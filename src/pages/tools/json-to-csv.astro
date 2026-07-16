@@ -1,0 +1,1196 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Container from "../../components/Container.astro";
+import Button from "../../components/Button.astro";
+import Card from "../../components/Card.astro";
+---
+
+<BaseLayout
+  title="JSON to CSV Converter - Offline Utilities"
+  activePath="/tools/json-to-csv"
+>
+  <section class="tool-section">
+    <Container size="wide">
+      <div class="tool-header">
+        <div class="breadcrumb">
+          <a href="/" class="breadcrumb-link">Home</a>
+          <span class="breadcrumb-separator">/</span>
+          <span class="breadcrumb-current">JSON to CSV</span>
+        </div>
+        <h1 class="display-lg tool-title">JSON to CSV Converter</h1>
+        <p class="body-md tool-subtitle">
+          Flatten and convert nested JSON arrays into clean CSV tables offline.
+        </p>
+      </div>
+
+      <!-- Privacy Notice Banner -->
+      <div class="privacy-notice">
+        <span class="privacy-icon">🔒</span>
+        <p class="caption">
+          Your data is processed entirely in your browser and is never uploaded.
+        </p>
+      </div>
+
+      <div class="workspace-grid">
+        <!-- Input Column -->
+        <div class="workspace-col input-col">
+          <Card variant="flat" class="workspace-card">
+            <div class="card-header">
+              <span class="caption-mono column-title">INPUT JSON</span>
+              <div class="header-actions">
+                <button id="load-sample-btn" class="text-btn caption-mono"
+                  >Load Sample</button
+                >
+                <span class="action-divider">|</span>
+                <button id="clear-btn" class="text-btn caption-mono"
+                  >Clear</button
+                >
+              </div>
+            </div>
+
+            <div class="drag-zone" id="drag-zone">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                class="drag-icon"
+              >
+                <path
+                  d="M12 16V8M12 8l-3 3M12 8l3 3M4 17v1a2 2 0 002 2h12a2 2 0 002-2v-1"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"></path>
+              </svg>
+              <p class="caption drag-text">
+                Drag & drop .json file or <span class="browse-link">browse</span
+                >
+              </p>
+              <input
+                type="file"
+                id="file-input"
+                accept=".json"
+                class="file-input-hidden"
+              />
+            </div>
+
+            <!-- Editor-like Textarea with Gutter -->
+            <div class="editor-outer">
+              <div class="editor-wrapper">
+                <div class="editor-gutter" id="json-gutter">
+                  <span>1</span>
+                </div>
+                <textarea
+                  id="json-input"
+                  class="editor-textarea"
+                  placeholder='Paste JSON array here...
+Example:
+[
+  { "id": 1, "name": "John Doe", "email": "john@example.com" },
+  { "id": 2, "name": "Jane Smith", "email": "jane@example.com" }
+]'
+                  spellcheck="false"></textarea>
+              </div>
+              <div class="editor-info-bar">
+                <span class="info-status" id="json-validation-status"
+                  >JSON Status: Empty</span
+                >
+                <span class="info-meta" id="json-char-count">0 chars</span>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        <!-- Controls Column (Sidebar) -->
+        <div class="workspace-col controls-col">
+          <Card variant="flat" class="workspace-card settings-card">
+            <h2 class="display-sm settings-title">Options</h2>
+            <div class="settings-divider"></div>
+
+            <div class="settings-group">
+              <label class="settings-label caption-mono">Delimiter</label>
+              <div class="select-wrapper">
+                <select id="delimiter-select" class="settings-select">
+                  <option value=",">Comma ( , )</option>
+                  <option value=";">Semicolon ( ; )</option>
+                  <option value="\t">Tab ( \t )</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="settings-group checkbox-group">
+              <label class="checkbox-container body-sm">
+                <input type="checkbox" id="flatten-checkbox" checked />
+                <span class="checkbox-checkmark"></span>
+                Flatten nested objects
+              </label>
+              <p class="caption settings-help">
+                Flattens properties like &#123;"user": &#123;"name":
+                "John"&#125;&#125; to user.name
+              </p>
+            </div>
+
+            <div class="settings-group checkbox-group">
+              <label class="checkbox-container body-sm">
+                <input type="checkbox" id="headers-checkbox" checked />
+                <span class="checkbox-checkmark"></span>
+                Include header row
+              </label>
+            </div>
+
+            <div class="settings-divider"></div>
+
+            <Button
+              id="convert-btn"
+              variant="primary"
+              size="lg"
+              shape="square"
+              class="action-btn"
+            >
+              Convert JSON
+            </Button>
+
+            <!-- Inline validation feedback area -->
+            <div id="error-banner" class="error-banner hidden">
+              <span class="error-icon">⚠</span>
+              <p class="caption error-msg" id="error-message">
+                Invalid JSON structure.
+              </p>
+            </div>
+
+            <div class="status-banner caption">
+              <span class="status-dot"></span> Local sandbox active
+            </div>
+          </Card>
+        </div>
+
+        <!-- Output Column -->
+        <div class="workspace-col output-col">
+          <Card variant="flat" class="workspace-card">
+            <div class="card-header">
+              <span class="caption-mono column-title">OUTPUT CSV</span>
+              <div class="header-actions">
+                <button id="copy-btn" class="text-btn caption-mono" disabled
+                  >Copy</button
+                >
+                <span class="action-divider">|</span>
+                <button id="download-btn" class="text-btn caption-mono" disabled
+                  >Download</button
+                >
+              </div>
+            </div>
+
+            <!-- Editor-like Readonly Textarea with Gutter -->
+            <div class="editor-outer">
+              <div class="editor-wrapper">
+                <div class="editor-gutter" id="csv-gutter">
+                  <span>1</span>
+                </div>
+                <textarea
+                  id="csv-output"
+                  class="editor-textarea"
+                  placeholder="CSV output will appear here..."
+                  readonly
+                  spellcheck="false"></textarea>
+              </div>
+              <div class="editor-info-bar">
+                <span class="info-status" id="csv-status"
+                  >CSV Status: Ready</span
+                >
+                <span class="info-meta" id="csv-char-count">0 chars</span>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </Container>
+  </section>
+</BaseLayout>
+
+<script>
+  import { jsonToCsv } from "../../lib/json/converter";
+
+  // State for large files to avoid DOM freeze
+  let largeJsonContent: string | null = null;
+  let largeCsvContent: string | null = null;
+
+  const LARGE_FILE_THRESHOLD = 500_000; // ~500 KB / chars
+  const WARNING_THRESHOLD = 5_000_000; // ~5 MB / chars
+
+  // DOM Elements
+  const jsonInput = document.getElementById(
+    "json-input",
+  ) as HTMLTextAreaElement;
+  const csvOutput = document.getElementById(
+    "csv-output",
+  ) as HTMLTextAreaElement;
+  const convertBtn = document.getElementById("convert-btn");
+  const loadSampleBtn = document.getElementById("load-sample-btn");
+  const clearBtn = document.getElementById("clear-btn");
+  const copyBtn = document.getElementById("copy-btn") as HTMLButtonElement;
+  const downloadBtn = document.getElementById(
+    "download-btn",
+  ) as HTMLButtonElement;
+
+  const delimiterSelect = document.getElementById(
+    "delimiter-select",
+  ) as HTMLSelectElement;
+  const flattenCheckbox = document.getElementById(
+    "flatten-checkbox",
+  ) as HTMLInputElement;
+  const headersCheckbox = document.getElementById(
+    "headers-checkbox",
+  ) as HTMLInputElement;
+
+  const jsonGutter = document.getElementById("json-gutter");
+  const csvGutter = document.getElementById("csv-gutter");
+
+  const jsonValidationStatus = document.getElementById(
+    "json-validation-status",
+  );
+  const jsonCharCount = document.getElementById("json-char-count");
+  const csvCharCount = document.getElementById("csv-char-count");
+
+  const dragZone = document.getElementById("drag-zone");
+  const fileInput = document.getElementById("file-input") as HTMLInputElement;
+
+  const errorBanner = document.getElementById("error-banner");
+  const errorMessage = document.getElementById("error-message");
+
+  const SAMPLE_JSON = `[
+  {
+    "id": 1,
+    "name": "Leanne Graham",
+    "username": "Bret",
+    "email": "Sincere@april.biz",
+    "address": {
+      "street": "Kulas Light",
+      "suite": "Apt. 556",
+      "city": "Gwenborough"
+    }
+  },
+  {
+    "id": 2,
+    "name": "Ervin Howell",
+    "username": "Antonette",
+    "email": "Shanna@melissa.tv",
+    "address": {
+      "street": "Victor Plains",
+      "suite": "Suite 879",
+      "city": "Wisokyburgh"
+    }
+  }
+]`;
+
+  // Centralized input handler
+  function handleJsonInput(text: string) {
+    hideError();
+
+    // Clear previous output
+    largeCsvContent = null;
+    csvOutput.value = "";
+    updateGutter(csvOutput, csvGutter);
+    if (csvCharCount) csvCharCount.innerText = "0 chars";
+    if (copyBtn) copyBtn.disabled = true;
+    if (downloadBtn) downloadBtn.disabled = true;
+
+    if (text.length > LARGE_FILE_THRESHOLD) {
+      largeJsonContent = text;
+      const previewLength = 20000;
+      const previewText =
+        text.substring(0, previewLength) +
+        `\n\n... [Truncated: ${(text.length - previewLength).toLocaleString()} more characters. Click Convert to process the entire file.]`;
+
+      jsonInput.value = previewText;
+      jsonInput.readOnly = true;
+
+      if (jsonCharCount) {
+        jsonCharCount.innerText = `${text.length.toLocaleString()} chars (Large File)`;
+      }
+      if (jsonValidationStatus) {
+        jsonValidationStatus.innerText =
+          "JSON Status: Large file loaded. Press Convert.";
+        (jsonValidationStatus as HTMLElement).style.color =
+          "var(--color-primary)";
+      }
+    } else {
+      largeJsonContent = null;
+      jsonInput.value = text;
+      jsonInput.readOnly = false;
+      validateJsonInput();
+    }
+    updateGutter(jsonInput, jsonGutter);
+  }
+
+  // Line Number Helpers
+  function updateGutter(
+    textarea: HTMLTextAreaElement,
+    gutter: HTMLElement | null,
+  ) {
+    if (!textarea || !gutter) return;
+    const lines = textarea.value.split("\n");
+    const lineCount = Math.max(1, lines.length);
+
+    // Prevent main thread lockup by using a placeholder if lines exceed 1000
+    if (lineCount > 1000) {
+      gutter.innerHTML = `<span>1</span><span style="height: ${(lineCount - 1) * 19.5}px; text-align: center; color: var(--color-mute);">...</span>`;
+      gutter.scrollTop = textarea.scrollTop;
+      return;
+    }
+
+    let gutterHtml = "";
+    for (let i = 1; i <= lineCount; i++) {
+      gutterHtml += `<span>${i}</span>`;
+    }
+    gutter.innerHTML = gutterHtml;
+    gutter.scrollTop = textarea.scrollTop;
+  }
+
+  function validateJsonInput() {
+    if (!jsonInput) return;
+
+    if (largeJsonContent !== null) {
+      updateGutter(jsonInput, jsonGutter);
+      if (jsonCharCount) {
+        jsonCharCount.innerText = `${largeJsonContent.length.toLocaleString()} chars (Large File)`;
+      }
+      return;
+    }
+
+    const val = jsonInput.value;
+    updateGutter(jsonInput, jsonGutter);
+
+    if (jsonCharCount)
+      jsonCharCount.innerText = `${val.length.toLocaleString()} chars`;
+    if (jsonValidationStatus) {
+      if (!val.trim()) {
+        jsonValidationStatus.innerText = "JSON Status: Empty";
+        (jsonValidationStatus as HTMLElement).style.color = "";
+        hideError();
+      } else {
+        // Parse only after clicking Convert to keep UI responsive
+        jsonValidationStatus.innerText = "JSON Status: Ready to convert";
+        (jsonValidationStatus as HTMLElement).style.color =
+          "var(--color-success)";
+        hideError();
+      }
+    }
+  }
+
+  // Bind gutter updates & scroll sync
+  if (jsonInput && jsonGutter) {
+    jsonInput.addEventListener("input", validateJsonInput);
+
+    jsonInput.addEventListener("scroll", () => {
+      jsonGutter.scrollTop = jsonInput.scrollTop;
+    });
+
+    jsonInput.addEventListener("paste", (e) => {
+      const pasteText = e.clipboardData?.getData("text") || "";
+      if (pasteText.length > LARGE_FILE_THRESHOLD) {
+        e.preventDefault();
+        handleJsonInput(pasteText);
+      }
+    });
+
+    // Initial gutter setup
+    validateJsonInput();
+  }
+
+  if (csvOutput && csvGutter) {
+    csvOutput.addEventListener("scroll", () => {
+      csvGutter.scrollTop = csvOutput.scrollTop;
+    });
+  }
+
+  // Load Sample Click
+  if (loadSampleBtn) {
+    loadSampleBtn.addEventListener("click", () => {
+      jsonInput.value = SAMPLE_JSON;
+      validateJsonInput();
+    });
+  }
+
+  // Clear Click
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      largeJsonContent = null;
+      largeCsvContent = null;
+      jsonInput.value = "";
+      jsonInput.readOnly = false;
+      csvOutput.value = "";
+      validateJsonInput();
+      updateGutter(csvOutput, csvGutter);
+      if (csvCharCount) csvCharCount.innerText = "0 chars";
+      copyBtn.disabled = true;
+      downloadBtn.disabled = true;
+    });
+  }
+
+  // Convert Trigger (responsiveness-safe)
+  const MAX_INPUT_CHARS = 15_000_000; // ~15M chars
+  const USE_WORKER_ABOVE_CHARS = 400_000;
+
+  const setLoadingUI = (isLoading: boolean, message?: string) => {
+    if (convertBtn) (convertBtn as HTMLButtonElement).disabled = isLoading;
+    if (copyBtn)
+      copyBtn.disabled = isLoading || (!csvOutput.value && !largeCsvContent);
+    if (downloadBtn)
+      downloadBtn.disabled =
+        isLoading || (!csvOutput.value && !largeCsvContent);
+
+    if (csvCharCount) {
+      const displayVal =
+        largeCsvContent !== null ? largeCsvContent : csvOutput.value;
+      csvCharCount.innerText = displayVal
+        ? `${displayVal.length.toLocaleString()} chars${largeCsvContent !== null ? " (Large Output)" : ""}`
+        : "0 chars";
+    }
+
+    const csvStatusEl = document.getElementById("csv-status");
+    if (csvStatusEl) {
+      csvStatusEl.innerText = isLoading
+        ? message || "Converting JSON…"
+        : "CSV Status: Ready";
+    }
+  };
+
+  const warnTooLarge = () => {
+    const len =
+      largeJsonContent !== null
+        ? largeJsonContent.length
+        : jsonInput.value.trim().length;
+    showError(
+      `Input too large (${len.toLocaleString()} chars). To keep the page responsive, limit is ${MAX_INPUT_CHARS.toLocaleString()} chars.`,
+    );
+  };
+
+  if (convertBtn) {
+    convertBtn.addEventListener("click", () => {
+      const input =
+        largeJsonContent !== null ? largeJsonContent : jsonInput.value.trim();
+      if (!input) {
+        showError("Please paste or load JSON first.");
+        return;
+      }
+
+      if (input.length > MAX_INPUT_CHARS) {
+        warnTooLarge();
+        return;
+      }
+
+      // Warn before processing extremely large files
+      if (input.length > WARNING_THRESHOLD) {
+        const proceed = confirm(
+          `The JSON data is large (${(input.length / 1024 / 1024).toFixed(1)} MB). Converting it might take a few seconds and consume memory. Do you want to proceed?`,
+        );
+        if (!proceed) {
+          return;
+        }
+      }
+
+      hideError();
+      setLoadingUI(true, "Converting JSON… (please wait)");
+
+      const delimiter = delimiterSelect.value as "," | ";" | "\t";
+      const includeHeaders = headersCheckbox.checked;
+      const flatten = flattenCheckbox.checked;
+      const options = { delimiter, includeHeaders, flatten };
+
+      const finalizeSuccess = (result: string) => {
+        // If output is too large, store it and render a preview
+        if (result.length > LARGE_FILE_THRESHOLD) {
+          largeCsvContent = result;
+          const previewLength = 20000;
+          const previewText =
+            result.substring(0, previewLength) +
+            `\n\n... [Truncated: ${(result.length - previewLength).toLocaleString()} more characters. Click Copy or Download to get the full CSV.]`;
+          csvOutput.value = previewText;
+        } else {
+          largeCsvContent = null;
+          csvOutput.value = result;
+        }
+
+        updateGutter(csvOutput, csvGutter);
+        hideError();
+        setLoadingUI(false);
+      };
+
+      const finalizeError = (message: string) => {
+        showError(message || "Failed to convert JSON.");
+        largeCsvContent = null;
+        csvOutput.value = "";
+        updateGutter(csvOutput, csvGutter);
+        setLoadingUI(false);
+      };
+
+      if (input.length < USE_WORKER_ABOVE_CHARS) {
+        try {
+          const result = jsonToCsv(input, options);
+          finalizeSuccess(result);
+        } catch (err: any) {
+          finalizeError(err?.message || "Failed to convert JSON.");
+        }
+        return;
+      }
+
+      try {
+        const worker = new Worker(
+          new URL("../../lib/json/json-to-csv.worker.ts", import.meta.url),
+          { type: "module" },
+        );
+
+        worker.onmessage = (e: MessageEvent<any>) => {
+          const data = e.data;
+          if (!data) return;
+
+          if (data.type === "progress") {
+            const step = data.payload?.step;
+            const detail = data.payload?.detail;
+            const csvStatusEl = document.getElementById("csv-status");
+            if (csvStatusEl) {
+              csvStatusEl.innerText =
+                step === "start"
+                  ? "Converting JSON… (parsing)"
+                  : `Converting JSON… (${detail || step || "processing"})`;
+            }
+            return;
+          }
+
+          if (data.type === "done") {
+            worker.terminate();
+            finalizeSuccess(data.payload?.result || "");
+            return;
+          }
+
+          if (data.type === "error") {
+            worker.terminate();
+            finalizeError(data.payload?.message || "Conversion failed.");
+            return;
+          }
+        };
+
+        worker.onerror = () => {
+          worker.terminate();
+          finalizeError("Conversion worker crashed. Try a smaller input.");
+        };
+
+        worker.postMessage({
+          type: "convert",
+          payload: { jsonStr: input, options },
+        });
+      } catch {
+        finalizeError("Failed to start conversion worker. Try again.");
+      }
+    });
+  }
+
+  // Copy Click
+  if (copyBtn) {
+    copyBtn.addEventListener("click", () => {
+      const outputVal =
+        largeCsvContent !== null ? largeCsvContent : csvOutput.value;
+      if (!outputVal) return;
+      navigator.clipboard.writeText(outputVal).then(() => {
+        const origText = copyBtn.innerText;
+        copyBtn.innerText = "Copied!";
+        setTimeout(() => {
+          copyBtn.innerText = origText;
+        }, 1500);
+      });
+    });
+  }
+
+  // Download Click
+  if (downloadBtn) {
+    downloadBtn.addEventListener("click", () => {
+      const outputVal =
+        largeCsvContent !== null ? largeCsvContent : csvOutput.value;
+      if (!outputVal) return;
+      const blob = new Blob([outputVal], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "data.csv");
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  }
+
+  // File Drag & Drop
+  if (dragZone && fileInput) {
+    dragZone.addEventListener("click", () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener("change", (e: any) => {
+      const file = e.target.files[0];
+      if (file) {
+        readFile(file);
+      }
+    });
+
+    dragZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dragZone.classList.add("drag-over");
+    });
+
+    dragZone.addEventListener("dragleave", () => {
+      dragZone.classList.remove("drag-over");
+    });
+
+    dragZone.addEventListener("drop", (e: any) => {
+      e.preventDefault();
+      dragZone.classList.remove("drag-over");
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        readFile(file);
+      }
+    });
+  }
+
+  function readFile(file: File) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      const text = e.target.result || "";
+      handleJsonInput(text);
+    };
+    reader.readAsText(file);
+  }
+
+  function showError(msg: string) {
+    if (errorBanner && errorMessage) {
+      errorMessage.innerText = msg;
+      errorBanner.classList.remove("hidden");
+    }
+  }
+
+  function hideError() {
+    if (errorBanner) {
+      errorBanner.classList.add("hidden");
+    }
+  }
+</script>
+
+<style>
+  .tool-section {
+    padding: var(--spacing-3xl) 0;
+  }
+
+  .tool-header {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xxs);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .breadcrumb-link {
+    font-size: 12px;
+    color: var(--color-mute);
+    text-decoration: none;
+  }
+
+  .breadcrumb-link:hover {
+    color: var(--color-ink);
+  }
+
+  .breadcrumb-separator {
+    font-size: 11px;
+    color: var(--color-hairline-strong);
+  }
+
+  .breadcrumb-current {
+    font-size: 12px;
+    color: var(--color-ink);
+    font-weight: 500;
+  }
+
+  .tool-title {
+    margin-bottom: var(--spacing-xxs);
+  }
+
+  .tool-subtitle {
+    color: var(--color-body);
+    margin: 0;
+  }
+
+  /* Privacy Notice */
+  .privacy-notice {
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    padding: var(--spacing-xs) var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .privacy-notice p {
+    color: var(--color-body);
+    margin: 0;
+  }
+
+  .privacy-icon {
+    font-size: 14px;
+  }
+
+  /* Workspace Layout */
+  .workspace-grid {
+    display: grid;
+    grid-template-columns: 1fr 280px 1fr;
+    gap: var(--spacing-lg);
+    align-items: stretch;
+    height: 70vh;
+  }
+
+  .workspace-col {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .workspace-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    gap: var(--spacing-md);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-hairline);
+    padding-bottom: var(--spacing-sm);
+  }
+
+  .column-title {
+    color: var(--color-mute);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .action-divider {
+    font-size: 11px;
+    color: var(--color-hairline-strong);
+  }
+
+  .text-btn {
+    background: none;
+    border: none;
+    color: var(--color-body);
+    cursor: pointer;
+    font-size: 11px;
+    padding: 0;
+    transition: color 0.15s ease;
+  }
+
+  .text-btn:hover:not(:disabled) {
+    color: var(--color-ink);
+    text-decoration: underline;
+  }
+
+  .text-btn:disabled {
+    color: var(--color-hairline-strong);
+    cursor: not-allowed;
+  }
+
+  /* Drag zone */
+  .drag-zone {
+    border: 1px dashed var(--color-hairline-strong);
+    border-radius: var(--rounded-sm);
+    padding: var(--spacing-md);
+    text-align: center;
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xxs);
+    background-color: var(--color-canvas-soft);
+  }
+
+  .drag-zone:hover,
+  .drag-zone.drag-over {
+    border-color: var(--color-ink);
+    background-color: var(--color-canvas-soft-2);
+  }
+
+  .drag-zone:hover .browse-link {
+    text-decoration: underline;
+  }
+
+  .drag-icon {
+    color: var(--color-mute);
+  }
+
+  .drag-text {
+    color: var(--color-body);
+    margin: 0;
+  }
+
+  .browse-link {
+    color: var(--color-primary);
+    font-weight: 500;
+  }
+
+  .file-input-hidden {
+    display: none;
+  }
+
+  /* Editor Layout */
+  .editor-outer {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    gap: var(--spacing-xs);
+  }
+
+  .editor-wrapper {
+    position: relative;
+    display: flex;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.5;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft-2);
+    min-height: 0;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .editor-gutter {
+    padding: var(--spacing-md) 0;
+    text-align: right;
+    color: var(--color-mute);
+    background-color: var(--color-canvas-soft);
+    border-right: 1px solid var(--color-hairline);
+    user-select: none;
+    width: 48px;
+    min-width: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding-right: var(--spacing-sm);
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .editor-gutter span {
+    display: block;
+    height: 19.5px;
+  }
+
+  .editor-textarea {
+    width: 100%;
+    height: 100%;
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--color-ink);
+    padding: var(--spacing-md);
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    resize: none;
+    outline: none;
+    white-space: pre;
+    overflow-x: auto;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+
+  .editor-info-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--color-hairline);
+    border-top: none;
+    margin-top: -8px;
+    border-bottom-left-radius: var(--rounded-sm);
+    border-bottom-right-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    padding: 6px var(--spacing-sm);
+    font-size: 11px;
+    color: var(--color-mute);
+    font-family: var(--font-sans);
+  }
+
+  .info-status {
+    font-weight: 500;
+  }
+
+  /* Settings Side Card */
+  .settings-card {
+    padding: var(--spacing-lg);
+  }
+
+  .settings-title {
+    margin: 0;
+  }
+
+  .settings-divider {
+    height: 1px;
+    background-color: var(--color-hairline);
+    margin: var(--spacing-xs) 0;
+  }
+
+  .settings-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .settings-label {
+    color: var(--color-mute);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .select-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .settings-select {
+    width: 100%;
+    height: 38px;
+    padding: 0 var(--spacing-md);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    appearance: none;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }
+
+  .settings-select:focus {
+    border-color: var(--color-hairline-strong);
+  }
+
+  .select-wrapper::after {
+    content: "▼";
+    font-size: 9px;
+    color: var(--color-body);
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  /* Checkboxes */
+  .checkbox-group {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 24px;
+    cursor: pointer;
+    user-select: none;
+    color: var(--color-ink);
+  }
+
+  .checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+
+  .checkbox-checkmark {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    height: 16px;
+    width: 16px;
+    border: 1px solid var(--color-hairline-strong);
+    border-radius: 4px;
+    background-color: var(--color-canvas);
+    transition:
+      background-color 0.1s ease,
+      border-color 0.1s ease;
+  }
+
+  .checkbox-container:hover input ~ .checkbox-checkmark {
+    border-color: var(--color-ink);
+  }
+
+  .checkbox-container input:checked ~ .checkbox-checkmark {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+
+  .checkbox-checkmark::after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+
+  .checkbox-container input:checked ~ .checkbox-checkmark::after {
+    display: block;
+  }
+
+  .checkbox-container .checkbox-checkmark::after {
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+  }
+
+  .settings-help {
+    color: var(--color-mute);
+    margin: 4px 0 0 24px;
+    line-height: 1.4;
+  }
+
+  .action-btn {
+    width: 100%;
+    margin-top: var(--spacing-sm);
+  }
+
+  .status-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-mute);
+    margin-top: auto;
+    padding-top: var(--spacing-md);
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--rounded-full);
+    background-color: #29bc9b;
+  }
+
+  /* Error Banner */
+  .error-banner {
+    margin-top: var(--spacing-md);
+    background-color: var(--color-error-soft);
+    border: 1px solid rgba(238, 0, 0, 0.15);
+    border-radius: var(--rounded-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .error-banner.hidden {
+    display: none;
+  }
+
+  .error-icon {
+    color: var(--color-error);
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
+  .error-msg {
+    color: var(--color-error);
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 959px) {
+    /* Stack panels vertically without inheriting the desktop 70vh layout */
+    .workspace-grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-xl);
+      height: auto;
+      align-items: start;
+      min-width: 0;
+      overflow-x: hidden;
+    }
+
+    .workspace-card {
+      height: auto;
+      min-width: 0;
+    }
+
+    .workspace-col {
+      min-width: 0;
+    }
+
+    .privacy-notice {
+      display: flex;
+    }
+
+    /* Prevent horizontal overflow on mobile/tablet */
+    .tool-section {
+      overflow-x: hidden;
+      min-width: 0;
+    }
+
+    /* Fixed mobile editor height: whole editor component is 350px */
+    .workspace-card .editor-outer {
+      height: 350px;
+      flex: 0 0 350px;
+      min-height: 0;
+    }
+
+    /* Allow the editor area to consume remaining space and scroll internally */
+    .workspace-card .editor-outer {
+      overflow: hidden;
+    }
+
+    .workspace-card .editor-wrapper {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    /* Remove negative margin that can cause overlap in fixed-height mode */
+    .workspace-card .editor-info-bar {
+      margin-top: 0;
+      flex: 0 0 auto;
+      min-height: 0;
+    }
+
+    /* Ensure textarea stays clipped to the fixed editor height and scrolls */
+    .workspace-card .editor-textarea {
+      height: 100%;
+      overflow: auto;
+    }
+
+    /* Keep gutter from forcing horizontal expansion */
+    .workspace-card .editor-gutter {
+      min-width: 0;
+    }
+  }
+</style>

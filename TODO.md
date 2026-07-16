@@ -1,0 +1,6 @@
+- [ ] Update workspace layout CSS in src/pages/tools/json-to-csv.astro per request:
+  - [x] Set .workspace-grid desktop height ~70vh
+  - [x] Add min-height: 0 to .workspace-col, .workspace-card, .editor-outer, .editor-wrapper
+  - [x] Ensure textarea fills parent (height: 100%)
+  - [x] Keep overflow-y: auto on textarea
+  - [x] Verify footer positioning after textarea scroll

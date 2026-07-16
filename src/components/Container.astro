@@ -1,0 +1,48 @@
+---
+interface Props {
+  size?: 'default' | 'wide' | 'narrow';
+  class?: string;
+  [key: string]: any;
+}
+
+const { size = 'default', class: className = '', ...rest } = Astro.props;
+
+const sizeClass = {
+  default: 'container-default',
+  wide: 'container-wide',
+  narrow: 'container-narrow',
+}[size];
+---
+
+<div class:list={['container', sizeClass, className]} {...rest}>
+  <slot />
+</div>
+
+<style>
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--spacing-lg);
+    padding-right: var(--spacing-lg);
+  }
+
+  @media (max-width: 600px) {
+    .container {
+      padding-left: var(--spacing-md);
+      padding-right: var(--spacing-md);
+    }
+  }
+
+  .container-default {
+    max-width: var(--geist-page-width);
+  }
+
+  .container-wide {
+    max-width: var(--ds-page-width);
+  }
+
+  .container-narrow {
+    max-width: 800px;
+  }
+</style>

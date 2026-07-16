@@ -1,0 +1,226 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Container from '../components/Container.astro';
+import Button from '../components/Button.astro';
+import Card from '../components/Card.astro';
+---
+
+<BaseLayout title="Design Sandbox - JSON Toolkit" activePath="/sandbox">
+  <section class="sandbox-section">
+    <Container size="default">
+      <div class="sandbox-header">
+        <span class="caption-mono section-eyebrow">DESIGN SYSTEM</span>
+        <h1 class="display-lg section-title">Visual Sandbox.</h1>
+        <p class="body-lg section-description">
+          Review core primitives, typographic hierarchies, and button configurations built for the JSON Toolkit.
+        </p>
+      </div>
+
+      <div class="sandbox-grid">
+        <!-- Typography card -->
+        <Card variant="default" class="sandbox-card">
+          <h3 class="display-sm sandbox-card-title">Typographical Scale</h3>
+          <div class="typography-showcase">
+            <div>
+              <span class="caption-mono text-tag">display-xl (48px)</span>
+              <h1 class="display-xl">Geometric display.</h1>
+            </div>
+            <div>
+              <span class="caption-mono text-tag">display-lg (32px)</span>
+              <h2 class="display-lg">Section header style.</h2>
+            </div>
+            <div>
+              <span class="caption-mono text-tag">display-md (24px)</span>
+              <h3 class="display-md">Sub-tier Title.</h3>
+            </div>
+            <div>
+              <span class="caption-mono text-tag">body-lg (18px)</span>
+              <p class="body-lg">Lead descriptions and high-readability paragraphs.</p>
+            </div>
+            <div>
+              <span class="caption-mono text-tag">body-md (16px)</span>
+              <p class="body-md">Standard body copy used for layouts and inline features.</p>
+            </div>
+            <div>
+              <span class="caption-mono text-tag">caption-mono (12px)</span>
+              <p class="caption-mono">eyebrow-labels, mono metadata tags</p>
+            </div>
+          </div>
+        </Card>
+
+        <!-- Button card -->
+        <Card variant="default" class="sandbox-card">
+          <h3 class="display-sm sandbox-card-title">Button Configurations</h3>
+          <div class="buttons-showcase">
+            <div class="button-row">
+              <span class="caption-mono button-type-tag">Primary Pills (sm/md/lg)</span>
+              <div class="button-list">
+                <Button variant="primary" size="sm" shape="pill">Button sm</Button>
+                <Button variant="primary" size="md" shape="pill">Button md</Button>
+                <Button variant="primary" size="lg" shape="pill">Button lg</Button>
+              </div>
+            </div>
+            
+            <div class="button-row">
+              <span class="caption-mono button-type-tag">Secondary Squares (sm/md/lg)</span>
+              <div class="button-list">
+                <Button variant="secondary" size="sm" shape="square">Button sm</Button>
+                <Button variant="secondary" size="md" shape="square">Button md</Button>
+                <Button variant="secondary" size="lg" shape="square">Button lg</Button>
+              </div>
+            </div>
+
+            <div class="button-row">
+              <span class="caption-mono button-type-tag">Ghost Buttons</span>
+              <div class="button-list">
+                <Button variant="ghost" size="sm">Ghost sm</Button>
+                <Button variant="ghost" size="md">Ghost md</Button>
+                <Button variant="ghost" size="lg">Ghost lg</Button>
+              </div>
+            </div>
+
+            <div class="button-row">
+              <span class="caption-mono button-type-tag">Button Interactive States</span>
+              <div class="button-list">
+                <Button variant="primary" disabled={true} size="md">Disabled Primary</Button>
+                <Button variant="secondary" disabled={true} size="md">Disabled Secondary</Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+        
+        <!-- Card variants card -->
+        <Card variant="default" class="sandbox-card full-width-card">
+          <h3 class="display-sm sandbox-card-title">Card Layout Variants</h3>
+          <div class="cards-showcase">
+            <Card variant="default">
+              <h4 class="display-sm">Default Card</h4>
+              <p class="body-sm">Standard feature card styled with subtle border and Level 3 stacked drop shadow.</p>
+            </Card>
+            
+            <Card variant="soft">
+              <h4 class="display-sm">Soft Card</h4>
+              <p class="body-sm">Lightly-tinted flat background styling for structural container groups.</p>
+            </Card>
+
+            <Card variant="large">
+              <h4 class="display-sm">Large Card</h4>
+              <p class="body-sm">Thicker rounded corners (12px) with Level 4 shadow offset for visual focus.</p>
+            </Card>
+          </div>
+        </Card>
+      </div>
+    </Container>
+  </section>
+</BaseLayout>
+
+<style>
+  .sandbox-section {
+    padding: var(--spacing-4xl) 0;
+  }
+
+  .sandbox-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .section-eyebrow {
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+    font-weight: 500;
+  }
+
+  .section-title {
+    color: var(--color-ink);
+  }
+
+  .section-description {
+    color: var(--color-body);
+    margin: 0;
+  }
+
+  .sandbox-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: var(--spacing-xl);
+  }
+
+  .sandbox-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+
+  .full-width-card {
+    grid-column: span 2;
+  }
+
+  .sandbox-card-title {
+    border-bottom: 1px solid var(--color-hairline);
+    padding-bottom: var(--spacing-sm);
+    margin: 0;
+  }
+
+  .typography-showcase {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+
+  .text-tag {
+    color: var(--color-mute);
+    font-size: 11px;
+    display: inline-block;
+    margin-bottom: 4px;
+  }
+
+  .buttons-showcase {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+  }
+
+  .button-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .button-type-tag {
+    color: var(--color-mute);
+    font-size: 11px;
+  }
+
+  .button-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+
+  .cards-showcase {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-sm);
+  }
+
+  @media (max-width: 959px) {
+    .sandbox-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .full-width-card {
+      grid-column: span 1;
+    }
+    
+    .cards-showcase {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

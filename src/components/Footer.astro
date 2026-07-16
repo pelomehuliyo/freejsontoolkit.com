@@ -1,0 +1,186 @@
+---
+import Container from './Container.astro';
+
+const footerSections = [
+  {
+    title: 'Tools',
+    links: [
+      { label: 'JSON to CSV', href: '/tools/json-to-csv' },
+      { label: 'CSV to JSON (Soon)', href: '#' },
+      { label: 'JSON Validator (Soon)', href: '#' },
+      { label: 'JSON Formatter (Soon)', href: '#' }
+    ]
+  },
+  {
+    title: 'Project',
+    links: [
+      { label: 'GitHub Repository', href: 'https://github.com' },
+      { label: 'Design Sandbox', href: '/sandbox' },
+      { label: 'Astro Docs', href: 'https://docs.astro.build' }
+    ]
+  }
+];
+---
+
+<footer class="footer">
+  <Container size="wide">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <svg viewBox="0 0 75 65" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-icon">
+            <path d="M37.5 0L75 65H0L37.5 0Z" fill="currentColor" />
+          </svg>
+          <span>JSON Toolkit</span>
+        </div>
+        <p class="footer-tagline body-sm">
+          A minimalist suite of offline-first developer utilities.
+        </p>
+        <p class="footer-disclaimer caption">
+          🔒 Your privacy is priority. All processing is executed 100% locally inside your browser sandbox. No telemetry, no logs, no servers.
+        </p>
+      </div>
+      
+      <div class="footer-nav-groups">
+        {footerSections.map((section) => (
+          <div class="footer-col">
+            <h4 class="footer-title">{section.title}</h4>
+            <ul class="footer-links">
+              {section.links.map((link) => (
+                <li>
+                  <a href={link.href} class="footer-link">
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p class="footer-copyright">
+        &copy; {new Date().getFullYear()} freejsontoolkit.com. Built with Astro.
+      </p>
+    </div>
+  </Container>
+</footer>
+
+<style>
+  .footer {
+    background-color: var(--color-canvas);
+    color: var(--color-body);
+    border-top: 1px solid var(--color-hairline);
+    padding: var(--spacing-4xl) 0 var(--spacing-2xl);
+    box-sizing: border-box;
+  }
+
+  .footer-grid {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-2xl);
+    margin-bottom: var(--spacing-3xl);
+  }
+
+  .footer-brand {
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .footer-logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-ink);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .footer-logo .logo-icon {
+    height: 14px;
+    width: auto;
+  }
+
+  .footer-tagline {
+    margin: 0;
+    color: var(--color-body);
+  }
+
+  .footer-disclaimer {
+    margin: 0;
+    color: var(--color-mute);
+    line-height: 1.5;
+  }
+
+  .footer-nav-groups {
+    display: flex;
+    gap: var(--spacing-3xl);
+  }
+
+  .footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    min-width: 140px;
+  }
+
+  .footer-title {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-ink);
+    margin: 0;
+  }
+
+  .footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .footer-link {
+    font-size: 14px;
+    color: var(--color-body);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .footer-link:hover {
+    color: var(--color-ink);
+  }
+
+  .footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: var(--spacing-xl);
+    border-top: 1px solid var(--color-hairline);
+  }
+
+  .footer-copyright {
+    font-size: 12px;
+    color: var(--color-mute);
+    margin: 0;
+  }
+
+  @media (max-width: 959px) {
+    .footer-grid {
+      flex-direction: column;
+      gap: var(--spacing-xl);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .footer-nav-groups {
+      flex-direction: column;
+      gap: var(--spacing-xl);
+    }
+  }
+</style>

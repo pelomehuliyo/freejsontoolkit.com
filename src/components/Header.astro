@@ -1,0 +1,301 @@
+---
+import Container from './Container.astro';
+
+interface Props {
+  activePath?: string;
+}
+
+const { activePath = '/' } = Astro.props;
+
+const navLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/tools/json-to-csv', label: 'Tools' },
+  { href: '/#about', label: 'About' },
+  { href: '/sandbox', label: 'Sandbox' }
+];
+---
+
+<header class="header">
+  <Container size="wide" class="header-container">
+    <div class="header-left">
+      <a href="/" class="logo">
+        <svg viewBox="0 0 75 65" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-icon">
+          <path d="M37.5 0L75 65H0L37.5 0Z" fill="currentColor" />
+        </svg>
+        <span class="logo-text">JSON Toolkit</span>
+      </a>
+    </div>
+
+    <nav class="header-nav">
+      {navLinks.map((link) => {
+        const isActive = activePath === link.href || (link.href !== '/' && activePath.startsWith(link.href));
+        return (
+          <a
+            href={link.href}
+            class:list={['nav-link', { 'nav-link-active': isActive }]}
+          >
+            {link.label}
+          </a>
+        );
+      })}
+    </nav>
+
+    <div class="header-right">
+      <a
+        href="https://github.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="github-link"
+        aria-label="GitHub Repository"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.577.688.479C19.138 20.162 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
+        </svg>
+        <span>GitHub</span>
+      </a>
+      
+      <!-- Mobile menu trigger -->
+      <button class="mobile-menu-trigger" aria-label="Toggle menu" id="mobile-menu-trigger">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+    </div>
+  </Container>
+  
+  <!-- Mobile Drawer -->
+  <div class="mobile-drawer" id="mobile-drawer">
+    <div class="mobile-drawer-header">
+      <a href="/" class="logo">
+        <svg viewBox="0 0 75 65" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-icon">
+          <path d="M37.5 0L75 65H0L37.5 0Z" fill="currentColor" />
+        </svg>
+        <span class="logo-text">JSON Toolkit</span>
+      </a>
+      <button class="mobile-menu-close" aria-label="Close menu" id="mobile-menu-close">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+    </div>
+    <div class="mobile-drawer-body">
+      <nav class="mobile-nav">
+        {navLinks.map((link) => (
+          <a href={link.href} class="mobile-nav-link">
+            {link.label}
+          </a>
+        ))}
+        <a
+          href="https://github.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mobile-nav-link"
+        >
+          GitHub External
+        </a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<script>
+  const trigger = document.getElementById('mobile-menu-trigger');
+  const close = document.getElementById('mobile-menu-close');
+  const drawer = document.getElementById('mobile-drawer');
+
+  if (trigger && drawer && close) {
+    trigger.addEventListener('click', () => {
+      drawer.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+    });
+
+    const closeDrawer = () => {
+      drawer.classList.remove('is-open');
+      document.body.style.overflow = '';
+    };
+
+    close.addEventListener('click', closeDrawer);
+
+    // Close on click link
+    const links = drawer.querySelectorAll('a');
+    links.forEach(link => {
+      link.addEventListener('click', closeDrawer);
+    });
+  }
+</script>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: 64px;
+    background-color: var(--color-canvas);
+    border-bottom: 1px solid var(--color-hairline);
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+  }
+
+  .header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    text-decoration: none;
+    color: var(--color-ink);
+  }
+
+  .logo-icon {
+    height: 18px;
+    width: auto;
+  }
+
+  .logo-text {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.4px;
+  }
+
+  .header-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .nav-link {
+    font-size: 14px;
+    color: var(--color-body);
+    text-decoration: none;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--rounded-sm);
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .nav-link:hover {
+    background-color: var(--color-canvas-soft-2);
+    color: var(--color-ink);
+  }
+
+  .nav-link-active {
+    color: var(--color-ink);
+    font-weight: 500;
+    background-color: var(--color-canvas-soft-2);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .github-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-body);
+    text-decoration: none;
+    font-size: 14px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--rounded-sm);
+    transition: color 0.15s ease, background-color 0.15s ease;
+    border: 1px solid var(--color-hairline);
+  }
+
+  .github-link:hover {
+    color: var(--color-ink);
+    background-color: var(--color-canvas-soft-2);
+  }
+
+  .mobile-menu-trigger {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--color-ink);
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  /* Mobile Drawer styles */
+  .mobile-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-canvas);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .mobile-drawer.is-open {
+    transform: translateY(0);
+  }
+
+  .mobile-drawer-header {
+    height: 64px;
+    padding: 0 var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--color-hairline);
+  }
+
+  .mobile-menu-close {
+    background: none;
+    border: none;
+    color: var(--color-ink);
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .mobile-drawer-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-lg);
+  }
+
+  .mobile-nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .mobile-nav-link {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--color-ink);
+    text-decoration: none;
+    padding: var(--spacing-xs) 0;
+    border-bottom: 1px solid var(--color-canvas-soft-2);
+  }
+
+  @media (max-width: 959px) {
+    .header-nav {
+      display: none;
+    }
+    
+    .github-link {
+      display: none;
+    }
+
+    .mobile-menu-trigger {
+      display: block;
+    }
+  }
+</style>
