@@ -555,6 +555,7 @@ Example:
                   ? "Converting JSON… (parsing)"
                   : `Converting JSON… (${detail || step || "processing"})`;
             }
+
             return;
           }
 
@@ -749,7 +750,6 @@ Example:
     grid-template-columns: 1fr 280px 1fr;
     gap: var(--spacing-lg);
     align-items: stretch;
-    height: 70vh;
   }
 
   .workspace-col {
@@ -1126,6 +1126,19 @@ Example:
     color: var(--color-error);
     margin: 0;
     line-height: 1.4;
+  }
+
+  @media (min-width: 960px) {
+    .workspace-card .editor-outer {
+      flex: none; /* Disable flex-grow so fixed height is respected */
+      height: 650px; /* Set fixed height as requested (600-700px range) */
+      min-height: 650px; /* Ensure it doesn't collapse */
+    }
+
+    /* Ensure wrapper also respects this, though editor-outer should be enough */
+    .workspace-card .editor-wrapper {
+      height: 100%; /* Ensure it fills the editor-outer */
+    }
   }
 
   @media (max-width: 959px) {
