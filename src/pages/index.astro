@@ -1,109 +1,254 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Container from '../components/Container.astro';
-import Button from '../components/Button.astro';
-import Card from '../components/Card.astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Container from "../components/Container.astro";
+import Button from "../components/Button.astro";
+import Card from "../components/Card.astro";
 ---
 
-<BaseLayout title="JSON Toolkit - Free Offline JSON Utilities" activePath="/">
-  <!-- Hero Section -->
-  <section class="hero-section">
-    <Container size="default" class="hero-container">
-      <div class="hero-content">
-        <span class="caption-mono hero-eyebrow">FREE DEVELOPER UTILITIES</span>
-        <h1 class="display-xl hero-title">JSON utilities. Processed locally.</h1>
-        <p class="body-lg hero-description">
-          A minimalist suite of offline-first utility tools to format, validate, and convert JSON data. No telemetry, no logs, processed entirely in your browser sandbox.
-        </p>
-        <div class="hero-actions">
-          <Button variant="primary" size="lg" shape="square" href="#tools">
-            Explore Utilities
-          </Button>
-          <Button variant="ghost" size="lg" href="/sandbox">
-            View Design System
-          </Button>
-        </div>
-      </div>
-    </Container>
-  </section>
+<BaseLayout
+  title="Free JSON Toolkit - Offline JSON Utilities"
+  description="Fast, free JSON utilities that run entirely in your browser."
+  activePath="/"
+>
+  <main>
+    {/* Hero */}
+    <section class="hero-section" aria-labelledby="hero-title">
+      <Container size="default" class="hero-container">
+        <div class="hero-content">
+          <h1 id="hero-title" class="display-xl hero-title">
+            Free JSON Toolkit
+          </h1>
 
-  <!-- Tools Catalog Section -->
-  <section id="tools" class="catalog-section">
-    <Container size="default">
-      <div class="section-header">
-        <span class="caption-mono section-eyebrow">UTILITIES</span>
-        <h2 class="display-lg section-title">Available Tools</h2>
-        <p class="body-md section-description">
-          Open any utility workspace below to begin processing payloads.
-        </p>
-      </div>
+          <p class="body-lg hero-subtitle">
+            Fast, free JSON utilities that run entirely in your browser.
+          </p>
 
-      <div class="catalog-grid">
-        <!-- JSON to CSV (Active) -->
-        <Card variant="default" hoverable={true} class="tool-card">
-          <div class="tool-card-content">
-            <div class="tool-icon">⇄</div>
-            <h3 class="display-sm tool-title">JSON to CSV Converter</h3>
-            <p class="body-sm tool-description">
-              Flatten nested JSON arrays and download clean, tidy CSV spreadsheets offline. Custom delimiter options.
-            </p>
-          </div>
-          <div class="tool-footer">
-            <Button variant="primary" size="sm" shape="square" href="/tools/json-to-csv" class="launch-btn">
-              Launch Converter →
+          <p class="body-lg hero-description">
+            Convert, format, validate, and transform JSON without uploading your
+            data. Everything is processed locally for speed, privacy, and
+            reliability.
+          </p>
+
+          <div class="hero-actions" role="group" aria-label="Primary actions">
+            <Button
+              variant="primary"
+              size="lg"
+              shape="square"
+              href="/tools/json-to-csv"
+            >
+              JSON → CSV Converter
+            </Button>
+
+            <Button
+              variant="secondary"
+              size="lg"
+              shape="square"
+              href="#featured-tools"
+            >
+              Browse Tools
             </Button>
           </div>
-        </Card>
+        </div>
+      </Container>
+    </section>
 
-        <!-- CSV to JSON (Coming Soon) -->
-        <Card variant="soft" class="tool-card tool-card-disabled">
-          <div class="tool-card-content">
-            <div class="tool-icon icon-disabled">↹</div>
-            <div class="tool-header-row">
-              <h3 class="display-sm tool-title">CSV to JSON</h3>
-              <span class="coming-soon-badge">Coming Soon</span>
+    {/* Trust */}
+    <section id="trust" class="trust-section" aria-labelledby="trust-title">
+      <Container size="default">
+        <div class="section-header trust-header">
+          <span class="caption-mono section-eyebrow">TRUST</span>
+          <h2 id="trust-title" class="display-lg section-title">
+            Developer-first privacy and reliability
+          </h2>
+        </div>
+
+        <div class="trust-grid" role="list" aria-label="Trust information">
+          <Card variant="default" class="trust-card" hoverable={false}>
+            <div class="trust-card-content" role="listitem">
+              <h3 class="display-sm tool-title">100% Local Processing</h3>
+              <p class="body-sm tool-description">
+                Your data never leaves your browser.
+              </p>
             </div>
-            <p class="body-sm tool-description">
-              Parse structured CSV tables and rows back into hierarchical nested JSON string formats.
-            </p>
-          </div>
-        </Card>
+          </Card>
 
-        <!-- JSON Formatter & Validator (Coming Soon) -->
-        <Card variant="soft" class="tool-card tool-card-disabled">
-          <div class="tool-card-content">
-            <div class="tool-icon icon-disabled">🛠️</div>
-            <div class="tool-header-row">
-              <h3 class="display-sm tool-title">JSON Formatter & Lint</h3>
-              <span class="coming-soon-badge">Coming Soon</span>
+          <Card variant="default" class="trust-card" hoverable={false}>
+            <div class="trust-card-content" role="listitem">
+              <h3 class="display-sm tool-title">Fast</h3>
+              <p class="body-sm tool-description">
+                No uploads. Instant browser-based processing.
+              </p>
             </div>
-            <p class="body-sm tool-description">
-              Lint, prettify, or minify JSON payloads with live structure checks, parsing error highlights, and line numbers.
-            </p>
-          </div>
-        </Card>
-      </div>
-    </Container>
-  </section>
+          </Card>
 
-  <!-- About / Privacy Section -->
-  <section id="about" class="about-section">
-    <Container size="narrow">
-      <div class="about-content">
-        <h2 class="display-sm about-title">Processed entirely on your device.</h2>
-        <p class="body-md about-text">
-          Many online tools send your JSON payloads to third-party servers to convert or validate them. If you work with customer information, API keys, or proprietary data records, this presents serious compliance risks.
-        </p>
-        <p class="body-md about-text">
-          <strong>JSON Toolkit is different.</strong> Our utility converter scripts run 100% inside your local browser context. Your JSON data is never transmitted over the internet, keeping your credentials and developer workflows completely private and compliant.
-        </p>
-      </div>
-    </Container>
-  </section>
+          <Card variant="default" class="trust-card" hoverable={false}>
+            <div class="trust-card-content" role="listitem">
+              <h3 class="display-sm tool-title">Free Forever</h3>
+              <p class="body-sm tool-description">
+                No accounts, subscriptions, or hidden limits.
+              </p>
+            </div>
+          </Card>
+        </div>
+      </Container>
+    </section>
+
+    {/* Featured Tools */}
+    <section
+      id="featured-tools"
+      class="catalog-section"
+      aria-labelledby="featured-tools-title"
+    >
+      <Container size="default">
+        <div class="section-header">
+          <span class="caption-mono section-eyebrow">FEATURED TOOLS</span>
+          <h2 id="featured-tools-title" class="display-lg section-title">
+            Convert JSON with confidence
+          </h2>
+        </div>
+
+        <div class="catalog-grid" aria-label="Available and upcoming tools">
+          <Card
+            variant="default"
+            hoverable={true}
+            class="tool-card tool-card-available"
+          >
+            <div class="tool-card-content">
+              <h3 class="display-sm tool-title">JSON → CSV Converter</h3>
+              <div class="tool-status" aria-label="Status: Available">
+                <span class="status-label status-available">Available</span>
+              </div>
+              <p class="body-sm tool-description">
+                Flatten nested JSON objects and export clean CSV spreadsheets.
+              </p>
+            </div>
+
+            <div class="tool-footer">
+              <Button
+                variant="primary"
+                size="sm"
+                shape="square"
+                href="/tools/json-to-csv"
+                class="launch-btn"
+              >
+                Open Tool
+              </Button>
+            </div>
+          </Card>
+
+          <Card
+            variant="soft"
+            class="tool-card tool-card-disabled"
+            aria-disabled="true"
+          >
+            <div class="tool-card-content">
+              <h3 class="display-sm tool-title">CSV → JSON</h3>
+              <div class="tool-status" aria-label="Status: Coming Soon">
+                <span class="status-label status-coming">Coming Soon</span>
+              </div>
+              <p class="body-sm tool-description">
+                Convert CSV files into structured JSON.
+              </p>
+            </div>
+          </Card>
+
+          <Card
+            variant="soft"
+            class="tool-card tool-card-disabled"
+            aria-disabled="true"
+          >
+            <div class="tool-card-content">
+              <h3 class="display-sm tool-title">JSON Formatter</h3>
+              <div class="tool-status" aria-label="Status: Coming Soon">
+                <span class="status-label status-coming">Coming Soon</span>
+              </div>
+              <p class="body-sm tool-description">
+                Beautify and minify JSON with customizable formatting.
+              </p>
+            </div>
+          </Card>
+
+          <Card
+            variant="soft"
+            class="tool-card tool-card-disabled"
+            aria-disabled="true"
+          >
+            <div class="tool-card-content">
+              <h3 class="display-sm tool-title">JSON Validator</h3>
+              <div class="tool-status" aria-label="Status: Coming Soon">
+                <span class="status-label status-coming">Coming Soon</span>
+              </div>
+              <p class="body-sm tool-description">
+                Validate JSON syntax and identify errors instantly.
+              </p>
+            </div>
+          </Card>
+        </div>
+
+        {/* Small internal anchor target for hero CTA scroll */}
+        <span id="tools" class="sr-only" aria-hidden="true"></span>
+      </Container>
+    </section>
+
+    {/* FAQ */}
+    <section id="faq" class="faq-section" aria-labelledby="faq-title">
+      <Container size="narrow">
+        <div class="faq-header">
+          <span class="caption-mono section-eyebrow">FAQ</span>
+          <h2 id="faq-title" class="display-lg section-title">Quick answers</h2>
+        </div>
+
+        <div class="faq-list">
+          <details class="faq-item">
+            <summary class="faq-summary">Is my data uploaded?</summary>
+            <p class="body-md faq-answer">
+              No. Everything is processed locally in your browser.
+            </p>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-summary">Is it free?</summary>
+            <p class="body-md faq-answer">Yes. All tools are free to use.</p>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-summary">Does it work offline?</summary>
+            <p class="body-md faq-answer">
+              Most tools continue to work after the page has loaded because
+              processing happens locally.
+            </p>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-summary">Which browsers are supported?</summary>
+            <p class="body-md faq-answer">
+              Latest versions of Chrome, Edge, Firefox, and Safari.
+            </p>
+          </details>
+        </div>
+      </Container>
+    </section>
+  </main>
 </BaseLayout>
 
 <style>
-  /* Hero Section */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Hero */
+  .hero-container {
+    padding-top: 0;
+  }
+
   .hero-section {
     padding-top: var(--spacing-5xl);
     padding-bottom: var(--spacing-4xl);
@@ -121,22 +266,14 @@ import Card from '../components/Card.astro';
     gap: var(--spacing-md);
   }
 
-  .hero-eyebrow {
-    color: var(--color-mute);
-    letter-spacing: 0.1em;
-  }
-
   .hero-title {
-    margin-top: var(--spacing-xs);
-    font-size: 56px;
-    line-height: 56px;
-    letter-spacing: -2.8px;
-    color: var(--color-ink);
+    margin-top: 0;
   }
 
+  .hero-subtitle,
   .hero-description {
     color: var(--color-body);
-    max-width: 620px;
+    max-width: 720px;
     margin: 0;
     line-height: 1.6;
   }
@@ -145,6 +282,7 @@ import Card from '../components/Card.astro';
     display: flex;
     gap: var(--spacing-md);
     margin-top: var(--spacing-lg);
+    justify-content: center;
   }
 
   @media (max-width: 600px) {
@@ -152,32 +290,20 @@ import Card from '../components/Card.astro';
       padding-top: var(--spacing-3xl);
       padding-bottom: var(--spacing-3xl);
     }
-    
-    .hero-title {
-      font-size: 38px;
-      line-height: 42px;
-      letter-spacing: -1.6px;
-    }
-    
+
     .hero-actions {
       flex-direction: column;
       width: 100%;
       gap: var(--spacing-sm);
     }
-    
+
     .hero-actions > :global(a),
     .hero-actions > :global(button) {
       width: 100%;
     }
   }
 
-  /* Catalog Section */
-  .catalog-section {
-    padding: var(--spacing-5xl) 0;
-    background-color: var(--color-canvas-soft);
-    border-bottom: 1px solid var(--color-hairline);
-  }
-
+  /* Section headers */
   .section-header {
     text-align: center;
     max-width: 700px;
@@ -197,15 +323,29 @@ import Card from '../components/Card.astro';
     color: var(--color-ink);
   }
 
-  .section-description {
-    color: var(--color-body);
-    margin: 0;
+  /* Featured Tools */
+  .catalog-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas-soft);
+    border-bottom: 1px solid var(--color-hairline);
   }
 
   .catalog-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-xl);
+  }
+
+  @media (min-width: 1020px) {
+    .catalog-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @media (max-width: 959px) {
+    .catalog-grid {
+      grid-template-columns: 1fr;
+    }
   }
 
   .tool-card {
@@ -216,29 +356,19 @@ import Card from '../components/Card.astro';
     background-color: var(--color-canvas);
   }
 
+  .tool-card-available {
+    border-color: var(--color-hairline-strong);
+  }
+
+  .tool-card-disabled {
+    opacity: 0.85;
+    background-color: var(--color-canvas-soft);
+  }
+
   .tool-card-content {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
-  }
-
-  .tool-icon {
-    font-size: 32px;
-    line-height: 1;
-    margin-bottom: var(--spacing-xxs);
-    color: var(--color-primary);
-  }
-
-  .icon-disabled {
-    color: var(--color-mute);
-    opacity: 0.5;
-  }
-
-  .tool-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--spacing-xs);
   }
 
   .tool-title {
@@ -246,20 +376,33 @@ import Card from '../components/Card.astro';
     margin: 0;
   }
 
-  .coming-soon-badge {
+  .tool-description {
+    color: var(--color-body);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .tool-status {
+    display: flex;
+    align-items: center;
+  }
+
+  .status-label {
     font-family: var(--font-mono);
     font-size: 10px;
-    background-color: var(--color-canvas-soft-2);
-    color: var(--color-mute);
     padding: 2px var(--spacing-xs);
     border-radius: var(--rounded-sm);
     border: 1px solid var(--color-hairline);
   }
 
-  .tool-description {
-    color: var(--color-body);
-    margin: 0;
-    line-height: 1.5;
+  .status-available {
+    color: var(--color-ink);
+    background-color: var(--color-canvas-soft-2);
+  }
+
+  .status-coming {
+    color: var(--color-mute);
+    background-color: var(--color-canvas-soft);
   }
 
   .tool-footer {
@@ -272,37 +415,60 @@ import Card from '../components/Card.astro';
     width: 100%;
   }
 
-  .tool-card-disabled {
-    opacity: 0.75;
-    background-color: var(--color-canvas-soft);
+  /* Trust */
+  .trust-section {
+    padding: var(--spacing-5xl) 0;
+  }
+
+  .trust-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xl);
   }
 
   @media (max-width: 959px) {
-    .catalog-grid {
+    .trust-grid {
       grid-template-columns: 1fr;
     }
   }
 
-  /* About / Privacy Section */
-  .about-section {
+  /* FAQ */
+  .faq-section {
     padding: var(--spacing-5xl) 0;
-    background-color: var(--color-canvas);
+    background-color: var(--color-canvas-soft);
+    border-top: 1px solid var(--color-hairline);
   }
 
-  .about-content {
+  .faq-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    align-items: center;
+    gap: var(--spacing-xs);
   }
 
-  .about-title {
-    color: var(--color-ink);
-    margin-bottom: var(--spacing-xs);
+  .faq-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
   }
 
-  .about-text {
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .faq-summary {
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  .faq-answer {
+    margin-top: var(--spacing-xs);
     color: var(--color-body);
-    margin: 0;
-    line-height: 1.6;
   }
 </style>
