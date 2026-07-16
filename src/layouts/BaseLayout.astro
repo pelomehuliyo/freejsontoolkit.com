@@ -7,13 +7,51 @@ interface Props {
   title?: string;
   description?: string;
   activePath?: string;
+  noindex?: boolean;
 }
 
 const {
   title = 'Free JSON Toolkit - Modern Developer Utilities',
-  description = 'A suite of clean, developer-first, Vercel-inspired JSON tools to transform, validate, and format data.',
-  activePath = '/'
+  description = 'A suite of clean, developer-first, JSON tools to transform, validate, and format data.',
+  activePath = '/',
+  noindex = false
 } = Astro.props;
+
+// Determine Canonical URL
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://freejsontoolkit.com');
+
+// Set up JSON-LD structured data
+const isHomePage = Astro.url.pathname === '/' || Astro.url.pathname === '';
+const siteBaseUrl = Astro.site?.toString() || 'https://freejsontoolkit.com';
+
+const jsonLd = isHomePage 
+  ? {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Free JSON Toolkit",
+      "url": siteBaseUrl,
+      "description": description,
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": `${siteBaseUrl}?q={search_term_string}`,
+        "query-input": "required name=search_term_string"
+      }
+    }
+  : {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": title,
+      "url": canonicalURL.toString(),
+      "description": description,
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires HTML5, JavaScript",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    };
 ---
 
 <!doctype html>
@@ -21,17 +59,40 @@ const {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Icons and Manifest -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    
     <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#171717" />
+    
+    <!-- Search Indexing -->
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
     
-    <!-- Open Graph / SEO -->
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL('/og-image.png', siteBaseUrl)} />
+    <meta property="og:site_name" content="Free JSON Toolkit" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalURL} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL('/og-image.png', siteBaseUrl)} />
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </head>
   <body>
     <div class="app-layout">
