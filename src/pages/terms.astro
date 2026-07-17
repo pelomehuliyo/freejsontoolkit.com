@@ -1,0 +1,164 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Container from "../components/Container.astro";
+import Card from "../components/Card.astro";
+---
+
+<BaseLayout
+  title="Terms and Conditions - Free JSON Toolkit"
+  description="Read the terms and conditions for Free JSON Toolkit. Learn about usage rules, developer responsibilities, and limits of liability."
+  activePath="/terms"
+>
+  <main>
+    {/* Page Header */}
+    <section class="page-header" aria-labelledby="terms-title">
+      <Container size="narrow" class="header-container">
+        <span class="caption-mono section-eyebrow">LEGAL POLICY</span>
+        <h1 id="terms-title" class="display-xl page-title">
+          Terms & Conditions
+        </h1>
+        <p class="caption-mono last-updated">
+          Last updated: July 2026
+        </p>
+      </Container>
+    </section>
+
+    {/* Content Sections */}
+    <section class="content-section" aria-label="Terms and Conditions Details">
+      <Container size="narrow">
+        <div class="policy-wrapper">
+
+          <Card variant="flat" class="policy-card">
+            <h2 class="display-md policy-heading">1. Free to Use</h2>
+            <p class="body-md policy-text">
+              Free JSON Toolkit provides browser-based utilities for developers. 
+              These tools are entirely free to use for personal, educational, or commercial purposes. 
+              No registration or billing is required to access any core features.
+            </p>
+          </Card>
+
+          <Card variant="flat" class="policy-card">
+            <h2 class="display-md policy-heading">2. Provided As-Is (No Warranty)</h2>
+            <p class="body-md policy-text">
+              While we design our conversion, formatting, and validation tools to be as precise as possible, all utilities on this website are provided "as-is". 
+              We do not guarantee that the converted data is always accurate, complete, or free from formatting quirks.
+            </p>
+          </Card>
+
+          <Card variant="flat" class="policy-card">
+            <h2 class="display-md policy-heading">3. Your Responsibility</h2>
+            <p class="body-md policy-text">
+              Since these tools run locally on your system, you remain fully responsible for the datasets you process. 
+              Always inspect and verify the converted or formatted outputs before using them in production systems, deploying code, or inserting them into databases.
+            </p>
+          </Card>
+
+          <Card variant="flat" class="policy-card">
+            <h2 class="display-md policy-heading">4. Limitation of Liability</h2>
+            <p class="body-md policy-text">
+              We are not liable for any issues, data corruption, system downtime, financial loss, or security incidents resulting from the use or inability to use the tools on Free JSON Toolkit. 
+              Your reliance on the tool outputs is entirely at your own risk.
+            </p>
+          </Card>
+
+          <Card variant="flat" class="policy-card">
+            <h2 class="display-md policy-heading">5. Intellectual Property</h2>
+            <p class="body-md policy-text">
+              The structure, styling, code, and brand design of Free JSON Toolkit are owned by the project maintainers. 
+              Where parts of the codebase are open source, you are welcome to clone, adapt, and build upon them in accordance with their respective open source licensing.
+            </p>
+          </Card>
+
+          <Card variant="flat" class="policy-card">
+            <h2 class="display-md policy-heading">6. Revisions and Modifications</h2>
+            <p class="body-md policy-text">
+              We reserve the right to update or change these terms at any time. 
+              Any revisions will be immediately reflected by the "Last updated" date at the top of this page. 
+              Your continued use of the toolkit indicates your agreement with the updated terms.
+            </p>
+          </Card>
+
+        </div>
+      </Container>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .page-header {
+    padding-top: var(--spacing-5xl);
+    padding-bottom: var(--spacing-3xl);
+    background-color: var(--color-canvas);
+    border-bottom: 1px solid var(--color-hairline);
+    text-align: center;
+  }
+
+  .header-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .section-eyebrow {
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+  }
+
+  .page-title {
+    margin-top: 0;
+    margin-bottom: var(--spacing-xxs);
+    color: var(--color-ink);
+  }
+
+  .last-updated {
+    color: var(--color-mute);
+    margin: 0;
+  }
+
+  .content-section {
+    padding: var(--spacing-4xl) 0;
+    background-color: var(--color-canvas-soft);
+  }
+
+  .policy-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+  }
+
+  .policy-card {
+    border: 1px solid var(--color-hairline);
+    background-color: var(--color-canvas);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding: var(--spacing-xl) !important;
+  }
+
+  .policy-heading {
+    color: var(--color-ink);
+    margin: 0;
+  }
+
+  .policy-text {
+    color: var(--color-body);
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  @media (max-width: 600px) {
+    .page-header {
+      padding-top: var(--spacing-3xl);
+      padding-bottom: var(--spacing-2xl);
+    }
+
+    .content-section {
+      padding: var(--spacing-2xl) 0;
+    }
+
+    .policy-card {
+      padding: var(--spacing-lg) !important;
+    }
+  }
+</style>

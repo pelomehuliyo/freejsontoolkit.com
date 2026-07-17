@@ -1,0 +1,185 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Container from "../components/Container.astro";
+import Card from "../components/Card.astro";
+import Button from "../components/Button.astro";
+---
+
+<BaseLayout
+  title="Contact Us - Free JSON Toolkit"
+  description="Get in touch with Free JSON Toolkit. Learn how to report bugs, suggest features, or reach out for inquiries."
+  activePath="/contact"
+>
+  <main>
+    {/* Page Header */}
+    <section class="page-header" aria-labelledby="contact-title">
+      <Container size="narrow" class="header-container">
+        <span class="caption-mono section-eyebrow">GET IN TOUCH</span>
+        <h1 id="contact-title" class="display-xl page-title">
+          Contact & Support
+        </h1>
+        <p class="body-lg page-subtitle">
+          Have feedback, a feature suggestion, or found a bug? Learn how you can get in touch with us.
+        </p>
+      </Container>
+    </section>
+
+    {/* Content Sections */}
+    <section class="content-section" aria-label="Contact Channels">
+      <Container size="narrow">
+        <div class="contact-grid">
+          
+          {/* Bug Reports */}
+          <Card variant="flat" class="contact-card">
+            <div class="card-header-icon">
+              <span class="caption-mono category-tag">BUG REPORTS</span>
+            </div>
+            <h2 class="display-sm contact-heading">Report a Bug</h2>
+            <p class="body-sm contact-text">
+              If a file doesn't parse correctly or the layout breaks, we want to know. 
+              You can file bug reports directly on GitHub by describing the steps to reproduce the issue.
+            </p>
+            <div class="action-wrapper">
+              <Button variant="secondary" size="sm" shape="square" href="https://github.com" target="_blank" rel="noopener noreferrer">
+                Open GitHub Issues
+              </Button>
+            </div>
+          </Card>
+
+          {/* Feature Requests */}
+          <Card variant="flat" class="contact-card">
+            <div class="card-header-icon">
+              <span class="caption-mono category-tag">FEATURE REQUESTS</span>
+            </div>
+            <h2 class="display-sm contact-heading">Suggest a Feature</h2>
+            <p class="body-sm contact-text">
+              Want support for new data formats, a minifier tool, or an interactive JSON viewer? 
+              Share your suggestions in our discussions or check back for dedicated feature request forms.
+            </p>
+            <div class="action-wrapper">
+              <Button variant="secondary" size="sm" shape="square" href="https://github.com" target="_blank" rel="noopener noreferrer">
+                Request a Feature
+              </Button>
+            </div>
+          </Card>
+
+          {/* Business Enquiries */}
+          <Card variant="flat" class="contact-card span-two-cols">
+            <div class="card-header-icon">
+              <span class="caption-mono category-tag">BUSINESS INQUIRIES</span>
+            </div>
+            <h2 class="display-sm contact-heading">Business Inquiries</h2>
+            <p class="body-sm contact-text">
+              For partnership proposals, general questions, or other enquiries, contact details will be published here. We do not accept unsolicited advertising or tracking pixels.
+            </p>
+          </Card>
+
+        </div>
+      </Container>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .page-header {
+    padding-top: var(--spacing-5xl);
+    padding-bottom: var(--spacing-3xl);
+    background-color: var(--color-canvas);
+    border-bottom: 1px solid var(--color-hairline);
+    text-align: center;
+  }
+
+  .header-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .section-eyebrow {
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+  }
+
+  .page-title {
+    margin-top: 0;
+    margin-bottom: var(--spacing-xxs);
+    color: var(--color-ink);
+  }
+
+  .page-subtitle {
+    color: var(--color-body);
+    max-width: 600px;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .content-section {
+    padding: var(--spacing-4xl) 0;
+    background-color: var(--color-canvas-soft);
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-xl);
+  }
+
+  .contact-card {
+    border: 1px solid var(--color-hairline);
+    background-color: var(--color-canvas);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xl) !important;
+  }
+
+  .span-two-cols {
+    grid-column: span 2;
+  }
+
+  .category-tag {
+    color: var(--color-mute);
+    letter-spacing: 0.05em;
+  }
+
+  .contact-heading {
+    color: var(--color-ink);
+    margin: 0;
+  }
+
+  .contact-text {
+    color: var(--color-body);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .action-wrapper {
+    margin-top: var(--spacing-xs);
+  }
+
+  @media (max-width: 768px) {
+    .contact-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .span-two-cols {
+      grid-column: span 1;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .page-header {
+      padding-top: var(--spacing-3xl);
+      padding-bottom: var(--spacing-2xl);
+    }
+
+    .content-section {
+      padding: var(--spacing-2xl) 0;
+    }
+
+    .contact-card {
+      padding: var(--spacing-lg) !important;
+    }
+  }
+</style>
