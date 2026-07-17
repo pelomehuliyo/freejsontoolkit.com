@@ -1,0 +1,114 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Container from "../components/Container.astro";
+import Button from "../components/Button.astro";
+---
+
+<BaseLayout
+    title="404 | Free JSON Toolkit"
+    description="We couldn't find that page."
+    activePath="/"
+>
+    <main>
+        <section class="notfound-section" aria-labelledby="notfound-title">
+            <Container size="narrow">
+                <div class="notfound-content">
+                    <h1 id="notfound-title" class="display-xl notfound-heading">
+                        404
+                    </h1>
+
+                    <p class="body-lg notfound-subheading">
+                        We couldn't find that page.
+                    </p>
+
+                    <p class="body-md notfound-description">
+                        The link may be incorrect or the page may have moved.
+                    </p>
+
+                    <div
+                        class="notfound-actions"
+                        role="group"
+                        aria-label="404 actions"
+                    >
+                        <Button
+                            variant="primary"
+                            size="lg"
+                            shape="square"
+                            href="/"
+                        >
+                            Go Home
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="lg"
+                            shape="square"
+                            href="/tools"
+                        >
+                            Browse Tools
+                        </Button>
+                    </div>
+                </div>
+            </Container>
+        </section>
+    </main>
+
+    <style>
+        .notfound-section {
+            padding: var(--spacing-6xl) 0;
+            background-color: var(--color-canvas-soft);
+            border-top: 1px solid var(--color-hairline);
+        }
+
+        .notfound-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: var(--spacing-md);
+        }
+
+        .notfound-heading {
+            letter-spacing: -2px;
+        }
+
+        .notfound-subheading {
+            color: var(--color-ink);
+            margin: 0;
+            font-weight: 500;
+            max-width: 720px;
+        }
+
+        .notfound-description {
+            color: var(--color-body);
+            margin: 0;
+            max-width: 720px;
+            line-height: 1.6;
+        }
+
+        .notfound-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-lg);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .notfound-actions :global(a.btn),
+        .notfound-actions :global(button.btn) {
+            min-width: 220px;
+        }
+
+        @media (max-width: 600px) {
+            .notfound-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .notfound-actions :global(a.btn),
+            .notfound-actions :global(button.btn) {
+                width: 100%;
+                min-width: 0;
+            }
+        }
+    </style>
+</BaseLayout>

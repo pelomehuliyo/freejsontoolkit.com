@@ -1,0 +1,303 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Container from "../../components/Container.astro";
+import Card from "../../components/Card.astro";
+import Button from "../../components/Button.astro";
+---
+
+<BaseLayout
+  title="Developer Tools | Free JSON Toolkit"
+  description="Browse all available and upcoming JSON utilities from Free JSON Toolkit."
+  activePath="/tools"
+>
+  <main>
+    <section class="catalog-hero" aria-labelledby="tools-hero-title">
+      <Container size="default">
+        <div class="hero-content">
+          <h1 id="tools-hero-title" class="display-xl hero-title">
+            Developer Tools
+          </h1>
+
+          <p class="body-lg hero-description">
+            All tools run locally, privacy-first, and free to use.
+            More tools are coming soon.
+          </p>
+        </div>
+      </Container>
+    </section>
+
+    <section class="tools-section" aria-labelledby="tools-grid-title">
+      <Container size="default">
+        <div class="section-header">
+          <span class="caption-mono section-eyebrow">TOOLS CATALOG</span>
+          <h2 id="tools-grid-title" class="display-lg section-title">
+            Browse available and upcoming utilities
+          </h2>
+        </div>
+
+        <div class="tools-grid" role="list" aria-label="Tools list">
+          {/* Available */}
+          <Card
+            variant="default"
+            hoverable={true}
+            class="tool-card tool-card-available"
+          >
+            <div class="tool-card-content" role="listitem">
+              <h3 class="display-sm tool-title">
+JSON → CSV Converter
+              </h3>
+
+              <div class="tool-status" aria-label="Status: Available">
+                <span class="status-label status-available">Available</span>
+                <span class="status-text">&nbsp; </span>
+              </div>
+
+              <p class="body-sm tool-description">
+                Convert JSON into CSV instantly with browser-based processing.
+              </p>
+            </div>
+
+            <div class="tool-footer">
+              <Button
+                variant="primary"
+                size="sm"
+                shape="square"
+                href="/tools/json-to-csv"
+              >
+                Open Tool
+              </Button>
+            </div>
+          </Card>
+
+          {/* Coming soon (no pages yet) */}
+          <Card variant="soft" class="tool-card tool-card-disabled" aria-disabled="true">
+            <div class="tool-card-content" role="listitem">
+              <h3 class="display-sm tool-title">JSON Formatter</h3>
+              <div class="tool-status" aria-label="Status: Coming Soon">
+                <span class="status-label status-coming">Coming Soon</span>
+              </div>
+              <p class="body-sm tool-description">
+                Beautify JSON and improve readability.
+              </p>
+            </div>
+
+            <div class="tool-footer">
+              <Button variant="secondary" size="sm" shape="square" disabled>
+                Coming Soon
+              </Button>
+            </div>
+          </Card>
+
+          <Card variant="soft" class="tool-card tool-card-disabled" aria-disabled="true">
+            <div class="tool-card-content" role="listitem">
+              <h3 class="display-sm tool-title">JSON Validator</h3>
+              <div class="tool-status" aria-label="Status: Coming Soon">
+                <span class="status-label status-coming">Coming Soon</span>
+              </div>
+              <p class="body-sm tool-description">
+                Check JSON syntax and surface errors.
+              </p>
+            </div>
+
+            <div class="tool-footer">
+              <Button variant="secondary" size="sm" shape="square" disabled>
+                Coming Soon
+              </Button>
+            </div>
+          </Card>
+
+          <Card variant="soft" class="tool-card tool-card-disabled" aria-disabled="true">
+            <div class="tool-card-content" role="listitem">
+              <h3 class="display-sm tool-title">CSV  JSON</h3>
+              <div class="tool-status" aria-label="Status: Coming Soon">
+                <span class="status-label status-coming">Coming Soon</span>
+              </div>
+              <p class="body-sm tool-description">
+                Convert CSV files into structured JSON.
+              </p>
+            </div>
+
+            <div class="tool-footer">
+              <Button variant="secondary" size="sm" shape="square" disabled>
+                Coming Soon
+              </Button>
+            </div>
+          </Card>
+
+          <Card variant="soft" class="tool-card tool-card-disabled" aria-disabled="true">
+            <div class="tool-card-content" role="listitem">
+              <h3 class="display-sm tool-title">JSON Minifier</h3>
+              <div class="tool-status" aria-label="Status: Coming Soon">
+                <span class="status-label status-coming">Coming Soon</span>
+              </div>
+              <p class="body-sm tool-description">
+                Reduce JSON size while preserving correctness.
+              </p>
+            </div>
+
+            <div class="tool-footer">
+              <Button variant="secondary" size="sm" shape="square" disabled>
+                Coming Soon
+              </Button>
+            </div>
+          </Card>
+
+          <Card variant="soft" class="tool-card tool-card-disabled" aria-disabled="true">
+            <div class="tool-card-content" role="listitem">
+              <h3 class="display-sm tool-title">JSON Pretty Print</h3>
+              <div class="tool-status" aria-label="Status: Coming Soon">
+                <span class="status-label status-coming">Coming Soon</span>
+              </div>
+              <p class="body-sm tool-description">
+                Format JSON with consistent indentation.
+              </p>
+            </div>
+
+            <div class="tool-footer">
+              <Button variant="secondary" size="sm" shape="square" disabled>
+                Coming Soon
+              </Button>
+            </div>
+          </Card>
+        </div>
+      </Container>
+    </section>
+  </main>
+
+  <style>
+    .catalog-hero {
+      padding: var(--spacing-5xl) 0 var(--spacing-4xl);
+      background-color: var(--color-canvas);
+      border-bottom: 1px solid var(--color-hairline);
+    }
+
+    .hero-content {
+      max-width: 820px;
+      margin: 0 auto;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .hero-title {
+      margin-top: 0;
+    }
+
+    .hero-description {
+      color: var(--color-body);
+      max-width: 720px;
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .tools-section {
+      padding: var(--spacing-5xl) 0;
+      background-color: var(--color-canvas-soft);
+      border-bottom: 1px solid var(--color-hairline);
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 780px;
+      margin: 0 auto var(--spacing-3xl);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+
+    .section-eyebrow {
+      color: var(--color-mute);
+      letter-spacing: 0.1em;
+    }
+
+    .section-title {
+      color: var(--color-ink);
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-xl);
+    }
+
+    @media (min-width: 1020px) {
+      .tools-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 959px) {
+      .tools-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .tool-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      background-color: var(--color-canvas);
+    }
+
+    .tool-card-disabled {
+      opacity: 0.92;
+      background-color: var(--color-canvas-soft);
+    }
+
+    .tool-card-content {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+
+    .tool-title {
+      color: var(--color-ink);
+      margin: 0;
+    }
+
+    .tool-description {
+      color: var(--color-body);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .tool-status {
+      display: flex;
+      align-items: center;
+    }
+
+    .status-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 2px var(--spacing-xs);
+      border-radius: var(--rounded-sm);
+      border: 1px solid var(--color-hairline);
+    }
+
+    .status-available {
+      color: var(--color-ink);
+      background-color: var(--color-canvas-soft-2);
+    }
+
+    .status-coming {
+      color: var(--color-mute);
+      background-color: var(--color-canvas-soft);
+    }
+
+    .tool-footer {
+      margin-top: var(--spacing-lg);
+      padding-top: var(--spacing-md);
+      border-top: 1px solid var(--color-hairline);
+    }
+
+    .tool-footer :global(a.btn),
+    .tool-footer :global(button.btn) {
+      width: 100%;
+    }
+  </style>
+</BaseLayout>
+
