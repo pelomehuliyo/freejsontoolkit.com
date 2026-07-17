@@ -1,16 +1,12 @@
-# TODO - Integrate new brand assets (favicon/manifest)
+# Launch readiness audit - TODO
 
-- [ ] Update global head in `src/layouts/BaseLayout.astro` to use the required favicon + manifest tags (no duplicates).
-- [ ] Remove/adjust any conflicting icon/manifest tags in `src/layouts/Layout.astro` (if unused, ensure no duplicate tags across project builds).
-- [ ] Update `public/site.webmanifest` fields (name, short_name, theme/background/display, and correct icon references).
-- [ ] Ensure `public/` contains all referenced icon files:
-  - [ ] favicon.ico
-  - [ ] favicon.svg
-  - [ ] favicon-96x96.png
-  - [ ] apple-touch-icon.png
-  - [ ] site.webmanifest
-  - [ ] favicon-192x192.png / 512 equivalents (or confirm existing filenames).
-- [x] Search the entire repo for duplicate favicon/manifest tags and fix any remaining occurrences.
-- [x] Run `npm run build` and fix any build errors introduced by the changes.
-
-
+- [ ] Fix Footer: remove all `href="#"` placeholder links; render as disabled/non-clickable with `aria-disabled="true"` when destination missing.
+- [ ] Fix Mobile navigation accessibility in `Header.astro`:
+  - [ ] Add `aria-expanded` + `aria-controls`
+  - [ ] Add appropriate ARIA attributes on drawer (`role="dialog"`, `aria-modal="true"`)
+  - [ ] Support closing with `Escape`
+  - [ ] Restore focus to menu button after closing
+  - [ ] Add lightweight focus management (basic focus trap while open)
+- [ ] Add global keyboard focus indicator in `src/styles/global.css` using `:focus-visible` with high contrast.
+- [ ] Run `npm run build`
+- [ ] If build passes: `git add .` and `git commit -m "Improve accessibility and launch readiness"`

@@ -14,7 +14,7 @@
   --color-canvas-soft-2: #f5f5f5;
   --color-link: #000000;
   --color-link-hover: #4d4d4d;
-  
+
   /* Semantic */
   --color-success: #0070f3;
   --color-error: #ee0000;
@@ -56,11 +56,14 @@
 }
 
 /* Reset styles */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -68,7 +71,8 @@ html, body {
   background-color: var(--color-canvas-soft);
   color: var(--color-ink);
   font-family: var(--font-sans);
-  font-feature-settings: "ss01", "ss02"; /* Enables geometric alternates for Inter */
+  font-feature-settings: "ss01", "ss02";
+  /* Enables geometric alternates for Inter */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -190,4 +194,24 @@ html, body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Accessibility: Visible keyboard focus */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--rounded-xs);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
 }
