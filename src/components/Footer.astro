@@ -24,9 +24,11 @@ const footerSections = [
   {
     title: "Resources",
     links: [
-      { label: "GitHub Repository", href: "https://github.com" },
+      {
+        label: "GitHub Repository",
+        href: "https://github.com/pelomehuliyo/freejsontoolkit.com",
+      },
       { label: "Design Sandbox", href: "/sandbox" },
-      { label: "Astro Docs", href: "https://docs.astro.build" },
     ],
   },
 ];
@@ -37,21 +39,31 @@ const footerSections = [
     <div class="footer-grid">
       <div class="footer-brand">
         <div class="footer-logo">
-          <svg
-            viewBox="0 0 75 65"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+          <img
+            src="/favicon.svg"
+            alt="Free JSON Toolkit Logo"
             class="logo-icon"
-          >
-            <path d="M37.5 0L75 65H0L37.5 0Z" fill="currentColor"></path>
-          </svg>
+          />
           <span>JSON Toolkit</span>
         </div>
         <p class="footer-tagline body-sm">
           A minimalist suite of offline-first developer utilities.
         </p>
         <p class="footer-disclaimer caption">
-          🔒 Your privacy is priority. All processing is executed 100% locally
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="footer-lock-icon"
+            style="display: inline-block; vertical-align: text-bottom; margin-right: 4px;"
+            ><rect x="3" y="11" width="18" height="11" rx="2" ry="2"
+            ></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg
+          >Your privacy is priority. All processing is executed 100% locally
           inside your browser sandbox. No telemetry, no logs, no servers.
         </p>
       </div>
@@ -87,7 +99,7 @@ const footerSections = [
 
     <div class="footer-bottom">
       <p class="footer-copyright">
-        &copy; {new Date().getFullYear()} freejsontoolkit.com. Built with Astro.
+        &copy; {new Date().getFullYear()} freejsontoolkit.com. All rights reserved.
       </p>
     </div>
   </Container>
@@ -126,8 +138,15 @@ const footerSections = [
   }
 
   .footer-logo .logo-icon {
-    height: 14px;
+    height: 30px;
     width: auto;
+    display: block;
+  }
+
+  @media (max-width: 959px) {
+    .footer-logo .logo-icon {
+      height: 26px;
+    }
   }
 
   .footer-tagline {

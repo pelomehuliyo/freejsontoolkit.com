@@ -9,9 +9,9 @@ const { activePath = "/" } = Astro.props;
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/tools/json-to-csv", label: "Tools" },
-  { href: "/#about", label: "About" },
-  { href: "/sandbox", label: "Sandbox" },
+  { href: "/tools", label: "Tools" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
 ];
 ---
 
@@ -19,14 +19,7 @@ const navLinks = [
   <Container size="wide" class="header-container">
     <div class="header-left">
       <a href="/" class="logo">
-        <svg
-          viewBox="0 0 75 65"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          class="logo-icon"
-        >
-          <path d="M37.5 0L75 65H0L37.5 0Z" fill="currentColor"></path>
-        </svg>
+        <img src="/favicon.svg" alt="Free JSON Toolkit Logo" class="logo-icon" />
         <span class="logo-text">JSON Toolkit</span>
       </a>
     </div>
@@ -51,7 +44,7 @@ const navLinks = [
 
     <div class="header-right">
       <a
-        href="https://github.com"
+        href="https://github.com/pelomehuliyo/freejsontoolkit.com"
         target="_blank"
         rel="noopener noreferrer"
         class="github-link"
@@ -94,14 +87,7 @@ const navLinks = [
   <div class="mobile-drawer" id="mobile-drawer">
     <div class="mobile-drawer-header">
       <a href="/" class="logo">
-        <svg
-          viewBox="0 0 75 65"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          class="logo-icon"
-        >
-          <path d="M37.5 0L75 65H0L37.5 0Z" fill="currentColor"></path>
-        </svg>
+        <img src="/favicon.svg" alt="Free JSON Toolkit Logo" class="logo-icon" />
         <span class="logo-text">JSON Toolkit</span>
       </a>
       <button
@@ -127,19 +113,27 @@ const navLinks = [
     <div class="mobile-drawer-body">
       <nav class="mobile-nav">
         {
-          navLinks.map((link) => (
-            <a href={link.href} class="mobile-nav-link">
-              {link.label}
-            </a>
-          ))
+          navLinks.map((link) => {
+            const isActive =
+              activePath === link.href ||
+              (link.href !== "/" && activePath.startsWith(link.href));
+            return (
+              <a
+                href={link.href}
+                class:list={["mobile-nav-link", { "mobile-nav-link-active": isActive }]}
+              >
+                {link.label}
+              </a>
+            );
+          })
         }
         <a
-          href="https://github.com"
+          href="https://github.com/pelomehuliyo/freejsontoolkit.com"
           target="_blank"
           rel="noopener noreferrer"
           class="mobile-nav-link"
         >
-          GitHub External
+          GitHub
         </a>
       </nav>
     </div>
@@ -276,8 +270,15 @@ const navLinks = [
   }
 
   .logo-icon {
-    height: 18px;
+    height: 30px;
     width: auto;
+    display: block;
+  }
+
+  @media (max-width: 959px) {
+    .logo-icon {
+      height: 26px;
+    }
   }
 
   .logo-text {
@@ -305,13 +306,17 @@ const navLinks = [
 
   .nav-link:hover {
     background-color: var(--color-canvas-soft-2);
-    color: var(--color-ink);
+    color: var(--color-accent);
   }
 
   .nav-link-active {
-    color: var(--color-ink);
+    color: var(--color-accent);
     font-weight: 500;
-    background-color: var(--color-canvas-soft-2);
+    background-color: transparent;
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
   }
 
   .header-right {
@@ -405,6 +410,13 @@ const navLinks = [
     text-decoration: none;
     padding: var(--spacing-xs) 0;
     border-bottom: 1px solid var(--color-canvas-soft-2);
+    transition: color 0.15s ease, padding-left 0.15s ease;
+  }
+
+  .mobile-nav-link-active {
+    color: var(--color-accent);
+    border-left: 2px solid var(--color-accent);
+    padding-left: var(--spacing-xs);
   }
 
   @media (max-width: 959px) {

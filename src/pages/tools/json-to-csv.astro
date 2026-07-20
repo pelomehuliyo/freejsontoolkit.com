@@ -26,7 +26,7 @@ import Card from "../../components/Card.astro";
 
       <!-- Privacy Notice Banner -->
       <div class="privacy-notice">
-        <span class="privacy-icon">🔒</span>
+        <span class="privacy-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="privacy-lock-icon" style="display: inline-block; vertical-align: text-bottom; margin-right: 4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>
         <p class="caption">
           Your data is processed entirely in your browser and is never uploaded.
         </p>
@@ -154,7 +154,7 @@ Example:
 
             <!-- Inline validation feedback area -->
             <div id="error-banner" class="error-banner hidden">
-              <span class="error-icon">⚠</span>
+              <span class="error-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="error-warning-icon" style="display: inline-block; vertical-align: text-bottom; margin-right: 4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
               <p class="caption error-msg" id="error-message">
                 Invalid JSON structure.
               </p>
@@ -313,7 +313,7 @@ Example:
         jsonValidationStatus.innerText =
           "JSON Status: Large file loaded. Press Convert.";
         (jsonValidationStatus as HTMLElement).style.color =
-          "var(--color-primary)";
+          "var(--color-accent)";
       }
     } else {
       largeJsonContent = null;
@@ -850,7 +850,7 @@ Example:
   }
 
   .browse-link {
-    color: var(--color-primary);
+    color: var(--color-accent);
     font-weight: 500;
   }
 
@@ -1049,8 +1049,8 @@ Example:
   }
 
   .checkbox-container input:checked ~ .checkbox-checkmark {
-    background-color: var(--color-primary);
-    border-color: var(--color-primary);
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
   }
 
   .checkbox-checkmark::after {

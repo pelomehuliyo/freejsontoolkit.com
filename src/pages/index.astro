@@ -396,8 +396,9 @@ import Card from "../components/Card.astro";
   }
 
   .status-available {
-    color: var(--color-ink);
-    background-color: var(--color-canvas-soft-2);
+    color: var(--color-accent);
+    background-color: rgba(33, 167, 138, 0.1);
+    border-color: rgba(33, 167, 138, 0.2);
   }
 
   .status-coming {
@@ -432,43 +433,5 @@ import Card from "../components/Card.astro";
     }
   }
 
-  /* FAQ */
-  .faq-section {
-    padding: var(--spacing-5xl) 0;
-    background-color: var(--color-canvas-soft);
-    border-top: 1px solid var(--color-hairline);
-  }
 
-  .faq-header {
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto var(--spacing-3xl);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-xs);
-  }
-
-  .faq-list {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--spacing-sm);
-  }
-
-  .faq-item {
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    background-color: var(--color-canvas);
-    padding: var(--spacing-sm) var(--spacing-md);
-  }
-
-  .faq-summary {
-    cursor: pointer;
-    font-weight: 500;
-  }
-
-  .faq-answer {
-    margin-top: var(--spacing-xs);
-    color: var(--color-body);
-  }
 </style>
