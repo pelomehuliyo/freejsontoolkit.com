@@ -101,6 +101,24 @@ const jsonLd = isHomePage
 
     <!-- Structured Data -->
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+    <!-- Google Analytics (Production Only) -->
+    {
+      import.meta.env.PROD && (
+        <>
+          <script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-PYSH78FPX0"
+          ></script>
+          <script is:inline>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() { dataLayer.push(arguments); }
+            gtag('js', new Date());
+            gtag('config', 'G-PYSH78FPX0');
+          </script>
+        </>
+      )
+    }
   </head>
   <body>
     <div class="app-layout">
