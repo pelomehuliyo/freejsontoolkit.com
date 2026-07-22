@@ -573,7 +573,7 @@ Example:
 
       try {
         const worker = new Worker(
-          new URL("../../lib/lib/json-to-csv.worker.ts", import.meta.url),
+          new URL("../../workers/json-to-csv.worker.ts", import.meta.url),
           { type: "module" },
         );
 
