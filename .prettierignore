@@ -1,0 +1,17 @@
+# Build output
+dist/
+.astro/
+node_modules/
+*.log
+package-lock.json
+
+# Third-party / agent skill files
+.agents/
+
+# Docs
+docs/
+
+# Ignore BaseLayout.astro due to inline gtag script using `arguments`
+# which prettier-plugin-astro cannot parse.
+src/layouts/BaseLayout.astro
+

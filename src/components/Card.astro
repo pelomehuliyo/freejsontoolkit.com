@@ -1,34 +1,24 @@
 ---
 interface Props {
-  variant?: 'default' | 'large' | 'soft' | 'featured' | 'flat';
+  variant?: "default" | "large" | "soft" | "featured" | "flat";
   hoverable?: boolean;
   class?: string;
   [key: string]: any;
 }
 
-const {
-  variant = 'default',
-  hoverable = false,
-  class: className = '',
-  ...rest
-} = Astro.props;
+const { variant = "default", hoverable = false, class: className = "", ...rest } = Astro.props;
 ---
 
-<div
-  class:list={[
-    'card',
-    `card-${variant}`,
-    { 'card-hoverable': hoverable },
-    className
-  ]}
-  {...rest}
->
+<div class:list={["card", `card-${variant}`, { "card-hoverable": hoverable }, className]} {...rest}>
   <slot />
 </div>
 
 <style>
   .card {
-    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease,
+      transform 0.15s ease;
     border: 1px solid transparent;
     box-sizing: border-box;
   }
@@ -40,8 +30,9 @@ const {
     border-radius: var(--rounded-md);
     padding: var(--spacing-lg);
     border-color: var(--color-hairline);
-    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.04), 
-                0px 8px 8px -8px rgba(0, 0, 0, 0.04);
+    box-shadow:
+      0px 2px 2px rgba(0, 0, 0, 0.04),
+      0px 8px 8px -8px rgba(0, 0, 0, 0.04);
   }
 
   /* Large (card-marketing-large) */
@@ -51,8 +42,9 @@ const {
     border-radius: var(--rounded-lg);
     padding: var(--spacing-xl);
     border-color: var(--color-hairline);
-    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.04), 
-                0px 8px 16px -4px rgba(0, 0, 0, 0.04);
+    box-shadow:
+      0px 2px 2px rgba(0, 0, 0, 0.04),
+      0px 8px 16px -4px rgba(0, 0, 0, 0.04);
   }
 
   /* Soft (card-soft) */
@@ -88,8 +80,9 @@ const {
   .card-hoverable.card-large:hover,
   .card-hoverable.card-flat:hover {
     border-color: var(--color-hairline-strong);
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.04), 
-                0px 12px 24px -4px rgba(0, 0, 0, 0.06);
+    box-shadow:
+      0px 4px 8px rgba(0, 0, 0, 0.04),
+      0px 12px 24px -4px rgba(0, 0, 0, 0.06);
   }
 
   .card-hoverable.card-soft:hover {

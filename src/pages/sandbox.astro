@@ -1,8 +1,8 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Container from '../components/Container.astro';
-import Button from '../components/Button.astro';
-import Card from '../components/Card.astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Container from "../components/Container.astro";
+import Button from "../components/Button.astro";
+import Card from "../components/Card.astro";
 ---
 
 <BaseLayout title="Design Sandbox - JSON Toolkit" activePath="/sandbox">
@@ -12,7 +12,8 @@ import Card from '../components/Card.astro';
         <span class="caption-mono section-eyebrow">DESIGN SYSTEM</span>
         <h1 class="display-lg section-title">Visual Sandbox.</h1>
         <p class="body-lg section-description">
-          Review core primitives, typographic hierarchies, and button configurations built for the JSON Toolkit.
+          Review core primitives, typographic hierarchies, and button configurations built for the
+          JSON Toolkit.
         </p>
       </div>
 
@@ -60,7 +61,7 @@ import Card from '../components/Card.astro';
                 <Button variant="primary" size="lg" shape="pill">Button lg</Button>
               </div>
             </div>
-            
+
             <div class="button-row">
               <span class="caption-mono button-type-tag">Secondary Squares (sm/md/lg)</span>
               <div class="button-list">
@@ -88,24 +89,30 @@ import Card from '../components/Card.astro';
             </div>
           </div>
         </Card>
-        
+
         <!-- Card variants card -->
         <Card variant="default" class="sandbox-card full-width-card">
           <h3 class="display-sm sandbox-card-title">Card Layout Variants</h3>
           <div class="cards-showcase">
             <Card variant="default">
               <h4 class="display-sm">Default Card</h4>
-              <p class="body-sm">Standard feature card styled with subtle border and Level 3 stacked drop shadow.</p>
+              <p class="body-sm">
+                Standard feature card styled with subtle border and Level 3 stacked drop shadow.
+              </p>
             </Card>
-            
+
             <Card variant="soft">
               <h4 class="display-sm">Soft Card</h4>
-              <p class="body-sm">Lightly-tinted flat background styling for structural container groups.</p>
+              <p class="body-sm">
+                Lightly-tinted flat background styling for structural container groups.
+              </p>
             </Card>
 
             <Card variant="large">
               <h4 class="display-sm">Large Card</h4>
-              <p class="body-sm">Thicker rounded corners (12px) with Level 4 shadow offset for visual focus.</p>
+              <p class="body-sm">
+                Thicker rounded corners (12px) with Level 4 shadow offset for visual focus.
+              </p>
             </Card>
           </div>
         </Card>
@@ -214,11 +221,11 @@ import Card from '../components/Card.astro';
     .sandbox-grid {
       grid-template-columns: 1fr;
     }
-    
+
     .full-width-card {
       grid-column: span 1;
     }
-    
+
     .cards-showcase {
       grid-template-columns: 1fr;
     }

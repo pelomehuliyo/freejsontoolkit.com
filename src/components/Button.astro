@@ -1,34 +1,28 @@
 ---
-import type { HTMLAttributes } from 'astro/types';
+import type { HTMLAttributes } from "astro/types";
 
-interface Props extends HTMLAttributes<'button'>, HTMLAttributes<'a'> {
-  variant?: 'primary' | 'secondary' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
-  shape?: 'pill' | 'square';
+interface Props extends HTMLAttributes<"button">, HTMLAttributes<"a"> {
+  variant?: "primary" | "secondary" | "ghost";
+  size?: "sm" | "md" | "lg";
+  shape?: "pill" | "square";
   href?: string;
 }
 
 const {
-  variant = 'primary',
-  size = 'md',
-  shape = 'pill',
+  variant = "primary",
+  size = "md",
+  shape = "pill",
   href,
-  class: className = '',
+  class: className = "",
   ...rest
 } = Astro.props;
 
-const Element = href ? 'a' : 'button';
+const Element = href ? "a" : "button";
 ---
 
 <Element
   href={href}
-  class:list={[
-    'btn',
-    `btn-${variant}`,
-    `btn-${size}`,
-    `btn-${shape}`,
-    className
-  ]}
+  class:list={["btn", `btn-${variant}`, `btn-${size}`, `btn-${shape}`, className]}
   {...rest as any}
 >
   <slot />
@@ -43,7 +37,11 @@ const Element = href ? 'a' : 'button';
     font-weight: 500;
     text-decoration: none;
     cursor: pointer;
-    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease,
+      box-shadow 0.15s ease;
     border: 1px solid transparent;
     user-select: none;
     white-space: nowrap;
@@ -59,7 +57,7 @@ const Element = href ? 'a' : 'button';
   .btn-pill {
     border-radius: var(--rounded-pill);
   }
-  
+
   /* Shape: Square */
   .btn-square {
     border-radius: var(--rounded-sm);

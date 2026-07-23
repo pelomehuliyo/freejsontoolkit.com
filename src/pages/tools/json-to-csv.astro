@@ -38,8 +38,8 @@ import Card from "../../components/Card.astro";
             stroke-linejoin="round"
             class="privacy-lock-icon"
             style="display: inline-block; vertical-align: text-bottom; margin-right: 4px;"
-            ><rect x="3" y="11" width="18" height="11" rx="2" ry="2"
-            ></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg
+            ><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path
+              d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg
           ></span
         >
         <p class="caption">
@@ -54,13 +54,9 @@ import Card from "../../components/Card.astro";
             <div class="card-header">
               <span class="caption-mono column-title">INPUT JSON</span>
               <div class="header-actions">
-                <button id="load-sample-btn" class="text-btn caption-mono"
-                  >Load Sample</button
-                >
+                <button id="load-sample-btn" class="text-btn caption-mono">Load Sample</button>
                 <span class="action-divider">|</span>
-                <button id="clear-btn" class="text-btn caption-mono"
-                  >Clear</button
-                >
+                <button id="clear-btn" class="text-btn caption-mono">Clear</button>
               </div>
             </div>
 
@@ -80,15 +76,9 @@ import Card from "../../components/Card.astro";
                   stroke-linejoin="round"></path>
               </svg>
               <p class="caption drag-text">
-                Drag & drop .json file or <span class="browse-link">browse</span
-                >
+                Drag & drop .json file or <span class="browse-link">browse</span>
               </p>
-              <input
-                type="file"
-                id="file-input"
-                accept=".json"
-                class="file-input-hidden"
-              />
+              <input type="file" id="file-input" accept=".json" class="file-input-hidden" />
             </div>
 
             <!-- Editor-like Textarea with Gutter -->
@@ -109,9 +99,7 @@ Example:
                   spellcheck="false"></textarea>
               </div>
               <div class="editor-info-bar">
-                <span class="info-status" id="json-validation-status"
-                  >JSON Status: Empty</span
-                >
+                <span class="info-status" id="json-validation-status">JSON Status: Empty</span>
                 <span class="info-meta" id="json-char-count">0 chars</span>
               </div>
             </div>
@@ -142,8 +130,7 @@ Example:
                 Flatten nested objects
               </label>
               <p class="caption settings-help">
-                Flattens properties like &#123;"user": &#123;"name":
-                "John"&#125;&#125; to user.name
+                Flattens properties like &#123;"user": &#123;"name": "John"&#125;&#125; to user.name
               </p>
             </div>
 
@@ -157,13 +144,7 @@ Example:
 
             <div class="settings-divider"></div>
 
-            <Button
-              id="convert-btn"
-              variant="primary"
-              size="lg"
-              shape="square"
-              class="action-btn"
-            >
+            <Button id="convert-btn" variant="primary" size="lg" shape="square" class="action-btn">
               Convert JSON
             </Button>
 
@@ -190,9 +171,7 @@ Example:
                     y2="17"></line></svg
                 ></span
               >
-              <p class="caption error-msg" id="error-message">
-                Invalid JSON structure.
-              </p>
+              <p class="caption error-msg" id="error-message">Invalid JSON structure.</p>
             </div>
 
             <div class="status-banner caption">
@@ -207,13 +186,9 @@ Example:
             <div class="card-header">
               <span class="caption-mono column-title">OUTPUT CSV</span>
               <div class="header-actions">
-                <button id="copy-btn" class="text-btn caption-mono" disabled
-                  >Copy</button
-                >
+                <button id="copy-btn" class="text-btn caption-mono" disabled>Copy</button>
                 <span class="action-divider">|</span>
-                <button id="download-btn" class="text-btn caption-mono" disabled
-                  >Download</button
-                >
+                <button id="download-btn" class="text-btn caption-mono" disabled>Download</button>
               </div>
             </div>
 
@@ -231,9 +206,7 @@ Example:
                   spellcheck="false"></textarea>
               </div>
               <div class="editor-info-bar">
-                <span class="info-status" id="csv-status"
-                  >CSV Status: Ready</span
-                >
+                <span class="info-status" id="csv-status">CSV Status: Ready</span>
                 <span class="info-meta" id="csv-char-count">0 chars</span>
               </div>
             </div>
@@ -255,36 +228,22 @@ Example:
   const WARNING_THRESHOLD = 5_000_000; // ~5 MB / chars
 
   // DOM Elements
-  const jsonInput = document.getElementById(
-    "json-input",
-  ) as HTMLTextAreaElement;
-  const csvOutput = document.getElementById(
-    "csv-output",
-  ) as HTMLTextAreaElement;
+  const jsonInput = document.getElementById("json-input") as HTMLTextAreaElement;
+  const csvOutput = document.getElementById("csv-output") as HTMLTextAreaElement;
   const convertBtn = document.getElementById("convert-btn");
   const loadSampleBtn = document.getElementById("load-sample-btn");
   const clearBtn = document.getElementById("clear-btn");
   const copyBtn = document.getElementById("copy-btn") as HTMLButtonElement;
-  const downloadBtn = document.getElementById(
-    "download-btn",
-  ) as HTMLButtonElement;
+  const downloadBtn = document.getElementById("download-btn") as HTMLButtonElement;
 
-  const delimiterSelect = document.getElementById(
-    "delimiter-select",
-  ) as HTMLSelectElement;
-  const flattenCheckbox = document.getElementById(
-    "flatten-checkbox",
-  ) as HTMLInputElement;
-  const headersCheckbox = document.getElementById(
-    "headers-checkbox",
-  ) as HTMLInputElement;
+  const delimiterSelect = document.getElementById("delimiter-select") as HTMLSelectElement;
+  const flattenCheckbox = document.getElementById("flatten-checkbox") as HTMLInputElement;
+  const headersCheckbox = document.getElementById("headers-checkbox") as HTMLInputElement;
 
   const jsonGutter = document.getElementById("json-gutter");
   const csvGutter = document.getElementById("csv-gutter");
 
-  const jsonValidationStatus = document.getElementById(
-    "json-validation-status",
-  );
+  const jsonValidationStatus = document.getElementById("json-validation-status");
   const jsonCharCount = document.getElementById("json-char-count");
   const csvCharCount = document.getElementById("csv-char-count");
 
@@ -345,10 +304,8 @@ Example:
         jsonCharCount.innerText = `${text.length.toLocaleString()} chars (Large File)`;
       }
       if (jsonValidationStatus) {
-        jsonValidationStatus.innerText =
-          "JSON Status: Large file loaded. Press Convert.";
-        (jsonValidationStatus as HTMLElement).style.color =
-          "var(--color-accent)";
+        jsonValidationStatus.innerText = "JSON Status: Large file loaded. Press Convert.";
+        (jsonValidationStatus as HTMLElement).style.color = "var(--color-accent)";
       }
     } else {
       largeJsonContent = null;
@@ -360,10 +317,7 @@ Example:
   }
 
   // Line Number Helpers
-  function updateGutter(
-    textarea: HTMLTextAreaElement,
-    gutter: HTMLElement | null,
-  ) {
+  function updateGutter(textarea: HTMLTextAreaElement, gutter: HTMLElement | null) {
     if (!textarea || !gutter) return;
     const lines = textarea.value.split("\n");
     const lineCount = Math.max(1, lines.length);
@@ -397,8 +351,7 @@ Example:
     const val = jsonInput.value;
     updateGutter(jsonInput, jsonGutter);
 
-    if (jsonCharCount)
-      jsonCharCount.innerText = `${val.length.toLocaleString()} chars`;
+    if (jsonCharCount) jsonCharCount.innerText = `${val.length.toLocaleString()} chars`;
     if (jsonValidationStatus) {
       if (!val.trim()) {
         jsonValidationStatus.innerText = "JSON Status: Empty";
@@ -407,8 +360,7 @@ Example:
       } else {
         // Parse only after clicking Convert to keep UI responsive
         jsonValidationStatus.innerText = "JSON Status: Ready to convert";
-        (jsonValidationStatus as HTMLElement).style.color =
-          "var(--color-success)";
+        (jsonValidationStatus as HTMLElement).style.color = "var(--color-success)";
         hideError();
       }
     }
@@ -470,15 +422,11 @@ Example:
 
   const setLoadingUI = (isLoading: boolean, message?: string) => {
     if (convertBtn) (convertBtn as HTMLButtonElement).disabled = isLoading;
-    if (copyBtn)
-      copyBtn.disabled = isLoading || (!csvOutput.value && !largeCsvContent);
-    if (downloadBtn)
-      downloadBtn.disabled =
-        isLoading || (!csvOutput.value && !largeCsvContent);
+    if (copyBtn) copyBtn.disabled = isLoading || (!csvOutput.value && !largeCsvContent);
+    if (downloadBtn) downloadBtn.disabled = isLoading || (!csvOutput.value && !largeCsvContent);
 
     if (csvCharCount) {
-      const displayVal =
-        largeCsvContent !== null ? largeCsvContent : csvOutput.value;
+      const displayVal = largeCsvContent !== null ? largeCsvContent : csvOutput.value;
       csvCharCount.innerText = displayVal
         ? `${displayVal.length.toLocaleString()} chars${largeCsvContent !== null ? " (Large Output)" : ""}`
         : "0 chars";
@@ -486,17 +434,12 @@ Example:
 
     const csvStatusEl = document.getElementById("csv-status");
     if (csvStatusEl) {
-      csvStatusEl.innerText = isLoading
-        ? message || "Converting JSON…"
-        : "CSV Status: Ready";
+      csvStatusEl.innerText = isLoading ? message || "Converting JSON…" : "CSV Status: Ready";
     }
   };
 
   const warnTooLarge = () => {
-    const len =
-      largeJsonContent !== null
-        ? largeJsonContent.length
-        : jsonInput.value.trim().length;
+    const len = largeJsonContent !== null ? largeJsonContent.length : jsonInput.value.trim().length;
     showError(
       `Input too large (${len.toLocaleString()} chars). To keep the page responsive, limit is ${MAX_INPUT_CHARS.toLocaleString()} chars.`,
     );
@@ -504,8 +447,7 @@ Example:
 
   if (convertBtn) {
     convertBtn.addEventListener("click", () => {
-      const input =
-        largeJsonContent !== null ? largeJsonContent : jsonInput.value.trim();
+      const input = largeJsonContent !== null ? largeJsonContent : jsonInput.value.trim();
       if (!input) {
         showError("Please paste or load JSON first.");
         return;
@@ -572,10 +514,9 @@ Example:
       }
 
       try {
-        const worker = new Worker(
-          new URL("../../workers/json-to-csv.worker.ts", import.meta.url),
-          { type: "module" },
-        );
+        const worker = new Worker(new URL("../../workers/json-to-csv.worker.ts", import.meta.url), {
+          type: "module",
+        });
 
         worker.onmessage = (e: MessageEvent<any>) => {
           const data = e.data;
@@ -626,8 +567,7 @@ Example:
   // Copy Click
   if (copyBtn) {
     copyBtn.addEventListener("click", () => {
-      const outputVal =
-        largeCsvContent !== null ? largeCsvContent : csvOutput.value;
+      const outputVal = largeCsvContent !== null ? largeCsvContent : csvOutput.value;
       if (!outputVal) return;
       navigator.clipboard.writeText(outputVal).then(() => {
         const origText = copyBtn.innerText;
@@ -642,8 +582,7 @@ Example:
   // Download Click
   if (downloadBtn) {
     downloadBtn.addEventListener("click", () => {
-      const outputVal =
-        largeCsvContent !== null ? largeCsvContent : csvOutput.value;
+      const outputVal = largeCsvContent !== null ? largeCsvContent : csvOutput.value;
       if (!outputVal) return;
       const blob = new Blob([outputVal], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);

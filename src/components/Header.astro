@@ -28,13 +28,9 @@ const navLinks = [
       {
         navLinks.map((link) => {
           const isActive =
-            activePath === link.href ||
-            (link.href !== "/" && activePath.startsWith(link.href));
+            activePath === link.href || (link.href !== "/" && activePath.startsWith(link.href));
           return (
-            <a
-              href={link.href}
-              class:list={["nav-link", { "nav-link-active": isActive }]}
-            >
+            <a href={link.href} class:list={["nav-link", { "nav-link-active": isActive }]}>
               {link.label}
             </a>
           );
@@ -61,11 +57,7 @@ const navLinks = [
       </a>
 
       <!-- Mobile menu trigger -->
-      <button
-        class="mobile-menu-trigger"
-        aria-label="Toggle menu"
-        id="mobile-menu-trigger"
-      >
+      <button class="mobile-menu-trigger" aria-label="Toggle menu" id="mobile-menu-trigger">
         <svg
           width="20"
           height="20"
@@ -74,10 +66,7 @@ const navLinks = [
           stroke="currentColor"
           stroke-width="1.5"
         >
-          <path
-            d="M4 6h16M4 12h16M4 18h16"
-            stroke-linecap="round"
-            stroke-linejoin="round"></path>
+          <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"></path>
         </svg>
       </button>
     </div>
@@ -90,11 +79,7 @@ const navLinks = [
         <img src="/favicon.svg" alt="Free JSON Toolkit Logo" class="logo-icon" />
         <span class="logo-text">JSON Toolkit</span>
       </a>
-      <button
-        class="mobile-menu-close"
-        aria-label="Close menu"
-        id="mobile-menu-close"
-      >
+      <button class="mobile-menu-close" aria-label="Close menu" id="mobile-menu-close">
         <svg
           width="24"
           height="24"
@@ -103,10 +88,7 @@ const navLinks = [
           stroke="currentColor"
           stroke-width="1.5"
         >
-          <path
-            d="M18 6L6 18M6 6l12 12"
-            stroke-linecap="round"
-            stroke-linejoin="round"></path>
+          <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path>
         </svg>
       </button>
     </div>
@@ -115,8 +97,7 @@ const navLinks = [
         {
           navLinks.map((link) => {
             const isActive =
-              activePath === link.href ||
-              (link.href !== "/" && activePath.startsWith(link.href));
+              activePath === link.href || (link.href !== "/" && activePath.startsWith(link.href));
             return (
               <a
                 href={link.href}
@@ -141,15 +122,9 @@ const navLinks = [
 </header>
 
 <script>
-  const trigger = document.getElementById(
-    "mobile-menu-trigger",
-  ) as HTMLButtonElement | null;
-  const close = document.getElementById(
-    "mobile-menu-close",
-  ) as HTMLButtonElement | null;
-  const drawer = document.getElementById(
-    "mobile-drawer",
-  ) as HTMLDivElement | null;
+  const trigger = document.getElementById("mobile-menu-trigger") as HTMLButtonElement | null;
+  const close = document.getElementById("mobile-menu-close") as HTMLButtonElement | null;
+  const drawer = document.getElementById("mobile-drawer") as HTMLDivElement | null;
 
   if (trigger && drawer && close) {
     // Narrow types for TypeScript
@@ -161,9 +136,7 @@ const navLinks = [
 
     function getFocusableElements(): HTMLElement[] {
       return Array.from(
-        d.querySelectorAll(
-          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        ),
+        d.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'),
       ).filter((el): el is HTMLElement => el instanceof HTMLElement);
     }
 
@@ -410,7 +383,9 @@ const navLinks = [
     text-decoration: none;
     padding: var(--spacing-xs) 0;
     border-bottom: 1px solid var(--color-canvas-soft-2);
-    transition: color 0.15s ease, padding-left 0.15s ease;
+    transition:
+      color 0.15s ease,
+      padding-left 0.15s ease;
   }
 
   .mobile-nav-link-active {

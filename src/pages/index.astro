@@ -15,36 +15,23 @@ import Card from "../components/Card.astro";
     <section class="hero-section" aria-labelledby="hero-title">
       <Container size="default" class="hero-container">
         <div class="hero-content">
-          <h1 id="hero-title" class="display-xl hero-title">
-            Free JSON Toolkit
-          </h1>
+          <h1 id="hero-title" class="display-xl hero-title">Free JSON Toolkit</h1>
 
           <p class="body-lg hero-subtitle">
             Fast, free JSON utilities that run entirely in your browser.
           </p>
 
           <p class="body-lg hero-description">
-            Convert, format, validate, and transform JSON without uploading your
-            data. Everything is processed locally for speed, privacy, and
-            reliability.
+            Convert, format, validate, and transform JSON without uploading your data. Everything is
+            processed locally for speed, privacy, and reliability.
           </p>
 
           <div class="hero-actions" role="group" aria-label="Primary actions">
-            <Button
-              variant="primary"
-              size="lg"
-              shape="square"
-              href="/tools/json-to-csv"
-            >
+            <Button variant="primary" size="lg" shape="square" href="/tools/json-to-csv">
               JSON &rarr; CSV Converter
             </Button>
 
-            <Button
-              variant="secondary"
-              size="lg"
-              shape="square"
-              href="#featured-tools"
-            >
+            <Button variant="secondary" size="lg" shape="square" href="#featured-tools">
               Browse Tools
             </Button>
           </div>
@@ -66,27 +53,21 @@ import Card from "../components/Card.astro";
           <Card variant="default" class="trust-card" hoverable={false}>
             <div class="trust-card-content" role="listitem">
               <h3 class="display-sm tool-title">100% Local Processing</h3>
-              <p class="body-sm tool-description">
-                Your data never leaves your browser.
-              </p>
+              <p class="body-sm tool-description">Your data never leaves your browser.</p>
             </div>
           </Card>
 
           <Card variant="default" class="trust-card" hoverable={false}>
             <div class="trust-card-content" role="listitem">
               <h3 class="display-sm tool-title">Fast</h3>
-              <p class="body-sm tool-description">
-                No uploads. Instant browser-based processing.
-              </p>
+              <p class="body-sm tool-description">No uploads. Instant browser-based processing.</p>
             </div>
           </Card>
 
           <Card variant="default" class="trust-card" hoverable={false}>
             <div class="trust-card-content" role="listitem">
               <h3 class="display-sm tool-title">Free Forever</h3>
-              <p class="body-sm tool-description">
-                No accounts, subscriptions, or hidden limits.
-              </p>
+              <p class="body-sm tool-description">No accounts, subscriptions, or hidden limits.</p>
             </div>
           </Card>
         </div>
@@ -94,11 +75,7 @@ import Card from "../components/Card.astro";
     </section>
 
     {/* Featured Tools */}
-    <section
-      id="featured-tools"
-      class="catalog-section"
-      aria-labelledby="featured-tools-title"
-    >
+    <section id="featured-tools" class="catalog-section" aria-labelledby="featured-tools-title">
       <Container size="default">
         <div class="section-header">
           <span class="caption-mono section-eyebrow">FEATURED TOOLS</span>
@@ -108,11 +85,7 @@ import Card from "../components/Card.astro";
         </div>
 
         <div class="catalog-grid" aria-label="Available and upcoming tools">
-          <Card
-            variant="default"
-            hoverable={true}
-            class="tool-card tool-card-available"
-          >
+          <Card variant="default" hoverable={true} class="tool-card tool-card-available">
             <div class="tool-card-content">
               <h3 class="display-sm tool-title">JSON → CSV Converter</h3>
               <div class="tool-status" aria-label="Status: Available">
@@ -136,27 +109,17 @@ import Card from "../components/Card.astro";
             </div>
           </Card>
 
-          <Card
-            variant="soft"
-            class="tool-card tool-card-disabled"
-            aria-disabled="true"
-          >
+          <Card variant="soft" class="tool-card tool-card-disabled" aria-disabled="true">
             <div class="tool-card-content">
               <h3 class="display-sm tool-title">CSV → JSON</h3>
               <div class="tool-status" aria-label="Status: Coming Soon">
                 <span class="status-label status-coming">Coming Soon</span>
               </div>
-              <p class="body-sm tool-description">
-                Convert CSV files into structured JSON.
-              </p>
+              <p class="body-sm tool-description">Convert CSV files into structured JSON.</p>
             </div>
           </Card>
 
-          <Card
-            variant="soft"
-            class="tool-card tool-card-disabled"
-            aria-disabled="true"
-          >
+          <Card variant="soft" class="tool-card tool-card-disabled" aria-disabled="true">
             <div class="tool-card-content">
               <h3 class="display-sm tool-title">JSON Formatter</h3>
               <div class="tool-status" aria-label="Status: Coming Soon">
@@ -168,11 +131,7 @@ import Card from "../components/Card.astro";
             </div>
           </Card>
 
-          <Card
-            variant="soft"
-            class="tool-card tool-card-disabled"
-            aria-disabled="true"
-          >
+          <Card variant="soft" class="tool-card tool-card-disabled" aria-disabled="true">
             <div class="tool-card-content">
               <h3 class="display-sm tool-title">JSON Validator</h3>
               <div class="tool-status" aria-label="Status: Coming Soon">
@@ -201,9 +160,7 @@ import Card from "../components/Card.astro";
         <div class="faq-list">
           <details class="faq-item">
             <summary class="faq-summary">Is my data uploaded?</summary>
-            <p class="body-md faq-answer">
-              No. Everything is processed locally in your browser.
-            </p>
+            <p class="body-md faq-answer">No. Everything is processed locally in your browser.</p>
           </details>
 
           <details class="faq-item">
@@ -214,16 +171,14 @@ import Card from "../components/Card.astro";
           <details class="faq-item">
             <summary class="faq-summary">Does it work offline?</summary>
             <p class="body-md faq-answer">
-              Most tools continue to work after the page has loaded because
-              processing happens locally.
+              Most tools continue to work after the page has loaded because processing happens
+              locally.
             </p>
           </details>
 
           <details class="faq-item">
             <summary class="faq-summary">Which browsers are supported?</summary>
-            <p class="body-md faq-answer">
-              Latest versions of Chrome, Edge, Firefox, and Safari.
-            </p>
+            <p class="body-md faq-answer">Latest versions of Chrome, Edge, Firefox, and Safari.</p>
           </details>
         </div>
       </Container>
@@ -432,6 +387,4 @@ import Card from "../components/Card.astro";
       grid-template-columns: 1fr;
     }
   }
-
-
 </style>

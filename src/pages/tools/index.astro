@@ -14,13 +14,10 @@ import Button from "../../components/Button.astro";
     <section class="catalog-hero" aria-labelledby="tools-hero-title">
       <Container size="default">
         <div class="hero-content">
-          <h1 id="tools-hero-title" class="display-xl hero-title">
-            Developer Tools
-          </h1>
+          <h1 id="tools-hero-title" class="display-xl hero-title">Developer Tools</h1>
 
           <p class="body-lg hero-description">
-            All tools run locally, privacy-first, and free to use.
-            More tools are coming soon.
+            All tools run locally, privacy-first, and free to use. More tools are coming soon.
           </p>
         </div>
       </Container>
@@ -37,15 +34,9 @@ import Button from "../../components/Button.astro";
 
         <div class="tools-grid" role="list" aria-label="Tools list">
           {/* Available */}
-          <Card
-            variant="default"
-            hoverable={true}
-            class="tool-card tool-card-available"
-          >
+          <Card variant="default" hoverable={true} class="tool-card tool-card-available">
             <div class="tool-card-content" role="listitem">
-              <h3 class="display-sm tool-title">
-JSON → CSV Converter
-              </h3>
+              <h3 class="display-sm tool-title">JSON → CSV Converter</h3>
 
               <div class="tool-status" aria-label="Status: Available">
                 <span class="status-label status-available">Available</span>
@@ -58,12 +49,7 @@ JSON → CSV Converter
             </div>
 
             <div class="tool-footer">
-              <Button
-                variant="primary"
-                size="sm"
-                shape="square"
-                href="/tools/json-to-csv"
-              >
+              <Button variant="primary" size="sm" shape="square" href="/tools/json-to-csv">
                 Open Tool
               </Button>
             </div>
@@ -76,15 +62,11 @@ JSON → CSV Converter
               <div class="tool-status" aria-label="Status: Coming Soon">
                 <span class="status-label status-coming">Coming Soon</span>
               </div>
-              <p class="body-sm tool-description">
-                Beautify JSON and improve readability.
-              </p>
+              <p class="body-sm tool-description">Beautify JSON and improve readability.</p>
             </div>
 
             <div class="tool-footer">
-              <Button variant="secondary" size="sm" shape="square" disabled>
-                Coming Soon
-              </Button>
+              <Button variant="secondary" size="sm" shape="square" disabled> Coming Soon </Button>
             </div>
           </Card>
 
@@ -94,33 +76,25 @@ JSON → CSV Converter
               <div class="tool-status" aria-label="Status: Coming Soon">
                 <span class="status-label status-coming">Coming Soon</span>
               </div>
-              <p class="body-sm tool-description">
-                Check JSON syntax and surface errors.
-              </p>
+              <p class="body-sm tool-description">Check JSON syntax and surface errors.</p>
             </div>
 
             <div class="tool-footer">
-              <Button variant="secondary" size="sm" shape="square" disabled>
-                Coming Soon
-              </Button>
+              <Button variant="secondary" size="sm" shape="square" disabled> Coming Soon </Button>
             </div>
           </Card>
 
           <Card variant="soft" class="tool-card tool-card-disabled" aria-disabled="true">
             <div class="tool-card-content" role="listitem">
-              <h3 class="display-sm tool-title">CSV  JSON</h3>
+              <h3 class="display-sm tool-title">CSV → JSON</h3>
               <div class="tool-status" aria-label="Status: Coming Soon">
                 <span class="status-label status-coming">Coming Soon</span>
               </div>
-              <p class="body-sm tool-description">
-                Convert CSV files into structured JSON.
-              </p>
+              <p class="body-sm tool-description">Convert CSV files into structured JSON.</p>
             </div>
 
             <div class="tool-footer">
-              <Button variant="secondary" size="sm" shape="square" disabled>
-                Coming Soon
-              </Button>
+              <Button variant="secondary" size="sm" shape="square" disabled> Coming Soon </Button>
             </div>
           </Card>
 
@@ -130,15 +104,11 @@ JSON → CSV Converter
               <div class="tool-status" aria-label="Status: Coming Soon">
                 <span class="status-label status-coming">Coming Soon</span>
               </div>
-              <p class="body-sm tool-description">
-                Reduce JSON size while preserving correctness.
-              </p>
+              <p class="body-sm tool-description">Reduce JSON size while preserving correctness.</p>
             </div>
 
             <div class="tool-footer">
-              <Button variant="secondary" size="sm" shape="square" disabled>
-                Coming Soon
-              </Button>
+              <Button variant="secondary" size="sm" shape="square" disabled> Coming Soon </Button>
             </div>
           </Card>
 
@@ -148,15 +118,11 @@ JSON → CSV Converter
               <div class="tool-status" aria-label="Status: Coming Soon">
                 <span class="status-label status-coming">Coming Soon</span>
               </div>
-              <p class="body-sm tool-description">
-                Format JSON with consistent indentation.
-              </p>
+              <p class="body-sm tool-description">Format JSON with consistent indentation.</p>
             </div>
 
             <div class="tool-footer">
-              <Button variant="secondary" size="sm" shape="square" disabled>
-                Coming Soon
-              </Button>
+              <Button variant="secondary" size="sm" shape="square" disabled> Coming Soon </Button>
             </div>
           </Card>
         </div>
@@ -301,4 +267,3 @@ JSON → CSV Converter
     }
   </style>
 </BaseLayout>
-

@@ -11,9 +11,9 @@
 // ──────────────────────────────────────────────
 
 export interface ConversionOptions {
-    delimiter?: ',' | ';' | '\t';
-    flatten?: boolean;
-    includeHeaders?: boolean;
+  delimiter?: "," | ";" | "\t";
+  flatten?: boolean;
+  includeHeaders?: boolean;
 }
 
 // ──────────────────────────────────────────────
@@ -21,9 +21,9 @@ export interface ConversionOptions {
 // ──────────────────────────────────────────────
 
 export interface ParseOptions {
-    delimiter?: string;
-    hasHeader?: boolean;
-    trimWhitespace?: boolean;
+  delimiter?: string;
+  hasHeader?: boolean;
+  trimWhitespace?: boolean;
 }
 
 // ──────────────────────────────────────────────
@@ -31,9 +31,9 @@ export interface ParseOptions {
 // ──────────────────────────────────────────────
 
 export interface ParseResult<T = Record<string, unknown>> {
-    success: boolean;
-    data?: T[];
-    errors: CsvError[];
+  success: boolean;
+  data?: T[];
+  errors: CsvError[];
 }
 
 // ──────────────────────────────────────────────
@@ -41,10 +41,10 @@ export interface ParseResult<T = Record<string, unknown>> {
 // ──────────────────────────────────────────────
 
 export interface CsvError {
-    code: string;
-    message: string;
-    line?: number;
-    column?: number;
+  code: string;
+  message: string;
+  line?: number;
+  column?: number;
 }
 
 // ──────────────────────────────────────────────
@@ -52,4 +52,3 @@ export interface CsvError {
 // ──────────────────────────────────────────────
 
 export type FlattenedRecord = Record<string, unknown>;
-
