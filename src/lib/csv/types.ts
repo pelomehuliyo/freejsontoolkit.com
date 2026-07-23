@@ -21,19 +21,21 @@ export interface ConversionOptions {
 // ──────────────────────────────────────────────
 
 export interface ParseOptions {
-  delimiter?: string;
+  delimiter?: "," | ";" | "\t" | "|" | ":";
   hasHeader?: boolean;
   trimWhitespace?: boolean;
+  skipEmptyLines?: boolean;
 }
 
 // ──────────────────────────────────────────────
 // Parse Result
 // ──────────────────────────────────────────────
 
-export interface ParseResult<T = Record<string, unknown>> {
+export interface ParseResult<T> {
   success: boolean;
   data?: T[];
-  errors: CsvError[];
+  error?: CsvError;
+  warnings?: CsvError[];
 }
 
 // ──────────────────────────────────────────────
@@ -45,6 +47,14 @@ export interface CsvError {
   message: string;
   line?: number;
   column?: number;
+}
+
+// ──────────────────────────────────────────────
+// CsvRecord
+// ──────────────────────────────────────────────
+
+export interface CsvRecord {
+  [key: string]: string;
 }
 
 // ──────────────────────────────────────────────

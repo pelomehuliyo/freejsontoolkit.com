@@ -1,17 +1,22 @@
-# Development Foundation Setup - Progress
+# CSV Parser Implementation — TODO
 
-## Steps
-
-- [x] Step 1: Install ESLint, Prettier, and Vitest packages
-- [x] Step 2: Create `.editorconfig`
-- [x] Step 3: Create `eslint.config.js`
-- [x] Step 4: Create `.prettierrc`
-- [x] Step 5: Create `vitest.config.ts`
-- [x] Step 6: Create `src/lib/csv/__tests__/converter.test.ts`
-- [x] Step 7: Update `package.json` scripts
-- [x] Step 8: Update `.gitignore`
-- [X] Step 9: Verify `npm run build` ✅
-- [X] Step 10: Verify `npm run lint` ✅ (0 errors, 10 warnings — pre-existing)
-- [X] Step 11: Verify `npm run format:check` ✅
-- [X] Step 12: Verify `npm test` ✅ (28/28 tests pass)
+## Completed
+- [x] Read existing types, converter, validation, existing parser stub
+- [x] Plan approved with adjustments
+- [x] Rewrite `src/lib/csv/csvParser.ts` with helpers:
+  - `normalizeEOL()` — normalize `\r\n` / `\r` to `\n`
+  - `parseRawRows()` — RFC 4180 character-by-character state machine
+    - Supports delimiters: `,` `;` `|` `:` `\t`
+    - Quoted fields with `""` escape
+    - Multiline quoted fields
+    - Blank-line skipping (`skipEmptyLines`)
+    - Line/col tracking for syntax errors
+  - `buildRecords()` — transform parsed rows into `CsvRecord[]`
+    - `hasHeader: true` → first row as header keys (always trimmed)
+    - `hasHeader: false` → `column1, column2, ...` keys
+    - `trimWhitespace` only on unquoted fields
+  - `parseCsv()` — main orchestrator, returns `ParseResult<CsvRecord>`
+  - `csvToJson()` — convenience wrapper (preserved)
+  - JSDoc comments on all exported functions and helpers
+- [x] Run existing tests — **28/28 passed** 🟢
 
