@@ -9,20 +9,7 @@
  */
 
 import type { CsvRecord, ValidationIssue } from "./types";
-
-// ──────────────────────────────────────────────
-// Helper
-// ──────────────────────────────────────────────
-
-/**
- * Serialises a CsvRecord to a stable string for duplicate comparison.
- * Keys are sorted alphabetically to ensure consistent hashing.
- */
-function serializeRecord(record: CsvRecord): string {
-    const keys = Object.keys(record).sort();
-    const parts = keys.map((k) => `${k}:${record[k]}`);
-    return parts.join("|");
-}
+import { serializeRecord } from "./helpers";
 
 // ──────────────────────────────────────────────
 // Rule: Duplicate Headers
@@ -301,4 +288,3 @@ export function checkEmptyFile(records: CsvRecord[]): ValidationIssue[] {
     }
     return [];
 }
-

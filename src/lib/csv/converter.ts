@@ -13,6 +13,7 @@
 import type { ConversionOptions } from "./types";
 import { validateJsonInput } from "./validation";
 import { formatJsonAsCsv } from "./jsonToCsvFormatter";
+import { flattenJson as flattenObj } from "./helpers";
 
 // ──────────────────────────────────────────────
 // Public API
@@ -83,43 +84,4 @@ export function previewJsonRecords(
   }
 
   return items as Record<string, unknown>[];
-}
-
-/**
- * Internal flatten helper — recursive, mutates `res` in place.
- */
-function flattenObj(obj: unknown, prefix: string, res: Record<string, unknown>): void {
-  if (obj === null || obj === undefined) {
-    if (prefix) res[prefix] = "";
-    return;
-  }
-
-  if (Array.isArray(obj)) {
-    if (obj.length === 0) {
-      if (prefix) res[prefix] = "";
-    } else {
-      for (let i = 0; i < obj.length; i++) {
-        const propName = prefix ? `${prefix}.${i}` : `${i}`;
-        flattenObj(obj[i], propName, res);
-      }
-    }
-    return;
-  }
-
-  if (typeof obj === "object" && obj !== null) {
-    const keys = Object.keys(obj as Record<string, unknown>);
-    if (keys.length === 0) {
-      if (prefix) res[prefix] = "";
-    } else {
-      for (const key of keys) {
-        const val = (obj as Record<string, unknown>)[key];
-        const propName = prefix ? `${prefix}.${key}` : key;
-        flattenObj(val, propName, res);
-      }
-    }
-    return;
-  }
-
-  // Primitive
-  if (prefix) res[prefix] = obj;
 }

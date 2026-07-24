@@ -7,6 +7,7 @@
  */
 
 import type { ConversionOptions, FlattenedRecord } from "./types";
+import { flattenJson } from "./helpers";
 
 // ──────────────────────────────────────────────
 // Public API
@@ -76,56 +77,6 @@ export function formatJsonAsCsv(
 // ──────────────────────────────────────────────
 // Internal Helpers
 // ──────────────────────────────────────────────
-
-/**
- * Flattens a nested object into dot-notation keys.
- *
- * Example:
- *   { user: { name: "John", tags: [1, 2] } }
- *   → { "user.name": "John", "user.tags.0": 1, "user.tags.1": 2 }
- */
-function flattenJson(obj: unknown, prefix = "", res: FlattenedRecord = {}): FlattenedRecord {
-  if (obj === null || obj === undefined) {
-    if (prefix) res[prefix] = "";
-    return res;
-  }
-
-  if (Array.isArray(obj)) {
-    if (obj.length === 0) {
-      if (prefix) res[prefix] = "";
-    } else {
-      for (let i = 0; i < obj.length; i++) {
-        const propName = prefix ? `${prefix}.${i}` : `${i}`;
-        flattenJson(obj[i], propName, res);
-      }
-    }
-    return res;
-  }
-
-  if (typeof obj === "object" && obj !== null) {
-    const keys = Object.keys(obj as Record<string, unknown>);
-    if (keys.length === 0) {
-      if (prefix) res[prefix] = "";
-    } else {
-      for (const key of keys) {
-        const val = (obj as Record<string, unknown>)[key];
-        const propName = prefix ? `${prefix}.${key}` : key;
-        if (val !== null && typeof val === "object") {
-          flattenJson(val, propName, res);
-        } else {
-          res[propName] = val;
-        }
-      }
-    }
-    return res;
-  }
-
-  // Primitive value at root
-  if (prefix) {
-    res[prefix] = obj;
-  }
-  return res;
-}
 
 /**
  * Collects all unique keys (headers) from an array of flat records,

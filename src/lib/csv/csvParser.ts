@@ -90,13 +90,13 @@ export function parseCsv(csvStr: string, options: ParseOptions = {}): ParseResul
     };
   }
 
-  // 1. Strip optional UTF-8 BOM
-  csvStr = csvStr.replace(/^\uFEFF/, "");
+  // 1. Strip optional UTF-8 BOM — assign to local const to avoid parameter reassignment
+  const cleaned = csvStr.replace(/^\uFEFF/, "");
 
   // 2. Normalise line endings
-  const normalized = normalizeEOL(csvStr);
+  const normalized = normalizeEOL(cleaned);
 
-  // 2. Character-level parse
+  // 3. Character-level parse
   const { rows, errors: parseErrors } = parseRawRows(normalized, delimiter, skipEmptyLines);
   errors.push(...parseErrors);
 
@@ -117,7 +117,7 @@ export function parseCsv(csvStr: string, options: ParseOptions = {}): ParseResul
     };
   }
 
-  // 3. Build records
+  // 4. Build records
   const { records, headers, warnings: buildWarnings } = buildRecords(rows, hasHeader, trimWhitespace);
   warnings.push(...buildWarnings);
 
@@ -419,4 +419,3 @@ function buildRecords(
 
   return { records, headers, warnings };
 }
-

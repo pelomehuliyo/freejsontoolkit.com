@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { convertJsonToCsv, previewJsonRecords } from "../converter";
-import { validateJsonInput, detectDelimiter } from "../validation";
+import { validateJsonInput } from "../validation";
+import { detectDelimiter } from "../delimiterDetection";
 import { formatJsonAsCsv } from "../jsonToCsvFormatter";
 
 // ──────────────────────────────────────────────
@@ -153,25 +154,31 @@ describe("validateJsonInput", () => {
 });
 
 // ──────────────────────────────────────────────
-// validation.ts — detectDelimiter
+// delimiterDetection.ts — detectDelimiter (real implementation)
 // ──────────────────────────────────────────────
 
 describe("detectDelimiter", () => {
   it("detects comma", () => {
-    expect(detectDelimiter("a,b,c")).toBe(",");
+    const result = detectDelimiter("a,b,c");
+    expect(result.delimiter).toBe(",");
   });
 
   it("detects semicolon", () => {
-    expect(detectDelimiter("a;b;c")).toBe(";");
+    const result = detectDelimiter("a;b;c");
+    expect(result.delimiter).toBe(";");
   });
 
   it("detects tab", () => {
-    expect(detectDelimiter("a\tb\tc")).toBe("\t");
+    const result = detectDelimiter("a\tb\tc");
+    expect(result.delimiter).toBe("\t");
   });
 
-  it("returns comma for empty or ambiguous", () => {
-    expect(detectDelimiter("")).toBe(",");
-    expect(detectDelimiter("abc")).toBe(",");
+  it("returns comma for empty input", () => {
+    expect(detectDelimiter("").delimiter).toBe(",");
+  });
+
+  it("returns comma for ambiguous input with no delimiters", () => {
+    expect(detectDelimiter("abc").delimiter).toBe(",");
   });
 });
 

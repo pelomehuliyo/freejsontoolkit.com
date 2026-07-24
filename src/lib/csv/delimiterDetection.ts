@@ -193,6 +193,11 @@ export function detectDelimiter(
 /**
  * Collects non-empty lines from the CSV input, up to `maxLines`.
  * Strips BOM, normalises line endings, and skips blank/whitespace-only lines.
+ *
+ * Uses character scanning (indexOf) instead of split("\n") to avoid
+ * allocating an array of ALL lines when only a sample is needed.
+ * This is critical for large CSV files where split("\n") would create
+ * hundreds of thousands of strings just to extract 10 lines.
  */
 function collectSampleLines(csv: string, maxLines: number): string[] {
     // Strip BOM
@@ -202,16 +207,24 @@ function collectSampleLines(csv: string, maxLines: number): string[] {
     clean = clean.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
     const lines: string[] = [];
-    const rawLines = clean.split("\n");
+    let pos = 0;
+    let nextPos: number;
 
-    for (const raw of rawLines) {
-        if (raw.trim() === "") {
-            continue; // skip empty/whitespace-only lines
-        }
-        lines.push(raw);
-        if (lines.length >= maxLines) {
+    while (lines.length < maxLines && pos < clean.length) {
+        nextPos = clean.indexOf("\n", pos);
+        if (nextPos === -1) {
+            // Last line (no trailing newline)
+            const line = clean.slice(pos);
+            if (line.trim() !== "") {
+                lines.push(line);
+            }
             break;
         }
+        const line = clean.slice(pos, nextPos);
+        if (line.trim() !== "") {
+            lines.push(line);
+        }
+        pos = nextPos + 1;
     }
 
     return lines;
@@ -440,4 +453,3 @@ function emptyResult(): DelimiterDetectionResult {
         ambiguous: false,
     };
 }
-

@@ -80,33 +80,3 @@ export function validateJsonInput(input: string): ValidationResult {
 
   return { valid: true, errors, warnings };
 }
-
-/**
- * Detects the likely delimiter of a CSV string by scanning the first line.
- */
-export function detectDelimiter(csvLine: string): string {
-  const counts = {
-    ",": 0,
-    ";": 0,
-    "\t": 0,
-    "|": 0,
-  };
-
-  for (const char of csvLine) {
-    if (char in counts) {
-      counts[char as keyof typeof counts]++;
-    }
-  }
-
-  let best = ",";
-  let max = 0;
-
-  for (const [delim, count] of Object.entries(counts)) {
-    if (count > max) {
-      max = count;
-      best = delim;
-    }
-  }
-
-  return best;
-}
