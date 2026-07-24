@@ -14,7 +14,8 @@
  * and contains no DOM or browser APIs.
  */
 
-import type { CsvError, CsvRecord, ParseOptions, ParseResult } from "./types";
+import type { CsvDelimiter, CsvError, CsvRecord, DelimiterDetectionResult, ParseOptions, ParseResult, ParsedCsv } from "./types";
+import { detectDelimiter } from "./delimiterDetection";
 
 // ──────────────────────────────────────────────
 // Internal Types
@@ -45,26 +46,37 @@ interface RawParseResult {
 // ──────────────────────────────────────────────
 
 /**
- * Parses a raw CSV string into an array of records.
+ * Parses a raw CSV string into a `ParseResult` containing a `ParsedCsv`
+ * on success or an error on failure.
  *
  * @param csvStr  The raw CSV text to parse
  * @param options Parsing options (delimiter, header flag, trimming, blank-line skipping)
- * @returns       A `ParseResult<CsvRecord>` containing the parsed data or an error
+ * @returns       A `ParseResult<CsvRecord>` containing `csv` (ParsedCsv) or an `error`
  *
  * @example
  * ```ts
  * const result = parseCsv("a,b,c\n1,2,3");
- * // { success: true, data: [{ a: "1", b: "2", c: "3" }] }
+ * // { success: true, csv: { records: [{ a: "1", b: "2", c: "3" }], headers: ["a","b","c"], delimiter: ",", warnings: [] } }
  * ```
  */
 export function parseCsv(csvStr: string, options: ParseOptions = {}): ParseResult<CsvRecord> {
   const errors: CsvError[] = [];
   const warnings: CsvError[] = [];
 
-  const delimiter = options.delimiter ?? ",";
   const hasHeader = options.hasHeader ?? true;
   const trimWhitespace = options.trimWhitespace ?? true;
   const skipEmptyLines = options.skipEmptyLines ?? false;
+
+  // Resolve delimiter: auto-detect if requested
+  let delimiter;
+  let detection;
+
+  if (options.delimiter === "auto") {
+    detection = detectDelimiter(csvStr);
+    delimiter = detection.delimiter;
+  } else {
+    delimiter = options.delimiter ?? ",";
+  }
 
   // Validate delimiter
   const validDelimiters = [",", ";", "|", ":", "\t"];
@@ -88,11 +100,10 @@ export function parseCsv(csvStr: string, options: ParseOptions = {}): ParseResul
   const { rows, errors: parseErrors } = parseRawRows(normalized, delimiter, skipEmptyLines);
   errors.push(...parseErrors);
 
-  if (parseErrors.length > 0) {
+  if (errors.length > 0) {
     return {
       success: false,
-      error: parseErrors[0],
-      warnings: warnings.length > 0 ? warnings : undefined,
+      error: errors[0],
     };
   }
 
@@ -107,13 +118,18 @@ export function parseCsv(csvStr: string, options: ParseOptions = {}): ParseResul
   }
 
   // 3. Build records
-  const { records: data, warnings: buildWarnings } = buildRecords(rows, hasHeader, trimWhitespace);
+  const { records, headers, warnings: buildWarnings } = buildRecords(rows, hasHeader, trimWhitespace);
   warnings.push(...buildWarnings);
 
   return {
     success: true,
-    data,
-    warnings: warnings.length > 0 ? warnings : undefined,
+    csv: {
+      records,
+      headers,
+      delimiter,
+      warnings,
+      detection,
+    },
   };
 }
 
@@ -127,11 +143,11 @@ export function parseCsv(csvStr: string, options: ParseOptions = {}): ParseResul
  */
 export function csvToJson(csvStr: string, options: ParseOptions = {}): string {
   const result = parseCsv(csvStr, options);
-  if (!result.success || !result.data) {
+  if (!result.success || !result.csv) {
     const err = result.error ?? { code: "UNKNOWN", message: "Failed to parse CSV" };
     throw new Error(`[${err.code}] ${err.message}`);
   }
-  return JSON.stringify(result.data, null, 2);
+  return JSON.stringify(result.csv.records, null, 2);
 }
 
 // ──────────────────────────────────────────────
@@ -322,15 +338,15 @@ function parseRawRows(
  * @param rows            Parsed fields with position metadata
  * @param hasHeader       Whether the first row is a header row
  * @param trimWhitespace   Whether to trim whitespace from unquoted fields
- * @returns               An object with `records` (array of record objects) and `warnings`
+ * @returns               An object with `records`, `headers`, and `warnings`
  */
 function buildRecords(
   rows: ParsedField[][],
   hasHeader: boolean,
   trimWhitespace: boolean,
-): { records: CsvRecord[]; warnings: CsvError[] } {
+): { records: CsvRecord[]; headers: string[]; warnings: CsvError[] } {
   if (rows.length === 0) {
-    return { records: [], warnings: [] };
+    return { records: [], headers: [], warnings: [] };
   }
 
   // Determine column count (use the longest row)
@@ -394,6 +410,6 @@ function buildRecords(
     records.push(record);
   }
 
-  return { records, warnings };
+  return { records, headers, warnings };
 }
 

@@ -1,22 +1,28 @@
-# CSV Parser Implementation — TODO
+# Sprint 3.3 — Type Inference Implementation Steps
 
-## Completed
-- [x] Read existing types, converter, validation, existing parser stub
-- [x] Plan approved with adjustments
-- [x] Rewrite `src/lib/csv/csvParser.ts` with helpers:
-  - `normalizeEOL()` — normalize `\r\n` / `\r` to `\n`
-  - `parseRawRows()` — RFC 4180 character-by-character state machine
-    - Supports delimiters: `,` `;` `|` `:` `\t`
-    - Quoted fields with `""` escape
-    - Multiline quoted fields
-    - Blank-line skipping (`skipEmptyLines`)
-    - Line/col tracking for syntax errors
-  - `buildRecords()` — transform parsed rows into `CsvRecord[]`
-    - `hasHeader: true` → first row as header keys (always trimmed)
-    - `hasHeader: false` → `column1, column2, ...` keys
-    - `trimWhitespace` only on unquoted fields
-  - `parseCsv()` — main orchestrator, returns `ParseResult<CsvRecord>`
-  - `csvToJson()` — convenience wrapper (preserved)
-  - JSDoc comments on all exported functions and helpers
-- [x] Run existing tests — **28/28 passed** 🟢
+## Step 1: Add new types to `types.ts`
+- [ ] Add `InferredCellType` union type
+- [ ] Add `ColumnTypeProfile` interface
+- [ ] Add `TypeAnalysis` interface
+- [ ] Add `TypeInferenceOptions` interface (compact `detect` array pattern)
+
+## Step 2: Implement `typeInference.ts`
+- [ ] Classify value regex patterns (INTEGER_RE, FLOAT_RE, BOOLEAN_RE, NULL_RE)
+- [ ] `classifyValue(value, options)` internal helper
+- [ ] `buildColumnProfile(column, values, options)` internal helper
+- [ ] `analyzeTypes(parsedCsv, options?)` public API
+- [ ] `applyTypes(parsedCsv, analysis)` public API
+
+## Step 3: Write comprehensive test suite
+- [ ] Cell-level classification tests
+- [ ] Column-level analysis tests
+- [ ] Integration tests (parse → analyze → apply)
+- [ ] Edge case tests (leading zeros, scientific notation, etc.)
+- [ ] Option toggle tests (`detect: ["integer"]`, `detect: []`, etc.)
+- [ ] Large input performance sanity test
+
+## Step 4: Verify no regressions
+- [ ] Run existing CSV parser tests
+- [ ] Run existing validator tests
+- [ ] Run new type inference tests
 

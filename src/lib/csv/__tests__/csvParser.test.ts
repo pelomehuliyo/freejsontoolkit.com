@@ -37,8 +37,8 @@ describe("happy path — basic CSV", () => {
         // Expected: success=true, data=[{ a: "1", b: "2", c: "3" }]
         const result = parseCsv("a,b,c\n1,2,3");
         expect(result.success).toBe(true);
-        expect(result.data).toHaveLength(1);
-        expect(result.data![0]).toEqual({ a: "1", b: "2", c: "3" });
+        expect(result.csv!.records).toHaveLength(1);
+        expect(result.csv!.records![0]).toEqual({ a: "1", b: "2", c: "3" });
     });
 
     it("should parse multiple rows", () => {
@@ -47,10 +47,10 @@ describe("happy path — basic CSV", () => {
         // Expected: success=true, data has 3 records
         const result = parseCsv("name,age\nAlice,30\nBob,25\nCharlie,35");
         expect(result.success).toBe(true);
-        expect(result.data).toHaveLength(3);
-        expect(result.data![0]).toEqual({ name: "Alice", age: "30" });
-        expect(result.data![1]).toEqual({ name: "Bob", age: "25" });
-        expect(result.data![2]).toEqual({ name: "Charlie", age: "35" });
+        expect(result.csv!.records).toHaveLength(3);
+        expect(result.csv!.records![0]).toEqual({ name: "Alice", age: "30" });
+        expect(result.csv!.records![1]).toEqual({ name: "Bob", age: "25" });
+        expect(result.csv!.records![2]).toEqual({ name: "Charlie", age: "35" });
     });
 
     it("should parse header mode with defaults", () => {
@@ -61,9 +61,9 @@ describe("happy path — basic CSV", () => {
             hasHeader: true,
         });
         expect(result.success).toBe(true);
-        expect(result.data).toHaveLength(2);
-        expect(result.data![0]).toEqual({ city: "Tokyo", population: "13929286", country: "Japan" });
-        expect(result.data![1]).toEqual({ city: "Delhi", population: "30290936", country: "India" });
+        expect(result.csv!.records).toHaveLength(2);
+        expect(result.csv!.records![0]).toEqual({ city: "Tokyo", population: "13929286", country: "Japan" });
+        expect(result.csv!.records![1]).toEqual({ city: "Delhi", population: "30290936", country: "India" });
     });
 
     it("should parse headerless mode with synthetic column names", () => {
@@ -72,9 +72,9 @@ describe("happy path — basic CSV", () => {
         // Expected: synthetic keys column1, column2, ...
         const result = parseCsv("John,30\nJane,25", { hasHeader: false });
         expect(result.success).toBe(true);
-        expect(result.data).toHaveLength(2);
-        expect(result.data![0]).toEqual({ column1: "John", column2: "30" });
-        expect(result.data![1]).toEqual({ column1: "Jane", column2: "25" });
+        expect(result.csv!.records).toHaveLength(2);
+        expect(result.csv!.records![0]).toEqual({ column1: "John", column2: "30" });
+        expect(result.csv!.records![1]).toEqual({ column1: "Jane", column2: "25" });
     });
 });
 
@@ -89,7 +89,7 @@ describe("delimiters", () => {
         // Expected: default comma parsing
         const result = parseCsv("a,b,c\n1,2,3", { delimiter: "," });
         expect(result.success).toBe(true);
-        expect(result.data![0]).toEqual({ a: "1", b: "2", c: "3" });
+        expect(result.csv!.records![0]).toEqual({ a: "1", b: "2", c: "3" });
     });
 
     it("should parse with semicolon delimiter", () => {
@@ -98,7 +98,7 @@ describe("delimiters", () => {
         // Expected: semicolon-delimited fields
         const result = parseCsv("a;b;c\n1;2;3", { delimiter: ";" });
         expect(result.success).toBe(true);
-        expect(result.data![0]).toEqual({ a: "1", b: "2", c: "3" });
+        expect(result.csv!.records![0]).toEqual({ a: "1", b: "2", c: "3" });
     });
 
     it("should parse with pipe delimiter", () => {
@@ -107,7 +107,7 @@ describe("delimiters", () => {
         // Expected: pipe-delimited fields
         const result = parseCsv("a|b|c\n1|2|3", { delimiter: "|" });
         expect(result.success).toBe(true);
-        expect(result.data![0]).toEqual({ a: "1", b: "2", c: "3" });
+        expect(result.csv!.records![0]).toEqual({ a: "1", b: "2", c: "3" });
     });
 
     it("should parse with colon delimiter", () => {
@@ -116,7 +116,7 @@ describe("delimiters", () => {
         // Expected: colon-delimited fields
         const result = parseCsv("a:b:c\n1:2:3", { delimiter: ":" });
         expect(result.success).toBe(true);
-        expect(result.data![0]).toEqual({ a: "1", b: "2", c: "3" });
+        expect(result.csv!.records![0]).toEqual({ a: "1", b: "2", c: "3" });
     });
 
     it("should parse with tab delimiter", () => {
@@ -125,7 +125,7 @@ describe("delimiters", () => {
         // Expected: tab-delimited fields
         const result = parseCsv("a\tb\tc\n1\t2\t3", { delimiter: "\t" });
         expect(result.success).toBe(true);
-        expect(result.data![0]).toEqual({ a: "1", b: "2", c: "3" });
+        expect(result.csv!.records![0]).toEqual({ a: "1", b: "2", c: "3" });
     });
 });
 
@@ -140,8 +140,8 @@ describe("RFC 4180 compliance", () => {
         // Expected: quoted comma preserved as part of field value
         const result = parseCsv('a,"b,c",d\n1,2,3');
         expect(result.success).toBe(true);
-        expect(Object.keys(result.data![0])).toContain("b,c");
-        expect(result.data![0]["b,c"]).toBe("2");
+        expect(Object.keys(result.csv!.records![0])).toContain("b,c");
+        expect(result.csv!.records![0]["b,c"]).toBe("2");
     });
 
     it("should handle escaped double quotes inside quoted fields", () => {
@@ -150,8 +150,8 @@ describe("RFC 4180 compliance", () => {
         // Expected: "" inside quotes becomes a single "
         const result = parseCsv('a,"say ""hello""",c\n1,2,3');
         expect(result.success).toBe(true);
-        expect(Object.keys(result.data![0])).toContain('say "hello"');
-        expect(result.data![0]['say "hello"']).toBe("2");
+        expect(Object.keys(result.csv!.records![0])).toContain('say "hello"');
+        expect(result.csv!.records![0]['say "hello"']).toBe("2");
     });
 
     it("should handle multiline quoted fields", () => {
@@ -160,8 +160,8 @@ describe("RFC 4180 compliance", () => {
         // Expected: newline preserved inside quoted field
         const result = parseCsv('a,"multi\nline",c\n1,2,3');
         expect(result.success).toBe(true);
-        expect(Object.keys(result.data![0])).toContain("multi\nline");
-        expect(result.data![0]["multi\nline"]).toBe("2");
+        expect(Object.keys(result.csv!.records![0])).toContain("multi\nline");
+        expect(result.csv!.records![0]["multi\nline"]).toBe("2");
     });
 
     it("should handle empty quoted fields", () => {
@@ -170,7 +170,7 @@ describe("RFC 4180 compliance", () => {
         // Expected: empty quoted field produces empty string
         const result = parseCsv('a,"",c\n1,2,3');
         expect(result.success).toBe(true);
-        const keys = Object.keys(result.data![0]);
+        const keys = Object.keys(result.csv!.records![0]);
         expect(keys).toContain("a");
         expect(keys).toContain("c");
     });
@@ -181,8 +181,8 @@ describe("RFC 4180 compliance", () => {
         // Expected: quoted whitespace is preserved
         const result = parseCsv('"  value with spaces  ",b\nhello,world');
         expect(result.success).toBe(true);
-        expect(Object.keys(result.data![0])).toContain("b");
-        expect(result.data![0]["b"]).toBe("world");
+        expect(Object.keys(result.csv!.records![0])).toContain("b");
+        expect(result.csv!.records![0]["b"]).toBe("world");
     });
 
     it("should handle field with just escaped quotes", () => {
@@ -190,8 +190,8 @@ describe("RFC 4180 compliance", () => {
         // Options: { hasHeader: true }
         const result = parseCsv('a,"""""",c\n1,2,3');
         expect(result.success).toBe(true);
-        expect(Object.keys(result.data![0])).toContain("a");
-        expect(Object.keys(result.data![0])).toContain("c");
+        expect(Object.keys(result.csv!.records![0])).toContain("a");
+        expect(Object.keys(result.csv!.records![0])).toContain("c");
     });
 });
 
@@ -206,7 +206,7 @@ describe("whitespace handling", () => {
         // Expected: headers and unquoted data trimmed
         const result = parseCsv("  a  ,  b  ,  c  \n  1  ,  2  ,  3  ");
         expect(result.success).toBe(true);
-        expect(result.data![0]).toEqual({ a: "1", b: "2", c: "3" });
+        expect(result.csv!.records![0]).toEqual({ a: "1", b: "2", c: "3" });
     });
 
     it("should preserve unquoted whitespace in data values when trimWhitespace=false", () => {
@@ -215,9 +215,9 @@ describe("whitespace handling", () => {
         // Expected: headers always trimmed; data values preserve whitespace
         const result = parseCsv("col1,col2\n  a  ,  b  ", { trimWhitespace: false });
         expect(result.success).toBe(true);
-        expect(Object.keys(result.data![0])).toEqual(["col1", "col2"]);
-        expect(result.data![0]["col1"]).toBe("  a  ");
-        expect(result.data![0]["col2"]).toBe("  b  ");
+        expect(Object.keys(result.csv!.records![0])).toEqual(["col1", "col2"]);
+        expect(result.csv!.records![0]["col1"]).toBe("  a  ");
+        expect(result.csv!.records![0]["col2"]).toBe("  b  ");
     });
 
     it("should NOT trim quoted whitespace in data values when trimWhitespace=true", () => {
@@ -226,7 +226,7 @@ describe("whitespace handling", () => {
         // Expected: quoted data values preserve whitespace
         const result = parseCsv('a,b\n"  hello  ","  world  "', { trimWhitespace: true });
         expect(result.success).toBe(true);
-        expect(result.data![0]).toEqual({ a: "  hello  ", b: "  world  " });
+        expect(result.csv!.records![0]).toEqual({ a: "  hello  ", b: "  world  " });
     });
 
     it("should NOT trim quoted whitespace in data values when trimWhitespace=false", () => {
@@ -235,7 +235,7 @@ describe("whitespace handling", () => {
         // Expected: quoted field preserves whitespace; unquoted field also preserves
         const result = parseCsv('a,b\n"  spaced  ",  value  ', { trimWhitespace: false });
         expect(result.success).toBe(true);
-        expect(result.data![0]).toEqual({ a: "  spaced  ", b: "  value  " });
+        expect(result.csv!.records![0]).toEqual({ a: "  spaced  ", b: "  value  " });
     });
 
     it("should preserve unquoted whitespace in headerless mode when trimWhitespace=false", () => {
@@ -244,7 +244,7 @@ describe("whitespace handling", () => {
         // Expected: no header trimming in headerless mode; values preserve whitespace
         const result = parseCsv("  hello  ,  world  ", { hasHeader: false, trimWhitespace: false });
         expect(result.success).toBe(true);
-        expect(result.data![0]).toEqual({ column1: "  hello  ", column2: "  world  " });
+        expect(result.csv!.records![0]).toEqual({ column1: "  hello  ", column2: "  world  " });
     });
 });
 
@@ -259,10 +259,10 @@ describe("skipEmptyLines option", () => {
         // Expected: blank lines ignored
         const result = parseCsv("a,b\n1,2\n\n3,4\n\n5,6", { skipEmptyLines: true });
         expect(result.success).toBe(true);
-        expect(result.data).toHaveLength(3);
-        expect(result.data![0]).toEqual({ a: "1", b: "2" });
-        expect(result.data![1]).toEqual({ a: "3", b: "4" });
-        expect(result.data![2]).toEqual({ a: "5", b: "6" });
+        expect(result.csv!.records).toHaveLength(3);
+        expect(result.csv!.records![0]).toEqual({ a: "1", b: "2" });
+        expect(result.csv!.records![1]).toEqual({ a: "3", b: "4" });
+        expect(result.csv!.records![2]).toEqual({ a: "5", b: "6" });
     });
 
     it("should keep blank lines when skipEmptyLines=false (default)", () => {
@@ -271,9 +271,9 @@ describe("skipEmptyLines option", () => {
         // Expected: blank line produces a record with empty values
         const result = parseCsv("a,b\n1,2\n\n3,4", { skipEmptyLines: false });
         expect(result.success).toBe(true);
-        expect(result.data).toHaveLength(3);
-        expect(result.data![0]).toEqual({ a: "1", b: "2" });
-        expect(result.data![2]).toEqual({ a: "3", b: "4" });
+        expect(result.csv!.records).toHaveLength(3);
+        expect(result.csv!.records![0]).toEqual({ a: "1", b: "2" });
+        expect(result.csv!.records![2]).toEqual({ a: "3", b: "4" });
     });
 
     it("should skip leading blank lines when skipEmptyLines=true", () => {
@@ -282,8 +282,8 @@ describe("skipEmptyLines option", () => {
         // Expected: leading blank lines dropped
         const result = parseCsv("\n\n\na,b\n1,2", { skipEmptyLines: true });
         expect(result.success).toBe(true);
-        expect(result.data).toHaveLength(1);
-        expect(result.data![0]).toEqual({ a: "1", b: "2" });
+        expect(result.csv!.records).toHaveLength(1);
+        expect(result.csv!.records![0]).toEqual({ a: "1", b: "2" });
     });
 
     it("should skip trailing blank lines when skipEmptyLines=true", () => {
@@ -292,8 +292,8 @@ describe("skipEmptyLines option", () => {
         // Expected: trailing blank lines dropped
         const result = parseCsv("a,b\n1,2\n\n\n", { skipEmptyLines: true });
         expect(result.success).toBe(true);
-        expect(result.data).toHaveLength(1);
-        expect(result.data![0]).toEqual({ a: "1", b: "2" });
+        expect(result.csv!.records).toHaveLength(1);
+        expect(result.csv!.records![0]).toEqual({ a: "1", b: "2" });
     });
 });
 
@@ -318,7 +318,7 @@ describe("error handling", () => {
         // Expected: whitespace lines have content so they are not empty; parsing succeeds
         const result = parseCsv("   \n\n  ", { skipEmptyLines: true });
         expect(result.success).toBe(true);
-        expect(result.data).toBeDefined();
+        expect(result.csv!.records).toBeDefined();
     });
 
     it("should return UNTERMINATED_QUOTE error for unterminated quote", () => {
@@ -374,8 +374,8 @@ describe("duplicate header warning", () => {
         // Expected: success=true, warnings contains DUPLICATE_HEADER
         const result = parseCsv("a,a,b\n1,2,3");
         expect(result.success).toBe(true);
-        expect(result.warnings).toBeDefined();
-        const dupWarnings = result.warnings!.filter((w) => w.code === "DUPLICATE_HEADER");
+        expect(result.csv!.warnings).toBeDefined();
+        const dupWarnings = result.csv!.warnings!.filter((w) => w.code === "DUPLICATE_HEADER");
         expect(dupWarnings.length).toBeGreaterThanOrEqual(1);
     });
 
@@ -385,8 +385,8 @@ describe("duplicate header warning", () => {
         // Expected: warnings for 'x' and 'y' being duplicated
         const result = parseCsv("x,x,y,y,z\n1,2,3,4,5");
         expect(result.success).toBe(true);
-        expect(result.warnings).toBeDefined();
-        const dupWarnings = result.warnings!.filter((w) => w.code === "DUPLICATE_HEADER");
+        expect(result.csv!.warnings).toBeDefined();
+        const dupWarnings = result.csv!.warnings!.filter((w) => w.code === "DUPLICATE_HEADER");
         expect(dupWarnings.length).toBe(2);
         expect(dupWarnings[0].message).toContain("x");
         expect(dupWarnings[1].message).toContain("y");
@@ -398,7 +398,7 @@ describe("duplicate header warning", () => {
         // Expected: no warnings
         const result = parseCsv("col1,col2,col3\n1,2,3");
         expect(result.success).toBe(true);
-        const dupWarnings = (result.warnings ?? []).filter((w) => w.code === "DUPLICATE_HEADER");
+        const dupWarnings = (result.csv!.warnings ?? []).filter((w) => w.code === "DUPLICATE_HEADER");
         expect(dupWarnings.length).toBe(0);
     });
 });
@@ -415,7 +415,7 @@ describe("UTF-8 BOM stripping", () => {
         const BOM = "\uFEFF";
         const result = parseCsv(BOM + "a,b,c\n1,2,3");
         expect(result.success).toBe(true);
-        expect(result.data![0]).toEqual({ a: "1", b: "2", c: "3" });
+        expect(result.csv!.records![0]).toEqual({ a: "1", b: "2", c: "3" });
     });
 
     it("should parse correctly with BOM and quoted fields", () => {
@@ -425,8 +425,8 @@ describe("UTF-8 BOM stripping", () => {
         const BOM = "\uFEFF";
         const result = parseCsv(BOM + '"hello",world\n1,2');
         expect(result.success).toBe(true);
-        expect(result.data![0]["hello"]).toBe("1");
-        expect(result.data![0]["world"]).toBe("2");
+        expect(result.csv!.records![0]["hello"]).toBe("1");
+        expect(result.csv!.records![0]["world"]).toBe("2");
     });
 
     it("should not strip BOM from middle of input", () => {
@@ -436,7 +436,7 @@ describe("UTF-8 BOM stripping", () => {
         const BOM = "\uFEFF";
         const result = parseCsv('a,b\n"' + BOM + '",2');
         expect(result.success).toBe(true);
-        expect(result.data![0]["a"]).toBe(BOM);
+        expect(result.csv!.records![0]["a"]).toBe(BOM);
     });
 });
 
@@ -451,9 +451,9 @@ describe("row length mismatch", () => {
         // Expected: first data row has empty city value
         const result = parseCsv("name,age,city\nJohn,20\nJane,25,LA");
         expect(result.success).toBe(true);
-        expect(result.data).toHaveLength(2);
-        expect(result.data![0]).toEqual({ name: "John", age: "20", city: "" });
-        expect(result.data![1]).toEqual({ name: "Jane", age: "25", city: "LA" });
+        expect(result.csv!.records).toHaveLength(2);
+        expect(result.csv!.records![0]).toEqual({ name: "John", age: "20", city: "" });
+        expect(result.csv!.records![1]).toEqual({ name: "Jane", age: "25", city: "LA" });
     });
 
     it("should expand column count based on longest row", () => {
@@ -462,16 +462,16 @@ describe("row length mismatch", () => {
         // Expected: column count = 4; extra fields get synthetic headers column3, column4
         const result = parseCsv("name,age\nJohn,20,extra1,extra2\nJane,25");
         expect(result.success).toBe(true);
-        expect(result.data).toHaveLength(2);
-        expect(result.data![0]).toHaveProperty("name");
-        expect(result.data![0]).toHaveProperty("age");
-        expect(result.data![0]).toHaveProperty("column3");
-        expect(result.data![0]).toHaveProperty("column4");
-        expect(result.data![0].name).toBe("John");
-        expect(result.data![0].age).toBe("20");
-        expect(result.data![0].column3).toBe("extra1");
-        expect(result.data![0].column4).toBe("extra2");
-        expect(result.data![1]).toEqual({ name: "Jane", age: "25", column3: "", column4: "" });
+        expect(result.csv!.records).toHaveLength(2);
+        expect(result.csv!.records![0]).toHaveProperty("name");
+        expect(result.csv!.records![0]).toHaveProperty("age");
+        expect(result.csv!.records![0]).toHaveProperty("column3");
+        expect(result.csv!.records![0]).toHaveProperty("column4");
+        expect(result.csv!.records![0].name).toBe("John");
+        expect(result.csv!.records![0].age).toBe("20");
+        expect(result.csv!.records![0].column3).toBe("extra1");
+        expect(result.csv!.records![0].column4).toBe("extra2");
+        expect(result.csv!.records![1]).toEqual({ name: "Jane", age: "25", column3: "", column4: "" });
     });
 
     it("should handle significantly mismatched rows (short and long)", () => {
@@ -480,10 +480,10 @@ describe("row length mismatch", () => {
         // Expected: column count = 5 (longest row has 5 fields); extra synthetic columns
         const result = parseCsv("a,b,c\n1,2\n3,4,5,6,7\n8");
         expect(result.success).toBe(true);
-        expect(result.data).toHaveLength(3);
-        expect(result.data![0]).toEqual({ a: "1", b: "2", c: "", column4: "", column5: "" });
-        expect(result.data![1]).toEqual({ a: "3", b: "4", c: "5", column4: "6", column5: "7" });
-        expect(result.data![2]).toEqual({ a: "8", b: "", c: "", column4: "", column5: "" });
+        expect(result.csv!.records).toHaveLength(3);
+        expect(result.csv!.records![0]).toEqual({ a: "1", b: "2", c: "", column4: "", column5: "" });
+        expect(result.csv!.records![1]).toEqual({ a: "3", b: "4", c: "5", column4: "6", column5: "7" });
+        expect(result.csv!.records![2]).toEqual({ a: "8", b: "", c: "", column4: "", column5: "" });
     });
 });
 
@@ -506,12 +506,12 @@ describe("large input sanity test", () => {
 
         const result = parseCsv(csv);
         expect(result.success).toBe(true);
-        expect(result.data).toHaveLength(ROW_COUNT);
-        expect(result.data![0]).toHaveProperty("id");
-        expect(result.data![0]).toHaveProperty("value");
-        expect(result.data![0]).toHaveProperty("timestamp");
-        expect(result.data![0].id).toBe("0");
-        expect(result.data![ROW_COUNT - 1].id).toBe(String(ROW_COUNT - 1));
+        expect(result.csv!.records).toHaveLength(ROW_COUNT);
+        expect(result.csv!.records![0]).toHaveProperty("id");
+        expect(result.csv!.records![0]).toHaveProperty("value");
+        expect(result.csv!.records![0]).toHaveProperty("timestamp");
+        expect(result.csv!.records![0].id).toBe("0");
+        expect(result.csv!.records![ROW_COUNT - 1].id).toBe(String(ROW_COUNT - 1));
     });
 
     it("should parse 5 000 rows with headerless mode", () => {
@@ -527,9 +527,9 @@ describe("large input sanity test", () => {
 
         const result = parseCsv(csv, { hasHeader: false });
         expect(result.success).toBe(true);
-        expect(result.data).toHaveLength(ROW_COUNT);
-        expect(result.data![0]).toEqual({ column1: "0", column2: "data-0" });
-        expect(result.data![ROW_COUNT - 1]).toEqual({
+        expect(result.csv!.records).toHaveLength(ROW_COUNT);
+        expect(result.csv!.records![0]).toEqual({ column1: "0", column2: "data-0" });
+        expect(result.csv!.records![ROW_COUNT - 1]).toEqual({
             column1: String(ROW_COUNT - 1),
             column2: `data-${ROW_COUNT - 1}`,
         });
@@ -544,34 +544,34 @@ describe("wasQuoted flag", () => {
     it("should preserve whitespace inside quoted fields (RFC 4180)", () => {
         const result = parseCsv('"  hello  ","world"', { hasHeader: false });
         expect(result.success).toBe(true);
-        expect(result.data![0]["column1"]).toBe("  hello  ");
-        expect(result.data![0]["column2"]).toBe("world");
+        expect(result.csv!.records![0]["column1"]).toBe("  hello  ");
+        expect(result.csv!.records![0]["column2"]).toBe("world");
     });
 
     it("should trim whitespace from unquoted fields when trimWhitespace=true", () => {
         const result = parseCsv("  hello  ,  world  ", { hasHeader: false });
         expect(result.success).toBe(true);
-        expect(result.data![0]["column1"]).toBe("hello");
-        expect(result.data![0]["column2"]).toBe("world");
+        expect(result.csv!.records![0]["column1"]).toBe("hello");
+        expect(result.csv!.records![0]["column2"]).toBe("world");
     });
 
     it("should keep whitespace exactly in quoted fields with commas inside", () => {
         const result = parseCsv('"  a , b  ",c', { hasHeader: false });
         expect(result.success).toBe(true);
-        expect(result.data![0]["column1"]).toBe("  a , b  ");
-        expect(result.data![0]["column2"]).toBe("c");
+        expect(result.csv!.records![0]["column1"]).toBe("  a , b  ");
+        expect(result.csv!.records![0]["column2"]).toBe("c");
     });
 
     it("should not trim whitespace in quoted fields even when trimWhitespace=true", () => {
         const result = parseCsv('"  spaced  "', { hasHeader: false, trimWhitespace: true });
         expect(result.success).toBe(true);
-        expect(result.data![0]["column1"]).toBe("  spaced  ");
+        expect(result.csv!.records![0]["column1"]).toBe("  spaced  ");
     });
 
     it("should handle escaped quotes inside quoted fields and preserve whitespace", () => {
         const result = parseCsv('"  say ""hi""  "', { hasHeader: false });
         expect(result.success).toBe(true);
-        expect(result.data![0]["column1"]).toBe('  say "hi"  ');
+        expect(result.csv!.records![0]["column1"]).toBe('  say "hi"  ');
     });
 });
 
@@ -583,23 +583,23 @@ describe("regression tests", () => {
     it("should parse standard CSV correctly", () => {
         const result = parseCsv("name,age,city\nAlice,30,NYC\nBob,25,LA");
         expect(result.success).toBe(true);
-        expect(result.data).toHaveLength(2);
-        expect(result.data![0]).toEqual({ name: "Alice", age: "30", city: "NYC" });
-        expect(result.data![1]).toEqual({ name: "Bob", age: "25", city: "LA" });
+        expect(result.csv!.records).toHaveLength(2);
+        expect(result.csv!.records![0]).toEqual({ name: "Alice", age: "30", city: "NYC" });
+        expect(result.csv!.records![1]).toEqual({ name: "Bob", age: "25", city: "LA" });
     });
 
     it("should handle quoted fields with embedded newlines", () => {
         const result = parseCsv('a,"multi\nline",c\n1,2,3', { hasHeader: true });
         expect(result.success).toBe(true);
-        expect(result.data![0]["a"]).toBe("1");
-        expect(result.data![0]["c"]).toBe("3");
+        expect(result.csv!.records![0]["a"]).toBe("1");
+        expect(result.csv!.records![0]["c"]).toBe("3");
     });
 
     it("should handle empty fields", () => {
         const result = parseCsv("a,,c\n1,,3", { hasHeader: true });
         expect(result.success).toBe(true);
-        expect(result.data![0]["a"]).toBe("1");
-        expect(result.data![0]["c"]).toBe("3");
+        expect(result.csv!.records![0]["a"]).toBe("1");
+        expect(result.csv!.records![0]["c"]).toBe("3");
     });
 });
 
