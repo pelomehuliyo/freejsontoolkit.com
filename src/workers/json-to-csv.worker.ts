@@ -1,4 +1,4 @@
-// Worker for JSON -> CSV conversion (large files)
+
 self.onmessage = (event: MessageEvent) => {
   const { jsonData } = event.data;
   try {

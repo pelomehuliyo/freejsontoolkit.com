@@ -1,0 +1,184 @@
+---
+/**
+ * ErrorBanner — Accessible error display banner.
+ *
+ * Features:
+ *   - role="alert" for immediate screen reader announcement
+ *   - aria-live="assertive" for dynamic content updates
+ *   - Close button to dismiss (keyboard accessible)
+ *   - Warning icon for visual identification (not color-only)
+ *
+ * Usage:
+ *   <ErrorBanner id="conversion-error" />
+ *
+ *   Show/hide via JS:
+ *     const banner = document.getElementById("conversion-error");
+ *     banner.show("Invalid JSON: missing comma at line 3.");
+ *     banner.hide();
+ *
+ *   Or set the message attribute and banner will auto-show:
+ *     banner.setAttribute("data-message", "Error message here");
+ */
+
+interface Props {
+  id: string;
+  message?: string;
+}
+
+const { id, message = "" } = Astro.props;
+
+const messageId = id + "-message";
+const closeId = id + "-close";
+const isHidden = !message;
+---
+
+<div
+  id={id}
+  class:list={["error-banner", { hidden: isHidden }]}
+  role="alert"
+  aria-live="assertive"
+  aria-atomic="true"
+  data-err-id={id}
+>
+  <span class="error-icon" aria-hidden="true">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path
+        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+      ></path>
+      <line x1="12" y1="9" x2="12" y2="13"></line>
+      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+    </svg>
+  </span>
+  <p class="caption error-msg" id={messageId}>{message}</p>
+  <button id={closeId} class="error-close" aria-label="Dismiss error" type="button">
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
+</div>
+
+<script>
+  (function () {
+    var script = document.currentScript;
+    if (!script) return;
+    var banner = script.parentElement;
+    if (!banner) return;
+
+    var errId = banner.getAttribute("data-err-id");
+    if (!errId) return;
+
+    var messageEl = document.getElementById(errId + "-message");
+    var closeBtn = document.getElementById(errId + "-close");
+    if (!messageEl || !closeBtn) return;
+
+    banner.show = function show(msg) {
+      messageEl.textContent = msg;
+      banner.classList.remove("hidden");
+      closeBtn.focus();
+    };
+
+    banner.hide = function hide() {
+      banner.classList.add("hidden");
+      messageEl.textContent = "";
+    };
+
+    closeBtn.addEventListener("click", function () {
+      banner.hide();
+    });
+
+    banner.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !banner.classList.contains("hidden")) {
+        banner.hide();
+      }
+    });
+
+    var observer = new MutationObserver(function () {
+      var msg = banner.getAttribute("data-message");
+      if (msg) {
+        banner.show(msg);
+      } else {
+        banner.hide();
+      }
+    });
+
+    observer.observe(banner, { attributes: true, attributeFilter: ["data-message"] });
+
+    if (messageEl.textContent) {
+      banner.classList.remove("hidden");
+    }
+  })();
+</script>
+
+<style>
+  .error-banner {
+    background-color: var(--color-error-soft);
+    border: 1px solid rgba(238, 0, 0, 0.15);
+    border-radius: var(--rounded-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-md);
+  }
+
+  .error-banner.hidden {
+    display: none;
+  }
+
+  .error-icon {
+    color: var(--color-error);
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 1.2;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .error-msg {
+    color: var(--color-error);
+    margin: 0;
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  .error-close {
+    background: none;
+    border: none;
+    color: var(--color-error);
+    cursor: pointer;
+    padding: 2px;
+    flex-shrink: 0;
+    border-radius: var(--rounded-xs);
+    opacity: 0.7;
+    transition: opacity 0.15s ease;
+  }
+
+  .error-close:hover {
+    opacity: 1;
+  }
+
+  .error-close:focus-visible {
+    outline: 2px solid var(--color-error);
+    outline-offset: 2px;
+  }
+</style>

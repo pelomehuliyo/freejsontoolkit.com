@@ -1,0 +1,91 @@
+---
+/**
+ * ToolShell — Standard tool page layout wrapper.
+ *
+ * Provides the consistent outer structure for every tool page:
+ *   1. ToolHeader (breadcrumb, H1, subtitle, privacy notice)
+ *   2. ToolWorkspace (input → controls → output)
+ *   3. Content slot (additional sections: how it works, features, FAQ)
+ *
+ * Usage:
+ *   <ToolShell title="JSON to CSV Converter" description="..." activePath="/tools/json-to-csv">
+ *     <section slot="workspace">
+ *       <!-- workspace columns: input panel, controls, output panel -->
+ *     </section>
+ *     <!-- Additional content (how it works, FAQ, etc.) -->
+ *   </ToolShell>
+ *
+ * Props mirror BaseLayout for seamless integration.
+ */
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  activePath?: string;
+  /** Optional: prevents search indexing */
+  noindex?: boolean;
+}
+
+const { title, description, activePath = "/tools", noindex = false } = Astro.props;
+---
+
+<!-- Use the existing BaseLayout so all pages share Header/Footer/SEO -->
+<BaseLayout {title} {description} {activePath} {noindex}>
+  <main class="tool-page">
+    <slot name="header" />
+    <section class="tool-workspace-section" aria-labelledby="workspace-heading">
+      <h2 id="workspace-heading" class="sr-only">Tool workspace</h2>
+      <slot name="workspace" />
+    </section>
+    <div class="tool-content">
+      <slot />
+    </div>
+  </main>
+</BaseLayout>
+
+<script>
+  // Global tool state behaviour goes here in Phase 2+
+</script>
+
+<style>
+  .tool-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
+  }
+
+  .tool-workspace-section {
+    padding: var(--spacing-xl) 0 var(--spacing-4xl);
+    background-color: var(--color-canvas);
+    border-bottom: 1px solid var(--color-hairline);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tool-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  @media (max-width: 959px) {
+    .tool-workspace-section {
+      padding: var(--spacing-md) 0 var(--spacing-2xl);
+    }
+  }
+</style>

@@ -1,0 +1,162 @@
+---
+/**
+ * ToolActions — Standard action button bar for tool pages.
+ *
+ * Provides the common actions: Copy, Download, Clear, Load Sample.
+ * Each button dispatches a custom event on the action bar element
+ * so parent components can handle them via the store.
+ *
+ * Variants:
+ *   "bar"     — Horizontal button row (default)
+ *   "inset"   — Inside a panel header (used in input/output panels)
+ *
+ * Usage:
+ *   <ToolActions
+ *     id="input-actions"
+ *     variant="inset"
+ *     actions={["sample", "clear"]}
+ *   />
+ *
+ *   Listen for "tool-action" on the element:
+ *   actionsBar.addEventListener("tool-action", (e) => {
+ *     const { action } = e.detail; // "sample" | "clear" | "copy" | "download"
+ *   });
+ */
+
+interface Action {
+  id: string;
+  label: string;
+  disabled?: boolean;
+}
+
+interface Props {
+  id: string;
+  variant?: "bar" | "inset";
+  actions: string[];
+}
+
+const ACTIONS_REGISTRY: Record<string, Action> = {
+  copy: { id: "copy", label: "Copy" },
+  download: { id: "download", label: "Download" },
+  clear: { id: "clear", label: "Clear" },
+  sample: { id: "sample", label: "Load Sample" },
+};
+
+const { id, variant = "bar", actions: actionIds } = Astro.props;
+
+const resolvedActions: Action[] = [];
+for (var i = 0; i < actionIds.length; i++) {
+  var act = ACTIONS_REGISTRY[actionIds[i]];
+  if (act) resolvedActions.push(act);
+}
+---
+
+<div
+  class:list={["tool-actions", "tool-actions-" + variant]}
+  id={id}
+  role="group"
+  aria-label="Tool actions"
+  data-actions-id={id}
+>
+  {
+    resolvedActions.map((action, i) => (
+      <>
+        {i > 0 && (
+          <span class="action-divider" aria-hidden="true">
+            |
+          </span>
+        )}
+        <button
+          class="text-btn caption-mono"
+          id={id + "-" + action.id}
+          data-action={action.id}
+          disabled={action.disabled ?? false}
+          type="button"
+        >
+          {action.label}
+        </button>
+      </>
+    ))
+  }
+</div>
+
+<script>
+  (function () {
+    var script = document.currentScript;
+    if (!script) return;
+    var container = script.parentElement;
+    if (!container) return;
+
+    var actionsId = container.getAttribute("data-actions-id");
+    if (!actionsId) return;
+
+    var el = document.getElementById(actionsId);
+    if (!el) return;
+
+    el.addEventListener("click", function (e) {
+      var target = e.target;
+      var btn = target.closest ? target.closest("[data-action]") : null;
+      if (!btn) return;
+      if (btn.disabled) return;
+
+      var action = btn.getAttribute("data-action");
+      if (!action) return;
+
+      el.dispatchEvent(
+        new CustomEvent("tool-action", {
+          bubbles: true,
+          detail: { action: action },
+        }),
+      );
+    });
+  })();
+</script>
+
+<style>
+  .tool-actions {
+    display: flex;
+    align-items: center;
+  }
+
+  .tool-actions-bar {
+    gap: var(--spacing-xs);
+    justify-content: center;
+    padding: var(--spacing-sm) 0;
+  }
+
+  .tool-actions-inset {
+    gap: var(--spacing-xs);
+    margin-left: auto;
+  }
+
+  .action-divider {
+    font-size: 11px;
+    color: var(--color-hairline-strong);
+  }
+
+  .text-btn {
+    background: none;
+    border: none;
+    color: var(--color-body);
+    cursor: pointer;
+    font-size: 11px;
+    padding: 0;
+    transition: color 0.15s ease;
+  }
+
+  .text-btn:hover:not(:disabled) {
+    color: var(--color-ink);
+    text-decoration: underline;
+  }
+
+  .text-btn:disabled {
+    color: var(--color-hairline-strong);
+    cursor: not-allowed;
+  }
+
+  .text-btn:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--rounded-xs);
+  }
+</style>

@@ -1,654 +1,338 @@
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import Container from "../../components/Container.astro";
-import Button from "../../components/Button.astro";
+import ToolShell from "../../components/tools/ToolShell.astro";
+import ToolHeader from "../../components/tools/ToolHeader.astro";
+import ToolWorkspace from "../../components/tools/ToolWorkspace.astro";
+import CodeEditor from "../../components/tools/CodeEditor.astro";
+import DragDropZone from "../../components/tools/DragDropZone.astro";
+import ToolActions from "../../components/tools/ToolActions.astro";
+import ErrorBanner from "../../components/tools/ErrorBanner.astro";
 import Card from "../../components/Card.astro";
+import Button from "../../components/Button.astro";
 ---
 
-<BaseLayout
+<ToolShell
   title="JSON to CSV Converter - Free JSON Toolkit"
   description="Convert nested JSON arrays into clean, structured CSV tables offline. 100% local browser-based JSON to CSV converter with support for flattening objects."
   activePath="/tools/json-to-csv"
 >
-  <section class="tool-section">
-    <Container size="wide">
-      <div class="tool-header">
-        <div class="breadcrumb">
-          <a href="/" class="breadcrumb-link">Home</a>
-          <span class="breadcrumb-separator">/</span>
-          <span class="breadcrumb-current">JSON to CSV</span>
+  <ToolHeader
+    slot="header"
+    breadcrumbs={[{ label: "Home", href: "/" }, { label: "JSON to CSV" }]}
+    title="JSON to CSV Converter"
+    subtitle="Flatten and convert nested JSON arrays into clean CSV tables offline."
+  />
+
+  <ToolWorkspace slot="workspace" layout="3-col">
+    <div slot="input">
+      <Card variant="flat" class="workspace-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">INPUT JSON</span>
+          <ToolActions id="input-actions" variant="inset" actions={["sample", "clear"]} />
         </div>
-        <h1 class="display-lg tool-title">JSON to CSV Converter</h1>
-        <p class="body-md tool-subtitle">
-          Flatten and convert nested JSON arrays into clean CSV tables offline.
-        </p>
-      </div>
-
-      <!-- Privacy Notice Banner -->
-      <div class="privacy-notice">
-        <span class="privacy-icon"
-          ><svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="privacy-lock-icon"
-            style="display: inline-block; vertical-align: text-bottom; margin-right: 4px;"
-            ><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path
-              d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg
-          ></span
-        >
-        <p class="caption">
-          Your data is processed entirely in your browser and is never uploaded.
-        </p>
-      </div>
-
-      <div class="workspace-grid">
-        <!-- Input Column -->
-        <div class="workspace-col input-col">
-          <Card variant="flat" class="workspace-card">
-            <div class="card-header">
-              <span class="caption-mono column-title">INPUT JSON</span>
-              <div class="header-actions">
-                <button id="load-sample-btn" class="text-btn caption-mono">Load Sample</button>
-                <span class="action-divider">|</span>
-                <button id="clear-btn" class="text-btn caption-mono">Clear</button>
-              </div>
-            </div>
-
-            <div class="drag-zone" id="drag-zone">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                class="drag-icon"
-              >
-                <path
-                  d="M12 16V8M12 8l-3 3M12 8l3 3M4 17v1a2 2 0 002 2h12a2 2 0 002-2v-1"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"></path>
-              </svg>
-              <p class="caption drag-text">
-                Drag & drop .json file or <span class="browse-link">browse</span>
-              </p>
-              <input type="file" id="file-input" accept=".json" class="file-input-hidden" />
-            </div>
-
-            <!-- Editor-like Textarea with Gutter -->
-            <div class="editor-outer">
-              <div class="editor-wrapper">
-                <div class="editor-gutter" id="json-gutter">
-                  <span>1</span>
-                </div>
-                <textarea
-                  id="json-input"
-                  class="editor-textarea"
-                  placeholder='Paste JSON array here...
+        <DragDropZone id="json-input" accept=".json" label="Upload JSON file" />
+        <CodeEditor
+          id="json-input"
+          label="JSON input"
+          placeholder='Paste JSON array here
 Example:
 [
   { "id": 1, "name": "John Doe", "email": "john@example.com" },
   { "id": 2, "name": "Jane Smith", "email": "jane@example.com" }
 ]'
-                  spellcheck="false"></textarea>
-              </div>
-              <div class="editor-info-bar">
-                <span class="info-status" id="json-validation-status">JSON Status: Empty</span>
-                <span class="info-meta" id="json-char-count">0 chars</span>
-              </div>
-            </div>
-          </Card>
+        >
+          <div class="editor-info-bar" slot>
+            <span class="info-status" id="json-validation-status">JSON Status: Empty</span>
+            <span class="info-meta" id="json-char-count">0 chars</span>
+          </div>
+        </CodeEditor>
+      </Card>
+    </div>
+
+    <div slot="controls">
+      <Card variant="flat" class="workspace-card settings-card">
+        <h2 class="display-sm settings-title">Options</h2>
+        <div class="settings-divider"></div>
+
+        <div class="settings-group">
+          <label class="settings-label caption-mono" for="delimiter-select">Delimiter</label>
+          <div class="select-wrapper">
+            <select id="delimiter-select" class="settings-select">
+              <option value=",">Comma ( , )</option>
+              <option value=";">Semicolon ( ; )</option>
+              <option value="\t">Tab ( \t )</option>
+            </select>
+          </div>
         </div>
 
-        <!-- Controls Column (Sidebar) -->
-        <div class="workspace-col controls-col">
-          <Card variant="flat" class="workspace-card settings-card">
-            <h2 class="display-sm settings-title">Options</h2>
-            <div class="settings-divider"></div>
-
-            <div class="settings-group">
-              <label class="settings-label caption-mono">Delimiter</label>
-              <div class="select-wrapper">
-                <select id="delimiter-select" class="settings-select">
-                  <option value=",">Comma ( , )</option>
-                  <option value=";">Semicolon ( ; )</option>
-                  <option value="\t">Tab ( \t )</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="settings-group checkbox-group">
-              <label class="checkbox-container body-sm">
-                <input type="checkbox" id="flatten-checkbox" checked />
-                <span class="checkbox-checkmark"></span>
-                Flatten nested objects
-              </label>
-              <p class="caption settings-help">
-                Flattens properties like &#123;"user": &#123;"name": "John"&#125;&#125; to user.name
-              </p>
-            </div>
-
-            <div class="settings-group checkbox-group">
-              <label class="checkbox-container body-sm">
-                <input type="checkbox" id="headers-checkbox" checked />
-                <span class="checkbox-checkmark"></span>
-                Include header row
-              </label>
-            </div>
-
-            <div class="settings-divider"></div>
-
-            <Button id="convert-btn" variant="primary" size="lg" shape="square" class="action-btn">
-              Convert JSON
-            </Button>
-
-            <!-- Inline validation feedback area -->
-            <div id="error-banner" class="error-banner hidden">
-              <span class="error-icon"
-                ><svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="error-warning-icon"
-                  style="display: inline-block; vertical-align: text-bottom; margin-right: 4px;"
-                  ><path
-                    d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
-                  ></path><line x1="12" y1="9" x2="12" y2="13"></line><line
-                    x1="12"
-                    y1="17"
-                    x2="12.01"
-                    y2="17"></line></svg
-                ></span
-              >
-              <p class="caption error-msg" id="error-message">Invalid JSON structure.</p>
-            </div>
-
-            <div class="status-banner caption">
-              <span class="status-dot"></span> Local sandbox active
-            </div>
-          </Card>
+        <div class="settings-group checkbox-group">
+          <label class="checkbox-container body-sm">
+            <input type="checkbox" id="flatten-checkbox" checked />
+            <span class="checkbox-checkmark"></span>
+            Flatten nested objects
+          </label>
+          <p class="caption settings-help">
+            Flattens properties like &#123;"user": &#123;"name": "John"&#125;&#125; to user.name
+          </p>
         </div>
 
-        <!-- Output Column -->
-        <div class="workspace-col output-col">
-          <Card variant="flat" class="workspace-card">
-            <div class="card-header">
-              <span class="caption-mono column-title">OUTPUT CSV</span>
-              <div class="header-actions">
-                <button id="copy-btn" class="text-btn caption-mono" disabled>Copy</button>
-                <span class="action-divider">|</span>
-                <button id="download-btn" class="text-btn caption-mono" disabled>Download</button>
-              </div>
-            </div>
-
-            <!-- Editor-like Readonly Textarea with Gutter -->
-            <div class="editor-outer">
-              <div class="editor-wrapper">
-                <div class="editor-gutter" id="csv-gutter">
-                  <span>1</span>
-                </div>
-                <textarea
-                  id="csv-output"
-                  class="editor-textarea"
-                  placeholder="CSV output will appear here..."
-                  readonly
-                  spellcheck="false"></textarea>
-              </div>
-              <div class="editor-info-bar">
-                <span class="info-status" id="csv-status">CSV Status: Ready</span>
-                <span class="info-meta" id="csv-char-count">0 chars</span>
-              </div>
-            </div>
-          </Card>
+        <div class="settings-group checkbox-group">
+          <label class="checkbox-container body-sm">
+            <input type="checkbox" id="headers-checkbox" checked />
+            <span class="checkbox-checkmark"></span>
+            Include header row
+          </label>
         </div>
-      </div>
-    </Container>
-  </section>
-</BaseLayout>
+
+        <div class="settings-divider"></div>
+
+        <Button id="convert-btn" variant="primary" size="lg" shape="square" class="action-btn">
+          Convert JSON
+        </Button>
+
+        <ErrorBanner id="conversion-error" />
+
+        <div class="status-banner caption">
+          <span class="status-dot"></span> Local sandbox active
+        </div>
+      </Card>
+    </div>
+
+    <div slot="output">
+      <Card variant="flat" class="workspace-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">OUTPUT CSV</span>
+          <ToolActions id="output-actions" variant="inset" actions={["copy", "download"]} />
+        </div>
+        <CodeEditor
+          id="csv-output"
+          label="CSV output"
+          placeholder="CSV output will appear here..."
+          readonly
+        >
+          <div class="editor-info-bar" slot>
+            <span class="info-status" id="csv-status">CSV Status: Ready</span>
+            <span class="info-meta" id="csv-char-count">0 chars</span>
+          </div>
+        </CodeEditor>
+      </Card>
+    </div>
+  </ToolWorkspace>
+</ToolShell>
 
 <script>
-  import { jsonToCsv } from "../../lib/converter";
+  import { jsonToCsvStore } from "../../lib/tools/json-to-csv/store";
+  import {
+    handleInput,
+    convertJsonToCsv,
+    loadSample,
+    clearAll,
+    copyCsv,
+    downloadCsv,
+    setDelimiter,
+    setFlatten,
+    setIncludeHeaders,
+  } from "../../lib/tools/json-to-csv/actions";
+  import type { Delimiter } from "../../lib/tools/json-to-csv/types";
 
-  // State for large files to avoid DOM freeze
-  let largeJsonContent: string | null = null;
-  let largeCsvContent: string | null = null;
+  // ── DOM refs ──
+  const jsonTextarea = document.getElementById("json-input-textarea") as HTMLTextAreaElement | null;
+  const jsonGutter = document.getElementById("json-input-gutter") as HTMLElement | null;
+  const csvTextarea = document.getElementById("csv-output-textarea") as HTMLTextAreaElement | null;
+  const csvGutter = document.getElementById("csv-output-gutter") as HTMLElement | null;
+  const jsonStatus = document.getElementById("json-validation-status") as HTMLElement | null;
+  const jsonCharCount = document.getElementById("json-char-count") as HTMLElement | null;
+  const csvStatus = document.getElementById("csv-status") as HTMLElement | null;
+  const csvCharCount = document.getElementById("csv-char-count") as HTMLElement | null;
+  const delimiterSelect = document.getElementById("delimiter-select") as HTMLSelectElement | null;
+  const flattenCheckbox = document.getElementById("flatten-checkbox") as HTMLInputElement | null;
+  const headersCheckbox = document.getElementById("headers-checkbox") as HTMLInputElement | null;
+  const convertBtn = document.getElementById("convert-btn") as HTMLButtonElement | null;
+  const errorBanner = document.getElementById("conversion-error") as HTMLElement | null;
 
-  const LARGE_FILE_THRESHOLD = 500_000; // ~500 KB / chars
-  const WARNING_THRESHOLD = 5_000_000; // ~5 MB / chars
+  // ── Copy button feedback ──
+  let copyBtnEl: HTMLButtonElement | null = null;
+  let origCopyText = "";
 
-  // DOM Elements
-  const jsonInput = document.getElementById("json-input") as HTMLTextAreaElement;
-  const csvOutput = document.getElementById("csv-output") as HTMLTextAreaElement;
-  const convertBtn = document.getElementById("convert-btn");
-  const loadSampleBtn = document.getElementById("load-sample-btn");
-  const clearBtn = document.getElementById("clear-btn");
-  const copyBtn = document.getElementById("copy-btn") as HTMLButtonElement;
-  const downloadBtn = document.getElementById("download-btn") as HTMLButtonElement;
-
-  const delimiterSelect = document.getElementById("delimiter-select") as HTMLSelectElement;
-  const flattenCheckbox = document.getElementById("flatten-checkbox") as HTMLInputElement;
-  const headersCheckbox = document.getElementById("headers-checkbox") as HTMLInputElement;
-
-  const jsonGutter = document.getElementById("json-gutter");
-  const csvGutter = document.getElementById("csv-gutter");
-
-  const jsonValidationStatus = document.getElementById("json-validation-status");
-  const jsonCharCount = document.getElementById("json-char-count");
-  const csvCharCount = document.getElementById("csv-char-count");
-
-  const dragZone = document.getElementById("drag-zone");
-  const fileInput = document.getElementById("file-input") as HTMLInputElement;
-
-  const errorBanner = document.getElementById("error-banner");
-  const errorMessage = document.getElementById("error-message");
-
-  const SAMPLE_JSON = `[
-  {
-    "id": 1,
-    "name": "Leanne Graham",
-    "username": "Bret",
-    "email": "Sincere@april.biz",
-    "address": {
-      "street": "Kulas Light",
-      "suite": "Apt. 556",
-      "city": "Gwenborough"
+  // ── Input status display helpers ──
+  function updateInputStatus(status: string, charCount: number) {
+    if (!jsonStatus || !jsonCharCount) return;
+    switch (status) {
+      case "empty":
+        jsonStatus.textContent = "JSON Status: Empty";
+        jsonStatus.style.color = "";
+        break;
+      case "ready":
+        jsonStatus.textContent = "JSON Status: Ready to convert";
+        jsonStatus.style.color = "var(--color-success)";
+        break;
+      case "large-file-loaded":
+        jsonStatus.textContent = "JSON Status: Large file loaded. Press Convert.";
+        jsonStatus.style.color = "var(--color-accent)";
+        break;
+      case "invalid":
+        jsonStatus.textContent = "JSON Status: Invalid";
+        jsonStatus.style.color = "var(--color-error)";
+        break;
+      default:
+        jsonStatus.textContent = "JSON Status: " + status;
+        jsonStatus.style.color = "";
     }
-  },
-  {
-    "id": 2,
-    "name": "Ervin Howell",
-    "username": "Antonette",
-    "email": "Shanna@melissa.tv",
-    "address": {
-      "street": "Victor Plains",
-      "suite": "Suite 879",
-      "city": "Wisokyburgh"
-    }
-  }
-]`;
-
-  // Centralized input handler
-  function handleJsonInput(text: string) {
-    hideError();
-
-    // Clear previous output
-    largeCsvContent = null;
-    csvOutput.value = "";
-    updateGutter(csvOutput, csvGutter);
-    if (csvCharCount) csvCharCount.innerText = "0 chars";
-    if (copyBtn) copyBtn.disabled = true;
-    if (downloadBtn) downloadBtn.disabled = true;
-
-    if (text.length > LARGE_FILE_THRESHOLD) {
-      largeJsonContent = text;
-      const previewLength = 20000;
-      const previewText =
-        text.substring(0, previewLength) +
-        `\n\n... [Truncated: ${(text.length - previewLength).toLocaleString()} more characters. Click Convert to process the entire file.]`;
-
-      jsonInput.value = previewText;
-      jsonInput.readOnly = true;
-
-      if (jsonCharCount) {
-        jsonCharCount.innerText = `${text.length.toLocaleString()} chars (Large File)`;
-      }
-      if (jsonValidationStatus) {
-        jsonValidationStatus.innerText = "JSON Status: Large file loaded. Press Convert.";
-        (jsonValidationStatus as HTMLElement).style.color = "var(--color-accent)";
-      }
-    } else {
-      largeJsonContent = null;
-      jsonInput.value = text;
-      jsonInput.readOnly = false;
-      validateJsonInput();
-    }
-    updateGutter(jsonInput, jsonGutter);
+    jsonCharCount.textContent = charCount.toLocaleString() + " chars";
   }
 
-  // Line Number Helpers
-  function updateGutter(textarea: HTMLTextAreaElement, gutter: HTMLElement | null) {
-    if (!textarea || !gutter) return;
-    const lines = textarea.value.split("\n");
-    const lineCount = Math.max(1, lines.length);
-
-    // Prevent main thread lockup by using a placeholder if lines exceed 1000
-    if (lineCount > 1000) {
-      gutter.innerHTML = `<span>1</span><span style="height: ${(lineCount - 1) * 19.5}px; text-align: center; color: var(--color-mute);">...</span>`;
-      gutter.scrollTop = textarea.scrollTop;
-      return;
+  function updateOutputStatus(status: string, charCount: number) {
+    if (!csvStatus || !csvCharCount) return;
+    switch (status) {
+      case "empty":
+      case "ready":
+      case "generated":
+        csvStatus.textContent = "CSV Status: Ready";
+        break;
+      case "generating":
+        csvStatus.textContent = "Converting JSON…";
+        break;
     }
-
-    let gutterHtml = "";
-    for (let i = 1; i <= lineCount; i++) {
-      gutterHtml += `<span>${i}</span>`;
-    }
-    gutter.innerHTML = gutterHtml;
-    gutter.scrollTop = textarea.scrollTop;
+    const suffix = charCount > 0 ? (charCount > 500000 ? " (Large Output)" : "") : "";
+    csvCharCount.textContent = charCount.toLocaleString() + " chars" + suffix;
   }
 
-  function validateJsonInput() {
-    if (!jsonInput) return;
+  function updateConvertBtn(loading: boolean) {
+    if (!convertBtn) return;
+    convertBtn.disabled = loading;
+  }
 
-    if (largeJsonContent !== null) {
-      updateGutter(jsonInput, jsonGutter);
-      if (jsonCharCount) {
-        jsonCharCount.innerText = `${largeJsonContent.length.toLocaleString()} chars (Large File)`;
-      }
-      return;
+  function updateCopyDownload(disabled: boolean) {
+    const copyBtn = document.querySelector(
+      "#output-actions [data-action='copy']",
+    ) as HTMLButtonElement | null;
+    const downloadBtn = document.querySelector(
+      "#output-actions [data-action='download']",
+    ) as HTMLButtonElement | null;
+    if (copyBtn) copyBtn.disabled = disabled;
+    if (downloadBtn) downloadBtn.disabled = disabled;
+  }
+
+  function triggerGutter(el: HTMLTextAreaElement | null) {
+    if (el && typeof (el as any).__updateGutter === "function") {
+      (el as any).__updateGutter();
+    }
+  }
+
+  // ── Store subscription ──
+  const unsub = jsonToCsvStore.subscribe((state) => {
+    // Update input textarea
+    if (jsonTextarea && jsonTextarea.value !== state.jsonInput) {
+      jsonTextarea.value = state.jsonInput;
+      triggerGutter(jsonTextarea);
     }
 
-    const val = jsonInput.value;
-    updateGutter(jsonInput, jsonGutter);
+    // Update output textarea
+    if (csvTextarea && csvTextarea.value !== state.csvOutput) {
+      csvTextarea.value = state.csvOutput;
+      triggerGutter(csvTextarea);
+    }
 
-    if (jsonCharCount) jsonCharCount.innerText = `${val.length.toLocaleString()} chars`;
-    if (jsonValidationStatus) {
-      if (!val.trim()) {
-        jsonValidationStatus.innerText = "JSON Status: Empty";
-        (jsonValidationStatus as HTMLElement).style.color = "";
-        hideError();
+    // Update status displays
+    updateInputStatus(state.inputStatus, state.jsonInput.length);
+    updateOutputStatus(state.outputStatus, state.csvOutput.length);
+
+    // Update button states
+    const isGenerating = state.outputStatus === "generating";
+    updateConvertBtn(isGenerating);
+    const hasOutput = !!state.csvOutput || !!state.largeCsvContent;
+    updateCopyDownload(!hasOutput || isGenerating);
+
+    // Error display
+    if (errorBanner) {
+      if (state.error) {
+        (errorBanner as any).show?.(state.error);
       } else {
-        // Parse only after clicking Convert to keep UI responsive
-        jsonValidationStatus.innerText = "JSON Status: Ready to convert";
-        (jsonValidationStatus as HTMLElement).style.color = "var(--color-success)";
-        hideError();
+        (errorBanner as any).hide?.();
       }
     }
+  });
+
+  // ── DragDropZone: file upload ──
+  const dropZone = document.getElementById("json-input-dropzone");
+  if (dropZone) {
+    dropZone.addEventListener("file-dropped", (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.text) {
+        handleInput(jsonToCsvStore, detail.text);
+      }
+    });
   }
 
-  // Bind gutter updates & scroll sync
-  if (jsonInput && jsonGutter) {
-    jsonInput.addEventListener("input", validateJsonInput);
-
-    jsonInput.addEventListener("scroll", () => {
-      jsonGutter.scrollTop = jsonInput.scrollTop;
+  // ── Input editor: manual input ──
+  if (jsonTextarea) {
+    jsonTextarea.addEventListener("input", () => {
+      handleInput(jsonToCsvStore, jsonTextarea.value);
     });
 
-    jsonInput.addEventListener("paste", (e) => {
+    jsonTextarea.addEventListener("paste", (e: ClipboardEvent) => {
       const pasteText = e.clipboardData?.getData("text") || "";
-      if (pasteText.length > LARGE_FILE_THRESHOLD) {
+      if (pasteText.length > 500000) {
         e.preventDefault();
-        handleJsonInput(pasteText);
+        handleInput(jsonToCsvStore, pasteText);
       }
     });
-
-    // Initial gutter setup
-    validateJsonInput();
   }
 
-  if (csvOutput && csvGutter) {
-    csvOutput.addEventListener("scroll", () => {
-      csvGutter.scrollTop = csvOutput.scrollTop;
-    });
-  }
-
-  // Load Sample Click
-  if (loadSampleBtn) {
-    loadSampleBtn.addEventListener("click", () => {
-      jsonInput.value = SAMPLE_JSON;
-      validateJsonInput();
-    });
-  }
-
-  // Clear Click
-  if (clearBtn) {
-    clearBtn.addEventListener("click", () => {
-      largeJsonContent = null;
-      largeCsvContent = null;
-      jsonInput.value = "";
-      jsonInput.readOnly = false;
-      csvOutput.value = "";
-      validateJsonInput();
-      updateGutter(csvOutput, csvGutter);
-      if (csvCharCount) csvCharCount.innerText = "0 chars";
-      copyBtn.disabled = true;
-      downloadBtn.disabled = true;
-    });
-  }
-
-  // Convert Trigger (responsiveness-safe)
-  const MAX_INPUT_CHARS = 15_000_000; // ~15M chars
-  const USE_WORKER_ABOVE_CHARS = 400_000;
-
-  const setLoadingUI = (isLoading: boolean, message?: string) => {
-    if (convertBtn) (convertBtn as HTMLButtonElement).disabled = isLoading;
-    if (copyBtn) copyBtn.disabled = isLoading || (!csvOutput.value && !largeCsvContent);
-    if (downloadBtn) downloadBtn.disabled = isLoading || (!csvOutput.value && !largeCsvContent);
-
-    if (csvCharCount) {
-      const displayVal = largeCsvContent !== null ? largeCsvContent : csvOutput.value;
-      csvCharCount.innerText = displayVal
-        ? `${displayVal.length.toLocaleString()} chars${largeCsvContent !== null ? " (Large Output)" : ""}`
-        : "0 chars";
-    }
-
-    const csvStatusEl = document.getElementById("csv-status");
-    if (csvStatusEl) {
-      csvStatusEl.innerText = isLoading ? message || "Converting JSON…" : "CSV Status: Ready";
-    }
-  };
-
-  const warnTooLarge = () => {
-    const len = largeJsonContent !== null ? largeJsonContent.length : jsonInput.value.trim().length;
-    showError(
-      `Input too large (${len.toLocaleString()} chars). To keep the page responsive, limit is ${MAX_INPUT_CHARS.toLocaleString()} chars.`,
-    );
-  };
-
+  // ── Convert button ──
   if (convertBtn) {
     convertBtn.addEventListener("click", () => {
-      const input = largeJsonContent !== null ? largeJsonContent : jsonInput.value.trim();
-      if (!input) {
-        showError("Please paste or load JSON first.");
-        return;
-      }
+      convertJsonToCsv(jsonToCsvStore);
+    });
+  }
 
-      if (input.length > MAX_INPUT_CHARS) {
-        warnTooLarge();
-        return;
-      }
+  // ── Settings changes ──
+  if (delimiterSelect) {
+    delimiterSelect.addEventListener("change", () => {
+      setDelimiter(jsonToCsvStore, delimiterSelect.value as Delimiter);
+    });
+  }
 
-      // Warn before processing extremely large files
-      if (input.length > WARNING_THRESHOLD) {
-        const proceed = confirm(
-          `The JSON data is large (${(input.length / 1024 / 1024).toFixed(1)} MB). Converting it might take a few seconds and consume memory. Do you want to proceed?`,
-        );
-        if (!proceed) {
-          return;
+  if (flattenCheckbox) {
+    flattenCheckbox.addEventListener("change", () => {
+      setFlatten(jsonToCsvStore, flattenCheckbox.checked);
+    });
+  }
+
+  if (headersCheckbox) {
+    headersCheckbox.addEventListener("change", () => {
+      setIncludeHeaders(jsonToCsvStore, headersCheckbox.checked);
+    });
+  }
+
+  // ── ToolActions ──
+  const inputActions = document.getElementById("input-actions");
+  if (inputActions) {
+    inputActions.addEventListener("tool-action", (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      if (action === "sample") loadSample(jsonToCsvStore);
+      if (action === "clear") clearAll(jsonToCsvStore);
+    });
+  }
+
+  const outputActions = document.getElementById("output-actions");
+  if (outputActions) {
+    outputActions.addEventListener("tool-action", async (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      if (action === "copy") {
+        const ok = await copyCsv(jsonToCsvStore);
+        if (ok) {
+          const copyBtn = outputActions.querySelector("[data-action='copy']");
+          if (copyBtn) {
+            const orig = copyBtn.textContent || "Copy";
+            copyBtn.textContent = "Copied!";
+            setTimeout(() => {
+              copyBtn.textContent = orig;
+            }, 1500);
+          }
         }
       }
-
-      hideError();
-      setLoadingUI(true, "Converting JSON… (please wait)");
-
-      const delimiter = delimiterSelect.value as "," | ";" | "\t";
-      const includeHeaders = headersCheckbox.checked;
-      const flatten = flattenCheckbox.checked;
-      const options = { delimiter, includeHeaders, flatten };
-
-      const finalizeSuccess = (result: string) => {
-        // If output is too large, store it and render a preview
-        if (result.length > LARGE_FILE_THRESHOLD) {
-          largeCsvContent = result;
-          const previewLength = 20000;
-          const previewText =
-            result.substring(0, previewLength) +
-            `\n\n... [Truncated: ${(result.length - previewLength).toLocaleString()} more characters. Click Copy or Download to get the full CSV.]`;
-          csvOutput.value = previewText;
-        } else {
-          largeCsvContent = null;
-          csvOutput.value = result;
-        }
-
-        updateGutter(csvOutput, csvGutter);
-        hideError();
-        setLoadingUI(false);
-      };
-
-      const finalizeError = (message: string) => {
-        showError(message || "Failed to convert JSON.");
-        largeCsvContent = null;
-        csvOutput.value = "";
-        updateGutter(csvOutput, csvGutter);
-        setLoadingUI(false);
-      };
-
-      if (input.length < USE_WORKER_ABOVE_CHARS) {
-        try {
-          const result = jsonToCsv(input, options);
-          finalizeSuccess(result);
-        } catch (err: any) {
-          finalizeError(err?.message || "Failed to convert JSON.");
-        }
-        return;
-      }
-
-      try {
-        const worker = new Worker(new URL("../../workers/json-to-csv.worker.ts", import.meta.url), {
-          type: "module",
-        });
-
-        worker.onmessage = (e: MessageEvent<any>) => {
-          const data = e.data;
-          if (!data) return;
-
-          if (data.type === "progress") {
-            const step = data.payload?.step;
-            const detail = data.payload?.detail;
-            const csvStatusEl = document.getElementById("csv-status");
-            if (csvStatusEl) {
-              csvStatusEl.innerText =
-                step === "start"
-                  ? "Converting JSON… (parsing)"
-                  : `Converting JSON… (${detail || step || "processing"})`;
-            }
-
-            return;
-          }
-
-          if (data.type === "done") {
-            worker.terminate();
-            finalizeSuccess(data.payload?.result || "");
-            return;
-          }
-
-          if (data.type === "error") {
-            worker.terminate();
-            finalizeError(data.payload?.message || "Conversion failed.");
-            return;
-          }
-        };
-
-        worker.onerror = () => {
-          worker.terminate();
-          finalizeError("Conversion worker crashed. Try a smaller input.");
-        };
-
-        worker.postMessage({
-          type: "convert",
-          payload: { jsonStr: input, options },
-        });
-      } catch {
-        finalizeError("Failed to start conversion worker. Try again.");
-      }
+      if (action === "download") downloadCsv(jsonToCsvStore);
     });
-  }
-
-  // Copy Click
-  if (copyBtn) {
-    copyBtn.addEventListener("click", () => {
-      const outputVal = largeCsvContent !== null ? largeCsvContent : csvOutput.value;
-      if (!outputVal) return;
-      navigator.clipboard.writeText(outputVal).then(() => {
-        const origText = copyBtn.innerText;
-        copyBtn.innerText = "Copied!";
-        setTimeout(() => {
-          copyBtn.innerText = origText;
-        }, 1500);
-      });
-    });
-  }
-
-  // Download Click
-  if (downloadBtn) {
-    downloadBtn.addEventListener("click", () => {
-      const outputVal = largeCsvContent !== null ? largeCsvContent : csvOutput.value;
-      if (!outputVal) return;
-      const blob = new Blob([outputVal], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", "data.csv");
-      link.style.visibility = "hidden";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    });
-  }
-
-  // File Drag & Drop
-  if (dragZone && fileInput) {
-    dragZone.addEventListener("click", () => {
-      fileInput.click();
-    });
-
-    fileInput.addEventListener("change", (e: any) => {
-      const file = e.target.files[0];
-      if (file) {
-        readFile(file);
-      }
-    });
-
-    dragZone.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      dragZone.classList.add("drag-over");
-    });
-
-    dragZone.addEventListener("dragleave", () => {
-      dragZone.classList.remove("drag-over");
-    });
-
-    dragZone.addEventListener("drop", (e: any) => {
-      e.preventDefault();
-      dragZone.classList.remove("drag-over");
-      const file = e.dataTransfer.files[0];
-      if (file) {
-        readFile(file);
-      }
-    });
-  }
-
-  function readFile(file: File) {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      const text = e.target.result || "";
-      handleJsonInput(text);
-    };
-    reader.readAsText(file);
-  }
-
-  function showError(msg: string) {
-    if (errorBanner && errorMessage) {
-      errorMessage.innerText = msg;
-      errorBanner.classList.remove("hidden");
-    }
-  }
-
-  function hideError() {
-    if (errorBanner) {
-      errorBanner.classList.add("hidden");
-    }
   }
 </script>
 
@@ -720,19 +404,6 @@ Example:
   }
 
   /* Workspace Layout */
-  .workspace-grid {
-    display: grid;
-    grid-template-columns: 1fr 280px 1fr;
-    gap: var(--spacing-lg);
-    align-items: stretch;
-  }
-
-  .workspace-col {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
-
   .workspace-card {
     display: flex;
     flex-direction: column;
@@ -754,146 +425,6 @@ Example:
     font-weight: 600;
     font-size: 11px;
     letter-spacing: 0.05em;
-  }
-
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-  }
-
-  .action-divider {
-    font-size: 11px;
-    color: var(--color-hairline-strong);
-  }
-
-  .text-btn {
-    background: none;
-    border: none;
-    color: var(--color-body);
-    cursor: pointer;
-    font-size: 11px;
-    padding: 0;
-    transition: color 0.15s ease;
-  }
-
-  .text-btn:hover:not(:disabled) {
-    color: var(--color-ink);
-    text-decoration: underline;
-  }
-
-  .text-btn:disabled {
-    color: var(--color-hairline-strong);
-    cursor: not-allowed;
-  }
-
-  /* Drag zone */
-  .drag-zone {
-    border: 1px dashed var(--color-hairline-strong);
-    border-radius: var(--rounded-sm);
-    padding: var(--spacing-md);
-    text-align: center;
-    cursor: pointer;
-    transition:
-      border-color 0.15s ease,
-      background-color 0.15s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-xxs);
-    background-color: var(--color-canvas-soft);
-  }
-
-  .drag-zone:hover,
-  .drag-zone.drag-over {
-    border-color: var(--color-ink);
-    background-color: var(--color-canvas-soft-2);
-  }
-
-  .drag-zone:hover .browse-link {
-    text-decoration: underline;
-  }
-
-  .drag-icon {
-    color: var(--color-mute);
-  }
-
-  .drag-text {
-    color: var(--color-body);
-    margin: 0;
-  }
-
-  .browse-link {
-    color: var(--color-accent);
-    font-weight: 500;
-  }
-
-  .file-input-hidden {
-    display: none;
-  }
-
-  /* Editor Layout */
-  .editor-outer {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-    gap: var(--spacing-xs);
-  }
-
-  .editor-wrapper {
-    position: relative;
-    display: flex;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    line-height: 1.5;
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    background-color: var(--color-canvas-soft-2);
-    min-height: 0;
-    flex: 1;
-    overflow: hidden;
-  }
-
-  .editor-gutter {
-    padding: var(--spacing-md) 0;
-    text-align: right;
-    color: var(--color-mute);
-    background-color: var(--color-canvas-soft);
-    border-right: 1px solid var(--color-hairline);
-    user-select: none;
-    width: 48px;
-    min-width: 48px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    padding-right: var(--spacing-sm);
-    overflow: hidden;
-    box-sizing: border-box;
-  }
-
-  .editor-gutter span {
-    display: block;
-    height: 19.5px;
-  }
-
-  .editor-textarea {
-    width: 100%;
-    height: 100%;
-    flex: 1;
-    border: none;
-    background: transparent;
-    color: var(--color-ink);
-    padding: var(--spacing-md);
-    font-family: inherit;
-    font-size: inherit;
-    line-height: inherit;
-    resize: none;
-    outline: none;
-    white-space: pre;
-    overflow-x: auto;
-    overflow-y: auto;
-    box-sizing: border-box;
   }
 
   .editor-info-bar {
@@ -1074,50 +605,19 @@ Example:
     background-color: #29bc9b;
   }
 
-  /* Error Banner */
-  .error-banner {
-    margin-top: var(--spacing-md);
-    background-color: var(--color-error-soft);
-    border: 1px solid rgba(238, 0, 0, 0.15);
-    border-radius: var(--rounded-sm);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    display: flex;
-    align-items: flex-start;
-    gap: var(--spacing-xs);
-  }
-
-  .error-banner.hidden {
-    display: none;
-  }
-
-  .error-icon {
-    color: var(--color-error);
-    font-weight: bold;
-    font-size: 14px;
-    line-height: 1.2;
-  }
-
-  .error-msg {
-    color: var(--color-error);
-    margin: 0;
-    line-height: 1.4;
-  }
-
   @media (min-width: 960px) {
     .workspace-card .editor-outer {
-      flex: none; /* Disable flex-grow so fixed height is respected */
-      height: 650px; /* Set fixed height as requested (600-700px range) */
-      min-height: 650px; /* Ensure it doesn't collapse */
+      flex: none;
+      height: 650px;
+      min-height: 650px;
     }
 
-    /* Ensure wrapper also respects this, though editor-outer should be enough */
     .workspace-card .editor-wrapper {
-      height: 100%; /* Ensure it fills the editor-outer */
+      height: 100%;
     }
   }
 
   @media (max-width: 959px) {
-    /* Stack panels vertically without inheriting the desktop 70vh layout */
     .workspace-grid {
       grid-template-columns: 1fr;
       gap: var(--spacing-xl);
@@ -1140,20 +640,17 @@ Example:
       display: flex;
     }
 
-    /* Prevent horizontal overflow on mobile/tablet */
     .tool-section {
       overflow-x: hidden;
       min-width: 0;
     }
 
-    /* Fixed mobile editor height: whole editor component is 350px */
     .workspace-card .editor-outer {
       height: 350px;
       flex: 0 0 350px;
       min-height: 0;
     }
 
-    /* Allow the editor area to consume remaining space and scroll internally */
     .workspace-card .editor-outer {
       overflow: hidden;
     }
@@ -1163,20 +660,17 @@ Example:
       min-height: 0;
     }
 
-    /* Remove negative margin that can cause overlap in fixed-height mode */
     .workspace-card .editor-info-bar {
       margin-top: 0;
       flex: 0 0 auto;
       min-height: 0;
     }
 
-    /* Ensure textarea stays clipped to the fixed editor height and scrolls */
     .workspace-card .editor-textarea {
       height: 100%;
       overflow: auto;
     }
 
-    /* Keep gutter from forcing horizontal expansion */
     .workspace-card .editor-gutter {
       min-width: 0;
     }

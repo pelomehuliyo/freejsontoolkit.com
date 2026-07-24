@@ -1,0 +1,106 @@
+---
+/**
+ * ToolWorkspace — Flexible tool workspace grid.
+ *
+ * Supports multiple layout variants so future tools can reuse the same shell.
+ *
+ * Layout variants:
+ *   "3-col"     — input | controls | output   (default, used by JSON→CSV)
+ *   "2-col"     — input | output              (validator, formatter)
+ *   "stacked"   — input above output          (mobile-friendly generics)
+ *   "single"    — single column               (generator)
+ *
+ * Usage:
+ *   <ToolWorkspace layout="3-col">
+ *     <div slot="input">    <!-- input panel content -->    </div>
+ *     <div slot="controls"> <!-- settings/conversion -->    </div>
+ *     <div slot="output">   <!-- output panel content -->   </div>
+ *   </ToolWorkspace>
+ *
+ *   For 2-col layout, omit the "controls" slot.
+ */
+
+import Container from "../Container.astro";
+
+interface Props {
+  layout?: "3-col" | "2-col" | "stacked" | "single";
+}
+
+const { layout = "3-col" } = Astro.props;
+
+const gridClass = `workspace-grid grid-${layout}`;
+---
+
+<Container size="wide">
+  <div class={gridClass}>
+    <div class="workspace-col input-col" role="region" aria-label="Input">
+      <slot name="input" />
+    </div>
+
+    {
+      layout === "3-col" && (
+        <div class="workspace-col controls-col" role="region" aria-label="Controls">
+          <slot name="controls" />
+        </div>
+      )
+    }
+
+    <div class="workspace-col output-col" role="region" aria-label="Output">
+      <slot name="output" />
+    </div>
+  </div>
+</Container>
+
+<style>
+  .workspace-grid {
+    display: grid;
+    gap: var(--spacing-lg);
+    align-items: stretch;
+    flex: 1;
+  }
+
+  .workspace-col {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  /* 3-column: input | controls | output */
+  .grid-3-col {
+    grid-template-columns: 1fr 280px 1fr;
+  }
+
+  /* 2-column: input | output */
+  .grid-2-col {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Stacked: input above output */
+  .grid-stacked {
+    grid-template-columns: 1fr;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* Single column */
+  .grid-single {
+    grid-template-columns: 1fr;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 959px) {
+    .workspace-grid {
+      grid-template-columns: 1fr !important;
+      gap: var(--spacing-xl);
+      max-width: 100%;
+      margin: 0;
+      min-width: 0;
+      overflow-x: hidden;
+    }
+
+    .workspace-col {
+      min-width: 0;
+    }
+  }
+</style>

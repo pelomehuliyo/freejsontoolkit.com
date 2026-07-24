@@ -1,0 +1,220 @@
+---
+/**
+ * CodeEditor — Lightweight textarea with line-number gutter.
+ *
+ * Design goals:
+ *   - Pure textarea (no Monaco, no CodeMirror, no syntax highlighting)
+ *   - Synchronised scrolling between gutter and textarea
+ *   - Readonly / editable mode
+ *   - Large text handling (>1000 lines → placeholder gutter)
+ *   - Mobile-friendly
+ *
+ * Props:
+ *   id          — Unique element ID
+ *   value       — Initial text content
+ *   placeholder — Placeholder text
+ *   readonly    — Whether the textarea is readonly (default: false)
+ *   label       — Accessible label for screen readers
+ *
+ * Slots:
+ *   (default) — Content rendered below the editor (e.g. status bar)
+ */
+
+interface Props {
+  id: string;
+  value?: string;
+  placeholder?: string;
+  readonly?: boolean;
+  label: string;
+}
+
+const { id, value = "", placeholder = "", readonly = false, label } = Astro.props;
+const gutterId = `${id}-gutter`;
+const textareaId = `${id}-textarea`;
+---
+
+<div class="editor-outer" data-editor-id={id}>
+  <div class="editor-wrapper">
+    <div class="editor-gutter" id={gutterId} aria-hidden="true" role="presentation">
+      <span>1</span>
+    </div>
+    <textarea
+      id={textareaId}
+      class="editor-textarea"
+      value={value}
+      placeholder={placeholder}
+      readonly={readonly}
+      spellcheck="false"
+      aria-label={label}
+      aria-multiline="true"></textarea>
+  </div>
+  <slot />
+</div>
+
+<script>
+  (function () {
+    const script = document.currentScript;
+    if (!script) return;
+    const container = script.parentElement;
+    if (!container) return;
+
+    const editorId = container.getAttribute("data-editor-id");
+    if (!editorId) return;
+
+    const textarea = document.getElementById(editorId + "-textarea") as HTMLTextAreaElement | null;
+    const gutter = document.getElementById(editorId + "-gutter") as HTMLElement | null;
+    if (!textarea || !gutter) return;
+
+    var LARGE_THRESHOLD = 500000;
+
+    function updateGutter() {
+      var lines = textarea.value.split("\n");
+      var lineCount = Math.max(1, lines.length);
+
+      if (lineCount > 1000) {
+        gutter.innerHTML =
+          '<span>1</span><span style="height:' +
+          (lineCount - 1) * 19.5 +
+          'px;text-align:center;color:var(--color-mute)">\u2026</span>';
+        gutter.scrollTop = textarea.scrollTop;
+        return;
+      }
+
+      var html = "";
+      for (var i = 1; i <= lineCount; i++) {
+        html += "<span>" + i + "</span>";
+      }
+      gutter.innerHTML = html;
+    }
+
+    function syncScroll() {
+      gutter.scrollTop = textarea.scrollTop;
+    }
+
+    function handlePaste(e) {
+      var pasteText = (e.clipboardData && e.clipboardData.getData("text")) || "";
+      if (pasteText.length > LARGE_THRESHOLD) {
+        e.preventDefault();
+        container.dispatchEvent(
+          new CustomEvent("editor-large-paste", {
+            bubbles: true,
+            detail: { text: pasteText, length: pasteText.length },
+          }),
+        );
+        return;
+      }
+      requestAnimationFrame(updateGutter);
+    }
+
+    textarea.addEventListener("input", updateGutter);
+    textarea.addEventListener("scroll", syncScroll);
+    textarea.addEventListener("paste", handlePaste);
+    updateGutter();
+
+    textarea.__updateGutter = updateGutter;
+  })();
+</script>
+
+<style>
+  .editor-outer {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    gap: var(--spacing-xs);
+    flex: 1;
+  }
+
+  .editor-wrapper {
+    position: relative;
+    display: flex;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.5;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft-2);
+    min-height: 0;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .editor-gutter {
+    padding: var(--spacing-md) 0;
+    text-align: right;
+    color: var(--color-mute);
+    background-color: var(--color-canvas-soft);
+    border-right: 1px solid var(--color-hairline);
+    user-select: none;
+    width: 48px;
+    min-width: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding-right: var(--spacing-sm);
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .editor-gutter span {
+    display: block;
+    height: 19.5px;
+  }
+
+  .editor-textarea {
+    width: 100%;
+    height: 100%;
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--color-ink);
+    padding: var(--spacing-md);
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    resize: none;
+    outline: none;
+    white-space: pre;
+    overflow-x: auto;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+
+  .editor-textarea:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: -3px;
+    border-radius: var(--rounded-xs);
+  }
+
+  @media (min-width: 960px) {
+    .editor-outer {
+      height: 650px;
+      min-height: 650px;
+    }
+
+    .editor-wrapper {
+      height: 100%;
+    }
+  }
+
+  @media (max-width: 959px) {
+    .editor-outer {
+      height: 350px;
+      flex: 0 0 350px;
+      overflow: hidden;
+    }
+
+    .editor-wrapper {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .editor-textarea {
+      height: 100%;
+      overflow: auto;
+    }
+
+    .editor-gutter {
+      min-width: 0;
+    }
+  }
+</style>
