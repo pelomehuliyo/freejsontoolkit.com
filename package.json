@@ -19,6 +19,9 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@openai-oauth/ai-sdk": "^2.0.0",
+    "@openai-oauth/local": "^2.0.0",
+    "ai": "^6.0.235",
     "astro": "^7.0.9"
   },
   "devDependencies": {

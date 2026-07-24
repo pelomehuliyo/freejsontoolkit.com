@@ -1,17 +1,14 @@
 /**
- * CSV Engine — Performance Benchmark Suite (Final)
+ * CSV Engine — Performance Benchmark Suite
  *
  * Measures baseline performance of the CSV engine across multiple sizes.
+ * The spread-operator bug in buildRecords() has been fixed — all sizes now work.
  *
- * ⚠️ CRITICAL ENGINE BUG DISCOVERED: `buildRecords()` at csvParser.ts:353 uses
- *    `Math.max(...rows.map(...))` which hits JS spread-operator argument limit
- *    (~125K). Any CSV with >125K rows FAILS to parse. Sizes 500K and 1M are
- *    affected — they cannot be benchmarked until this bug is fixed.
+ * Data is generated lazily inside each benchmark function (not at module load)
+ * to avoid vitest collection-time timeouts for large datasets (500K, 1M).
  *
- * Tested sizes: 1K, 10K, 100K (safe for all operations).
- * Data is pre-generated once per describe block using deterministic seed (42).
- *
- * Run: `npx vitest bench --run`
+ * Run: `npx vitest bench --run` (smaller sizes, quick)
+ * Run: `npx vitest bench --run --testTimeout=300000` (all sizes, generous timeout)
  * Existing tests: `npx vitest run` — all 237 pass ✅
  */
 
@@ -25,14 +22,17 @@ import { generateBenchmarkCsv, CSV_SIZES } from "./csvBenchmarkData";
 // Configuration
 // ──────────────────────────────────────────────
 
-// Only sizes that work (Math.max spread bug prevents > ~125K rows)
-const WORKING_SIZES = CSV_SIZES.filter((s) => s.rowCount <= 100_000);
+// All sizes: 1K, 10K, 100K, 500K, 1M
+const ALL_SIZES = CSV_SIZES;
 // Edge case sizes (smaller for quick execution)
 const SMALL_SIZES = CSV_SIZES.filter((s) => s.rowCount <= 10_000);
 
-// Pre-generate all CSV data once at module load time
+/**
+ * Lazy data generator: creates CSV data only on first call, then caches it.
+ * This avoids generating 1M rows (~50MB) during module load/collection.
+ */
 const csvCache = new Map<number, string>();
-function csv(rowCount: number): string {
+function getCsv(rowCount: number): string {
     let c = csvCache.get(rowCount);
     if (!c) {
         c = generateBenchmarkCsv(rowCount).csv;
@@ -45,17 +45,21 @@ function csv(rowCount: number): string {
 // 1. Parse Only
 // ──────────────────────────────────────────────
 
-describe("CSV Parse (parseCsv)", () => {
-    for (const size of WORKING_SIZES) {
-        const data = csv(size.rowCount);
+describe("1 CSV Parse (parseCsv)", () => {
+    for (const size of ALL_SIZES) {
+        // Create a closure that captures the row count
+        // Data is generated lazily inside the benchmark function
+        const rowCount = size.rowCount;
+        const label = size.label;
 
         bench(
-            `${size.label} rows`,
+            `${label} rows`,
             () => {
+                const data = getCsv(rowCount);
                 const result = parseCsv(data);
                 if (!result.success) throw new Error(`Parse failed: ${result.error?.message}`);
             },
-            size.rowCount >= 100_000 ? { time: 10_000, warmupTime: 3_000 } : { time: 5_000 },
+            rowCount >= 500_000 ? { time: 60_000, warmupTime: 10_000 } : rowCount >= 100_000 ? { time: 30_000, warmupTime: 5_000 } : { time: 5_000 },
         );
     }
 });
@@ -64,24 +68,23 @@ describe("CSV Parse (parseCsv)", () => {
 // 2. Parse + Validate
 // ──────────────────────────────────────────────
 
-describe("CSV Parse + Validate", () => {
-    // Pre-parse once for each size
-    const parsedCache = new Map<number, ReturnType<typeof parseCsv>>();
-
-    for (const size of WORKING_SIZES) {
-        if (!parsedCache.has(size.rowCount)) {
-            const data = csv(size.rowCount);
-            parsedCache.set(size.rowCount, parseCsv(data));
-        }
-        const parseResult = parsedCache.get(size.rowCount)!;
+describe("2 CSV Parse + Validate", () => {
+    for (const size of ALL_SIZES) {
+        const rowCount = size.rowCount;
+        const label = size.label;
 
         bench(
-            `${size.label} rows`,
+            `${label} rows`,
             () => {
+                const data = getCsv(rowCount);
+                const parseResult = parseCsv(data);
+                if (!parseResult.success || !parseResult.csv) {
+                    throw new Error(`Parse failed: ${parseResult.error?.message}`);
+                }
                 const result = validateCsv(parseResult);
                 if (!result) throw new Error("Validation returned no result");
             },
-            size.rowCount >= 100_000 ? { time: 10_000, warmupTime: 3_000 } : { time: 5_000 },
+            rowCount >= 500_000 ? { time: 60_000, warmupTime: 10_000 } : rowCount >= 100_000 ? { time: 30_000, warmupTime: 5_000 } : { time: 5_000 },
         );
     }
 });
@@ -90,25 +93,23 @@ describe("CSV Parse + Validate", () => {
 // 3. Type Inference
 // ──────────────────────────────────────────────
 
-describe("CSV Type Inference (analyzeTypes)", () => {
-    const parsedCache = new Map<number, NonNullable<ReturnType<typeof parseCsv>["csv"]>>();
-
-    for (const size of WORKING_SIZES) {
-        if (!parsedCache.has(size.rowCount)) {
-            const data = csv(size.rowCount);
-            const r = parseCsv(data);
-            if (!r.success || !r.csv) throw new Error("Pre-parse failed");
-            parsedCache.set(size.rowCount, r.csv);
-        }
-        const parsedCsv = parsedCache.get(size.rowCount)!;
+describe("3 CSV Type Inference (analyzeTypes)", () => {
+    for (const size of ALL_SIZES) {
+        const rowCount = size.rowCount;
+        const label = size.label;
 
         bench(
-            `${size.label} rows`,
+            `${label} rows`,
             () => {
-                const analysis = analyzeTypes(parsedCsv);
+                const data = getCsv(rowCount);
+                const parseResult = parseCsv(data);
+                if (!parseResult.success || !parseResult.csv) {
+                    throw new Error(`Parse failed: ${parseResult.error?.message}`);
+                }
+                const analysis = analyzeTypes(parseResult.csv);
                 if (!analysis.complete) throw new Error("Analysis incomplete");
             },
-            size.rowCount >= 100_000 ? { time: 10_000, warmupTime: 3_000 } : { time: 5_000 },
+            rowCount >= 500_000 ? { time: 60_000, warmupTime: 10_000 } : rowCount >= 100_000 ? { time: 30_000, warmupTime: 5_000 } : { time: 5_000 },
         );
     }
 });
@@ -117,13 +118,15 @@ describe("CSV Type Inference (analyzeTypes)", () => {
 // 4. Full Pipeline
 // ──────────────────────────────────────────────
 
-describe("CSV Full Pipeline (parse + validate + types)", () => {
-    for (const size of WORKING_SIZES) {
-        const data = csv(size.rowCount);
+describe("4 CSV Full Pipeline (parse + validate + types)", () => {
+    for (const size of ALL_SIZES) {
+        const rowCount = size.rowCount;
+        const label = size.label;
 
         bench(
-            `${size.label} rows`,
+            `${label} rows`,
             () => {
+                const data = getCsv(rowCount);
                 const parseResult = parseCsv(data);
                 if (!parseResult.success || !parseResult.csv) {
                     throw new Error(`Parse failed: ${parseResult.error?.message}`);
@@ -133,7 +136,7 @@ describe("CSV Full Pipeline (parse + validate + types)", () => {
                 const a = analyzeTypes(parseResult.csv);
                 if (!a.complete) throw new Error("Analysis incomplete");
             },
-            size.rowCount >= 100_000 ? { time: 10_000, warmupTime: 3_000 } : { time: 5_000 },
+            rowCount >= 500_000 ? { time: 90_000, warmupTime: 15_000 } : rowCount >= 100_000 ? { time: 30_000, warmupTime: 5_000 } : { time: 5_000 },
         );
     }
 });
@@ -142,13 +145,15 @@ describe("CSV Full Pipeline (parse + validate + types)", () => {
 // 5. Edge Cases
 // ──────────────────────────────────────────────
 
-describe("CSV Edge Cases", () => {
+describe("5 CSV Edge Cases", () => {
     // Quoted fields
     for (const size of SMALL_SIZES) {
-        const { csv: raw } = generateBenchmarkCsv(size.rowCount);
-        const quoted = raw.split("\n").map((l) => l.split(",").map((f) => `"${f}"`).join(",")).join("\n");
+        const rowCount = size.rowCount;
+        const label = size.label;
 
-        bench(`quoted fields — ${size.label} rows`, () => {
+        bench(`quoted fields — ${label} rows`, () => {
+            const { csv: raw } = generateBenchmarkCsv(rowCount);
+            const quoted = raw.split("\n").map((l) => l.split(",").map((f) => `"${f}"`).join(",")).join("\n");
             const r = parseCsv(quoted);
             if (!r.success) throw new Error(`Parse failed: ${r.error?.message}`);
         }, { time: 5_000 });
@@ -156,8 +161,11 @@ describe("CSV Edge Cases", () => {
 
     // Headerless
     for (const size of SMALL_SIZES) {
-        const data = csv(size.rowCount);
-        bench(`headerless — ${size.label} rows`, () => {
+        const rowCount = size.rowCount;
+        const label = size.label;
+
+        bench(`headerless — ${label} rows`, () => {
+            const data = getCsv(rowCount);
             const r = parseCsv(data, { hasHeader: false });
             if (!r.success) throw new Error(`Parse failed: ${r.error?.message}`);
         }, { time: 5_000 });
@@ -165,8 +173,11 @@ describe("CSV Edge Cases", () => {
 
     // Auto delimiter
     for (const size of SMALL_SIZES) {
-        const data = csv(size.rowCount);
-        bench(`auto delimiter — ${size.label} rows`, () => {
+        const rowCount = size.rowCount;
+        const label = size.label;
+
+        bench(`auto delimiter — ${label} rows`, () => {
+            const data = getCsv(rowCount);
             const r = parseCsv(data, { delimiter: "auto" });
             if (!r.success) throw new Error(`Parse failed: ${r.error?.message}`);
         }, { time: 5_000 });
@@ -177,8 +188,8 @@ describe("CSV Edge Cases", () => {
 // 6. Sub-Operations (10K)
 // ──────────────────────────────────────────────
 
-describe("CSV Sub-operations (10K rows, pre-parsed)", () => {
-    const data = csv(10_000);
+describe("6 CSV Sub-operations (10K rows, pre-parsed)", () => {
+    const data = getCsv(10_000);
     const parseResult = parseCsv(data);
     if (!parseResult.success || !parseResult.csv) throw new Error("Pre-parse failed");
     const parsedCsv = parseResult.csv;
@@ -198,8 +209,8 @@ describe("CSV Sub-operations (10K rows, pre-parsed)", () => {
 // 7. Memory Estimate (10K)
 // ──────────────────────────────────────────────
 
-describe("Memory Estimates (10K rows)", () => {
-    const data = csv(10_000);
+describe("7 Memory Estimates (10K rows)", () => {
+    const data = getCsv(10_000);
     const parseResult = parseCsv(data);
     if (!parseResult.success || !parseResult.csv) throw new Error("Pre-parse failed");
 
@@ -218,4 +229,3 @@ describe("Memory Estimates (10K rows)", () => {
         if (total < 0) throw new Error("Unexpected");
     });
 });
-

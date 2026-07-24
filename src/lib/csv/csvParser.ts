@@ -350,7 +350,14 @@ function buildRecords(
   }
 
   // Determine column count (use the longest row)
-  const columnCount = Math.max(...rows.map((r) => r.length));
+  // NOTE: Iterative approach to avoid JavaScript spread-operator argument limit (~125K).
+  // Math.max(...rows.map(...)) would crash for CSV files with >125K rows.
+  let columnCount = 0;
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i].length > columnCount) {
+      columnCount = rows[i].length;
+    }
+  }
 
   // Resolve headers
   let headers: string[];
