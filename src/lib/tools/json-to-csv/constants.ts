@@ -24,23 +24,33 @@ export const USE_WORKER_ABOVE_CHARS = 400_000;
 /** Number of characters to show in preview mode for both input and output */
 export const PREVIEW_LENGTH = 20_000;
 
-// ── Worker progress steps ──
+// ── Worker progress stages ──
+// Matches the WorkerStage union in workerProtocol.ts
 
-export const WORKER_STEPS = {
-    START: "start",
-    PARSING: "parsing",
-    FLATTENING: "flattening",
-    FORMATTING: "formatting",
-    DONE: "done",
-    ERROR: "error",
+export const WORKER_STAGES = {
+  PARSING: "parsing",
+  FLATTENING: "flattening",
+  FORMATTING: "formatting",
+  COMPLETE: "complete",
 } as const;
+
+// ── Worker timeout (ms) ──
+// How long to wait before forcefully terminating a hung worker
+
+export const WORKER_TIMEOUT_MS = 60_000;
+
+// ── Cancellation grace period (ms) ──
+// After sending a cancel request, how long to wait for the worker to
+// acknowledge before force-terminating the worker thread.
+
+export const CANCELLATION_GRACE_MS = 500;
 
 // ── UI options ──
 
 export const DELIMITER_OPTIONS: DelimiterOption[] = [
-    { value: ",", label: "Comma ( , )" },
-    { value: ";", label: "Semicolon ( ; )" },
-    { value: "\t", label: "Tab ( \\t )" },
+  { value: ",", label: "Comma ( , )" },
+  { value: ";", label: "Semicolon ( ; )" },
+  { value: "\t", label: "Tab ( \\t )" },
 ];
 
 // ── Sample data ──

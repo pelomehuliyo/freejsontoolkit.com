@@ -6,6 +6,8 @@
  * can generate presentation text.
  */
 
+import type { WorkerStage } from "./workerProtocol";
+
 /** Input validation / file status */
 export type InputStatus = "empty" | "ready" | "valid" | "invalid" | "large-file-loaded";
 
@@ -19,6 +21,12 @@ export type Delimiter = "," | ";" | "\t";
 export interface DelimiterOption {
     value: Delimiter;
     label: string;
+}
+
+/** Structured conversion progress reported by the worker */
+export interface ConversionProgress {
+    stage: WorkerStage;
+    percentage?: number;
 }
 
 /**
@@ -47,6 +55,14 @@ export interface JsonToCsvState {
     inputStatus: InputStatus;
     outputStatus: OutputStatus;
     error: string | null;
+
+    // ── Worker Lifecycle ──
+    /** True while a conversion is in progress */
+    isConverting: boolean;
+    /** True when the user has requested cancellation */
+    isCancelling: boolean;
+    /** Structured progress from the worker (null when not converting) */
+    conversionProgress: ConversionProgress | null;
 }
 
 /** Factory for the default/initial state */
@@ -61,5 +77,8 @@ export const DEFAULT_STATE: JsonToCsvState = {
     inputStatus: "empty",
     outputStatus: "empty",
     error: null,
+    isConverting: false,
+    isCancelling: false,
+    conversionProgress: null,
 };
 

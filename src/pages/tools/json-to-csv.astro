@@ -124,6 +124,7 @@ Example:
   import {
     handleInput,
     convertJsonToCsv,
+    cancelConversion,
     loadSample,
     clearAll,
     copyCsv,
@@ -180,7 +181,26 @@ Example:
     jsonCharCount.textContent = charCount.toLocaleString() + " chars";
   }
 
-  function updateOutputStatus(status: string, charCount: number) {
+  function stageLabel(stage: string): string {
+    switch (stage) {
+      case "parsing":
+        return "Parsing JSON…";
+      case "flattening":
+        return "Flattening objects…";
+      case "formatting":
+        return "Formatting CSV…";
+      case "complete":
+        return "Conversion complete";
+      default:
+        return "Converting…";
+    }
+  }
+
+  function updateOutputStatus(
+    status: string,
+    charCount: number,
+    progress?: { stage: string; percentage?: number } | null,
+  ) {
     if (!csvStatus || !csvCharCount) return;
     switch (status) {
       case "empty":
@@ -189,16 +209,31 @@ Example:
         csvStatus.textContent = "CSV Status: Ready";
         break;
       case "generating":
-        csvStatus.textContent = "Converting JSON…";
+        if (progress) {
+          const label = stageLabel(progress.stage);
+          csvStatus.textContent =
+            progress.percentage != null ? `${label} (${progress.percentage}%)` : label;
+        } else {
+          csvStatus.textContent = "Converting JSON…";
+        }
         break;
     }
     const suffix = charCount > 0 ? (charCount > 500000 ? " (Large Output)" : "") : "";
     csvCharCount.textContent = charCount.toLocaleString() + " chars" + suffix;
   }
 
-  function updateConvertBtn(loading: boolean) {
+  function updateConvertBtn(isConverting: boolean, isCancelling: boolean) {
     if (!convertBtn) return;
-    convertBtn.disabled = loading;
+    if (isCancelling) {
+      convertBtn.textContent = "Cancelling…";
+      convertBtn.disabled = true;
+    } else if (isConverting) {
+      convertBtn.textContent = "Cancel";
+      convertBtn.disabled = false;
+    } else {
+      convertBtn.textContent = "Convert JSON";
+      convertBtn.disabled = false;
+    }
   }
 
   function updateCopyDownload(disabled: boolean) {
@@ -234,13 +269,12 @@ Example:
 
     // Update status displays
     updateInputStatus(state.inputStatus, state.jsonInput.length);
-    updateOutputStatus(state.outputStatus, state.csvOutput.length);
+    updateOutputStatus(state.outputStatus, state.csvOutput.length, state.conversionProgress);
 
     // Update button states
-    const isGenerating = state.outputStatus === "generating";
-    updateConvertBtn(isGenerating);
+    updateConvertBtn(state.isConverting, state.isCancelling);
     const hasOutput = !!state.csvOutput || !!state.largeCsvContent;
-    updateCopyDownload(!hasOutput || isGenerating);
+    updateCopyDownload(!hasOutput || state.isConverting);
 
     // Error display
     if (errorBanner) {
@@ -278,10 +312,15 @@ Example:
     });
   }
 
-  // ── Convert button ──
+  // ── Convert / Cancel button ──
   if (convertBtn) {
     convertBtn.addEventListener("click", () => {
-      convertJsonToCsv(jsonToCsvStore);
+      const state = jsonToCsvStore.get();
+      if (state.isConverting) {
+        cancelConversion(jsonToCsvStore);
+      } else {
+        convertJsonToCsv(jsonToCsvStore);
+      }
     });
   }
 

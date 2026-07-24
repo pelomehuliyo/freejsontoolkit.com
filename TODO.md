@@ -1,35 +1,68 @@
-# Phase 1 — Component Architecture Foundation ✅ COMPLETE
+# Phase 3 — Worker Architecture Refinement
 
-## Files Created (8 total)
+## ✅ Plan Approved — Implementing
 
-| File | Purpose |
-|---|---|
-| `src/lib/state/toolStore.ts` | Observable store with equality guard, zero deps |
-| `src/components/tools/ToolShell.astro` | Page layout wrapper using BaseLayout |
-| `src/components/tools/ToolHeader.astro` | Breadcrumb + H1 + subtitle + privacy notice |
-| `src/components/tools/ToolWorkspace.astro` | Flexible grid (3-col, 2-col, stacked, single) |
-| `src/components/tools/CodeEditor.astro` | Textarea with line gutter, scroll sync, large-text |
-| `src/components/tools/DragDropZone.astro` | Accessible file drop target (keyboard + screen reader) |
-| `src/components/tools/ToolActions.astro` | Registry-driven action buttons (copy/download/clear/sample) |
-| `src/components/tools/ErrorBanner.astro` | Accessible error display with role="alert" |
+### Steps
 
-## Verification
+- [x] Create `src/lib/tools/json-to-csv/workerProtocol.ts`
+- [x] Update `src/lib/tools/json-to-csv/constants.ts`
+- [x] Update `src/lib/tools/json-to-csv/types.ts`
+- [x] Rewrite `src/workers/json-to-csv.worker.ts`
+- [x] Rewrite `src/lib/tools/json-to-csv/jsonToCsvWorker.ts`
+- [x] Update `src/lib/tools/json-to-csv/actions.ts`
+- [x] Update `src/pages/tools/json-to-csv.astro`
 
-- **`npm test`** — ✅ **254 tests passed** (5 test files, 258 total, 174s)
-- **`npm run build`** — ✅ **10 pages built, Complete!** (21s)
+1. **Create `src/lib/tools/json-to-csv/workerProtocol.ts`**
+   - `WorkerStage` union type: `"parsing" | "flattening" | "formatting" | "complete"`
+   - `ConvertRequest` with `requestId` + payload
+   - `CancelRequest` with `requestId`
+   - `ProgressResponse`, `DoneResponse`, `ErrorResponse`, `CancelledResponse` — all with `requestId`
+   - `WorkerClientHandle` interface
+   - `WorkerProgress` interface
 
-## Files Modified
+2. **Update `src/lib/tools/json-to-csv/constants.ts`**
+   - Add `WORKER_TIMEOUT_MS` exported constant (60_000)
+   - Update `WORKER_STEPS` to match protocol stages
 
-- **None.** Phase 1 is additive only. No existing files touched.
+3. **Update `src/lib/tools/json-to-csv/types.ts`**
+   - Add `ConversionProgress` interface
+   - Add `isCancelling` and `conversionProgress` fields to `JsonToCsvState`
+   - Update `DEFAULT_STATE`
 
-## Next Phase (Ready to Start)
+4. **Rewrite `src/workers/json-to-csv.worker.ts`**
+   - Import `convertJsonToCsv` from CSV engine
+   - Implement typed message handler matching `WorkerRequest` union
+   - Send `ProgressResponse` with stage at natural boundaries
+   - Check cancellation flag per `requestId` between stages
+   - Send `CancelledResponse` on cancellation
+   - Send `DoneResponse` with CSV result
+   - Send `ErrorResponse` on failure
+   - No fake percentages — only real measurable progress
 
-**Phase 2** — Wire existing JSON→CSV functionality into the new components:
-- Create `src/lib/tools/json-to-csv/actions.ts` + largeFileHandler + fileHandler
-- Rewrite `src/pages/tools/json-to-csv.astro` to compose:
-  - `ToolShell` → `ToolHeader` + `ToolWorkspace` (3-col) + info sections
-  - `DragDropZone` + `CodeEditor` (input) + `CodeEditor` readonly (output)
-  - `ToolActions` (sample/clear) + `ToolActions` (copy/download)
-  - `ErrorBanner` for validation errors
-  - Store-driven state via `toolStore.ts`
+5. **Rewrite `src/lib/tools/json-to-csv/jsonToCsvWorker.ts`**
+   - Implement typed message passing with `requestId`
+   - Return `WorkerClientHandle` (`{ result, cancel }`)
+   - Use `WORKER_TIMEOUT_MS` from constants
+   - Move threshold logic inside (whether to use worker)
+   - Cancel sends `CancelRequest` with `requestId`, then force-terminates after short timeout
+   - Reject result promise on cancel/timeout/error
+
+6. **Update `src/lib/tools/json-to-csv/actions.ts`**
+   - Use new `WorkerClientHandle` pattern
+   - Integrate cancellation — set `isCancelling` in store
+   - Wire cancel to `workerHandle.cancel()`
+   - Remove sync/worker threshold logic (worker client owns this)
+   - Use structured progress from store
+
+7. **Update `src/pages/tools/json-to-csv.astro`**
+   - Add cancel button (visible during conversion)
+   - Wire cancel action
+   - Use structured progress for status display
+   - Handle `isCancelling` state
+
+### After Implementation
+```bash
+npm test
+npm run build
+```
 

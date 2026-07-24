@@ -11,17 +11,20 @@
  */
 
 import type { Store } from "../../state/toolStore";
-import type { JsonToCsvState, Delimiter } from "./types";
-import { jsonToCsv } from "../../converter";
+import type { JsonToCsvState, Delimiter, ConversionProgress } from "./types";
 import { convertInWorker } from "./jsonToCsvWorker";
+import type { WorkerClientHandle } from "./workerProtocol";
 import {
     LARGE_FILE_THRESHOLD,
     WARNING_THRESHOLD,
     MAX_INPUT_CHARS,
-    USE_WORKER_ABOVE_CHARS,
     PREVIEW_LENGTH,
     SAMPLE_JSON,
 } from "./constants";
+
+// ── Module-level reference to the current conversion handle ──
+// Allows cancellation across multiple rapid conversions.
+let currentWorkerHandle: WorkerClientHandle | null = null;
 
 // ── Input Handling ──
 
@@ -38,6 +41,7 @@ export function handleInput(store: Store<JsonToCsvState>, text: string): void {
         largeCsvContent: null,
         outputStatus: "empty",
         error: null,
+        conversionProgress: null,
     };
 
     if (!text.trim()) {
@@ -93,7 +97,7 @@ export function handleInput(store: Store<JsonToCsvState>, text: string): void {
 
 /**
  * Run the JSON→CSV conversion using the current store settings.
- * Automatically uses the Web Worker for large inputs.
+ * The worker client handles the decision of whether to use a Web Worker.
  */
 export async function convertJsonToCsv(store: Store<JsonToCsvState>): Promise<void> {
     const state = store.get();
@@ -108,20 +112,25 @@ export async function convertJsonToCsv(store: Store<JsonToCsvState>): Promise<vo
 
     // Warn before processing extremely large files
     if (trimmed.length > WARNING_THRESHOLD) {
-        // Note: confirm() is a browser API — this is the one acceptable side-effect
-        // since it blocks user interaction by design.
         const proceed = confirm(
             `The JSON data is large (${(trimmed.length / 1024 / 1024).toFixed(1)} MB). Converting it might take a few seconds and consume memory. Do you want to proceed?`,
         );
         if (!proceed) return;
     }
 
+    // Cancel any previous conversion that might still be running
+    cancelCurrentConversion();
+
+    // Reset state for new conversion
     store.update((s) => ({
         ...s,
         error: null,
         outputStatus: "generating",
         csvOutput: "",
         largeCsvContent: null,
+        isConverting: true,
+        isCancelling: false,
+        conversionProgress: null,
     }));
 
     const options = {
@@ -131,49 +140,92 @@ export async function convertJsonToCsv(store: Store<JsonToCsvState>): Promise<vo
     };
 
     try {
-        let result: string;
+        const handle = convertInWorker(trimmed, options, (progress) => {
+            // Update structured progress in store
+            const conversionProgress: ConversionProgress = {
+                stage: progress.stage,
+                percentage: progress.percentage,
+            };
+            store.update((s) => ({
+                ...s,
+                conversionProgress,
+            }));
+        });
 
-        if (trimmed.length < USE_WORKER_ABOVE_CHARS) {
-            // Synchronous path (small input)
-            result = jsonToCsv(trimmed, options);
-        } else {
-            // Worker path (large input)
-            result = await convertInWorker(trimmed, options, (step) => {
-                store.update((s) => ({
-                    ...s,
-                    csvStatus: step === "start" ? "Converting JSON… (parsing)" : `Converting JSON… (${step})`,
-                }));
-            });
-        }
+        // Store the handle for cancellation
+        currentWorkerHandle = handle;
+
+        const result = await handle.result;
 
         // Handle large output with preview
-        if (result.length > LARGE_FILE_THRESHOLD) {
+        if (result.csv.length > LARGE_FILE_THRESHOLD) {
             const preview =
-                result.substring(0, PREVIEW_LENGTH) +
-                `\n\n... [Truncated: ${(result.length - PREVIEW_LENGTH).toLocaleString()} more characters. Click Copy or Download to get the full CSV.]`;
+                result.csv.substring(0, PREVIEW_LENGTH) +
+                `\n\n... [Truncated: ${(result.csv.length - PREVIEW_LENGTH).toLocaleString()} more characters. Click Copy or Download to get the full CSV.]`;
 
             store.update((s) => ({
                 ...s,
                 csvOutput: preview,
-                largeCsvContent: result,
+                largeCsvContent: result.csv,
                 outputStatus: "generated",
+                isConverting: false,
+                isCancelling: false,
+                conversionProgress: null,
             }));
         } else {
             store.update((s) => ({
                 ...s,
-                csvOutput: result,
+                csvOutput: result.csv,
                 largeCsvContent: null,
                 outputStatus: "generated",
+                isConverting: false,
+                isCancelling: false,
+                conversionProgress: null,
             }));
         }
+
+        currentWorkerHandle = null;
     } catch (err: any) {
+        // Check if this was a cancellation
+        const isCancel = err?.message?.includes("cancelled") || err?.message?.includes("Cancelled");
+
         store.update((s) => ({
             ...s,
-            error: err?.message || "Failed to convert JSON.",
-            csvOutput: "",
-            largeCsvContent: null,
-            outputStatus: "empty",
+            error: isCancel ? null : (err?.message || "Failed to convert JSON."),
+            csvOutput: isCancel ? s.csvOutput : "",
+            largeCsvContent: isCancel ? s.largeCsvContent : null,
+            outputStatus: isCancel ? s.outputStatus : "empty",
+            isConverting: false,
+            isCancelling: false,
+            conversionProgress: null,
         }));
+
+        currentWorkerHandle = null;
+    }
+}
+
+/**
+ * Cancel the currently running conversion, if any.
+ */
+export function cancelConversion(store: Store<JsonToCsvState>): void {
+    const state = store.get();
+    if (!state.isConverting) return;
+
+    store.update((s) => ({
+        ...s,
+        isCancelling: true,
+    }));
+
+    cancelCurrentConversion();
+}
+
+/**
+ * Internal helper to cancel the current worker handle.
+ */
+function cancelCurrentConversion(): void {
+    if (currentWorkerHandle) {
+        currentWorkerHandle.cancel();
+        currentWorkerHandle = null;
     }
 }
 
@@ -186,6 +238,8 @@ export function loadSample(store: Store<JsonToCsvState>): void {
 
 /** Reset all content and clear errors */
 export function clearAll(store: Store<JsonToCsvState>): void {
+    cancelCurrentConversion();
+
     store.update((s) => ({
         ...s,
         jsonInput: "",
@@ -195,6 +249,9 @@ export function clearAll(store: Store<JsonToCsvState>): void {
         inputStatus: "empty",
         outputStatus: "empty",
         error: null,
+        isConverting: false,
+        isCancelling: false,
+        conversionProgress: null,
     }));
 }
 
