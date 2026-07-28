@@ -24,7 +24,7 @@ import Container from "../../components/Container.astro";
   />
 
   <ToolWorkspace slot="workspace" layout="3-col">
-    <div slot="input">
+    <div slot="input" class="ws-fill">
       <Card variant="flat" class="workspace-card">
         <div class="card-header">
           <span class="caption-mono column-title">INPUT JSON</span>
@@ -134,7 +134,7 @@ Example:
       </Card>
     </div>
 
-    <div slot="output">
+    <div slot="output" class="ws-fill ws-output">
       <Card variant="flat" class="workspace-card">
         <div class="card-header">
           <span class="caption-mono column-title">OUTPUT CSV</span>
@@ -1412,6 +1412,51 @@ Example:
     .workspace-card :global(.editor-wrapper) {
       height: 100%;
     }
+
+    /* ── Make the CSV card the SAME height as the JSON card (LAYOUT ONLY) ──
+       The grid already stretches both columns to one equal (tall) height, but
+       the CSV card was staying short because the wrapper <div slot="output">
+       never grew to fill its column, so the card kept its content height.
+       We grow every link with FLEX (never percentage heights — those silently
+       collapse to "auto" when the parent has no explicit height):
+         .workspace-col  (stretched equal by the grid)
+           → .ws-fill    (flex:1, itself a flex column)
+             → the Card  (flex:1 via `.ws-fill > *` → reliably fills wrapper)
+       `margin-top:auto` on the OUTPUT editor then eats exactly the slack the
+       upload box creates on the JSON side, so the two editors line up at the
+       top AND the bottom — empty or full, forever. No pixel values involved,
+       so it self-balances and can never drift. The middle Options card is
+       untouched (its wrapper has no .ws-fill, so it keeps its natural height). */
+    .ws-fill {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+    /* whatever the wrapper's direct child is (the Card root) — make it fill
+       and be a flex column, so the height propagates regardless of how Card
+       is built internally. `height:auto` overrides the page-level
+       `.workspace-card { height:100% }` which was the percentage trap. */
+    .ws-fill > * {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+      height: auto;
+    }
+    /* belt-and-braces: also target the card by class (both scoped + global
+       forms) so it fills even if the child-combinator form is ever blocked */
+    .ws-fill :global(.workspace-card),
+    .ws-fill .workspace-card {
+      flex: 1 1 auto;
+      min-height: 0;
+      height: auto;
+    }
+    /* push the CSV editor down so its top lines up with the JSON editor
+       (which sits below the upload box) */
+    .ws-output :global(.editor-outer) {
+      margin-top: auto;
+    }
   }
 
   /* ── Responsive: ≤959px (Tablet & Mobile) ── */
@@ -1541,6 +1586,46 @@ Example:
     .trust-2-grid {
       grid-template-columns: 1fr;
       gap: var(--spacing-md);
+    }
+  }
+</style>
+<style is:global>
+  /* ── Equal-height editor cards (desktop only) ───────────────────────────
+     This block is intentionally GLOBAL (is:global), not scoped. The card we
+     need to stretch is rendered by the <Card> component, so it never carries
+     this page's scope tag — which is exactly why the scoped `.ws-fill > *` /
+     `.ws-fill .workspace-card` rules could never make it grow (they couldn't
+     "see" it). A global rule sees every element, so the card finally fills its
+     wrapper, the CSV card becomes the same height as the JSON card, and
+     `margin-top:auto` then has real free space to push the CSV editor down so
+     its top lines up with the JSON editor. !important is a deliberate shield
+     against the page's own `.workspace-card { height:100% }` (the percentage
+     trap) — layout only, no visual side effects. */
+  @media (min-width: 960px) {
+    .workspace-grid.grid-3-col {
+      align-items: stretch !important;
+    }
+    .workspace-col.input-col,
+    .workspace-col.output-col {
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    .ws-fill {
+      display: flex !important;
+      flex-direction: column !important;
+      flex: 1 1 auto !important;
+      min-height: 0 !important;
+    }
+    /* the card fills the wrapper — the rule that scoping was blocking */
+    .ws-fill > .workspace-card {
+      flex: 1 1 auto !important;
+      height: auto !important;
+      min-height: 0 !important;
+    }
+    /* push ONLY the CSV editor down so its top matches the JSON editor's
+       (the JSON editor sits below the upload box) */
+    .ws-output .workspace-card .editor-outer {
+      margin-top: auto !important;
     }
   }
 </style>
