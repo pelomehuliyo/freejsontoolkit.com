@@ -6,7 +6,7 @@
  *   - Pure textarea (no Monaco, no CodeMirror, no syntax highlighting)
  *   - Synchronised scrolling between gutter and textarea
  *   - Readonly / editable mode
- *   - Large text handling (>1000 lines → placeholder gutter)
+ *   - Simple line rendering for all file sizes (single text node — fast)
  *   - Mobile-friendly
  *
  * Props:
@@ -16,8 +16,24 @@
  *   readonly    — Whether the textarea is readonly (default: false)
  *   label       — Accessible label for screen readers
  *
+ * Events (on textarea element):
+ *   'editor-refresh' — Dispatch to force gutter re-render after
+ *                      programmatic value changes.
+ *
  * Slots:
  *   (default) — Content rendered below the editor (e.g. status bar)
+ *
+ * NOTE on the gutter:
+ *   The numbers are rendered as ONE text node (with real line breaks)
+ *   inside a single static element (.gutter-content). We do this on
+ *   purpose: Astro's scoped <style> only reaches elements that exist in
+ *   the template at build time, NOT elements a script creates later.
+ *   The old approach (one <span> per line, created via innerHTML) meant
+ *   the "stack each number vertically" rule never applied to those spans,
+ *   so the numbers collapsed onto one horizontal row ("123456…") and the
+ *   scroll sync drifted on large files. A single static element + real
+ *   line breaks (white-space: pre) avoids that entirely and is also much
+ *   faster for big files.
  */
 
 interface Props {
@@ -30,13 +46,14 @@ interface Props {
 
 const { id, value = "", placeholder = "", readonly = false, label } = Astro.props;
 const gutterId = `${id}-gutter`;
+const gutterContentId = `${id}-gutter-content`;
 const textareaId = `${id}-textarea`;
 ---
 
 <div class="editor-outer" data-editor-id={id}>
   <div class="editor-wrapper">
     <div class="editor-gutter" id={gutterId} aria-hidden="true" role="presentation">
-      <span>1</span>
+      <div class="gutter-content" id={gutterContentId}>1</div>
     </div>
     <textarea
       id={textareaId}
@@ -53,65 +70,86 @@ const textareaId = `${id}-textarea`;
 
 <script>
   (function () {
-    const script = document.currentScript;
-    if (!script) return;
-    const container = script.parentElement;
-    if (!container) return;
+    var roots = document.querySelectorAll("[data-editor-id]");
+    for (var ri = 0; ri < roots.length; ri++) {
+      (function () {
+        var container = roots[ri];
+        var editorId = container.getAttribute("data-editor-id");
+        if (!editorId) return;
 
-    const editorId = container.getAttribute("data-editor-id");
-    if (!editorId) return;
+        var textarea = document.getElementById(editorId + "-textarea");
+        var gutter = document.getElementById(editorId + "-gutter");
+        var gutterContent = document.getElementById(editorId + "-gutter-content");
+        if (!textarea || !gutter || !gutterContent) return;
 
-    const textarea = document.getElementById(editorId + "-textarea") as HTMLTextAreaElement | null;
-    const gutter = document.getElementById(editorId + "-gutter") as HTMLElement | null;
-    if (!textarea || !gutter) return;
+        // Guard: already initialized
+        if (textarea.__ceInitialized) return;
+        textarea.__ceInitialized = true;
 
-    var LARGE_THRESHOLD = 500000;
+        // Track current line count to avoid unnecessary work
+        var currentLineCount = 1;
 
-    function updateGutter() {
-      var lines = textarea.value.split("\n");
-      var lineCount = Math.max(1, lines.length);
+        /**
+         * Re-render the gutter when the line count changes.
+         * We build a single string "1\n2\n3\n…\nN" and drop it in as one
+         * text node. The CSS `white-space: pre` on .gutter-content turns
+         * each "\n" into a real line break, so the numbers stack vertically
+         * and stay perfectly aligned with the textarea's lines.
+         */
+        function renderGutterLines() {
+          var lineCount = textarea.value.split("\n").length;
+          if (lineCount < 1) lineCount = 1;
 
-      if (lineCount > 1000) {
-        gutter.innerHTML =
-          '<span>1</span><span style="height:' +
-          (lineCount - 1) * 19.5 +
-          'px;text-align:center;color:var(--color-mute)">\u2026</span>';
-        gutter.scrollTop = textarea.scrollTop;
-        return;
-      }
+          // Skip work if nothing changed
+          if (lineCount === currentLineCount) return;
+          currentLineCount = lineCount;
 
-      var html = "";
-      for (var i = 1; i <= lineCount; i++) {
-        html += "<span>" + i + "</span>";
-      }
-      gutter.innerHTML = html;
+          var parts = new Array(lineCount);
+          for (var i = 0; i < lineCount; i++) {
+            parts[i] = String(i + 1);
+          }
+          // textContent (not innerHTML) — safe, fast, no per-line elements
+          gutterContent.textContent = parts.join("\n");
+        }
+
+        /**
+         * Sync gutter scroll position with textarea scroll.
+         * (overflow-y is hidden on the gutter, but programmatic scrollTop
+         *  still works — so the numbers follow the code as you scroll.)
+         */
+        function syncGutterScroll() {
+          gutter.scrollTop = textarea.scrollTop;
+        }
+
+        // Scroll: keep the numbers lined up with the visible code
+        textarea.addEventListener("scroll", syncGutterScroll);
+
+        // Typing: re-render numbers, then re-sync scroll
+        textarea.addEventListener("input", function () {
+          renderGutterLines();
+          syncGutterScroll();
+        });
+
+        // Paste: re-render after the browser has inserted the text
+        textarea.addEventListener("paste", function () {
+          requestAnimationFrame(function () {
+            renderGutterLines();
+            syncGutterScroll();
+          });
+        });
+
+        // Custom event: re-render after the page sets the value in code
+        textarea.addEventListener("editor-refresh", function () {
+          currentLineCount = -1; // force a fresh render
+          renderGutterLines();
+          syncGutterScroll();
+        });
+
+        // First paint
+        renderGutterLines();
+        syncGutterScroll();
+      })();
     }
-
-    function syncScroll() {
-      gutter.scrollTop = textarea.scrollTop;
-    }
-
-    function handlePaste(e) {
-      var pasteText = (e.clipboardData && e.clipboardData.getData("text")) || "";
-      if (pasteText.length > LARGE_THRESHOLD) {
-        e.preventDefault();
-        container.dispatchEvent(
-          new CustomEvent("editor-large-paste", {
-            bubbles: true,
-            detail: { text: pasteText, length: pasteText.length },
-          }),
-        );
-        return;
-      }
-      requestAnimationFrame(updateGutter);
-    }
-
-    textarea.addEventListener("input", updateGutter);
-    textarea.addEventListener("scroll", syncScroll);
-    textarea.addEventListener("paste", handlePaste);
-    updateGutter();
-
-    textarea.__updateGutter = updateGutter;
   })();
 </script>
 
@@ -120,8 +158,6 @@ const textareaId = `${id}-textarea`;
     display: flex;
     flex-direction: column;
     min-height: 0;
-    gap: var(--spacing-xs);
-    flex: 1;
   }
 
   .editor-wrapper {
@@ -139,7 +175,10 @@ const textareaId = `${id}-textarea`;
   }
 
   .editor-gutter {
-    padding: var(--spacing-md) 0;
+    /* top + bottom padding now MATCH the textarea's vertical padding so the
+       numbers line up with the code from the first line to the very last,
+       and the scroll ranges are identical (no drift at the bottom). */
+    padding: var(--spacing-md) var(--spacing-sm) var(--spacing-md) 0;
     text-align: right;
     color: var(--color-mute);
     background-color: var(--color-canvas-soft);
@@ -147,17 +186,19 @@ const textareaId = `${id}-textarea`;
     user-select: none;
     width: 48px;
     min-width: 48px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    padding-right: var(--spacing-sm);
-    overflow: hidden;
+    overflow-y: hidden;
+    overflow-x: hidden;
     box-sizing: border-box;
   }
 
-  .editor-gutter span {
-    display: block;
-    height: 19.5px;
+  /* The numbers live here as plain text with real line breaks.
+     `white-space: pre` is what makes them stack vertically — one number
+     per line — instead of running sideways. font-size / line-height /
+     text-align are inherited from the wrappers above, so they always
+     match the textarea exactly. */
+  .gutter-content {
+    white-space: pre;
+    font-variant-numeric: tabular-nums;
   }
 
   .editor-textarea {
@@ -183,38 +224,5 @@ const textareaId = `${id}-textarea`;
     outline: 3px solid var(--color-accent);
     outline-offset: -3px;
     border-radius: var(--rounded-xs);
-  }
-
-  @media (min-width: 960px) {
-    .editor-outer {
-      height: 650px;
-      min-height: 650px;
-    }
-
-    .editor-wrapper {
-      height: 100%;
-    }
-  }
-
-  @media (max-width: 959px) {
-    .editor-outer {
-      height: 350px;
-      flex: 0 0 350px;
-      overflow: hidden;
-    }
-
-    .editor-wrapper {
-      flex: 1 1 auto;
-      min-height: 0;
-    }
-
-    .editor-textarea {
-      height: 100%;
-      overflow: auto;
-    }
-
-    .editor-gutter {
-      min-width: 0;
-    }
   }
 </style>

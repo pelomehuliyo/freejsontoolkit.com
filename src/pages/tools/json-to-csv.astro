@@ -8,11 +8,12 @@ import ToolActions from "../../components/tools/ToolActions.astro";
 import ErrorBanner from "../../components/tools/ErrorBanner.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
+import Container from "../../components/Container.astro";
 ---
 
 <ToolShell
-  title="JSON to CSV Converter - Free JSON Toolkit"
-  description="Convert nested JSON arrays into clean, structured CSV tables offline. 100% local browser-based JSON to CSV converter with support for flattening objects."
+  title="JSON to CSV Converter — Convert JSON to CSV Online (Free, Local)"
+  description="Free online JSON to CSV converter. Flatten nested JSON arrays into clean CSV tables — 100% local, no upload, no server. Supports custom delimiters, flattening, and header rows."
   activePath="/tools/json-to-csv"
 >
   <ToolHeader
@@ -59,14 +60,14 @@ Example:
             <select id="delimiter-select" class="settings-select">
               <option value=",">Comma ( , )</option>
               <option value=";">Semicolon ( ; )</option>
-              <option value="\t">Tab ( \t )</option>
+              <option value="\t">Tab ( \\t )</option>
             </select>
           </div>
         </div>
 
         <div class="settings-group checkbox-group">
           <label class="checkbox-container body-sm">
-            <input type="checkbox" id="flatten-checkbox" checked />
+            <input type="checkbox" id="flatten-checkbox" checked={true} />
             <span class="checkbox-checkmark"></span>
             Flatten nested objects
           </label>
@@ -77,7 +78,7 @@ Example:
 
         <div class="settings-group checkbox-group">
           <label class="checkbox-container body-sm">
-            <input type="checkbox" id="headers-checkbox" checked />
+            <input type="checkbox" id="headers-checkbox" checked={true} />
             <span class="checkbox-checkmark"></span>
             Include header row
           </label>
@@ -89,10 +90,46 @@ Example:
           Convert JSON
         </Button>
 
+        <!-- Progress Section (visible only during conversion) -->
+        <div id="progress-section" class="progress-section hidden">
+          <div class="progress-stage-labels" id="stage-labels" role="status" aria-live="polite">
+            <span class="spinner" aria-hidden="true"></span>
+            <span id="progress-text" class="caption">Starting conversion…</span>
+          </div>
+          <div
+            class="progress-bar-track"
+            role="progressbar"
+            aria-valuenow="0"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            id="progress-bar"
+            aria-label="Conversion progress"
+          >
+            <div class="progress-bar-fill indeterminate" id="progress-fill"></div>
+          </div>
+          <div class="stage-stepper" id="stage-stepper" aria-hidden="true">
+            <span class="stage-step" data-stage="parsing">
+              <span class="stage-dot"></span>Parse
+            </span>
+            <span class="stage-connector" data-connector="parsing-flattening"></span>
+            <span class="stage-step" data-stage="flattening">
+              <span class="stage-dot"></span>Flatten
+            </span>
+            <span class="stage-connector" data-connector="flattening-formatting"></span>
+            <span class="stage-step" data-stage="formatting">
+              <span class="stage-dot"></span>Format
+            </span>
+          </div>
+        </div>
+
         <ErrorBanner id="conversion-error" />
 
         <div class="status-banner caption">
-          <span class="status-dot"></span> Local sandbox active
+          <span class="status-indicator">
+            <span class="dot idle" id="status-dot"></span>
+          </span>
+          <span class="sr-only" id="status-announce" aria-live="polite"></span>
+          Local sandbox active
         </div>
       </Card>
     </div>
@@ -103,6 +140,7 @@ Example:
           <span class="caption-mono column-title">OUTPUT CSV</span>
           <ToolActions id="output-actions" variant="inset" actions={["copy", "download"]} />
         </div>
+        <div class="output-notice hidden" id="csv-notice" role="status" aria-live="polite"></div>
         <CodeEditor
           id="csv-output"
           label="CSV output"
@@ -117,6 +155,127 @@ Example:
       </Card>
     </div>
   </ToolWorkspace>
+
+  <!-- How It Works Section -->
+  <section class="tool-content-section" aria-labelledby="how-it-works-title">
+    <Container size="narrow">
+      <div class="content-section-header">
+        <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
+        <h2 id="how-it-works-title" class="display-md section-title">
+          Three steps to convert JSON to CSV
+        </h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">1</span>
+          <h3 class="body-sm-strong step-title">Paste or upload</h3>
+          <p class="caption step-desc">
+            Paste your JSON array or upload a .json file. We support files up to 15M characters.
+          </p>
+        </div>
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">2</span>
+          <h3 class="body-sm-strong step-title">Configure options</h3>
+          <p class="caption step-desc">
+            Choose delimiter (comma, semicolon, tab), toggle flattening for nested objects, and
+            decide whether to include headers.
+          </p>
+        </div>
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">3</span>
+          <h3 class="body-sm-strong step-title">Convert &amp; export</h3>
+          <p class="caption step-desc">
+            Click Convert to transform your JSON into clean CSV. Copy to clipboard or download as a
+            .csv file — all offline.
+          </p>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <!-- Trust Section -->
+  <section class="trust-section-2" aria-labelledby="trust-json-title">
+    <Container size="narrow">
+      <div class="trust-2-grid">
+        <div class="trust-2-item">
+          <h3 class="body-sm-strong">100% Local</h3>
+          <p class="caption">
+            Your data never leaves your browser. No servers, no uploads, no logs.
+          </p>
+        </div>
+        <div class="trust-2-item">
+          <h3 class="body-sm-strong">Handles Large Files</h3>
+          <p class="caption">
+            Web Worker processing keeps the UI responsive for files up to 15M characters.
+          </p>
+        </div>
+        <div class="trust-2-item">
+          <h3 class="body-sm-strong">Flexible Output</h3>
+          <p class="caption">
+            Multiple delimiters, flattening control, and full CSV header support.
+          </p>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-section" aria-labelledby="faq-title-2">
+    <Container size="narrow">
+      <div class="faq-header">
+        <span class="caption-mono section-eyebrow">FAQ</span>
+        <h2 id="faq-title-2" class="display-md section-title">Frequently asked questions</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary class="faq-summary">Is my JSON data uploaded to a server?</summary>
+          <p class="body-md faq-answer">
+            No. Everything runs locally in your browser. Your JSON is never sent to any server — the
+            conversion happens 100% client-side using a Web Worker for large files.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">What is the maximum file size?</summary>
+          <p class="body-md faq-answer">
+            The tool accepts JSON inputs up to 15 million characters. For files above 500K
+            characters, a preview is shown and the full content is used only when you click Convert.
+            Files above 5M characters trigger a confirmation dialog before processing.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">How does object flattening work?</summary>
+          <p class="body-md faq-answer">
+            When flattening is enabled, nested objects are expanded using dot notation. For example, <code
+              >&#123;"user": &#123;"name": "John"&#125;&#125;</code
+            > becomes a column named <code>user.name</code> with value <code>John</code>. This
+            ensures deeply nested JSON is represented as flat CSV columns.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Which delimiters are supported?</summary>
+          <p class="body-md faq-answer">
+            You can choose between comma (,), semicolon (;), and tab (\\t) delimiters. The default
+            is comma, which works with most spreadsheet applications like Excel and Google Sheets.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Can I cancel a running conversion?</summary>
+          <p class="body-md faq-answer">
+            Yes. During conversion, the button changes to "Cancel". Click it to stop the conversion.
+            For large files using a Web Worker, cancellation also terminates the worker thread to
+            free memory.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Does the tool work offline?</summary>
+          <p class="body-md faq-answer">
+            After the initial page load, the tool works offline — there is no server-side dependency
+            for the conversion logic. All processing is built into the JavaScript bundle.
+          </p>
+        </details>
+      </div>
+    </Container>
+  </section>
 </ToolShell>
 
 <script>
@@ -127,73 +286,206 @@ Example:
     cancelConversion,
     loadSample,
     clearAll,
-    copyCsv,
-    downloadCsv,
+    getCsvContent,
     setDelimiter,
     setFlatten,
     setIncludeHeaders,
   } from "../../lib/tools/json-to-csv/actions";
   import type { Delimiter } from "../../lib/tools/json-to-csv/types";
+  import { STAGE_LABELS, STAGE_ORDER } from "../../lib/tools/json-to-csv/constants";
+  import { debounce } from "../../shared/debounce";
+  import { announce, initAnnounce } from "../../shared/announce";
+  import { copyToClipboard } from "../../shared/clipboard";
+  import { downloadFile } from "../../shared/download";
 
   // ── DOM refs ──
   const jsonTextarea = document.getElementById("json-input-textarea") as HTMLTextAreaElement | null;
-  const jsonGutter = document.getElementById("json-input-gutter") as HTMLElement | null;
   const csvTextarea = document.getElementById("csv-output-textarea") as HTMLTextAreaElement | null;
-  const csvGutter = document.getElementById("csv-output-gutter") as HTMLElement | null;
   const jsonStatus = document.getElementById("json-validation-status") as HTMLElement | null;
   const jsonCharCount = document.getElementById("json-char-count") as HTMLElement | null;
   const csvStatus = document.getElementById("csv-status") as HTMLElement | null;
   const csvCharCount = document.getElementById("csv-char-count") as HTMLElement | null;
+  const csvNotice = document.getElementById("csv-notice") as HTMLElement | null;
   const delimiterSelect = document.getElementById("delimiter-select") as HTMLSelectElement | null;
   const flattenCheckbox = document.getElementById("flatten-checkbox") as HTMLInputElement | null;
   const headersCheckbox = document.getElementById("headers-checkbox") as HTMLInputElement | null;
   const convertBtn = document.getElementById("convert-btn") as HTMLButtonElement | null;
   const errorBanner = document.getElementById("conversion-error") as HTMLElement | null;
+  const progressSection = document.getElementById("progress-section") as HTMLElement | null;
+  const progressText = document.getElementById("progress-text") as HTMLElement | null;
+  const progressFill = document.getElementById("progress-fill") as HTMLElement | null;
+  const progressBar = document.getElementById("progress-bar") as HTMLElement | null;
+  const stageStepper = document.getElementById("stage-stepper") as HTMLElement | null;
+  const statusDot = document.getElementById("status-dot") as HTMLElement | null;
+  const statusAnnounce = document.getElementById("status-announce") as HTMLElement | null;
 
-  // ── Copy button feedback ──
-  let copyBtnEl: HTMLButtonElement | null = null;
-  let origCopyText = "";
+  // ── Initialise shared utilities ──
+  initAnnounce("status-announce");
+
+  // ── Throttle helpers for progress updates ──
+  let rafId = 0;
+  let announceTimer: number | null = null;
+
+  function throttleDomUpdate(fn: () => void): void {
+    if (rafId) return;
+    rafId = requestAnimationFrame(() => {
+      rafId = 0;
+      fn();
+    });
+  }
+
+  /** Sync aria-hidden with a hidden class toggle on an element */
+  function syncAriaHidden(el: HTMLElement | null, hidden: boolean): void {
+    if (!el) return;
+    if (hidden) {
+      el.classList.add("hidden");
+      el.setAttribute("aria-hidden", "true");
+    } else {
+      el.classList.remove("hidden");
+      el.removeAttribute("aria-hidden");
+    }
+  }
+
+  /**
+   * Throttled screen reader announcement for progress stage changes.
+   * Only announces when the stage changes, not every percentage update.
+   */
+  let lastAnnouncedStage: string | null = null;
+  function announceProgressStage(stage: string | null, percentage?: number | null): void {
+    if (!statusAnnounce) return;
+    if (!stage) return;
+    if (stage === lastAnnouncedStage && percentage == null) return;
+    lastAnnouncedStage = stage;
+
+    if (announceTimer) clearTimeout(announceTimer);
+    announceTimer = window.setTimeout(() => {
+      const label = STAGE_LABELS[stage] || stage;
+      const pct = percentage != null ? ` (${percentage}%)` : "";
+      statusAnnounce.textContent = `Conversion: ${label}${pct}`;
+      announceTimer = null;
+    }, 300);
+  }
 
   // ── Input status display helpers ──
   function updateInputStatus(status: string, charCount: number) {
-    if (!jsonStatus || !jsonCharCount) return;
-    switch (status) {
-      case "empty":
-        jsonStatus.textContent = "JSON Status: Empty";
-        jsonStatus.style.color = "";
-        break;
-      case "ready":
-        jsonStatus.textContent = "JSON Status: Ready to convert";
-        jsonStatus.style.color = "var(--color-success)";
-        break;
-      case "large-file-loaded":
-        jsonStatus.textContent = "JSON Status: Large file loaded. Press Convert.";
-        jsonStatus.style.color = "var(--color-accent)";
-        break;
-      case "invalid":
-        jsonStatus.textContent = "JSON Status: Invalid";
-        jsonStatus.style.color = "var(--color-error)";
-        break;
-      default:
-        jsonStatus.textContent = "JSON Status: " + status;
-        jsonStatus.style.color = "";
-    }
-    jsonCharCount.textContent = charCount.toLocaleString() + " chars";
+    throttleDomUpdate(() => {
+      if (!jsonStatus || !jsonCharCount) return;
+      switch (status) {
+        case "empty":
+          jsonStatus.textContent = "JSON Status: Empty";
+          jsonStatus.style.color = "";
+          break;
+        case "ready":
+          jsonStatus.textContent = "JSON Status: Ready to convert";
+          jsonStatus.style.color = "var(--color-success)";
+          break;
+        case "large-file-loaded":
+          jsonStatus.textContent = "JSON Status: Large file loaded. Press Convert.";
+          jsonStatus.style.color = "var(--color-accent)";
+          break;
+        case "invalid":
+          jsonStatus.textContent = "JSON Status: Invalid";
+          jsonStatus.style.color = "var(--color-error)";
+          break;
+        default:
+          jsonStatus.textContent = "JSON Status: " + status;
+          jsonStatus.style.color = "";
+      }
+      jsonCharCount.textContent = charCount.toLocaleString() + " chars";
+    });
   }
 
-  function stageLabel(stage: string): string {
-    switch (stage) {
-      case "parsing":
-        return "Parsing JSON…";
-      case "flattening":
-        return "Flattening objects…";
-      case "formatting":
-        return "Formatting CSV…";
-      case "complete":
-        return "Conversion complete";
-      default:
-        return "Converting…";
-    }
+  function updateStageStepper(currentStage: string | null): void {
+    if (!stageStepper) return;
+    const steps = stageStepper.querySelectorAll(".stage-step");
+    const connectors = stageStepper.querySelectorAll(".stage-connector");
+
+    let activeFound = false;
+    const order = STAGE_ORDER;
+
+    steps.forEach((step) => {
+      const stage = step.getAttribute("data-stage");
+      step.classList.remove("active", "done");
+
+      if (!activeFound && stage === currentStage) {
+        step.classList.add("active");
+        activeFound = true;
+      } else if (!activeFound) {
+        step.classList.add("done");
+      }
+    });
+
+    connectors.forEach((conn) => {
+      conn.classList.remove("done");
+      let isDone = true;
+      for (const s of order) {
+        if (s === currentStage) break;
+        if (s === conn.getAttribute("data-connector")?.split("-")[0]) {
+          break;
+        }
+      }
+      // Mark connectors for stages before current as done
+      const connParts = conn.getAttribute("data-connector")?.split("-") || [];
+      const beforeStage = connParts[0];
+      if (beforeStage && order.indexOf(beforeStage as any) < order.indexOf(currentStage as any)) {
+        conn.classList.add("done");
+      }
+    });
+  }
+
+  function updateProgressUI(
+    isConverting: boolean,
+    isCancelling: boolean,
+    progress?: { stage: string; percentage?: number } | null,
+  ): void {
+    throttleDomUpdate(() => {
+      if (!progressSection || !progressText || !progressFill || !progressBar) return;
+
+      if (isCancelling) {
+        syncAriaHidden(progressSection, false);
+        progressText.textContent = "Cancelling…";
+        progressFill.className = "progress-bar-fill";
+        progressFill.style.width = "0%";
+        progressBar.setAttribute("aria-valuenow", "0");
+        return;
+      }
+
+      if (isConverting) {
+        syncAriaHidden(progressSection, false);
+
+        if (progress) {
+          const label = STAGE_LABELS[progress.stage] || "Converting…";
+          const pct =
+            progress.percentage != null ? Math.min(100, Math.max(0, progress.percentage)) : null;
+          progressText.innerHTML = `<span class="spinner" aria-hidden="true"></span> ${label}${pct != null ? ` (${pct}%)` : "…"}`;
+
+          if (pct != null) {
+            progressFill.className = "progress-bar-fill";
+            progressFill.style.width = pct + "%";
+            progressBar.setAttribute("aria-valuenow", String(pct));
+          } else {
+            progressFill.className = "progress-bar-fill indeterminate";
+            progressFill.style.width = "";
+            progressBar.setAttribute("aria-valuenow", "0");
+          }
+
+          updateStageStepper(progress.stage);
+          announceProgressStage(progress.stage, pct);
+        } else {
+          progressText.innerHTML = '<span class="spinner" aria-hidden="true"></span> Converting…';
+          progressFill.className = "progress-bar-fill indeterminate";
+          progressFill.style.width = "";
+          progressBar.setAttribute("aria-valuenow", "0");
+        }
+      } else {
+        syncAriaHidden(progressSection, true);
+        progressFill.className = "progress-bar-fill";
+        progressFill.style.width = "0%";
+        progressBar.setAttribute("aria-valuenow", "0");
+        updateStageStepper(null);
+        lastAnnouncedStage = null;
+      }
+    });
   }
 
   function updateOutputStatus(
@@ -201,25 +493,29 @@ Example:
     charCount: number,
     progress?: { stage: string; percentage?: number } | null,
   ) {
-    if (!csvStatus || !csvCharCount) return;
-    switch (status) {
-      case "empty":
-      case "ready":
-      case "generated":
-        csvStatus.textContent = "CSV Status: Ready";
-        break;
-      case "generating":
-        if (progress) {
-          const label = stageLabel(progress.stage);
-          csvStatus.textContent =
-            progress.percentage != null ? `${label} (${progress.percentage}%)` : label;
-        } else {
-          csvStatus.textContent = "Converting JSON…";
-        }
-        break;
-    }
-    const suffix = charCount > 0 ? (charCount > 500000 ? " (Large Output)" : "") : "";
-    csvCharCount.textContent = charCount.toLocaleString() + " chars" + suffix;
+    throttleDomUpdate(() => {
+      if (!csvStatus || !csvCharCount) return;
+      switch (status) {
+        case "empty":
+        case "ready":
+        case "generated":
+          csvStatus.textContent = "CSV Status: Ready";
+          break;
+        case "generating":
+          if (progress) {
+            const label = STAGE_LABELS[progress.stage] || "Converting";
+            csvStatus.textContent =
+              progress.percentage != null
+                ? `CSV Status: ${label} (${progress.percentage}%)`
+                : `CSV Status: ${label}…`;
+          } else {
+            csvStatus.textContent = "CSV Status: Converting…";
+          }
+          break;
+      }
+      const suffix = charCount > 0 ? (charCount > 500000 ? " (Large Output)" : "") : "";
+      csvCharCount.textContent = charCount.toLocaleString() + " chars" + suffix;
+    });
   }
 
   function updateConvertBtn(isConverting: boolean, isCancelling: boolean) {
@@ -247,34 +543,137 @@ Example:
     if (downloadBtn) downloadBtn.disabled = disabled;
   }
 
-  function triggerGutter(el: HTMLTextAreaElement | null) {
-    if (el && typeof (el as any).__updateGutter === "function") {
-      (el as any).__updateGutter();
+  function updateStatusDot(inputState: string, isConverting: boolean): void {
+    throttleDomUpdate(() => {
+      if (!statusDot) return;
+      statusDot.classList.remove("idle", "active", "error");
+      if (isConverting) {
+        statusDot.classList.add("active");
+      } else if (inputState === "invalid") {
+        statusDot.classList.add("error");
+      } else {
+        statusDot.classList.add("idle");
+      }
+    });
+  }
+
+  // ── Focus management ──
+  function focusErrorBanner(): void {
+    if (errorBanner && !errorBanner.classList.contains("hidden")) {
+      (errorBanner as any).focus?.();
+      const closeBtn = errorBanner.querySelector(".error-close") as HTMLButtonElement | null;
+      closeBtn?.focus();
     }
   }
 
-  // ── Store subscription ──
-  const unsub = jsonToCsvStore.subscribe((state) => {
-    // Update input textarea
-    if (jsonTextarea && jsonTextarea.value !== state.jsonInput) {
-      jsonTextarea.value = state.jsonInput;
-      triggerGutter(jsonTextarea);
+  function focusConvertBtn(): void {
+    convertBtn?.focus();
+  }
+
+  // ── Keyboard shortcuts ──
+  function handleKeyboardShortcuts(e: KeyboardEvent): void {
+    // Ctrl+Enter or Cmd+Enter to Convert
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      // Don't intercept if user is typing in textarea and just wants a newline
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "TEXTAREA" || tag === "INPUT" || tag === "SELECT") {
+        // Allow default Enter behavior in textareas (newline)
+        return;
+      }
+      e.preventDefault();
+      const state = jsonToCsvStore.get();
+      if (state.isConverting) {
+        cancelConversion(jsonToCsvStore);
+      } else {
+        convertJsonToCsv(jsonToCsvStore);
+      }
     }
 
-    // Update output textarea
+    // Escape to Cancel
+    if (e.key === "Escape") {
+      const state = jsonToCsvStore.get();
+      if (state.isConverting && !state.isCancelling) {
+        e.preventDefault();
+        cancelConversion(jsonToCsvStore);
+      }
+    }
+  }
+
+  // ── Cancel-tracking flag for focus management ──
+  let wasCancelling = false;
+
+  // ── Store subscription ──
+  const unsub = jsonToCsvStore.subscribe((state) => {
+    // Update input textarea — skip writeback while user is actively typing
+    // to prevent cursor position reset and focus loss
+    const inputFocused = jsonTextarea && document.activeElement === jsonTextarea;
+    if (jsonTextarea && jsonTextarea.value !== state.jsonInput && !inputFocused) {
+      jsonTextarea.value = state.jsonInput;
+      jsonTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+
+    // Update output textarea (only when value actually changed — preserves cursor/selection)
     if (csvTextarea && csvTextarea.value !== state.csvOutput) {
       csvTextarea.value = state.csvOutput;
-      triggerGutter(csvTextarea);
+      csvTextarea.dispatchEvent(new Event("editor-refresh"));
     }
 
     // Update status displays
     updateInputStatus(state.inputStatus, state.jsonInput.length);
     updateOutputStatus(state.outputStatus, state.csvOutput.length, state.conversionProgress);
+    updateProgressUI(state.isConverting, state.isCancelling, state.conversionProgress);
+    updateStatusDot(state.inputStatus, state.isConverting);
 
     // Update button states
     updateConvertBtn(state.isConverting, state.isCancelling);
     const hasOutput = !!state.csvOutput || !!state.largeCsvContent;
     updateCopyDownload(!hasOutput || state.isConverting);
+
+    // Focus management & screen reader announcements
+    if (state.outputStatus === "generated" && !state.isConverting) {
+      announce("Conversion complete. CSV output is ready.");
+    }
+
+    if (state.error) {
+      announce("Error: " + state.error);
+      focusErrorBanner();
+    }
+
+    if (state.isConverting && !state.isCancelling) {
+      announce("Conversion in progress");
+    }
+
+    if (state.isCancelling) {
+      wasCancelling = true;
+      announce("Cancelling conversion");
+    }
+
+    // Return focus to convert button only after an explicit cancel completes
+    if (wasCancelling && !state.isConverting && !state.isCancelling) {
+      wasCancelling = false;
+      focusConvertBtn();
+    }
+
+    // Update output notice / preview banner using syncAriaHidden
+    if (csvNotice) {
+      if (state.outputNotice) {
+        csvNotice.textContent = state.outputNotice;
+        syncAriaHidden(csvNotice, false);
+        if (state.isPreview) {
+          csvNotice.className = "output-notice visible preview-notice";
+        } else {
+          csvNotice.className = "output-notice visible info-notice";
+        }
+      } else {
+        syncAriaHidden(csvNotice, true);
+      }
+    }
+
+    // Set aria-busy on the workspace section (not just controls)
+    const workspace = document.querySelector("#workspace-heading") as HTMLElement | null;
+    if (workspace && workspace.parentElement) {
+      workspace.parentElement.setAttribute("aria-busy", String(state.isConverting));
+    }
 
     // Error display
     if (errorBanner) {
@@ -293,14 +692,19 @@ Example:
       const detail = (e as CustomEvent).detail;
       if (detail?.text) {
         handleInput(jsonToCsvStore, detail.text);
+        announce("File loaded: " + (detail.name || "file"));
       }
     });
   }
 
-  // ── Input editor: manual input ──
+  // ── Input editor: manual input (debounced for performance) ──
+  const debouncedInput = debounce((value: string) => {
+    handleInput(jsonToCsvStore, value);
+  }, 150);
+
   if (jsonTextarea) {
     jsonTextarea.addEventListener("input", () => {
-      handleInput(jsonToCsvStore, jsonTextarea.value);
+      debouncedInput(jsonTextarea.value);
     });
 
     jsonTextarea.addEventListener("paste", (e: ClipboardEvent) => {
@@ -308,6 +712,7 @@ Example:
       if (pasteText.length > 500000) {
         e.preventDefault();
         handleInput(jsonToCsvStore, pasteText);
+        announce("Large paste detected (" + pasteText.length.toLocaleString() + " chars)");
       }
     });
   }
@@ -348,8 +753,14 @@ Example:
   if (inputActions) {
     inputActions.addEventListener("tool-action", (e: Event) => {
       const action = (e as CustomEvent).detail?.action;
-      if (action === "sample") loadSample(jsonToCsvStore);
-      if (action === "clear") clearAll(jsonToCsvStore);
+      if (action === "sample") {
+        loadSample(jsonToCsvStore);
+        announce("Sample JSON loaded");
+      }
+      if (action === "clear") {
+        clearAll(jsonToCsvStore);
+        announce("Input cleared");
+      }
     });
   }
 
@@ -358,21 +769,111 @@ Example:
     outputActions.addEventListener("tool-action", async (e: Event) => {
       const action = (e as CustomEvent).detail?.action;
       if (action === "copy") {
-        const ok = await copyCsv(jsonToCsvStore);
+        const csv = getCsvContent(jsonToCsvStore);
+        const ok = csv ? await copyToClipboard(csv) : false;
+        const copyBtn = outputActions.querySelector("[data-action='copy']");
         if (ok) {
-          const copyBtn = outputActions.querySelector("[data-action='copy']");
           if (copyBtn) {
             const orig = copyBtn.textContent || "Copy";
             copyBtn.textContent = "Copied!";
+            announce("CSV copied to clipboard");
             setTimeout(() => {
               copyBtn.textContent = orig;
             }, 1500);
           }
+        } else {
+          announce("Failed to copy CSV");
         }
       }
-      if (action === "download") downloadCsv(jsonToCsvStore);
+      if (action === "download") {
+        const csv = getCsvContent(jsonToCsvStore);
+        if (csv) {
+          downloadFile(csv, "data.csv", "text/csv;charset=utf-8;");
+          announce("CSV download started");
+        }
+      }
     });
   }
+
+  // ── Keyboard shortcuts (global) ──
+  document.addEventListener("keydown", handleKeyboardShortcuts);
+</script>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- LAYOUT INSTRUMENTATION — Step 1: Log computed heights          -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<script is:inline>
+  (function () {
+    /** Resolve element from CSS selector */
+    var q = function (sel) {
+      return document.querySelector(sel);
+    };
+
+    var SELECTORS = [
+      ".tool-workspace-section",
+      ".container-wide",
+      ".workspace-grid",
+      ".workspace-col",
+      ".workspace-card",
+      ".editor-outer",
+      ".editor-wrapper",
+      ".editor-textarea",
+    ];
+
+    /** Snapshot layout metrics for all target elements */
+    function snapshot(label) {
+      var rows = [];
+      SELECTORS.forEach(function (sel) {
+        var els = document.querySelectorAll(sel);
+        // If multiple matches (e.g. .workspace-col, .workspace-card),
+        // take the *first* one (input column)
+        var el = els.length > 0 ? els[0] : null;
+        if (!el) {
+          rows.push({
+            selector: sel,
+            found: false,
+            clientHeight: "-",
+            scrollHeight: "-",
+            offsetHeight: "-",
+            computedHeight: "-",
+          });
+          return;
+        }
+        var cs = getComputedStyle(el);
+        rows.push({
+          selector: sel,
+          found: true,
+          clientHeight: el.clientHeight,
+          scrollHeight: el.scrollHeight,
+          offsetHeight: el.offsetHeight,
+          computedHeight: cs.height,
+        });
+      });
+      console.log("=== LAYOUT " + label + " ===");
+      console.table(rows);
+      // Also log JSON for easy copy
+      console.log(JSON.stringify(rows, null, 2));
+      return rows;
+    }
+
+    // Delay first snapshot until layout is settled
+    var timer = setTimeout(function () {
+      snapshot("BEFORE");
+
+      // Hook into the existing paste handler — snapshot AFTER paste
+      var ta = document.getElementById("json-input-textarea");
+      if (ta) {
+        ta.addEventListener("paste", function () {
+          // snapshot after the DOM has updated from the paste
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              snapshot("AFTER PASTE");
+            });
+          });
+        });
+      }
+    }, 500);
+  })();
 </script>
 
 <style>
@@ -472,7 +973,6 @@ Example:
     align-items: center;
     border: 1px solid var(--color-hairline);
     border-top: none;
-    margin-top: -8px;
     border-bottom-left-radius: var(--rounded-sm);
     border-bottom-right-radius: var(--rounded-sm);
     background-color: var(--color-canvas);
@@ -628,6 +1128,39 @@ Example:
     margin-top: var(--spacing-sm);
   }
 
+  /* Progress Section */
+  .progress-section {
+    margin-top: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm);
+    background-color: var(--color-canvas-soft);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    transition: opacity 0.2s ease;
+  }
+
+  .progress-section.hidden {
+    display: none;
+  }
+
+  .progress-stage-labels {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    min-height: 20px;
+  }
+
+  .progress-stage-labels .spinner {
+    flex-shrink: 0;
+  }
+
+  .progress-section .progress-bar-track {
+    margin-top: 0;
+  }
+
+  /* Status Banner */
   .status-banner {
     display: flex;
     align-items: center;
@@ -644,21 +1177,247 @@ Example:
     background-color: #29bc9b;
   }
 
+  /* ── Tool Content Sections ── */
+  .tool-content-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas-soft);
+    border-top: 1px solid var(--color-hairline);
+  }
+
+  .content-section-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .section-eyebrow {
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: var(--spacing-xxs);
+  }
+
+  .section-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+
+  /* Steps Grid */
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xl);
+  }
+
+  .step-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-lg);
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    text-align: center;
+    align-items: center;
+  }
+
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-accent);
+    color: var(--color-on-primary);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .step-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+
+  .step-desc {
+    color: var(--color-body);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* Trust Section */
+  .trust-section-2 {
+    padding: var(--spacing-4xl) 0;
+    background-color: var(--color-canvas);
+    border-top: 1px solid var(--color-hairline);
+  }
+
+  .trust-2-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xl);
+  }
+
+  .trust-2-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xxs);
+    text-align: center;
+    align-items: center;
+    padding: var(--spacing-md);
+  }
+
+  .trust-2-item h3 {
+    color: var(--color-ink);
+    margin: 0;
+  }
+
+  .trust-2-item p {
+    color: var(--color-body);
+    margin: 0;
+    max-width: 280px;
+    line-height: 1.5;
+  }
+
+  /* FAQ Section overrides */
+  .faq-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas-soft);
+    border-top: 1px solid var(--color-hairline);
+  }
+
+  .faq-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .faq-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+
+  .faq-summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink);
+    padding: var(--spacing-xs) 0;
+    user-select: none;
+  }
+
+  .faq-summary:hover {
+    color: var(--color-accent);
+  }
+
+  .faq-answer {
+    margin-top: var(--spacing-sm);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--color-body);
+    line-height: 1.6;
+  }
+
+  .faq-answer code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background-color: var(--color-canvas-soft-2);
+    padding: 1px 4px;
+    border-radius: var(--rounded-xs);
+  }
+
+  /* ── Output Notice / Preview Banner ── */
+  .output-notice {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--rounded-xs);
+    font-size: 11px;
+    line-height: 1.4;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .output-notice.hidden {
+    display: none;
+  }
+
+  .output-notice.info-notice {
+    background-color: var(--color-canvas-soft-2);
+    border: 1px solid var(--color-hairline);
+    color: var(--color-body);
+  }
+
+  .output-notice.preview-notice {
+    background-color: #fef9e7;
+    border: 1px solid #f9e79f;
+    color: #7d6608;
+  }
+
+  /* ── Skip to content link ── */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: var(--spacing-md);
+    z-index: 10000;
+    background: var(--color-accent);
+    color: var(--color-on-primary);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--rounded-xs);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .skip-link:focus {
+    top: var(--spacing-xs);
+  }
+
+  /* ── SR only ── */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* ── Desktop Layout ── */
   @media (min-width: 960px) {
-    .workspace-card .editor-outer {
+    .workspace-card :global(.editor-outer) {
       flex: none;
       height: 650px;
       min-height: 650px;
     }
 
-    .workspace-card .editor-wrapper {
+    .workspace-card :global(.editor-wrapper) {
       height: 100%;
     }
   }
 
+  /* ── Responsive: ≤959px (Tablet & Mobile) ── */
   @media (max-width: 959px) {
     .workspace-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr !important;
       gap: var(--spacing-xl);
       height: auto;
       align-items: start;
@@ -684,34 +1443,104 @@ Example:
       min-width: 0;
     }
 
-    .workspace-card .editor-outer {
+    .workspace-card :global(.editor-outer) {
       height: 350px;
       flex: 0 0 350px;
       min-height: 0;
     }
 
-    .workspace-card .editor-outer {
-      overflow: hidden;
-    }
-
-    .workspace-card .editor-wrapper {
-      flex: 1 1 auto;
-      min-height: 0;
-    }
-
-    .workspace-card .editor-info-bar {
-      margin-top: 0;
-      flex: 0 0 auto;
-      min-height: 0;
-    }
-
-    .workspace-card .editor-textarea {
+    .workspace-card :global(.editor-wrapper) {
       height: 100%;
-      overflow: auto;
     }
 
-    .workspace-card .editor-gutter {
-      min-width: 0;
+    /* Steps grid collapses to single column */
+    .steps-grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-md);
+    }
+
+    .step-card {
+      padding: var(--spacing-md);
+    }
+
+    .trust-2-grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-md);
+    }
+  }
+
+  /* ── Small Mobile: ≤430px ── */
+  @media (max-width: 430px) {
+    .editor-info-bar {
+      flex-direction: column;
+      gap: var(--spacing-xxs);
+      align-items: flex-start;
+      padding: 6px var(--spacing-xs);
+      font-size: 10px;
+    }
+
+    .card-header {
+      flex-wrap: wrap;
+      gap: var(--spacing-xxs);
+    }
+
+    .settings-card {
+      padding: var(--spacing-md);
+    }
+
+    .step-card {
+      padding: var(--spacing-sm);
+    }
+
+    .step-desc {
+      font-size: 11px;
+    }
+
+    .trust-2-item {
+      padding: var(--spacing-sm);
+    }
+
+    /* Ensure 44px touch targets */
+    .drag-zone,
+    .settings-select,
+    .action-btn,
+    .error-close,
+    .text-btn,
+    .checkbox-container {
+      min-height: 44px;
+    }
+
+    .text-btn {
+      padding: var(--spacing-xxs) var(--spacing-xs);
+    }
+  }
+
+  /* ── Very Small Mobile: ≤375px ── */
+  @media (max-width: 375px) {
+    .workspace-card :global(.editor-outer) {
+      height: 280px;
+      flex: 0 0 280px;
+    }
+
+    .card-header .column-title {
+      font-size: 10px;
+    }
+
+    .card-header .text-btn {
+      font-size: 10px;
+    }
+  }
+
+  /* ── Medium Screens: 768px ── */
+  @media (min-width: 431px) and (max-width: 768px) {
+    .steps-grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-md);
+    }
+
+    .trust-2-grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-md);
     }
   }
 </style>

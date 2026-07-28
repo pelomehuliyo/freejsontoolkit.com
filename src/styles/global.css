@@ -1,4 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap");
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/jetbrains-mono";
 
 :root {
   /* Stark Palette */
@@ -6,7 +7,7 @@
   --color-on-primary: #ffffff;
   --color-ink: #171717;
   --color-body: #4d4d4d;
-  --color-mute: #888888;
+  --color-mute: #6e6e6e;
   --color-hairline: #ebebeb;
   --color-hairline-strong: #a1a1a1;
   --color-canvas: #ffffff;
@@ -54,8 +55,8 @@
   --geist-page-width: 1200px;
 
   /* Typography Fonts */
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+  --font-sans: "Inter Variable", "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
 }
 
 /* Reset styles */
@@ -187,6 +188,176 @@ body {
   line-height: 20px;
   letter-spacing: 0;
   margin: 0;
+}
+
+/* ── Shared Progress Bar ── */
+
+.progress-bar-track {
+  width: 100%;
+  height: 4px;
+  background-color: var(--color-hairline);
+  border-radius: var(--rounded-full);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: var(--color-accent);
+  border-radius: var(--rounded-full);
+  transition: width 0.3s ease;
+  will-change: width;
+}
+
+.progress-bar-fill.indeterminate {
+  width: 30%;
+  animation: indeterminate 1.5s ease-in-out infinite;
+}
+
+@keyframes indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  50% {
+    transform: translateX(200%);
+  }
+
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+/* ── Stage Stepper ── */
+
+.stage-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+}
+
+.stage-step {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--color-mute);
+  transition: color 0.25s ease;
+  white-space: nowrap;
+}
+
+.stage-step.active {
+  color: var(--color-accent);
+  font-weight: 500;
+}
+
+.stage-step.done {
+  color: var(--color-mute);
+}
+
+.stage-step .stage-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--rounded-full);
+  background-color: var(--color-hairline-strong);
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.stage-step.active .stage-dot {
+  background-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(33, 167, 138, 0.15);
+}
+
+.stage-step.done .stage-dot {
+  background-color: var(--color-accent);
+}
+
+.stage-connector {
+  flex: 1;
+  height: 1px;
+  background-color: var(--color-hairline);
+  margin: 0 var(--spacing-xxs);
+  min-width: 8px;
+  transition: background-color 0.25s ease;
+}
+
+.stage-connector.done {
+  background-color: var(--color-accent);
+}
+
+/* ── Spinner ── */
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-hairline-strong);
+  border-top-color: var(--color-accent);
+  border-radius: var(--rounded-full);
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Fade / slide transitions ── */
+
+.fade-in {
+  animation: fadeIn 0.2s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* ── Status indicator dot ── */
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+}
+
+.status-indicator .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--rounded-full);
+  transition: background-color 0.2s ease;
+}
+
+.status-indicator .dot.idle {
+  background-color: var(--color-hairline-strong);
+}
+
+.status-indicator .dot.active {
+  background-color: var(--color-accent);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.status-indicator .dot.error {
+  background-color: var(--color-error);
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
 }
 
 /* Accessibility: Respect user preference for reduced motion */

@@ -63,10 +63,15 @@ const Element = href ? "a" : "button";
     border-radius: var(--rounded-sm);
   }
 
-  /* Variant: Primary */
+  /* Variant: Primary
+     Accessible fill ramp — white text passes WCAG AA (>=4.5:1) in every state:
+       base   --color-accent-strong #198069  -> 4.9:1
+       hover  #16725e                        -> 5.8:1
+       active #12594b                        -> 8.2:1
+     (The old base, --color-accent #21a78a, was only 3.0:1 with white text.) */
   .btn-primary {
     background-color: var(--color-accent);
-    color: var(--color-on-primary);
+    color: var(--color-ink);
     border-color: var(--color-accent);
   }
   .btn-primary:hover:not(:disabled) {

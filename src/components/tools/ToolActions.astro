@@ -82,33 +82,31 @@ for (var i = 0; i < actionIds.length; i++) {
 
 <script>
   (function () {
-    var script = document.currentScript;
-    if (!script) return;
-    var container = script.parentElement;
-    if (!container) return;
+    var roots = document.querySelectorAll("[data-actions-id]");
+    for (var i = 0; i < roots.length; i++) {
+      (function (el) {
+        // Guard: already initialized
+        if (el.__toolActionsInitialized) return;
+        el.__toolActionsInitialized = true;
 
-    var actionsId = container.getAttribute("data-actions-id");
-    if (!actionsId) return;
+        el.addEventListener("click", function (e) {
+          var target = e.target;
+          var btn = target.closest ? target.closest("[data-action]") : null;
+          if (!btn) return;
+          if (btn.disabled) return;
 
-    var el = document.getElementById(actionsId);
-    if (!el) return;
+          var action = btn.getAttribute("data-action");
+          if (!action) return;
 
-    el.addEventListener("click", function (e) {
-      var target = e.target;
-      var btn = target.closest ? target.closest("[data-action]") : null;
-      if (!btn) return;
-      if (btn.disabled) return;
-
-      var action = btn.getAttribute("data-action");
-      if (!action) return;
-
-      el.dispatchEvent(
-        new CustomEvent("tool-action", {
-          bubbles: true,
-          detail: { action: action },
-        }),
-      );
-    });
+          el.dispatchEvent(
+            new CustomEvent("tool-action", {
+              bubbles: true,
+              detail: { action: action },
+            }),
+          );
+        });
+      })(roots[i]);
+    }
   })();
 </script>
 

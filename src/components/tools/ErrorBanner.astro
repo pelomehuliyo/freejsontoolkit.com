@@ -7,6 +7,7 @@
  *   - aria-live="assertive" for dynamic content updates
  *   - Close button to dismiss (keyboard accessible)
  *   - Warning icon for visual identification (not color-only)
+ *   - aria-hidden synchronised with visibility state
  *
  * Usage:
  *   <ErrorBanner id="conversion-error" />
@@ -38,6 +39,7 @@ const isHidden = !message;
   role="alert"
   aria-live="assertive"
   aria-atomic="true"
+  aria-hidden={isHidden ? "true" : "false"}
   data-err-id={id}
 >
   <span class="error-icon" aria-hidden="true">
@@ -79,52 +81,68 @@ const isHidden = !message;
 
 <script>
   (function () {
-    var script = document.currentScript;
-    if (!script) return;
-    var banner = script.parentElement;
-    if (!banner) return;
+    var roots = document.querySelectorAll("[data-err-id]");
+    for (var ri = 0; ri < roots.length; ri++) {
+      (function () {
+        var banner = roots[ri];
+        var errId = banner.getAttribute("data-err-id");
+        if (!errId) return;
 
-    var errId = banner.getAttribute("data-err-id");
-    if (!errId) return;
+        var messageEl = document.getElementById(errId + "-message");
+        var closeBtn = document.getElementById(errId + "-close");
+        if (!messageEl || !closeBtn) return;
 
-    var messageEl = document.getElementById(errId + "-message");
-    var closeBtn = document.getElementById(errId + "-close");
-    if (!messageEl || !closeBtn) return;
+        // Guard: already initialized
+        if (banner.__errInitialized) return;
+        banner.__errInitialized = true;
 
-    banner.show = function show(msg) {
-      messageEl.textContent = msg;
-      banner.classList.remove("hidden");
-      closeBtn.focus();
-    };
+        function syncAriaHidden(hidden) {
+          if (hidden) {
+            banner.setAttribute("aria-hidden", "true");
+          } else {
+            banner.setAttribute("aria-hidden", "false");
+          }
+        }
 
-    banner.hide = function hide() {
-      banner.classList.add("hidden");
-      messageEl.textContent = "";
-    };
+        banner.show = function show(msg) {
+          messageEl.textContent = msg;
+          banner.classList.remove("hidden");
+          syncAriaHidden(false);
+          closeBtn.focus();
+        };
 
-    closeBtn.addEventListener("click", function () {
-      banner.hide();
-    });
+        banner.hide = function hide() {
+          banner.classList.add("hidden");
+          syncAriaHidden(true);
+          messageEl.textContent = "";
+        };
 
-    banner.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && !banner.classList.contains("hidden")) {
-        banner.hide();
-      }
-    });
+        closeBtn.addEventListener("click", function () {
+          banner.hide();
+        });
 
-    var observer = new MutationObserver(function () {
-      var msg = banner.getAttribute("data-message");
-      if (msg) {
-        banner.show(msg);
-      } else {
-        banner.hide();
-      }
-    });
+        banner.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && !banner.classList.contains("hidden")) {
+            banner.hide();
+          }
+        });
 
-    observer.observe(banner, { attributes: true, attributeFilter: ["data-message"] });
+        var observer = new MutationObserver(function () {
+          var msg = banner.getAttribute("data-message");
+          if (msg) {
+            banner.show(msg);
+          } else {
+            banner.hide();
+          }
+        });
 
-    if (messageEl.textContent) {
-      banner.classList.remove("hidden");
+        observer.observe(banner, { attributes: true, attributeFilter: ["data-message"] });
+
+        if (messageEl.textContent) {
+          banner.classList.remove("hidden");
+          syncAriaHidden(false);
+        }
+      })();
     }
   })();
 </script>

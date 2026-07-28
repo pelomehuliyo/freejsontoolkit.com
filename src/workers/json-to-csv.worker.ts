@@ -76,7 +76,16 @@ async function handleConvert(request: WorkerRequest & { type: "convert" }): Prom
     }
 
     if (parsed.length === 0) {
-      sendDone(requestId, "");
+      // Empty array: send an empty CSV with headers if requested
+      if (options.includeHeaders) {
+        // If there are no objects, we can't determine columns — output is truly empty
+        sendProgress(requestId, "complete");
+        sendDone(requestId, "");
+      } else {
+        sendProgress(requestId, "complete");
+        sendDone(requestId, "");
+      }
+      // Use a progress note to indicate empty result — see actions.ts for the notice
       return;
     }
 

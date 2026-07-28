@@ -65,7 +65,6 @@ const jsonLd = isHomePage
 
     <!-- Icons and Manifest -->
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="Free JSON Toolkit" />
@@ -122,8 +121,10 @@ const jsonLd = isHomePage
   </head>
   <body>
     <div class="app-layout">
+      <!-- Skip-to-content link for keyboard and screen reader users -->
+      <a href="#main-content-target" class="skip-link">Skip to main content</a>
       <Header activePath={activePath} />
-      <main class="main-content">
+      <main class="main-content" id="main-content-target">
         <slot />
       </main>
       <Footer />
@@ -142,5 +143,24 @@ const jsonLd = isHomePage
     flex: 1;
     display: flex;
     flex-direction: column;
+  }
+
+  /* Skip-to-content link: hidden by default, visible on focus */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: var(--spacing-md);
+    z-index: 10000;
+    background: var(--color-accent);
+    color: var(--color-on-primary);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--rounded-xs);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .skip-link:focus {
+    top: var(--spacing-xs);
   }
 </style>

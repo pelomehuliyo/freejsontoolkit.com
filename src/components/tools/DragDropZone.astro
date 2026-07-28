@@ -72,89 +72,94 @@ const statusId = id + "-status";
 
 <script>
   (function () {
-    var script = document.currentScript;
-    if (!script) return;
-    var container = script.parentElement;
-    if (!container) return;
+    var roots = document.querySelectorAll("[data-drop-id]");
+    for (var ri = 0; ri < roots.length; ri++) {
+      (function () {
+        var container = roots[ri];
+        var dropId = container.getAttribute("data-drop-id");
+        if (!dropId) return;
 
-    var dropId = container.getAttribute("data-drop-id");
-    if (!dropId) return;
+        var dropZone = document.getElementById(dropId + "-dropzone");
+        var fileInput = document.getElementById(dropId + "-file-input");
+        var statusEl = document.getElementById(dropId + "-status");
+        if (!dropZone || !fileInput || !statusEl) return;
 
-    var dropZone = document.getElementById(dropId + "-dropzone");
-    var fileInput = document.getElementById(dropId + "-file-input");
-    var statusEl = document.getElementById(dropId + "-status");
-    if (!dropZone || !fileInput || !statusEl) return;
+        // Guard: already initialized
+        if (dropZone.__ddzInitialized) return;
+        dropZone.__ddzInitialized = true;
 
-    function announce(msg) {
-      statusEl.textContent = msg;
+        function announce(msg) {
+          statusEl.textContent = msg;
+        }
+
+        function readFileAsText(file) {
+          return new Promise(function (resolve, reject) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+              resolve(e.target ? e.target.result || "" : "");
+            };
+            reader.onerror = function () {
+              reject(new Error("Failed to read file"));
+            };
+            reader.readAsText(file);
+          });
+        }
+
+        async function handleFile(file) {
+          if (!file) return;
+          announce("Reading file: " + file.name);
+
+          try {
+            var text = await readFileAsText(file);
+            announce(
+              "File loaded: " + file.name + " (" + text.length.toLocaleString() + " characters)",
+            );
+
+            dropZone.dispatchEvent(
+              new CustomEvent("file-dropped", {
+                bubbles: true,
+                detail: { file: file, text: text, name: file.name, size: file.size },
+              }),
+            );
+          } catch (err) {
+            announce("Failed to read file. Please try again.");
+          }
+        }
+
+        dropZone.addEventListener("click", function () {
+          fileInput.click();
+        });
+
+        dropZone.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            fileInput.click();
+          }
+        });
+
+        fileInput.addEventListener("change", function () {
+          var file = fileInput.files ? fileInput.files[0] : null;
+          handleFile(file);
+          fileInput.value = "";
+        });
+
+        dropZone.addEventListener("dragover", function (e) {
+          e.preventDefault();
+          dropZone.classList.add("drag-over");
+        });
+
+        dropZone.addEventListener("dragleave", function () {
+          dropZone.classList.remove("drag-over");
+        });
+
+        dropZone.addEventListener("drop", function (e) {
+          e.preventDefault();
+          dropZone.classList.remove("drag-over");
+          var file = e.dataTransfer ? e.dataTransfer.files[0] : null;
+          handleFile(file);
+        });
+      })();
     }
-
-    function readFileAsText(file) {
-      return new Promise(function (resolve, reject) {
-        var reader = new FileReader();
-        reader.onload = function (e) {
-          resolve(e.target ? e.target.result || "" : "");
-        };
-        reader.onerror = function () {
-          reject(new Error("Failed to read file"));
-        };
-        reader.readAsText(file);
-      });
-    }
-
-    async function handleFile(file) {
-      if (!file) return;
-      announce("Reading file: " + file.name);
-
-      try {
-        var text = await readFileAsText(file);
-        announce(
-          "File loaded: " + file.name + " (" + text.length.toLocaleString() + " characters)",
-        );
-
-        dropZone.dispatchEvent(
-          new CustomEvent("file-dropped", {
-            bubbles: true,
-            detail: { file: file, text: text, name: file.name, size: file.size },
-          }),
-        );
-      } catch (err) {
-        announce("Failed to read file. Please try again.");
-      }
-    }
-
-    dropZone.addEventListener("click", function () {
-      fileInput.click();
-    });
-
-    dropZone.addEventListener("keydown", function (e) {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        fileInput.click();
-      }
-    });
-
-    fileInput.addEventListener("change", function () {
-      var file = fileInput.files ? fileInput.files[0] : null;
-      handleFile(file);
-      fileInput.value = "";
-    });
-
-    dropZone.addEventListener("dragover", function (e) {
-      e.preventDefault();
-      dropZone.classList.add("drag-over");
-    });
-
-    dropZone.addEventListener("dragleave", function () {
-      dropZone.classList.remove("drag-over");
-    });
-
-    dropZone.addEventListener("drop", function (e) {
-      e.preventDefault();
-      dropZone.classList.remove("drag-over");
-      var file = e.dataTransfer ? e.dataTransfer.files[0] : null;
-      handleFile(file);
-    });
   })();
 </script>
 

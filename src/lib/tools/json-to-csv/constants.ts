@@ -53,6 +53,20 @@ export const DELIMITER_OPTIONS: DelimiterOption[] = [
   { value: "\t", label: "Tab ( \\t )" },
 ];
 
+// ── Stage display labels ──
+// Maps WorkerStage to user-facing text shown in progress indicator
+
+export const STAGE_LABELS: Record<string, string> = {
+  parsing: "Parsing JSON",
+  flattening: "Flattening objects",
+  formatting: "Formatting CSV",
+  complete: "Complete",
+};
+
+// ── Stage order for the stepper progress indicator ──
+
+export const STAGE_ORDER = ["parsing", "flattening", "formatting"] as const;
+
 // ── Sample data ──
 
 export const SAMPLE_JSON = `[

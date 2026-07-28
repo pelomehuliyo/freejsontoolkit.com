@@ -39,7 +39,13 @@ const footerSections = [
     <div class="footer-grid">
       <div class="footer-brand">
         <div class="footer-logo">
-          <img src="/favicon.svg" alt="Free JSON Toolkit Logo" class="logo-icon" />
+          <img
+            src="/favicon-96x96.png"
+            alt="Free JSON Toolkit Logo"
+            class="logo-icon"
+            width="30"
+            height="30"
+          />
           <span>JSON Toolkit</span>
         </div>
         <p class="footer-tagline body-sm">
@@ -68,7 +74,7 @@ const footerSections = [
         {
           footerSections.map((section) => (
             <div class="footer-col">
-              <h4 class="footer-title">{section.title}</h4>
+              <h3 class="footer-title">{section.title}</h3>
               <ul class="footer-links">
                 {section.links.map((link) => (
                   <li>
@@ -195,8 +201,11 @@ const footerSections = [
     color: var(--color-ink);
   }
 
+  /* Disabled "Soon" links: was --color-hairline-strong (#a1a1a1, only 2.6:1 —
+     fails WCAG). Now uses the accessible mute gray (5.1:1) so "coming soon"
+     items are still readable, while staying visibly lighter than active links. */
   .footer-link-disabled {
-    color: var(--color-hairline-strong);
+    color: var(--color-mute);
     cursor: default;
   }
 

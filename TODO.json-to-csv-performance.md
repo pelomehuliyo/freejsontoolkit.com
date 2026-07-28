@@ -8,9 +8,9 @@
   - [x] Disable Convert/Copy/Download while converting
   - [x] Move conversion to Web Worker for inputs above USE_WORKER_ABOVE_CHARS=400_000
   - [x] Refuse conversion (warn instead of freeze) when input exceeds MAX_INPUT_CHARS
-- [ ] Manual test:
-  - [ ] small JSON -> works
-  - [ ] large JSON > MAX_INPUT_CHARS -> warning shown
-  - [ ] medium/large JSON -> worker progress updates and UI stays responsive
+- [x] Manual test:
+  - [x] small JSON -> works
+  - [x] large JSON > MAX_INPUT_CHARS -> warning shown
+  - [x] medium/large JSON -> worker progress updates and UI stays responsive
 
 

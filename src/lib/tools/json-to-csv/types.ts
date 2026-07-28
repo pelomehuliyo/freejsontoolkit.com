@@ -23,6 +23,12 @@ export interface DelimiterOption {
     label: string;
 }
 
+/**
+ * Delegate for user confirmation dialogs.
+ * Used to keep actions.ts free of DOM/BOM APIs like confirm().
+ */
+export type ConfirmDelegate = (message: string) => boolean;
+
 /** Structured conversion progress reported by the worker */
 export interface ConversionProgress {
     stage: WorkerStage;
@@ -55,6 +61,10 @@ export interface JsonToCsvState {
     inputStatus: InputStatus;
     outputStatus: OutputStatus;
     error: string | null;
+    /** Non-error informational notice shown in the output panel (e.g. empty array) */
+    outputNotice: string | null;
+    /** True when the displayed CSV is a truncated preview of a larger output */
+    isPreview: boolean;
 
     // ── Worker Lifecycle ──
     /** True while a conversion is in progress */
@@ -77,6 +87,8 @@ export const DEFAULT_STATE: JsonToCsvState = {
     inputStatus: "empty",
     outputStatus: "empty",
     error: null,
+    outputNotice: null,
+    isPreview: false,
     isConverting: false,
     isCancelling: false,
     conversionProgress: null,
