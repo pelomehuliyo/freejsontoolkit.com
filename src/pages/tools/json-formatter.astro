@@ -1,0 +1,644 @@
+---
+import ToolShell from "../../components/tools/ToolShell.astro";
+import ToolHeader from "../../components/tools/ToolHeader.astro";
+import ToolWorkspace from "../../components/tools/ToolWorkspace.astro";
+import CodeEditor from "../../components/tools/CodeEditor.astro";
+import DragDropZone from "../../components/tools/DragDropZone.astro";
+import ToolActions from "../../components/tools/ToolActions.astro";
+import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import Card from "../../components/Card.astro";
+import Button from "../../components/Button.astro";
+import Container from "../../components/Container.astro";
+import { INDENT_OPTIONS } from "../../lib/tools/json-formatter/constants";
+---
+
+<ToolShell
+  title="JSON Formatter — Beautify & Pretty-Print JSON Online (Free, Local)"
+  description="Free online JSON formatter. Beautify, pretty-print, and sort JSON keys with 2-space, 4-space, or tab indentation — 100% local, no upload, no server."
+  activePath="/tools/json-formatter"
+>
+  <ToolHeader
+    slot="header"
+    breadcrumbs={[{ label: "Home", href: "/" }, { label: "JSON Formatter" }]}
+    title="JSON Formatter"
+    subtitle="Beautify and pretty-print JSON with consistent indentation — offline."
+  />
+
+  <ToolWorkspace slot="workspace" layout="3-col">
+    <div slot="input">
+      <Card variant="flat" class="workspace-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">INPUT JSON</span>
+          <ToolActions id="input-actions" variant="inset" actions={["sample", "clear"]} />
+        </div>
+        <DragDropZone id="json-input" accept=".json" label="Upload JSON file" />
+        <CodeEditor
+          id="json-input"
+          label="JSON input"
+          placeholder='Paste JSON here to format it
+Example:
+{"id":1,"name":"Ada","roles":["admin"]}'
+        >
+          <div class="editor-info-bar" slot>
+            <span class="info-status" id="json-validation-status">JSON Status: Empty</span>
+            <span class="info-meta" id="json-char-count">0 chars</span>
+          </div>
+        </CodeEditor>
+      </Card>
+    </div>
+
+    <div slot="controls">
+      <Card variant="flat" class="workspace-card settings-card">
+        <h2 class="display-sm settings-title">Options</h2>
+        <div class="settings-divider"></div>
+
+        <div class="settings-group">
+          <label class="settings-label caption-mono" for="indent-select">Indentation</label>
+          <div class="select-wrapper">
+            <select id="indent-select" class="settings-select">
+              {INDENT_OPTIONS.map((opt) => <option value={opt.value}>{opt.label}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-group checkbox-group">
+          <label class="checkbox-container body-sm">
+            <input type="checkbox" id="sort-keys-checkbox" />
+            <span class="checkbox-checkmark"></span>
+            Sort object keys (A→Z)
+          </label>
+          <p class="caption settings-help">
+            Produces deterministic output; array order is preserved.
+          </p>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <Button id="format-btn" variant="primary" size="lg" shape="square" class="action-btn">
+          Format JSON
+        </Button>
+
+        <ErrorBanner id="format-error" />
+
+        <div class="status-banner caption">
+          <span class="status-indicator"><span class="dot idle"></span></span>
+          <span class="sr-only" id="format-status-announce" aria-live="polite"></span>
+          Local sandbox active
+        </div>
+      </Card>
+    </div>
+
+    <div slot="output">
+      <Card variant="flat" class="workspace-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">FORMATTED OUTPUT</span>
+          <ToolActions id="output-actions" variant="inset" actions={["copy", "download"]} />
+        </div>
+        <CodeEditor
+          id="formatted-output"
+          label="Formatted JSON output"
+          placeholder="Formatted JSON will appear here..."
+          readonly
+        >
+          <div class="editor-info-bar" slot>
+            <span class="info-status" id="format-output-status">Output: Empty</span>
+            <span class="info-meta" id="format-output-count">0 chars</span>
+          </div>
+        </CodeEditor>
+      </Card>
+    </div>
+  </ToolWorkspace>
+
+  <section class="tool-content-section" aria-labelledby="how-title">
+    <Container size="narrow">
+      <div class="content-section-header">
+        <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
+        <h2 id="how-title" class="display-md section-title">Format JSON in three steps</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">1</span>
+          <h3 class="body-sm-strong step-title">Paste or upload</h3>
+          <p class="caption step-desc">
+            Drop in raw, minified, or messy JSON — up to 15M characters.
+          </p>
+        </div>
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">2</span>
+          <h3 class="body-sm-strong step-title">Pick indentation</h3>
+          <p class="caption step-desc">
+            Choose 2 spaces, 4 spaces, or tabs, and optionally sort keys A→Z.
+          </p>
+        </div>
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">3</span>
+          <h3 class="body-sm-strong step-title">Format &amp; export</h3>
+          <p class="caption step-desc">
+            Click Format, then copy or download the beautified result — all offline.
+          </p>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <section class="faq-section" aria-labelledby="faq-title">
+    <Container size="narrow">
+      <div class="faq-header">
+        <span class="caption-mono section-eyebrow">FAQ</span>
+        <h2 id="faq-title" class="display-md section-title">Frequently asked questions</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary class="faq-summary">Is my JSON uploaded anywhere?</summary>
+          <p class="body-md faq-answer">
+            No. Formatting happens entirely in your browser. Your data never leaves your machine.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">What does "sort keys" do?</summary>
+          <p class="body-md faq-answer">
+            It reorders every object's properties alphabetically for deterministic output — handy
+            for diffing. Array element order is always preserved.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Can it validate JSON too?</summary>
+          <p class="body-md faq-answer">
+            Yes — if the input isn't valid JSON, the status bar shows the parse error with its
+            position. A dedicated JSON Validator with richer diagnostics ships in v1.2.
+          </p>
+        </details>
+      </div>
+    </Container>
+  </section>
+</ToolShell>
+
+<script>
+  import { jsonFormatterStore } from "../../lib/tools/json-formatter/store";
+  import {
+    handleInput,
+    format,
+    loadSample,
+    clearAll,
+    getFormattedContent,
+    setIndent,
+    setSortKeys,
+  } from "../../lib/tools/json-formatter/actions";
+  import type { IndentOption } from "../../lib/tools/json-formatter/types";
+  import { debounce } from "../../shared/debounce";
+  import { announce, initAnnounce } from "../../shared/announce";
+  import { copyToClipboard } from "../../shared/clipboard";
+  import { downloadFile } from "../../shared/download";
+
+  const jsonTextarea = document.getElementById("json-input-textarea") as HTMLTextAreaElement | null;
+  const outTextarea = document.getElementById(
+    "formatted-output-textarea",
+  ) as HTMLTextAreaElement | null;
+  const inputStatus = document.getElementById("json-validation-status") as HTMLElement | null;
+  const inputCharCount = document.getElementById("json-char-count") as HTMLElement | null;
+  const outputStatus = document.getElementById("format-output-status") as HTMLElement | null;
+  const outputCharCount = document.getElementById("format-output-count") as HTMLElement | null;
+  const indentSelect = document.getElementById("indent-select") as HTMLSelectElement | null;
+  const sortCheckbox = document.getElementById("sort-keys-checkbox") as HTMLInputElement | null;
+  const formatBtn = document.getElementById("format-btn") as HTMLButtonElement | null;
+  const errorBanner = document.getElementById("format-error") as HTMLElement | null;
+
+  initAnnounce("format-status-announce");
+
+  const debouncedInput = debounce((value: string) => {
+    handleInput(jsonFormatterStore, value);
+  }, 150);
+
+  jsonFormatterStore.subscribe((state) => {
+    const inputFocused = jsonTextarea && document.activeElement === jsonTextarea;
+    if (jsonTextarea && jsonTextarea.value !== state.jsonInput && !inputFocused) {
+      jsonTextarea.value = state.jsonInput;
+      jsonTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+    if (outTextarea && outTextarea.value !== state.formattedOutput) {
+      outTextarea.value = state.formattedOutput;
+      outTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+
+    if (inputStatus) {
+      switch (state.inputStatus) {
+        case "empty":
+          inputStatus.textContent = "JSON Status: Empty";
+          inputStatus.style.color = "";
+          break;
+        case "ready":
+          inputStatus.textContent = "JSON Status: Valid";
+          inputStatus.style.color = "var(--color-success)";
+          break;
+        case "invalid":
+          inputStatus.textContent = "JSON Status: Invalid";
+          inputStatus.style.color = "var(--color-error)";
+          break;
+      }
+    }
+    if (inputCharCount)
+      inputCharCount.textContent = state.jsonInput.length.toLocaleString() + " chars";
+    if (outputStatus)
+      outputStatus.textContent =
+        state.outputStatus === "formatted" ? "Output: Ready" : "Output: Empty";
+    if (outputCharCount)
+      outputCharCount.textContent = state.formattedOutput.length.toLocaleString() + " chars";
+
+    if (formatBtn) {
+      if (state.isFormatting) {
+        formatBtn.textContent = "Formatting…";
+        formatBtn.disabled = true;
+      } else {
+        formatBtn.textContent = "Format JSON";
+        formatBtn.disabled = false;
+      }
+    }
+
+    if (errorBanner) {
+      if (state.error) (errorBanner as any).show?.(state.error);
+      else (errorBanner as any).hide?.();
+    }
+    if (state.error) announce("Error: " + state.error);
+  });
+
+  if (jsonTextarea) {
+    jsonTextarea.addEventListener("input", () => debouncedInput(jsonTextarea.value));
+  }
+  if (formatBtn) formatBtn.addEventListener("click", () => format(jsonFormatterStore));
+  if (indentSelect)
+    indentSelect.addEventListener("change", () =>
+      setIndent(jsonFormatterStore, indentSelect.value as IndentOption),
+    );
+  if (sortCheckbox)
+    sortCheckbox.addEventListener("change", () =>
+      setSortKeys(jsonFormatterStore, sortCheckbox.checked),
+    );
+
+  const inputActions = document.getElementById("input-actions");
+  if (inputActions) {
+    inputActions.addEventListener("tool-action", (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      if (action === "sample") {
+        loadSample(jsonFormatterStore);
+        announce("Sample JSON loaded");
+      }
+      if (action === "clear") {
+        clearAll(jsonFormatterStore);
+        announce("Input cleared");
+      }
+    });
+  }
+
+  const outputActions = document.getElementById("output-actions");
+  if (outputActions) {
+    outputActions.addEventListener("tool-action", async (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      if (action === "copy") {
+        const out = getFormattedContent(jsonFormatterStore);
+        const ok = out ? await copyToClipboard(out) : false;
+        const btn = outputActions.querySelector("[data-action='copy']");
+        if (ok && btn) {
+          const orig = btn.textContent || "Copy";
+          btn.textContent = "Copied!";
+          announce("Formatted JSON copied");
+          setTimeout(() => {
+            btn.textContent = orig;
+          }, 1500);
+        }
+      }
+      if (action === "download") {
+        const out = getFormattedContent(jsonFormatterStore);
+        if (out) {
+          downloadFile(out, "formatted.json", "application/json;charset=utf-8;");
+          announce("Download started");
+        }
+      }
+    });
+  }
+
+  const dropZone = document.getElementById("json-input-dropzone");
+  if (dropZone) {
+    dropZone.addEventListener("file-dropped", (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.text) {
+        handleInput(jsonFormatterStore, detail.text);
+        announce("File loaded: " + (detail.name || "file") + " — click Format JSON");
+      }
+    });
+  }
+
+  document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "SELECT") return;
+      e.preventDefault();
+      format(jsonFormatterStore);
+    }
+  });
+</script>
+
+<style>
+  .workspace-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    gap: var(--spacing-md);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-hairline);
+    padding-bottom: var(--spacing-sm);
+  }
+  .column-title {
+    color: var(--color-mute);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+  .editor-info-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--color-hairline);
+    border-top: none;
+    border-bottom-left-radius: var(--rounded-sm);
+    border-bottom-right-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    padding: 6px var(--spacing-sm);
+    font-size: 11px;
+    color: var(--color-mute);
+    font-family: var(--font-sans);
+  }
+  .info-status {
+    font-weight: 500;
+  }
+
+  .settings-card {
+    padding: var(--spacing-lg);
+  }
+  .settings-title {
+    margin: 0;
+  }
+  .settings-divider {
+    height: 1px;
+    background-color: var(--color-hairline);
+    margin: var(--spacing-xs) 0;
+  }
+  .settings-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-md);
+  }
+  .settings-label {
+    color: var(--color-mute);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .select-wrapper {
+    position: relative;
+    width: 100%;
+  }
+  .settings-select {
+    width: 100%;
+    height: 38px;
+    padding: 0 var(--spacing-md);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    appearance: none;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }
+  .settings-select:focus {
+    border-color: var(--color-hairline-strong);
+  }
+  .select-wrapper::after {
+    content: "▼";
+    font-size: 9px;
+    color: var(--color-body);
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .checkbox-group {
+    margin-bottom: var(--spacing-sm);
+  }
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 24px;
+    cursor: pointer;
+    user-select: none;
+    color: var(--color-ink);
+  }
+  .checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  .checkbox-checkmark {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    height: 16px;
+    width: 16px;
+    border: 1px solid var(--color-hairline-strong);
+    border-radius: 4px;
+    background-color: var(--color-canvas);
+    transition:
+      background-color 0.1s ease,
+      border-color 0.1s ease;
+  }
+  .checkbox-container:hover input ~ .checkbox-checkmark {
+    border-color: var(--color-ink);
+  }
+  .checkbox-container input:checked ~ .checkbox-checkmark {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+  .checkbox-checkmark::after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+  .checkbox-container input:checked ~ .checkbox-checkmark::after {
+    display: block;
+  }
+  .checkbox-container .checkbox-checkmark::after {
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+  }
+  .settings-help {
+    color: var(--color-mute);
+    margin: 4px 0 0 24px;
+    line-height: 1.4;
+  }
+  .action-btn {
+    width: 100%;
+    margin-top: var(--spacing-sm);
+  }
+
+  .status-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-mute);
+    margin-top: auto;
+    padding-top: var(--spacing-md);
+  }
+  .status-indicator .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-hairline-strong);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .tool-content-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas-soft);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .content-section-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .section-eyebrow {
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+  }
+  .section-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xl);
+  }
+  .step-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-lg);
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    text-align: center;
+    align-items: center;
+  }
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-accent);
+    color: var(--color-on-primary);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+  }
+  .step-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+  .step-desc {
+    color: var(--color-body);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .faq-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .faq-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .faq-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft);
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  .faq-summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink);
+    padding: var(--spacing-xs) 0;
+    user-select: none;
+  }
+  .faq-summary:hover {
+    color: var(--color-accent);
+  }
+  .faq-answer {
+    margin-top: var(--spacing-sm);
+    font-size: 13px;
+    color: var(--color-body);
+    line-height: 1.6;
+  }
+
+  @media (min-width: 960px) {
+    .workspace-card :global(.editor-outer) {
+      flex: none;
+      height: 650px;
+      min-height: 650px;
+    }
+    .workspace-card :global(.editor-wrapper) {
+      height: 100%;
+    }
+  }
+  @media;
+</style>

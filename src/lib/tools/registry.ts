@@ -132,7 +132,8 @@ export const tools: ToolManifest[] = [
         name: "JSON Formatter",
         tagline: "Beautify and pretty-print JSON with consistent indentation.",
         category: "format",
-        status: "soon",
+        status: "available",
+        href: "/tools/json-formatter",
         // captures formatter / beautifier / pretty-print intent in one tool
         keywords: ["json formatter", "json beautifier", "json pretty print", "prettify json"],
         addedIn: "v1.1",

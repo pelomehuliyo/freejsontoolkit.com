@@ -31,7 +31,6 @@ interface Props {
 const { title, description, activePath = "/tools", noindex = false } = Astro.props;
 ---
 
-<!-- Use the existing BaseLayout so all pages share Header/Footer/SEO -->
 <BaseLayout {title} {description} {activePath} {noindex}>
   <main class="tool-page">
     <slot name="header" />
