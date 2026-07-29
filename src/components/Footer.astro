@@ -1,16 +1,17 @@
 ---
 import Container from "./Container.astro";
+import { availableTools } from "../lib/tools/registry";
+
+// Tools column is generated from the registry: live tools as links, plus a
+// "browse all" entry. The "coming soon" pipeline lives on /tools, not as dead
+// footer links. As tools ship, this column fills itself — zero hand-editing.
+const toolLinks = [
+  ...availableTools.map((t) => ({ label: t.name, href: t.href as string })),
+  { label: "Browse all tools →", href: "/tools" },
+];
 
 const footerSections = [
-  {
-    title: "Tools",
-    links: [
-      { label: "JSON to CSV", href: "/tools/json-to-csv" },
-      { label: "CSV to JSON (Soon)", href: null },
-      { label: "JSON Validator (Soon)", href: null },
-      { label: "JSON Formatter (Soon)", href: null },
-    ],
-  },
+  { title: "Tools", links: toolLinks },
   {
     title: "Legal",
     links: [
@@ -24,10 +25,7 @@ const footerSections = [
   {
     title: "Resources",
     links: [
-      {
-        label: "GitHub Repository",
-        href: "https://github.com/pelomehuliyo/freejsontoolkit.com",
-      },
+      { label: "GitHub Repository", href: "https://github.com/pelomehuliyo/freejsontoolkit.com" },
       { label: "Design Sandbox", href: "/sandbox" },
     ],
   },
@@ -78,15 +76,9 @@ const footerSections = [
               <ul class="footer-links">
                 {section.links.map((link) => (
                   <li>
-                    {link.href ? (
-                      <a href={link.href} class="footer-link">
-                        {link.label}
-                      </a>
-                    ) : (
-                      <span class="footer-link footer-link-disabled" aria-disabled="true">
-                        {link.label}
-                      </span>
-                    )}
+                    <a href={link.href} class="footer-link">
+                      {link.label}
+                    </a>
                   </li>
                 ))}
               </ul>
@@ -199,14 +191,6 @@ const footerSections = [
 
   .footer-link:hover {
     color: var(--color-ink);
-  }
-
-  /* Disabled "Soon" links: was --color-hairline-strong (#a1a1a1, only 2.6:1 —
-     fails WCAG). Now uses the accessible mute gray (5.1:1) so "coming soon"
-     items are still readable, while staying visibly lighter than active links. */
-  .footer-link-disabled {
-    color: var(--color-mute);
-    cursor: default;
   }
 
   .footer-bottom {
