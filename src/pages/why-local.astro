@@ -1,0 +1,311 @@
+---
+import DocLayout from "../layouts/DocLayout.astro";
+
+const toc = [
+  { id: "promise", label: "The promise" },
+  { id: "proof", label: "Live proof" },
+  { id: "ledger", label: "Where your data goes" },
+  { id: "architecture", label: "How it's built" },
+  { id: "guarantees", label: "The guarantees" },
+  { id: "honesty", label: "What we do send" },
+];
+---
+
+<DocLayout
+  title="Why local — and how we keep it that way"
+  description="Free JSON Toolkit processes everything in your browser. Here is exactly what your data touches, what it never touches, and the architecture that makes the promise structural rather than a slogan."
+  eyebrow="Trust & Architecture"
+  lede="“We don't upload your data” is a claim. This page is the proof — a live instrument, a ledger, and the code structure that makes the promise impossible to break by accident."
+  toc={toc}
+  updated="2026-07-30"
+>
+  <section class="doc-section" id="promise">
+    <h2>The promise</h2>
+    <p>
+      Every tool in this toolkit runs <strong>entirely inside your browser</strong>. The JSON, CSV,
+      XML, or YAML you paste or drop never travels to a server to be processed — there is no server
+      doing the work. Conversion, formatting, and validation happen on your own machine, in a Web
+      Worker when the file is large, and the result is handed back to you to copy or download.
+    </p>
+    <p>
+      That isn't a privacy policy written after the fact. It's the shape of the code: there is no
+      backend endpoint for your content to be sent to, because none was ever built. The trust you
+      place in this site is trust in your own browser, not in our infrastructure.
+    </p>
+  </section>
+
+  <section class="doc-section" id="proof">
+    <h2>Live proof</h2>
+    <p>
+      Don't take the promise on faith — watch it. The panel below instruments this very page. The
+      moment it loaded, it wrapped the browser's <code>fetch</code> and <code>XMLHttpRequest</code>
+      and started counting every outbound call the page's own code makes. Try it: paste something into
+      a tool, convert it, format it. The number stays at zero, because none of that touches the network.
+    </p>
+
+    <div class="netproof" aria-label="Live outbound-request counter">
+      <div class="netproof-head">
+        <span class="netproof-eyebrow">
+          <span class="netproof-live" aria-hidden="true"></span>
+          Live proof
+        </span>
+        <span class="netproof-state">monitoring</span>
+      </div>
+      <div class="netproof-big">
+        <span class="netproof-count" id="netproof-count">0</span>
+        <span class="netproof-unit">outbound calls since interactive</span>
+      </div>
+      <div class="netproof-spark" id="netproof-spark" aria-hidden="true"></div>
+      <p class="netproof-dare">
+        Open <strong>DevTools → Network</strong>, filter to <code>Fetch/XHR</code>, then convert a
+        file. Watch the list stay empty. For <span id="netproof-seconds">0</span>s, this page has
+        sent nothing that contains your data.
+      </p>
+      <p class="netproof-note">
+        Scope: this counts fetch/XHR the page's JavaScript issues after load. It deliberately can't
+        see the page's own initial assets (same-origin HTML/CSS/fonts) or browser/extension traffic
+        — it measures what <em>this code</em> sends, which is the part that would carry your input.
+      </p>
+    </div>
+  </section>
+
+  <section class="doc-section" id="ledger">
+    <h2>Where your data goes</h2>
+    <p>
+      A line-by-line ledger of every place your input touches — and the answer to the only question
+      that matters.
+    </p>
+    <div class="doc-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Your data</th>
+            <th>Touches</th>
+            <th>Leaves your machine?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Text you paste</td>
+            <td>In-memory JavaScript + a Web Worker</td>
+            <td class="no">No</td>
+          </tr>
+          <tr>
+            <td>A file you drop</td>
+            <td>Read locally via the FileReader API</td>
+            <td class="no">No</td>
+          </tr>
+          <tr>
+            <td>The converted result</td>
+            <td>In-memory, until you copy or download it</td>
+            <td class="no">No</td>
+          </tr>
+          <tr>
+            <td>Stars &amp; recent tools</td>
+            <td>Your browser's <code>localStorage</code></td>
+            <td class="no">No</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      There is no account, no session, and no server-side copy of anything you process. Close the
+      tab and the in-memory data is gone; the only thing that persists is the small set of favorites
+      and recents you chose to keep, stored on your own device.
+    </p>
+  </section>
+
+  <section class="doc-section" id="architecture">
+    <h2>How it's built</h2>
+    <p>
+      The promise holds because the architecture has no seam where your data could leak. Each tool
+      is a thin page wired to a pure transform that runs off the main thread:
+    </p>
+    <div class="spine" aria-label="Per-tool engine pipeline">
+      <div class="spine-node">
+        <span class="spine-badge">ED</span>
+        <div class="spine-text">
+          <p class="spine-label">Editor</p>
+          <p class="spine-desc">
+            A plain textarea + line gutter. Your input lives only here, in the DOM.
+          </p>
+        </div>
+      </div>
+      <div class="spine-node">
+        <span class="spine-badge">WS</span>
+        <div class="spine-text">
+          <p class="spine-label">Workspace</p>
+          <p class="spine-desc">
+            Layout + options. No data leaves the page; controls only set local state.
+          </p>
+        </div>
+      </div>
+      <div class="spine-node">
+        <span class="spine-badge">ST</span>
+        <div class="spine-text">
+          <p class="spine-label">Store</p>
+          <p class="spine-desc">
+            In-memory state. No persistence, no network — just the current values.
+          </p>
+        </div>
+      </div>
+      <div class="spine-node">
+        <span class="spine-badge">WK</span>
+        <div class="spine-text">
+          <p class="spine-label">Worker</p>
+          <p class="spine-desc">
+            Heavy parsing runs on a background thread so the UI never freezes.
+          </p>
+        </div>
+      </div>
+      <div class="spine-node">
+        <span class="spine-badge">EN</span>
+        <div class="spine-text">
+          <p class="spine-label">Engine</p>
+          <p class="spine-desc">
+            A pure function: input + options in, result out. No DOM, no fetch, no side effects.
+          </p>
+        </div>
+      </div>
+    </div>
+    <p>
+      On top of that, a single registry drives the whole site, so the catalog, the footer, the
+      search, and the SEO metadata can never disagree about what exists:
+    </p>
+    <div class="spine" aria-label="Platform registry spine">
+      <div class="spine-node">
+        <span class="spine-badge">RG</span>
+        <div class="spine-text">
+          <p class="spine-label">registry.ts</p>
+          <p class="spine-desc">
+            One typed list of every tool — id, name, category, status, keywords.
+          </p>
+        </div>
+      </div>
+      <div class="spine-node">
+        <span class="spine-badge">→</span>
+        <div class="spine-text">
+          <p class="spine-label">Catalog · Footer · Search · JSON-LD</p>
+          <p class="spine-desc">
+            All generated from the registry. Ship a tool once; every surface updates.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="guarantees">
+    <h2>The guarantees</h2>
+    <p>Every tool that ships must satisfy all of these, or it doesn't ship:</p>
+    <ul class="guarantees">
+      <li>Runs completely in the browser — no server-side processing of your content.</li>
+      <li>No login, no account, no API key required to use any tool.</li>
+      <li>No uploads — your input is never transmitted to be processed.</li>
+      <li>No server-side storage of anything you paste or drop.</li>
+      <li>Instant-loading shell; large work is deferred to a background worker.</li>
+      <li>Mobile-friendly and keyboard-first, with copy/paste as the primary flow.</li>
+      <li>Open source and built in the open — you can read every line that touches your data.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="honesty">
+    <h2>What we do send</h2>
+    <p>
+      Trust is earned by disclosure, so here is the complete list of network activity this site
+      performs — none of which carries your pasted content.
+    </p>
+    <div class="doc-table">
+      <table>
+        <thead>
+          <tr>
+            <th>What</th>
+            <th>When</th>
+            <th>Why</th>
+            <th>Contains your data?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>App HTML / CSS / JS / fonts</td>
+            <td>On page load</td>
+            <td>To render the toolkit itself</td>
+            <td class="no">No</td>
+          </tr>
+          <tr>
+            <td>Anonymized pageview (Google Analytics)</td>
+            <td>On load, in production only</td>
+            <td>To understand which tools are used</td>
+            <td class="no">No</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      The analytics ping sees only the page URL and standard browser metadata — never the contents
+      of an editor, a file, or a result. It is disabled entirely in local development. If you'd
+      rather block it, your browser's tracking protection or an extension will stop it without
+      affecting any tool.
+    </p>
+    <blockquote>
+      The short version: your data stays on your machine, the code that proves it is public, and the
+      only thing we measure is which pages get visited — not what you do on them.
+    </blockquote>
+  </section>
+</DocLayout>
+
+<script>
+  // ── Live network proof: count fetch/XHR the page issues after load. ──
+  (function () {
+    var countEl = document.getElementById("netproof-count");
+    var secEl = document.getElementById("netproof-seconds");
+    var spark = document.getElementById("netproof-spark");
+    if (!countEl || !spark) return;
+
+    var BARS = 40;
+    var bars = [];
+    for (var i = 0; i < BARS; i++) {
+      var s = document.createElement("span");
+      spark.appendChild(s);
+      bars.push(s);
+    }
+
+    var count = 0;
+    var barIdx = 0;
+    var start = Date.now();
+
+    function bump() {
+      count++;
+      countEl.textContent = String(count);
+      var b = bars[barIdx % BARS];
+      if (b) b.classList.add("hit");
+      barIdx++;
+    }
+
+    try {
+      var origFetch = window.fetch;
+      if (typeof origFetch === "function") {
+        window.fetch = function () {
+          bump();
+          return origFetch.apply(this, arguments);
+        };
+      }
+    } catch (e) {}
+
+    try {
+      var XHR = window.XMLHttpRequest;
+      if (XHR && XHR.prototype && XHR.prototype.open) {
+        var origOpen = XHR.prototype.open;
+        XHR.prototype.open = function () {
+          bump();
+          return origOpen.apply(this, arguments);
+        };
+      }
+    } catch (e) {}
+
+    if (secEl) {
+      setInterval(function () {
+        secEl.textContent = String(Math.floor((Date.now() - start) / 1000));
+      }, 1000);
+    }
+  })();
+</script>

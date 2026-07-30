@@ -1,0 +1,235 @@
+---
+/**
+ * DocLayout — the shared shell for every long-form document.
+ *
+ * Gives each page, for free: a terminal-style path kicker, an eyebrow + title
+ * + lede head, a sticky scroll-spy table of contents (desktop) with a mobile
+ * disclosure fallback, a floating white "document sheet" on a textured field,
+ * an optional plain-language notice, a prev/next pager (derived from DOC_ORDER
+ * so it can't drift), a back-to-top button, and scroll reveals.
+ *
+ * Prose is authored in the page as <section class="doc-section" id="…"> blocks;
+ * the `toc` prop lists those ids/labels. Styles live in the global doc.css so
+ * they reach the slotted content (a scoped block here could not).
+ */
+import BaseLayout from "./BaseLayout.astro";
+import Container from "../components/Container.astro";
+import "../styles/doc.css";
+
+interface TocItem {
+  id: string;
+  label: string;
+}
+interface Props {
+  title: string;
+  description: string;
+  eyebrow: string;
+  lede?: string;
+  toc?: TocItem[];
+  updated?: string;
+  tag?: string;
+  notice?: string;
+}
+
+const { title, description, eyebrow, lede, toc = [], updated, tag, notice } = Astro.props;
+
+// Pager order + grouping — the single source for prev/next across all docs.
+const DOC_ORDER: { href: string; group: string; label: string }[] = [
+  { href: "/why-local", group: "trust", label: "Why local" },
+  { href: "/about", group: "company", label: "About" },
+  { href: "/contact", group: "company", label: "Contact" },
+  { href: "/privacy", group: "legal", label: "Privacy" },
+  { href: "/terms", group: "legal", label: "Terms" },
+  { href: "/disclaimer", group: "legal", label: "Disclaimer" },
+];
+const here = Astro.url.pathname.replace(/\/+$/, "") || "/";
+const current = DOC_ORDER.find((d) => d.href === here);
+let prev: (typeof DOC_ORDER)[number] | null = null;
+let next: (typeof DOC_ORDER)[number] | null = null;
+if (current) {
+  const group = DOC_ORDER.filter((d) => d.group === current.group);
+  const i = group.findIndex((d) => d.href === current.href);
+  prev = i > 0 ? group[i - 1] : null;
+  next = i < group.length - 1 ? group[i + 1] : null;
+}
+
+const docPath = "~/freejsontoolkit " + (Astro.url.pathname.replace(/\/+$/, "") || "/");
+---
+
+<BaseLayout title={title} description={description} activePath={Astro.url.pathname}>
+  <main>
+    <section class="doc-page">
+      <Container size="default">
+        <div class="doc-grid">
+          {
+            toc.length > 0 && (
+              <aside class="doc-toc" aria-label="On this page">
+                <p class="doc-toc-title caption-mono">On this page</p>
+                <ul class="doc-toc-list">
+                  {toc.map((t) => (
+                    <li>
+                      <a class="doc-toc-link" href={`#${t.id}`} data-toc={t.id}>
+                        {t.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </aside>
+            )
+          }
+
+          <div class="doc-main">
+            <header class="doc-head doc-reveal">
+              <p class="doc-path caption-mono">{docPath}</p>
+              <p class="doc-eyebrow caption-mono">{eyebrow}</p>
+              <h1 class="doc-title display-xl">{title}</h1>
+              {lede && <p class="doc-lede body-lg">{lede}</p>}
+              {
+                (updated || tag) && (
+                  <div class="doc-meta">
+                    {updated && (
+                      <>
+                        <span class="doc-meta-dot" aria-hidden="true" />
+                        <span>Updated {updated}</span>
+                      </>
+                    )}
+                    {tag && <span class="doc-meta-tag">{tag}</span>}
+                  </div>
+                )
+              }
+            </header>
+
+            <article class="doc-sheet doc-reveal">
+              {
+                toc.length > 0 && (
+                  <details class="doc-toc-mobile">
+                    <summary class="caption-mono">On this page</summary>
+                    <ul>
+                      {toc.map((t) => (
+                        <li>
+                          <a href={`#${t.id}`}>{t.label}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                )
+              }
+
+              {
+                notice && (
+                  <div class="doc-notice" role="note">
+                    <span class="doc-notice-mark" aria-hidden="true">
+                      !
+                    </span>
+                    <span>{notice}</span>
+                  </div>
+                )
+              }
+
+              <div class="doc-prose">
+                <slot />
+              </div>
+            </article>
+
+            {
+              (prev || next) && (
+                <nav class="doc-pager" aria-label="Document navigation">
+                  {prev ? (
+                    <a class="doc-pager-link prev" href={prev.href}>
+                      <span class="doc-pager-dir">
+                        <span class="doc-pager-arrow" aria-hidden="true">
+                          ←{" "}
+                        </span>
+                        Previous
+                      </span>
+                      <span class="doc-pager-title">{prev.label}</span>
+                    </a>
+                  ) : (
+                    <span class="doc-pager-spacer" />
+                  )}
+                  {next ? (
+                    <a class="doc-pager-link next" href={next.href}>
+                      <span class="doc-pager-dir">
+                        Next
+                        <span class="doc-pager-arrow" aria-hidden="true">
+                          {" "}
+                          →
+                        </span>
+                      </span>
+                      <span class="doc-pager-title">{next.label}</span>
+                    </a>
+                  ) : (
+                    <span class="doc-pager-spacer" />
+                  )}
+                </nav>
+              )
+            }
+          </div>
+        </div>
+      </Container>
+    </section>
+  </main>
+
+  <button type="button" class="doc-top" id="doc-top" aria-label="Back to top">↑</button>
+
+  <script>
+    // ── Scroll-spy: highlight the TOC entry for the section near the top ──
+    var tocLinks = Array.prototype.slice.call(document.querySelectorAll(".doc-toc-link"));
+    var sections = Array.prototype.slice.call(document.querySelectorAll(".doc-section"));
+    if (tocLinks.length && sections.length && "IntersectionObserver" in window) {
+      var spy = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (en) {
+            if (!en.isIntersecting) return;
+            var id = en.target.id;
+            tocLinks.forEach(function (l) {
+              l.classList.toggle("is-active", l.getAttribute("data-toc") === id);
+            });
+          });
+        },
+        { rootMargin: "-45% 0px -50% 0px", threshold: 0 },
+      );
+      sections.forEach(function (s) {
+        spy.observe(s);
+      });
+    }
+
+    // ── Scroll reveal for head / sheet / sections ──
+    if ("IntersectionObserver" in window) {
+      var revealables = Array.prototype.slice.call(
+        document.querySelectorAll(".doc-reveal, .doc-section"),
+      );
+      revealables.forEach(function (el, i) {
+        el.classList.add("doc-reveal");
+        el.style.transitionDelay = Math.min(i, 8) * 60 + "ms";
+      });
+      var rev = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (en) {
+            if (en.isIntersecting) {
+              en.target.classList.add("is-visible");
+              rev.unobserve(en.target);
+            }
+          });
+        },
+        { threshold: 0.12 },
+      );
+      revealables.forEach(function (el) {
+        rev.observe(el);
+      });
+    }
+
+    // ── Back to top ──
+    var topBtn = document.getElementById("doc-top");
+    if (topBtn) {
+      var onScroll = function () {
+        topBtn.classList.toggle("show", window.scrollY > 420);
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
+      topBtn.addEventListener("click", function () {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    }
+  </script>
+</BaseLayout>

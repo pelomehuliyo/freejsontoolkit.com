@@ -1,265 +1,101 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import Container from "../components/Container.astro";
-import Card from "../components/Card.astro";
-import Button from "../components/Button.astro";
+import DocLayout from "../layouts/DocLayout.astro";
+import { counts } from "../lib/tools/registry";
+
+const toc = [
+  { id: "what", label: "What this is" },
+  { id: "philosophy", label: "Philosophy" },
+  { id: "built", label: "Built in the open" },
+  { id: "roadmap", label: "Where it's going" },
+];
 ---
 
-<BaseLayout
-  title="About Us - Free JSON Toolkit"
-  description="Learn about Free JSON Toolkit, our mission to build fast, free, privacy-first developer utilities that run 100% locally in your browser."
-  activePath="/about"
+<DocLayout
+  title="About Free JSON Toolkit"
+  description="A minimalist, offline-first suite of developer utilities for JSON, CSV, XML and YAML. Built in the open, privacy-first, and free to use."
+  eyebrow="About"
+  lede="A small, opinionated toolbox for the data formats developers live in — built to run on your machine and nowhere else."
+  toc={toc}
+  updated="2026-07-30"
 >
-  <main>
-    {/* Page Header */}
-    <section class="page-header" aria-labelledby="about-title">
-      <Container size="narrow" class="header-container">
-        <span class="caption-mono section-eyebrow">ABOUT THE PROJECT</span>
-        <h1 id="about-title" class="display-xl page-title">Free JSON Toolkit</h1>
-        <p class="body-lg page-subtitle">
-          Fast, free, and privacy-first developer utilities that process your data entirely in your
-          browser.
-        </p>
-      </Container>
-    </section>
+  <section class="doc-section" id="what">
+    <h2>What this is</h2>
+    <div class="doc-stats">
+      <div class="doc-stat">
+        <span class="doc-stat-num">{counts.available}</span>
+        <span class="doc-stat-label">live tools</span>
+      </div>
+      <div class="doc-stat">
+        <span class="doc-stat-num">{counts.comingSoon}</span>
+        <span class="doc-stat-label">in the pipeline</span>
+      </div>
+      <div class="doc-stat">
+        <span class="doc-stat-num">0</span>
+        <span class="doc-stat-label">bytes uploaded</span>
+      </div>
+    </div>
+    <p>
+      Free JSON Toolkit is a suite of single-purpose utilities for converting, formatting, and
+      validating structured data. It exists for the moments when you have a blob of JSON that needs
+      to be readable, a CSV that needs to become JSON, or a payload you need to sanity-check — and
+      you'd rather not paste it into a site that phones home.
+    </p>
+    <p>
+      It is deliberately narrow. Each tool does one thing, does it locally, and gets out of your
+      way. No dashboards, no accounts, no onboarding flow between you and the thing you came to do.
+    </p>
+  </section>
 
-    {/* Philosophy / Overview */}
-    <section class="content-section" aria-labelledby="mission-title">
-      <Container size="narrow">
-        <div class="content-block">
-          <h2 id="mission-title" class="display-md section-heading">Our Mission</h2>
-          <p class="body-md text-content">
-            Developers frequently need to format, validate, and convert data like JSON to CSV.
-            However, many web-based tools require uploading this sensitive data to external servers,
-            creating privacy risks and latency.
-          </p>
-          <p class="body-md text-content">
-            Free JSON Toolkit is built to solve this problem. Our mission is to build fast, free,
-            privacy-first developer utilities that process data locally. By executing all processing
-            inside your browser sandbox, your datasets never leave your computer, ensuring absolute
-            privacy and security.
-          </p>
-        </div>
-      </Container>
-    </section>
+  <section class="doc-section" id="philosophy">
+    <h2>Philosophy</h2>
+    <p>A tool earns its place here only if it respects a short list of rules:</p>
+    <ul class="guarantees">
+      <li>Privacy by architecture — if it can't run in the browser, it doesn't belong.</li>
+      <li>Speed over features — the interface should feel instant, even on large files.</li>
+      <li>One purpose per tool — clarity beats a Swiss-army knife with a dull blade.</li>
+      <li>Copy/paste first — the fastest path in is the one that's already on your clipboard.</li>
+      <li>Honest over impressive — we tell you what we send, and we send almost nothing.</li>
+    </ul>
+    <p>
+      The design follows the same logic: a stark, monospace-led system with no decoration that
+      doesn't earn its keep. The aesthetic is the engineering, made visible.
+    </p>
+  </section>
 
-    {/* Why Free JSON Toolkit */}
-    <section class="features-section" aria-labelledby="why-title">
-      <Container size="narrow">
-        <div class="section-header-align-left">
-          <h2 id="why-title" class="display-md section-heading">Why Free JSON Toolkit?</h2>
-          <p class="body-md section-intro">
-            We aim to minimize unnecessary tracking while keeping the toolkit fast and
-            privacy-focused. Here is what makes our tools different:
-          </p>
-        </div>
+  <section class="doc-section" id="built">
+    <h2>Built in the open</h2>
+    <p>
+      The entire project is open source. The code that handles your data, the design system, the
+      roadmap, and even the planning documents all live in the public repository — you can read,
+      audit, fork, or contribute to any of it.
+    </p>
+    <p>
+      If you find a bug, want a tool that isn't here yet, or disagree with a decision, the right
+      place to say so is a GitHub issue. The roadmap is shaped by the people who actually use the
+      tools.
+    </p>
+    <p>
+      <a href="https://github.com/pelomehuliyo/freejsontoolkit.com"
+        >View the repository on GitHub →</a
+      >
+    </p>
+  </section>
 
-        <div class="grid-layout" role="list">
-          <Card variant="flat" class="feature-card" role="listitem">
-            <h3 class="display-sm feature-title">Free Forever</h3>
-            <p class="body-sm feature-desc">
-              No hidden fees, no limits, and no subscriptions. All tools are open and free to use
-              for personal or commercial projects.
-            </p>
-          </Card>
-
-          <Card variant="flat" class="feature-card" role="listitem">
-            <h3 class="display-sm feature-title">Browser-Based</h3>
-            <p class="body-sm feature-desc">
-              All tools run locally inside your browser using JavaScript. No software to install and
-              no external compilation required.
-            </p>
-          </Card>
-
-          <Card variant="flat" class="feature-card" role="listitem">
-            <h3 class="display-sm feature-title">Privacy-First</h3>
-            <p class="body-sm feature-desc">
-              Since execution happens entirely inside your local browser sandbox, your JSON data is
-              never uploaded to any servers.
-            </p>
-          </Card>
-
-          <Card variant="flat" class="feature-card" role="listitem">
-            <h3 class="display-sm feature-title">No Account Required</h3>
-            <p class="body-sm feature-desc">
-              Skip the sign-up flow. Start converting and formatting data instantly without creating
-              a profile.
-            </p>
-          </Card>
-
-          <Card variant="flat" class="feature-card" role="listitem">
-            <h3 class="display-sm feature-title">Fast</h3>
-            <p class="body-sm feature-desc">
-              No network uploads or server queues. Files and strings are processed instantly in
-              memory.
-            </p>
-          </Card>
-        </div>
-      </Container>
-    </section>
-
-    {/* What's Next */}
-    <section class="content-section border-top" aria-labelledby="next-title">
-      <Container size="narrow">
-        <div class="content-block">
-          <h2 id="next-title" class="display-md section-heading">What's Next</h2>
-          <p class="body-md text-content">
-            We are actively expanding the toolkit to support more conversion and formatting
-            workflows. Planned upcoming tools include a bidirectional CSV to JSON converter, a JSON
-            validator to pinpoint syntax errors, and a custom JSON formatter.
-          </p>
-          <div class="cta-actions">
-            <Button variant="primary" size="md" shape="square" href="/tools/json-to-csv">
-              Try JSON → CSV Converter
-            </Button>
-            <Button variant="secondary" size="md" shape="square" href="/contact">
-              Suggest a Tool
-            </Button>
-          </div>
-        </div>
-      </Container>
-    </section>
-  </main>
-</BaseLayout>
-
-<style>
-  .page-header {
-    padding-top: var(--spacing-5xl);
-    padding-bottom: var(--spacing-3xl);
-    background-color: var(--color-canvas);
-    border-bottom: 1px solid var(--color-hairline);
-    text-align: center;
-  }
-
-  .header-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-sm);
-  }
-
-  .section-eyebrow {
-    color: var(--color-mute);
-    letter-spacing: 0.1em;
-  }
-
-  .page-title {
-    margin-top: 0;
-    margin-bottom: var(--spacing-xxs);
-    color: var(--color-ink);
-  }
-
-  .page-subtitle {
-    color: var(--color-body);
-    max-width: 600px;
-    margin: 0;
-    line-height: 1.6;
-  }
-
-  .content-section {
-    padding: var(--spacing-4xl) 0;
-    background-color: var(--color-canvas);
-  }
-
-  .border-top {
-    border-top: 1px solid var(--color-hairline);
-  }
-
-  .content-block {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-  }
-
-  .section-heading {
-    color: var(--color-ink);
-    margin-top: 0;
-    margin-bottom: var(--spacing-xxs);
-  }
-
-  .text-content {
-    color: var(--color-body);
-    line-height: 1.7;
-    margin: 0;
-  }
-
-  .features-section {
-    padding: var(--spacing-4xl) 0;
-    background-color: var(--color-canvas-soft);
-    border-top: 1px solid var(--color-hairline);
-    border-bottom: 1px solid var(--color-hairline);
-  }
-
-  .section-header-align-left {
-    margin-bottom: var(--spacing-2xl);
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-  }
-
-  .section-intro {
-    color: var(--color-body);
-    margin: 0;
-    max-width: 650px;
-    line-height: 1.6;
-  }
-
-  .grid-layout {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-lg);
-  }
-
-  .feature-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    border: 1px solid var(--color-hairline);
-    background-color: var(--color-canvas);
-  }
-
-  .feature-title {
-    margin: 0;
-    color: var(--color-ink);
-  }
-
-  .feature-desc {
-    margin: 0;
-    color: var(--color-body);
-    line-height: 1.5;
-  }
-
-  .cta-actions {
-    display: flex;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-md);
-  }
-
-  @media (max-width: 768px) {
-    .grid-layout {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 600px) {
-    .page-header {
-      padding-top: var(--spacing-3xl);
-      padding-bottom: var(--spacing-2xl);
-    }
-
-    .content-section,
-    .features-section {
-      padding: var(--spacing-2xl) 0;
-    }
-
-    .cta-actions {
-      flex-direction: column;
-      gap: var(--spacing-sm);
-    }
-
-    .cta-actions > :global(a),
-    .cta-actions > :global(button) {
-      width: 100%;
-    }
-  }
-</style>
+  <section class="doc-section" id="roadmap">
+    <h2>Where it's going</h2>
+    <p>
+      The toolkit grows one honest release at a time. Right now there are{" "}
+      <strong>{counts.available} live tools</strong> and <strong
+        >{counts.comingSoon} in the pipeline</strong
+      > — converters, formatters, validators, and a growing utilities drawer.
+    </p>
+    <p>
+      The full catalog, with what's available today and what's planned next, lives on the tools
+      page. Nothing there is a placeholder for its own sake: a tool appears the moment it works, and
+      the pipeline reflects real intent, not filler.
+    </p>
+    <p>
+      <a href="/tools">Browse the catalog &amp; roadmap →</a>
+    </p>
+  </section>
+</DocLayout>
