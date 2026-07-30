@@ -1,0 +1,734 @@
+---
+import ToolShell from "../../components/tools/ToolShell.astro";
+import ToolHeader from "../../components/tools/ToolHeader.astro";
+import ToolWorkspace from "../../components/tools/ToolWorkspace.astro";
+import CodeEditor from "../../components/tools/CodeEditor.astro";
+import DragDropZone from "../../components/tools/DragDropZone.astro";
+import ToolActions from "../../components/tools/ToolActions.astro";
+import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import Card from "../../components/Card.astro";
+import Button from "../../components/Button.astro";
+import Container from "../../components/Container.astro";
+import { INDENT_OPTIONS } from "../../lib/tools/json-validator/constants";
+---
+
+<ToolShell
+  title="JSON Validator — Check JSON Syntax Online (Free, Local)"
+  description="Free online JSON validator. Pinpoint syntax errors to the exact line and column, flag duplicate keys, and inspect structure — 100% local, no upload, no server."
+  activePath="/tools/json-validator"
+>
+  <ToolHeader
+    slot="header"
+    breadcrumbs={[{ label: "Home", href: "/" }, { label: "JSON Validator" }]}
+    title="JSON Validator"
+    subtitle="Pinpoint syntax errors to the exact line and column — offline."
+  />
+
+  <ToolWorkspace slot="workspace" layout="3-col">
+    <div slot="input" class="ws-fill">
+      <Card variant="flat" class="workspace-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">INPUT JSON</span>
+          <ToolActions id="input-actions" variant="inset" actions={["sample", "clear"]} />
+        </div>
+        <DragDropZone id="json-input" accept=".json" label="Upload JSON file" />
+        <CodeEditor
+          id="json-input"
+          label="JSON input"
+          placeholder='Paste JSON to validate it
+Example:
+{"id":1,"name":"Ada"}'
+        >
+          <div class="editor-info-bar" slot>
+            <span class="info-status" id="json-validation-status">JSON Status: Empty</span>
+            <span class="info-meta" id="json-char-count">0 chars</span>
+          </div>
+        </CodeEditor>
+      </Card>
+    </div>
+
+    <div slot="controls">
+      <Card variant="flat" class="workspace-card settings-card">
+        <h2 class="display-sm settings-title">Options</h2>
+        <div class="settings-divider"></div>
+
+        <div class="settings-group checkbox-group">
+          <label class="checkbox-container body-sm">
+            <input type="checkbox" id="flag-dupes-checkbox" checked />
+            <span class="checkbox-checkmark"></span>
+            Flag duplicate keys
+          </label>
+          <p class="caption settings-help">
+            JSON allows repeated keys; most code keeps the last. We warn you.
+          </p>
+        </div>
+
+        <div class="settings-group checkbox-group">
+          <label class="checkbox-container body-sm">
+            <input type="checkbox" id="include-normalized-checkbox" />
+            <span class="checkbox-checkmark"></span>
+            Include normalized JSON
+          </label>
+          <p class="caption settings-help">
+            Append a pretty-printed copy to the report when valid.
+          </p>
+        </div>
+
+        <div class="settings-group">
+          <label class="settings-label caption-mono" for="indent-select">Normalized indent</label>
+          <div class="select-wrapper">
+            <select id="indent-select" class="settings-select">
+              {INDENT_OPTIONS.map((opt) => <option value={opt.value}>{opt.label}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <Button id="validate-btn" variant="primary" size="lg" shape="square" class="action-btn">
+          Validate JSON
+        </Button>
+
+        <ErrorBanner id="validate-error" />
+
+        <div class="status-banner caption">
+          <span class="status-indicator"><span class="dot idle" id="status-dot"></span></span>
+          <span class="sr-only" id="validate-status-announce" aria-live="polite"></span>
+          Local sandbox active
+        </div>
+      </Card>
+    </div>
+
+    <div slot="output" class="ws-fill ws-output">
+      <Card variant="flat" class="workspace-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">DIAGNOSTICS</span>
+          <ToolActions id="output-actions" variant="inset" actions={["copy", "download"]} />
+        </div>
+        <CodeEditor
+          id="validation-output"
+          label="Validation diagnostics"
+          placeholder="Diagnostics will appear here..."
+          readonly
+        >
+          <div class="editor-info-bar" slot>
+            <span class="info-status" id="validation-output-status">Output: Empty</span>
+            <span class="info-meta" id="validation-output-count">0 chars</span>
+          </div>
+        </CodeEditor>
+      </Card>
+    </div>
+  </ToolWorkspace>
+
+  <section class="tool-content-section" aria-labelledby="how-title">
+    <Container size="narrow">
+      <div class="content-section-header">
+        <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
+        <h2 id="how-title" class="display-md section-title">Validate JSON in three steps</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">1</span>
+          <h3 class="body-sm-strong step-title">Paste or upload</h3>
+          <p class="caption step-desc">
+            Drop in any JSON — validity is checked as you type, up to 15M characters.
+          </p>
+        </div>
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">2</span>
+          <h3 class="body-sm-strong step-title">Read the diagnosis</h3>
+          <p class="caption step-desc">
+            Errors point to the exact line and column, with the offending lines and a caret.
+          </p>
+        </div>
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">3</span>
+          <h3 class="body-sm-strong step-title">Inspect structure</h3>
+          <p class="caption step-desc">
+            When valid, see a structure tally, duplicate-key warnings, and an optional normalized
+            copy.
+          </p>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <section class="faq-section" aria-labelledby="faq-title">
+    <Container size="narrow">
+      <div class="faq-header">
+        <span class="caption-mono section-eyebrow">FAQ</span>
+        <h2 id="faq-title" class="display-md section-title">Frequently asked questions</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary class="faq-summary">Is my JSON uploaded anywhere?</summary>
+          <p class="body-md faq-answer">
+            No. Validation runs entirely in your browser (in a background worker for large files).
+            Your data never leaves your machine.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Why are duplicate keys only a warning?</summary>
+          <p class="body-md faq-answer">
+            The JSON specification permits repeated keys, and <code>JSON.parse</code> silently keeps the
+            last value — which is usually a bug. We flag them so you can decide, rather than rejecting
+            valid input.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">How exact are the line and column numbers?</summary>
+          <p class="body-md faq-answer">
+            Exact, and identical in every browser. The validator walks the JSON grammar itself
+            rather than reading an error string, so the coordinates never depend on the engine's
+            message format.
+          </p>
+        </details>
+      </div>
+    </Container>
+  </section>
+</ToolShell>
+
+<script>
+  import { jsonValidatorStore } from "../../lib/tools/json-validator/store";
+  import {
+    handleInput,
+    validate,
+    loadSample,
+    clearAll,
+    setFlagDuplicateKeys,
+    setIncludeNormalized,
+    setIndent,
+  } from "../../lib/tools/json-validator/actions";
+  import { buildReport } from "../../lib/tools/json-validator/engine";
+  import type { IndentOption } from "../../lib/tools/json-validator/types";
+  import { debounce } from "../../shared/debounce";
+  import { announce, initAnnounce } from "../../shared/announce";
+  import { copyToClipboard } from "../../shared/clipboard";
+  import { downloadFile } from "../../shared/download";
+
+  const jsonTextarea = document.getElementById("json-input-textarea") as HTMLTextAreaElement | null;
+  const outTextarea = document.getElementById(
+    "validation-output-textarea",
+  ) as HTMLTextAreaElement | null;
+  const inputStatus = document.getElementById("json-validation-status") as HTMLElement | null;
+  const inputCharCount = document.getElementById("json-char-count") as HTMLElement | null;
+  const outputStatus = document.getElementById("validation-output-status") as HTMLElement | null;
+  const outputCharCount = document.getElementById("validation-output-count") as HTMLElement | null;
+  const flagDupes = document.getElementById("flag-dupes-checkbox") as HTMLInputElement | null;
+  const includeNormalized = document.getElementById(
+    "include-normalized-checkbox",
+  ) as HTMLInputElement | null;
+  const indentSelect = document.getElementById("indent-select") as HTMLSelectElement | null;
+  const validateBtn = document.getElementById("validate-btn") as HTMLButtonElement | null;
+  const errorBanner = document.getElementById("validate-error") as HTMLElement | null;
+  const statusDot = document.getElementById("status-dot") as HTMLElement | null;
+
+  initAnnounce("validate-status-announce");
+
+  const debouncedInput = debounce((value: string) => {
+    handleInput(jsonValidatorStore, value);
+  }, 150);
+
+  let lastScrolledPos = -1;
+  let lastReport = "";
+
+  jsonValidatorStore.subscribe((state) => {
+    const inputFocused = jsonTextarea && document.activeElement === jsonTextarea;
+    if (jsonTextarea && jsonTextarea.value !== state.jsonInput && !inputFocused) {
+      jsonTextarea.value = state.jsonInput;
+      jsonTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+
+    // Build the diagnostics report from the current result (live or authoritative).
+    const report = state.result ? buildReport(state.result, state.jsonInput) : "";
+    if (report !== lastReport) {
+      lastReport = report;
+      if (outTextarea && outTextarea.value !== report) {
+        outTextarea.value = report;
+        outTextarea.dispatchEvent(new Event("editor-refresh"));
+      }
+    }
+
+    if (inputStatus) {
+      if (state.inputStatus === "empty") {
+        inputStatus.textContent = "JSON Status: Empty";
+        inputStatus.style.color = "";
+      } else if (state.result && !state.result.valid && state.result.error) {
+        const e = state.result.error;
+        inputStatus.textContent = `JSON Status: Invalid · line ${e.line}, col ${e.column}`;
+        inputStatus.style.color = "var(--color-error)";
+      } else if (state.result && state.result.valid) {
+        inputStatus.textContent = "JSON Status: Valid";
+        inputStatus.style.color = "var(--color-success)";
+      } else {
+        inputStatus.textContent = "JSON Status: Ready";
+        inputStatus.style.color = "";
+      }
+    }
+    if (inputCharCount)
+      inputCharCount.textContent = state.jsonInput.length.toLocaleString() + " chars";
+
+    if (outputStatus) {
+      outputStatus.textContent =
+        state.outputStatus === "valid"
+          ? "Output: Valid"
+          : state.outputStatus === "invalid"
+            ? "Output: Invalid"
+            : "Output: Empty";
+      outputStatus.style.color =
+        state.outputStatus === "valid"
+          ? "var(--color-success)"
+          : state.outputStatus === "invalid"
+            ? "var(--color-error)"
+            : "";
+    }
+    if (outputCharCount) outputCharCount.textContent = report.length.toLocaleString() + " chars";
+
+    if (statusDot) {
+      statusDot.classList.remove("idle", "active", "error");
+      statusDot.classList.add(
+        state.isValidating ? "active" : state.outputStatus === "invalid" ? "error" : "idle",
+      );
+    }
+
+    if (validateBtn) {
+      validateBtn.textContent = state.isValidating ? "Validating…" : "Validate JSON";
+      validateBtn.disabled = state.isValidating;
+    }
+
+    // Scroll the input to the error line ONLY on an authoritative invalid result,
+    // so as-you-type diagnostics never yank the caret while typing.
+    if (
+      jsonTextarea &&
+      state.result &&
+      state.result.authoritative &&
+      !state.result.valid &&
+      state.result.error &&
+      state.result.error.position !== lastScrolledPos
+    ) {
+      lastScrolledPos = state.result.error.position;
+      const lh = parseFloat(getComputedStyle(jsonTextarea).lineHeight) || 19.5;
+      jsonTextarea.scrollTop = Math.max(0, (state.result.error.line - 3) * lh);
+    }
+
+    if (errorBanner) {
+      if (state.error) (errorBanner as any).show?.(state.error);
+      else (errorBanner as any).hide?.();
+    }
+    if (state.error) announce("Error: " + state.error);
+    if (state.result && state.result.authoritative && state.result.valid) announce("JSON is valid");
+    if (state.result && state.result.authoritative && !state.result.valid)
+      announce("JSON is invalid");
+  });
+
+  if (jsonTextarea) {
+    jsonTextarea.addEventListener("input", () => debouncedInput(jsonTextarea.value));
+  }
+  if (validateBtn) validateBtn.addEventListener("click", () => validate(jsonValidatorStore));
+  if (flagDupes)
+    flagDupes.addEventListener("change", () =>
+      setFlagDuplicateKeys(jsonValidatorStore, flagDupes.checked),
+    );
+  if (includeNormalized)
+    includeNormalized.addEventListener("change", () =>
+      setIncludeNormalized(jsonValidatorStore, includeNormalized.checked),
+    );
+  if (indentSelect)
+    indentSelect.addEventListener("change", () =>
+      setIndent(jsonValidatorStore, indentSelect.value as IndentOption),
+    );
+
+  const inputActions = document.getElementById("input-actions");
+  if (inputActions) {
+    inputActions.addEventListener("tool-action", (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      if (action === "sample") {
+        loadSample(jsonValidatorStore);
+        announce("Sample JSON loaded");
+      }
+      if (action === "clear") {
+        clearAll(jsonValidatorStore);
+        announce("Input cleared");
+      }
+    });
+  }
+
+  const outputActions = document.getElementById("output-actions");
+  if (outputActions) {
+    outputActions.addEventListener("tool-action", async (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      const report = lastReport;
+      if (action === "copy") {
+        const ok = report ? await copyToClipboard(report) : false;
+        const btn = outputActions.querySelector("[data-action='copy']");
+        if (ok && btn) {
+          const orig = btn.textContent || "Copy";
+          btn.textContent = "Copied!";
+          announce("Diagnostics copied");
+          setTimeout(() => {
+            btn.textContent = orig;
+          }, 1500);
+        }
+      }
+      if (action === "download") {
+        if (report) {
+          downloadFile(report, "validation-report.txt", "text/plain;charset=utf-8;");
+          announce("Download started");
+        }
+      }
+    });
+  }
+
+  const dropZone = document.getElementById("json-input-dropzone");
+  if (dropZone) {
+    dropZone.addEventListener("file-dropped", (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.text) {
+        handleInput(jsonValidatorStore, detail.text);
+        validate(jsonValidatorStore);
+        announce("File loaded: " + (detail.name || "file"));
+      }
+    });
+  }
+
+  document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "SELECT") return;
+      e.preventDefault();
+      validate(jsonValidatorStore);
+    }
+  });
+</script>
+
+<style>
+  .workspace-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    gap: var(--spacing-md);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-hairline);
+    padding-bottom: var(--spacing-sm);
+  }
+  .column-title {
+    color: var(--color-mute);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+  .editor-info-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--color-hairline);
+    border-top: none;
+    border-bottom-left-radius: var(--rounded-sm);
+    border-bottom-right-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    padding: 6px var(--spacing-sm);
+    font-size: 11px;
+    color: var(--color-mute);
+    font-family: var(--font-sans);
+  }
+  .info-status {
+    font-weight: 500;
+  }
+
+  .settings-card {
+    padding: var(--spacing-lg);
+  }
+  .settings-title {
+    margin: 0;
+  }
+  .settings-divider {
+    height: 1px;
+    background-color: var(--color-hairline);
+    margin: var(--spacing-xs) 0;
+  }
+  .settings-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-md);
+  }
+  .settings-label {
+    color: var(--color-mute);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .select-wrapper {
+    position: relative;
+    width: 100%;
+  }
+  .settings-select {
+    width: 100%;
+    height: 38px;
+    padding: 0 var(--spacing-md);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    appearance: none;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }
+  .settings-select:focus {
+    border-color: var(--color-hairline-strong);
+  }
+  .select-wrapper::after {
+    content: "▼";
+    font-size: 9px;
+    color: var(--color-body);
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .checkbox-group {
+    margin-bottom: var(--spacing-sm);
+  }
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 24px;
+    cursor: pointer;
+    user-select: none;
+    color: var(--color-ink);
+  }
+  .checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  .checkbox-checkmark {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    height: 16px;
+    width: 16px;
+    border: 1px solid var(--color-hairline-strong);
+    border-radius: 4px;
+    background-color: var(--color-canvas);
+    transition:
+      background-color 0.1s ease,
+      border-color 0.1s ease;
+  }
+  .checkbox-container:hover input ~ .checkbox-checkmark {
+    border-color: var(--color-ink);
+  }
+  .checkbox-container input:checked ~ .checkbox-checkmark {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+  .checkbox-checkmark::after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+  .checkbox-container input:checked ~ .checkbox-checkmark::after {
+    display: block;
+  }
+  .checkbox-container .checkbox-checkmark::after {
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+  }
+  .settings-help {
+    color: var(--color-mute);
+    margin: 4px 0 0 24px;
+    line-height: 1.4;
+  }
+  .action-btn {
+    width: 100%;
+    margin-top: var(--spacing-sm);
+  }
+
+  .status-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-mute);
+    margin-top: auto;
+    padding-top: var(--spacing-md);
+  }
+  .status-indicator .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-hairline-strong);
+  }
+  .status-indicator .dot.active {
+    background-color: var(--color-accent);
+  }
+  .status-indicator .dot.error {
+    background-color: var(--color-error);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .tool-content-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas-soft);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .content-section-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .section-eyebrow {
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+  }
+  .section-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xl);
+  }
+  .step-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-lg);
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    text-align: center;
+    align-items: center;
+  }
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-accent);
+    color: var(--color-on-primary);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+  }
+  .step-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+  .step-desc {
+    color: var(--color-body);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .faq-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .faq-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .faq-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft);
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  .faq-summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink);
+    padding: var(--spacing-xs) 0;
+    user-select: none;
+  }
+  .faq-summary:hover {
+    color: var(--color-accent);
+  }
+  .faq-answer {
+    margin-top: var(--spacing-sm);
+    font-size: 13px;
+    color: var(--color-body);
+    line-height: 1.6;
+  }
+  .faq-answer code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background-color: var(--color-canvas-soft-2);
+    padding: 1px 4px;
+    border-radius: var(--rounded-xs);
+  }
+
+  @media (min-width: 960px) {
+    .workspace-card :global(.editor-outer) {
+      flex: none;
+      height: 650px;
+      min-height: 650px;
+    }
+    .workspace-card :global(.editor-wrapper) {
+      height: 100%;
+    }
+  }
+  @media (max-width: 959px) {
+    .workspace-card :global(.editor-outer) {
+      height: 350px;
+      flex: 0 0 350px;
+      min-height: 0;
+    }
+    .workspace-card :global(.editor-wrapper) {
+      height: 100%;
+    }
+    .steps-grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-md);
+    }
+  }
+</style>
