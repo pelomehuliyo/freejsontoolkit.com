@@ -1,0 +1,1072 @@
+---
+import ToolShell from "../../components/tools/ToolShell.astro";
+import ToolHeader from "../../components/tools/ToolHeader.astro";
+import CodeEditor from "../../components/tools/CodeEditor.astro";
+import ToolActions from "../../components/tools/ToolActions.astro";
+import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import Card from "../../components/Card.astro";
+import Button from "../../components/Button.astro";
+import Container from "../../components/Container.astro";
+---
+
+<ToolShell
+  title="JSON Diff — Compare Two JSON Documents Online (Free, Local)"
+  description="Free online JSON diff. Compare two JSON documents side-by-side or unified, with exact added/removed/changed lines and a similarity score — 100% local, no upload, no server."
+  activePath="/tools/json-diff"
+>
+  <ToolHeader
+    slot="header"
+    breadcrumbs={[{ label: "Home", href: "/" }, { label: "JSON Diff" }]}
+    title="JSON Diff"
+    subtitle="Compare two JSON documents and see exactly what changed — offline."
+  />
+
+  <section class="dj-stage">
+    <Container size="wide">
+      {/* ── Two inputs ── */}
+      <div class="dj-inputs">
+        <Card variant="flat" class="workspace-card diff-input-card">
+          <div class="card-header">
+            <span class="caption-mono column-title">ORIGINAL · A</span>
+            <ToolActions id="a-actions" variant="inset" actions={["clear"]} />
+          </div>
+          <CodeEditor
+            id="diff-a"
+            label="Original JSON (A)"
+            placeholder="Paste the original JSON here…"
+          />
+        </Card>
+
+        <Card variant="flat" class="workspace-card diff-input-card">
+          <div class="card-header">
+            <span class="caption-mono column-title">MODIFIED · B</span>
+            <ToolActions id="b-actions" variant="inset" actions={["clear"]} />
+          </div>
+          <CodeEditor
+            id="diff-b"
+            label="Modified JSON (B)"
+            placeholder="Paste the modified JSON here…"
+          />
+        </Card>
+      </div>
+
+      {/* ── Controls + live stats ── */}
+      <Card variant="flat" class="workspace-card dj-controls-card">
+        <div class="dj-controls">
+          <div class="dj-opts">
+            <label class="dj-check body-sm">
+              <input type="checkbox" id="ignore-ws" />
+              <span class="dj-box"></span>
+              Ignore whitespace
+            </label>
+            <label class="dj-check body-sm">
+              <input type="checkbox" id="ignore-case" />
+              <span class="dj-box"></span>
+              Ignore case
+            </label>
+            <div class="dj-mode" role="group" aria-label="Diff view">
+              <button
+                type="button"
+                class="dj-mode-btn is-active"
+                data-diff-mode="side"
+                aria-pressed="true"
+              >
+                Side-by-side
+              </button>
+              <button
+                type="button"
+                class="dj-mode-btn"
+                data-diff-mode="unified"
+                aria-pressed="false"
+              >
+                Unified
+              </button>
+            </div>
+          </div>
+
+          <div class="dj-actions">
+            <Button id="compare-btn" variant="primary" size="md" shape="square">Compare</Button>
+            <Button id="sample-btn" variant="secondary" size="md" shape="square">Load sample</Button
+            >
+          </div>
+        </div>
+
+        <div class="dj-stats" id="dj-stats" hidden>
+          <div class="dj-stat">
+            <span class="dj-stat-num dj-c-add" id="dj-n-add">0</span>
+            <span class="dj-stat-label caption-mono">added</span>
+          </div>
+          <div class="dj-stat">
+            <span class="dj-stat-num dj-c-remove" id="dj-n-remove">0</span>
+            <span class="dj-stat-label caption-mono">removed</span>
+          </div>
+          <div class="dj-stat">
+            <span class="dj-stat-num dj-c-change" id="dj-n-change">0</span>
+            <span class="dj-stat-label caption-mono">changed</span>
+          </div>
+          <div class="dj-stat">
+            <span class="dj-stat-num" id="dj-n-eq">0</span>
+            <span class="dj-stat-label caption-mono">unchanged</span>
+          </div>
+          <div class="dj-sim">
+            <div class="dj-sim-top">
+              <span class="caption-mono">similarity</span>
+              <span class="dj-sim-pct" id="dj-sim-pct">100%</span>
+            </div>
+            <div class="dj-sim-track">
+              <div class="dj-sim-fill" id="dj-sim-fill" style="width: 100%"></div>
+            </div>
+          </div>
+          <div class="dj-bar" aria-hidden="true">
+            <span class="dj-bar-eq" id="dj-bar-eq" style="width: 100%"></span>
+            <span class="dj-bar-add" id="dj-bar-add" style="width: 0%"></span>
+            <span class="dj-bar-remove" id="dj-bar-remove" style="width: 0%"></span>
+          </div>
+        </div>
+
+        <p class="dj-hint caption-mono" id="dj-hint">
+          Live diff is on — differences appear as you type.
+        </p>
+        <ErrorBanner id="diff-error" />
+      </Card>
+
+      {/* ── Result stage ── */}
+      <Card variant="flat" class="workspace-card diff-out-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">DIFF</span>
+          <ToolActions id="out-actions" variant="inset" actions={["copy", "download"]} />
+        </div>
+
+        <div class="dj-idle" id="dj-idle">
+          <p class="dj-idle-cmd caption-mono">$ diff a.json b.json</p>
+          <p class="body-sm dj-idle-msg">
+            Paste two snippets above — or load the sample — and the differences render here, line by
+            line, the instant they change.
+          </p>
+        </div>
+
+        {/* side-by-side: ONE grid → rows align exactly, one scrollbar, no sync code */}
+        <div class="dj-sbs" id="diff-sbs" hidden></div>
+
+        {/* unified: single column of +/-/context lines */}
+        <div class="dj-unified" id="diff-unified" hidden></div>
+
+        <p class="dj-trunc caption-mono" id="dj-trunc" hidden>
+          Showing the first 20,000 lines of a very large diff.
+        </p>
+      </Card>
+    </Container>
+  </section>
+
+  <section class="tool-content-section" aria-labelledby="how-title">
+    <Container size="narrow">
+      <div class="content-section-header">
+        <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
+        <h2 id="how-title" class="display-md section-title">Compare JSON in three steps</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">1</span>
+          <h3 class="body-sm-strong step-title">Paste both sides</h3>
+          <p class="caption step-desc">
+            Original in A, modified in B. The diff runs as you type — no upload, no waiting.
+          </p>
+        </div>
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">2</span>
+          <h3 class="body-sm-strong step-title">Read the changes</h3>
+          <p class="caption step-desc">
+            Additions in teal, deletions in red, changed lines facing each other. Toggle unified for
+            a single column.
+          </p>
+        </div>
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">3</span>
+          <h3 class="body-sm-strong step-title">Tune &amp; export</h3>
+          <p class="caption step-desc">
+            Ignore whitespace or case to cut noise, then copy or download the unified patch.
+          </p>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <section class="faq-section" aria-labelledby="faq-title">
+    <Container size="narrow">
+      <div class="faq-header">
+        <span class="caption-mono section-eyebrow">FAQ</span>
+        <h2 id="faq-title" class="display-md section-title">Frequently asked questions</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary class="faq-summary">Is either document uploaded?</summary>
+          <p class="body-md faq-answer">
+            No. The comparison runs entirely in your browser, in a background worker for large
+            inputs. Neither side ever leaves your machine.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Why do some changed lines face each other?</summary>
+          <p class="body-md faq-answer">
+            When a line is removed and another added in the same place, the diff pairs them onto one
+            row so you can read the before/after at a glance, instead of scrolling a delete block
+            against an insert block.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">What does the similarity score mean?</summary>
+          <p class="body-md faq-answer">
+            It's the share of lines that are identical on both sides, as a percentage of all lines
+            involved. 100% means identical; 0% means nothing in common.
+          </p>
+        </details>
+      </div>
+    </Container>
+  </section>
+</ToolShell>
+
+<script>
+  import { jsonDiffStore } from "../../lib/tools/json-diff/store";
+  import {
+    setInputA,
+    setInputB,
+    compare,
+    loadSample,
+    clearAll,
+    setMode,
+    setIgnoreWhitespace,
+    setIgnoreCase,
+  } from "../../lib/tools/json-diff/actions";
+  import type { DiffMode, DiffResult, SbsRow, UnifiedLine } from "../../lib/tools/json-diff/types";
+  import { debounce } from "../../shared/debounce";
+  import { announce, initAnnounce } from "../../shared/announce";
+  import { copyToClipboard } from "../../shared/clipboard";
+  import { downloadFile } from "../../shared/download";
+
+  const aTextarea = document.getElementById("diff-a-textarea") as HTMLTextAreaElement | null;
+  const bTextarea = document.getElementById("diff-b-textarea") as HTMLTextAreaElement | null;
+  const sbsEl = document.getElementById("diff-sbs") as HTMLElement | null;
+  const uniEl = document.getElementById("diff-unified") as HTMLElement | null;
+  const idleEl = document.getElementById("dj-idle") as HTMLElement | null;
+  const statsEl = document.getElementById("dj-stats") as HTMLElement | null;
+  const hintEl = document.getElementById("dj-hint") as HTMLElement | null;
+  const truncEl = document.getElementById("dj-trunc") as HTMLElement | null;
+  const compareBtn = document.getElementById("compare-btn") as HTMLButtonElement | null;
+  const sampleBtn = document.getElementById("sample-btn") as HTMLButtonElement | null;
+  const ignoreWs = document.getElementById("ignore-ws") as HTMLInputElement | null;
+  const ignoreCase = document.getElementById("ignore-case") as HTMLInputElement | null;
+  const modeBtns = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-diff-mode]"));
+  const errorBanner = document.getElementById("diff-error") as HTMLElement | null;
+
+  const nAdd = document.getElementById("dj-n-add") as HTMLElement | null;
+  const nRemove = document.getElementById("dj-n-remove") as HTMLElement | null;
+  const nChange = document.getElementById("dj-n-change") as HTMLElement | null;
+  const nEq = document.getElementById("dj-n-eq") as HTMLElement | null;
+  const simPct = document.getElementById("dj-sim-pct") as HTMLElement | null;
+  const simFill = document.getElementById("dj-sim-fill") as HTMLElement | null;
+  const barEq = document.getElementById("dj-bar-eq") as HTMLElement | null;
+  const barAdd = document.getElementById("dj-bar-add") as HTMLElement | null;
+  const barRemove = document.getElementById("dj-bar-remove") as HTMLElement | null;
+
+  initAnnounce("diff-error"); // reuse the banner's live region if present
+
+  function esc(s: unknown): string {
+    return String(s == null ? "" : s).replace(
+      /[&<>]/g,
+      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c] as string,
+    );
+  }
+
+  let lastResult: DiffResult | null = null;
+  let renderedResult: DiffResult | null = null;
+
+  function renderSbs(r: DiffResult): void {
+    if (!sbsEl) return;
+    const parts: string[] = [];
+    for (let i = 0; i < r.sbs.length; i++) {
+      const row = r.sbs[i];
+      parts.push(cellHtml(row, "a"));
+      parts.push(cellHtml(row, "b"));
+    }
+    sbsEl.innerHTML = parts.join("");
+  }
+
+  function cellHtml(row: SbsRow, side: "a" | "b"): string {
+    const cell = side === "a" ? row.a : row.b;
+    let cls = "dj-cell ";
+    let marker = " ";
+    if (row.type === "equal") {
+      cls += side === "a" ? "dj-eq-l" : "dj-eq-r";
+    } else if (row.type === "change") {
+      cls += side === "a" ? "dj-change-l" : "dj-change-r";
+      marker = side === "a" ? "−" : "+";
+    } else if (row.type === "remove") {
+      cls += side === "a" ? "dj-remove" : "dj-empty";
+      if (side === "a") marker = "−";
+    } else {
+      // add
+      cls += side === "a" ? "dj-empty" : "dj-add";
+      if (side === "b") marker = "+";
+    }
+    if (!cell) {
+      return `<div class="${cls}dj-empty" data-row="${0}"><span class="dj-marker" aria-hidden="true"></span><span class="dj-lineno" aria-hidden="true"></span><span class="dj-code"></span></div>`;
+    }
+    return (
+      `<div class="${cls}" data-row="${i_hash(row)}">` +
+      `<span class="dj-marker" aria-hidden="true">${esc(marker)}</span>` +
+      `<span class="dj-lineno" aria-hidden="true">${cell.n ?? ""}</span>` +
+      `<span class="dj-code">${esc(cell.text)}</span></div>`
+    );
+  }
+
+  // stable per-row index for hover mirroring (the sbs array index)
+  let _rowCounter = 0;
+  function i_hash(_row: SbsRow): number {
+    // We assign sequential row indices during render instead; see renderSbs2.
+    return _rowCounter;
+  }
+
+  // (renderSbs above uses i_hash; rewrite to pass index cleanly)
+  function renderSbs2(r: DiffResult): void {
+    if (!sbsEl) return;
+    const parts: string[] = [];
+    for (let i = 0; i < r.sbs.length; i++) {
+      parts.push(cellHtmlIdx(r.sbs[i], "a", i));
+      parts.push(cellHtmlIdx(r.sbs[i], "b", i));
+    }
+    sbsEl.innerHTML = parts.join("");
+  }
+  function cellHtmlIdx(row: SbsRow, side: "a" | "b", idx: number): string {
+    const cell = side === "a" ? row.a : row.b;
+    let cls = "dj-cell ";
+    let marker = " ";
+    if (row.type === "equal") cls += side === "a" ? "dj-eq-l" : "dj-eq-r";
+    else if (row.type === "change") {
+      cls += side === "a" ? "dj-change-l" : "dj-change-r";
+      marker = side === "a" ? "−" : "+";
+    } else if (row.type === "remove") {
+      cls += side === "a" ? "dj-remove" : "dj-empty";
+      if (side === "a") marker = "−";
+    } else {
+      cls += side === "a" ? "dj-empty" : "dj-add";
+      if (side === "b") marker = "+";
+    }
+    if (!cell) {
+      return `<div class="${cls} dj-empty" data-row="${idx}"><span class="dj-marker" aria-hidden="true"></span><span class="dj-lineno" aria-hidden="true"></span><span class="dj-code"></span></div>`;
+    }
+    return (
+      `<div class="${cls}" data-row="${idx}">` +
+      `<span class="dj-marker" aria-hidden="true">${esc(marker)}</span>` +
+      `<span class="dj-lineno" aria-hidden="true">${cell.n ?? ""}</span>` +
+      `<span class="dj-code">${esc(cell.text)}</span></div>`
+    );
+  }
+
+  function renderUnified(r: DiffResult): void {
+    if (!uniEl) return;
+    const parts: string[] = [];
+    for (const ln of r.unified) {
+      const cls =
+        ln.type === "equal" ? "dj-ul-eq" : ln.type === "add" ? "dj-ul-add" : "dj-ul-remove";
+      const marker = ln.type === "equal" ? " " : ln.type === "add" ? "+" : "−";
+      parts.push(
+        `<div class="dj-uline ${cls}">` +
+          `<span class="dj-marker" aria-hidden="true">${esc(marker)}</span>` +
+          `<span class="dj-lineno" aria-hidden="true">${ln.na ?? ""}</span>` +
+          `<span class="dj-lineno" aria-hidden="true">${ln.nb ?? ""}</span>` +
+          `<span class="dj-code">${esc(ln.text)}</span>` +
+          `</div>`,
+      );
+    }
+    uniEl.innerHTML = parts.join("");
+  }
+
+  function renderStats(r: DiffResult): void {
+    const st = r.stats;
+    if (nAdd) nAdd.textContent = String(st.added);
+    if (nRemove) nRemove.textContent = String(st.removed);
+    if (nChange) nChange.textContent = String(st.changed);
+    if (nEq) nEq.textContent = String(st.equal);
+    if (simPct) simPct.textContent = st.similarity + "%";
+    if (simFill) simFill.style.width = st.similarity + "%";
+    const total = st.equal + st.added + st.removed || 1;
+    if (barEq) barEq.style.width = ((st.equal / total) * 100).toFixed(2) + "%";
+    if (barAdd) barAdd.style.width = ((st.added / total) * 100).toFixed(2) + "%";
+    if (barRemove) barRemove.style.width = ((st.removed / total) * 100).toFixed(2) + "%";
+  }
+
+  function unifiedText(r: DiffResult): string {
+    return r.unified
+      .map((ln) => {
+        const m = ln.type === "equal" ? " " : ln.type === "add" ? "+" : "-";
+        return m + " " + ln.text;
+      })
+      .join("\n");
+  }
+
+  function showPane(mode: DiffMode, hasResult: boolean): void {
+    if (idleEl) idleEl.hidden = hasResult;
+    if (sbsEl) sbsEl.hidden = !(hasResult && mode === "side");
+    if (uniEl) uniEl.hidden = !(hasResult && mode === "unified");
+  }
+
+  jsonDiffStore.subscribe((state) => {
+    // mirror inputs back into the editors (skip the focused one)
+    const aFocused = aTextarea && document.activeElement === aTextarea;
+    const bFocused = bTextarea && document.activeElement === bTextarea;
+    if (aTextarea && aTextarea.value !== state.inputA && !aFocused) {
+      aTextarea.value = state.inputA;
+      aTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+    if (bTextarea && bTextarea.value !== state.inputB && !bFocused) {
+      bTextarea.value = state.inputB;
+      bTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+
+    // mode buttons
+    modeBtns.forEach((b) => {
+      const on = b.getAttribute("data-diff-mode") === state.mode;
+      b.classList.toggle("is-active", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+
+    // compare button + hint
+    if (compareBtn) {
+      if (state.isComparing) {
+        compareBtn.textContent = "Comparing…";
+        compareBtn.disabled = true;
+      } else if (state.needsManual) {
+        compareBtn.textContent = "Compare (large input)";
+        compareBtn.disabled = false;
+      } else {
+        compareBtn.textContent = "Compare";
+        compareBtn.disabled = false;
+      }
+    }
+    if (hintEl) {
+      hintEl.textContent = state.isComparing
+        ? "Comparing…"
+        : state.needsManual
+          ? "Inputs are large — press Compare to diff."
+          : state.result
+            ? "Live diff on · " +
+              state.result.stats.added +
+              " added, " +
+              state.result.stats.removed +
+              " removed"
+            : "Live diff is on — differences appear as you type.";
+    }
+
+    // result rendering (only rebuild DOM when the result object changes)
+    lastResult = state.result;
+    if (state.result !== renderedResult) {
+      renderedResult = state.result;
+      if (state.result) {
+        if (statsEl) statsEl.hidden = false;
+        renderStats(state.result);
+        renderSbs2(state.result);
+        renderUnified(state.result);
+        if (truncEl) truncEl.hidden = !state.result.truncated;
+      } else {
+        if (statsEl) statsEl.hidden = true;
+        if (truncEl) truncEl.hidden = true;
+      }
+    }
+    showPane(state.mode, !!state.result);
+
+    if (errorBanner) {
+      if (state.error) (errorBanner as any).show?.(state.error);
+      else (errorBanner as any).hide?.();
+    }
+  });
+
+  // hover mirror across the two side-by-side columns (delegated)
+  if (sbsEl) {
+    sbsEl.addEventListener("mouseover", (e) => {
+      const cell = (e.target as HTMLElement).closest?.("[data-row]");
+      if (!cell) return;
+      const row = cell.getAttribute("data-row");
+      sbsEl.querySelectorAll(".is-hot").forEach((el) => el.classList.remove("is-hot"));
+      sbsEl.querySelectorAll(`[data-row="${row}"]`).forEach((el) => el.classList.add("is-hot"));
+    });
+    sbsEl.addEventListener("mouseleave", () => {
+      sbsEl.querySelectorAll(".is-hot").forEach((el) => el.classList.remove("is-hot"));
+    });
+  }
+
+  // live recompute (debounced) as either side changes
+  const recompute = debounce(() => {
+    if (aTextarea) setInputA(jsonDiffStore, aTextarea.value);
+    if (bTextarea) setInputB(jsonDiffStore, bTextarea.value);
+    compare(jsonDiffStore, false);
+  }, 250);
+  if (aTextarea) aTextarea.addEventListener("input", recompute);
+  if (bTextarea) bTextarea.addEventListener("input", recompute);
+
+  if (compareBtn) compareBtn.addEventListener("click", () => compare(jsonDiffStore, true));
+  if (sampleBtn)
+    sampleBtn.addEventListener("click", () => {
+      loadSample(jsonDiffStore);
+      announce("Sample diff loaded");
+    });
+  if (ignoreWs)
+    ignoreWs.addEventListener("change", () => setIgnoreWhitespace(jsonDiffStore, ignoreWs.checked));
+  if (ignoreCase)
+    ignoreCase.addEventListener("change", () => setIgnoreCase(jsonDiffStore, ignoreCase.checked));
+  modeBtns.forEach((b) =>
+    b.addEventListener("click", () =>
+      setMode(jsonDiffStore, b.getAttribute("data-diff-mode") as DiffMode),
+    ),
+  );
+
+  // per-side clear actions
+  const aActions = document.getElementById("a-actions");
+  if (aActions)
+    aActions.addEventListener("tool-action", (e: Event) => {
+      if ((e as CustomEvent).detail?.action === "clear") {
+        setInputA(jsonDiffStore, "");
+        if (aTextarea) {
+          aTextarea.value = "";
+          aTextarea.dispatchEvent(new Event("editor-refresh"));
+        }
+        compare(jsonDiffStore, false);
+      }
+    });
+  const bActions = document.getElementById("b-actions");
+  if (bActions)
+    bActions.addEventListener("tool-action", (e: Event) => {
+      if ((e as CustomEvent).detail?.action === "clear") {
+        setInputB(jsonDiffStore, "");
+        if (bTextarea) {
+          bTextarea.value = "";
+          bTextarea.dispatchEvent(new Event("editor-refresh"));
+        }
+        compare(jsonDiffStore, false);
+      }
+    });
+
+  // copy / download the unified patch
+  const outActions = document.getElementById("out-actions");
+  if (outActions)
+    outActions.addEventListener("tool-action", async (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      const r = lastResult;
+      if (!r) return;
+      const text = "--- a\n+++ b\n" + unifiedText(r);
+      if (action === "copy") {
+        const ok = await copyToClipboard(text);
+        const btn = outActions.querySelector("[data-action='copy']");
+        if (ok && btn) {
+          const orig = btn.textContent || "Copy";
+          btn.textContent = "Copied!";
+          announce("Diff copied");
+          setTimeout(() => {
+            btn.textContent = orig;
+          }, 1500);
+        }
+      }
+      if (action === "download") {
+        downloadFile(text, "diff.patch", "text/plain;charset=utf-8;");
+        announce("Download started");
+      }
+    });
+
+  // Ctrl/Cmd+Enter = Compare (the global ? sheet already marks this row "here")
+  document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "SELECT") return;
+      e.preventDefault();
+      compare(jsonDiffStore, true);
+    }
+  });
+</script>
+
+<!-- Client-rendered diff rows live here (innerHTML), so their styles must be
+     GLOBAL — a scoped block can't see injected nodes. Names are dj-/dj- prefixed
+     so they can't collide with anything else on the site. -->
+<style is:global>
+  .dj-cell,
+  .dj-uline {
+    display: grid;
+    align-items: stretch;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    border-bottom: 1px solid var(--color-hairline);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .dj-cell {
+    grid-template-columns: 18px 40px 1fr;
+    min-width: 0;
+    padding-right: var(--spacing-sm);
+  }
+  .dj-cell.dj-empty {
+    background-color: var(--color-canvas-soft);
+  }
+  .dj-uline {
+    grid-template-columns: 18px 40px 40px 1fr;
+    padding-right: var(--spacing-sm);
+  }
+  .dj-marker {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 1px;
+    font-weight: 700;
+    user-select: none;
+  }
+  .dj-lineno {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 1px 8px 0 0;
+    color: var(--color-hairline-strong);
+    user-select: none;
+    font-variant-numeric: tabular-nums;
+  }
+  .dj-code {
+    padding: 1px 0;
+    color: var(--color-ink);
+    min-width: 0;
+  }
+
+  /* brand-coherent diff palette: teal = added / your new stuff, muted red = removed */
+  .dj-add,
+  .dj-ul-add {
+    background-color: rgba(33, 167, 138, 0.1);
+  }
+  .dj-add .dj-marker,
+  .dj-ul-add .dj-marker {
+    color: var(--color-accent-active);
+  }
+  .dj-remove,
+  .dj-ul-remove {
+    background-color: rgba(179, 38, 30, 0.08);
+  }
+  .dj-remove .dj-marker,
+  .dj-ul-remove .dj-marker {
+    color: #b3261e;
+  }
+  .dj-change-l {
+    background-color: rgba(179, 38, 30, 0.08);
+  }
+  .dj-change-l .dj-marker {
+    color: #b3261e;
+  }
+  .dj-change-r {
+    background-color: rgba(33, 167, 138, 0.1);
+  }
+  .dj-change-r .dj-marker {
+    color: var(--color-accent-active);
+  }
+
+  /* hover mirror: the same row lights up in both columns */
+  .dj-cell.is-hot {
+    box-shadow: inset 0 0 0 1px var(--color-accent);
+    background-blend-mode: multiply;
+  }
+  .dj-eq-l.is-hot,
+  .dj-eq-r.is-hot {
+    background-color: rgba(33, 167, 138, 0.06);
+  }
+</style>
+
+<style>
+  .dj-stage {
+    padding: var(--spacing-3xl) 0 var(--spacing-5xl);
+    background-color: var(--color-canvas-soft);
+    background-image: radial-gradient(var(--color-hairline) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  .dj-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+  /* the two input editors are shorter than the default 650px tool editor */
+  .diff-input-card :global(.editor-outer) {
+    height: 300px;
+    min-height: 300px;
+    flex: 0 0 300px;
+  }
+  .diff-input-card :global(.editor-wrapper) {
+    height: 100%;
+  }
+
+  .dj-controls-card {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+  .dj-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+  }
+  .dj-opts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+  .dj-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    color: var(--color-ink);
+  }
+  .dj-check input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .dj-box {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--color-hairline-strong);
+    border-radius: 4px;
+    background-color: var(--color-canvas);
+    position: relative;
+    transition:
+      background-color 0.1s ease,
+      border-color 0.1s ease;
+  }
+  .dj-check input:checked ~ .dj-box {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+  .dj-check input:checked ~ .dj-box::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid #fff;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+  }
+  .dj-check input:focus-visible ~ .dj-box {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .dj-mode {
+    display: inline-flex;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    overflow: hidden;
+  }
+  .dj-mode-btn {
+    border: none;
+    background: var(--color-canvas);
+    color: var(--color-body);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    padding: 7px 12px;
+    cursor: pointer;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
+  }
+  .dj-mode-btn + .dj-mode-btn {
+    border-left: 1px solid var(--color-hairline);
+  }
+  .dj-mode-btn.is-active {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+  }
+  .dj-mode-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+  }
+
+  .dj-actions {
+    display: flex;
+    gap: var(--spacing-xs);
+  }
+
+  /* live stats */
+  .dj-stats {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .dj-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .dj-stat-num {
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--color-ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .dj-c-add {
+    color: var(--color-accent-active);
+  }
+  .dj-c-remove {
+    color: #b3261e;
+  }
+  .dj-c-change {
+    color: var(--color-ink);
+  }
+  .dj-stat-label {
+    color: var(--color-mute);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .dj-sim {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 160px;
+    flex: 1;
+    max-width: 280px;
+  }
+  .dj-sim-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .dj-sim-pct {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .dj-sim-track {
+    height: 6px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-hairline);
+    overflow: hidden;
+  }
+  .dj-sim-fill {
+    height: 100%;
+    background-color: var(--color-accent);
+    transition: width 0.4s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  .dj-bar {
+    display: flex;
+    width: 100%;
+    height: 6px;
+    border-radius: var(--rounded-full);
+    overflow: hidden;
+    background-color: var(--color-hairline);
+    flex-basis: 100%;
+  }
+  .dj-bar span {
+    height: 100%;
+    transition: width 0.4s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  .dj-bar-eq {
+    background-color: var(--color-hairline-strong);
+  }
+  .dj-bar-add {
+    background-color: var(--color-accent);
+  }
+  .dj-bar-remove {
+    background-color: #b3261e;
+  }
+
+  .dj-hint {
+    margin: var(--spacing-sm) 0 0;
+    color: var(--color-mute);
+  }
+
+  /* result stage */
+  .diff-out-card {
+    padding: var(--spacing-md);
+  }
+  .dj-idle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+    text-align: center;
+    padding: var(--spacing-4xl) var(--spacing-md);
+    color: var(--color-body);
+  }
+  .dj-idle-cmd {
+    color: var(--color-accent-active);
+  }
+  .dj-idle-msg {
+    max-width: 46ch;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .dj-sbs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-height: 480px;
+    overflow: auto;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+  }
+  /* a hairline down the middle of the side-by-side view */
+  .dj-sbs .dj-cell:nth-child(odd) {
+    border-right: 1px solid var(--color-hairline);
+  }
+  .dj-unified {
+    max-height: 480px;
+    overflow: auto;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+  }
+  .dj-trunc {
+    margin: var(--spacing-xs) 0 0;
+    color: var(--color-mute);
+  }
+
+  /* shared content-section / faq styles (template-rendered → scoped is fine) */
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-hairline);
+    padding-bottom: var(--spacing-sm);
+  }
+  .column-title {
+    color: var(--color-mute);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+  .tool-content-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas-soft);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .content-section-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .section-eyebrow {
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+  }
+  .section-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xl);
+  }
+  .step-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-lg);
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    text-align: center;
+    align-items: center;
+  }
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-accent);
+    color: var(--color-on-primary);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+  }
+  .step-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+  .step-desc {
+    color: var(--color-body);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .faq-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .faq-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .faq-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft);
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  .faq-summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink);
+    padding: var(--spacing-xs) 0;
+    user-select: none;
+  }
+  .faq-summary:hover {
+    color: var(--color-accent);
+  }
+  .faq-answer {
+    margin-top: var(--spacing-sm);
+    font-size: 13px;
+    color: var(--color-body);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 959px) {
+    .dj-inputs {
+      grid-template-columns: 1fr;
+    }
+    .dj-sbs {
+      grid-template-columns: 1fr; /* stack the two columns on narrow screens */
+    }
+    .dj-sbs .dj-cell:nth-child(odd) {
+      border-right: none;
+    }
+    .steps-grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-md);
+    }
+  }
+</style>
