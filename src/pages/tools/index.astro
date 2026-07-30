@@ -1,19 +1,34 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Container from "../../components/Container.astro";
-import Button from "../../components/Button.astro";
 import {
-  featuredTool,
   availableTools,
-  comingSoonByCategory,
+  comingSoon,
   categoryLabel,
   counts,
+  type ToolCategory,
 } from "../../lib/tools/registry";
 
-// Any live tools beyond the featured one — renders as compact cards, auto-fills as tools ship.
-const liveExtras = featuredTool
-  ? availableTools.filter((t) => t.id !== featuredTool.id)
-  : availableTools;
+// 3-letter technical monogram per category — typographic, not iconographic.
+const monogram: Record<ToolCategory, string> = {
+  convert: "CON",
+  format: "FOR",
+  validate: "VAL",
+  compare: "CMP",
+  generate: "GEN",
+  utilities: "UTL",
+  api: "API",
+};
+
+// "In the pipeline" preview: soonest upcoming tools by roadmap version.
+function versionRank(v?: string): number {
+  if (!v) return 999;
+  const m = v.match(/(\d+)\.(\d+)/);
+  return m ? Number(m[1]) * 100 + Number(m[2]) : 999;
+}
+const pipeline = [...comingSoon].sort(
+  (a, b) => versionRank(a.addedIn) - versionRank(b.addedIn),
+);
 ---
 
 <BaseLayout
@@ -22,7 +37,7 @@ const liveExtras = featuredTool
   activePath="/tools"
 >
   <main>
-    <!-- ── Manifest header: asymmetric, mono voice, live stats ── -->
+    {/* ── Manifest hero ── */}
     <section class="catalog-hero" aria-labelledby="tools-hero-title">
       <Container size="default">
         <div class="hero-grid">
@@ -49,174 +64,147 @@ const liveExtras = featuredTool
             </ul>
           </div>
 
-          {
-            featuredTool && (
-              <a class="featured-panel" href={featuredTool.href}>
-                <div class="featured-top">
-                  <span class="status-pill status-live">
-                    <span class="pulse-dot" aria-hidden="true" />
-                    Available
-                  </span>
-                  <span class="featured-cat caption-mono">{categoryLabel(featuredTool.category)}</span>
-                </div>
-                <h2 class="display-md featured-name">{featuredTool.name}</h2>
-                <p class="body-sm featured-tagline">{featuredTool.tagline}</p>
-
-                <div class="terminal" aria-hidden="true">
-                  <div class="terminal-bar">
-                    <span class="t-dot" />
-                    <span class="t-dot" />
-                    <span class="t-dot" />
-                    <span class="t-title caption-mono">convert · local · 0 requests</span>
-                  </div>
-                  <pre class="terminal-body caption-mono"><span class="t-prompt">$</span> <span class="t-in">{'{ "id": 1, "name": "Ada" }'}</span>{"\n"}<span class="t-out">id,name{"\n"}1,Ada</span> <span class="t-caret">▍</span></pre>
-                </div>
-
-                <span class="featured-cta body-sm-strong">
-                  Open tool <span class="cta-arrow" aria-hidden="true">→</span>
-                </span>
-              </a>
-            )
-          }
+          <div class="hero-terminal" aria-hidden="true">
+            <div class="terminal-bar">
+              <span class="t-dot" /><span class="t-dot" /><span class="t-dot" />
+              <span class="t-title caption-mono">local · offline · no telemetry</span>
+            </div>
+            <pre class="terminal-body caption-mono"><span class="t-prompt">$</span> <span class="t-cmd">toolkit --local</span>{"\n"}<span class="t-ok">✓ {counts.available} tools ready</span>{"\n"}<span class="t-ok">✓ 0 bytes uploaded</span>{"\n"}<span class="t-ok">✓ processed in your browser</span>{"\n"}<span class="t-prompt">$</span> <span class="t-caret">▍</span></pre>
+          </div>
         </div>
       </Container>
     </section>
 
-    <!-- ── Directory: live extras (if any) + the pipeline ── -->
-    <section class="catalog-body" aria-labelledby="pipeline-title">
+    {/* ── Catalog ── */}
+    <section class="catalog-section" aria-labelledby="catalog-title">
       <Container size="default">
+        {/* bite 2: personalized row — filled client-side from favorites + recents.
+            Empty on first visit (the global script shows an onboarding hint). */}
+        <div class="your-tools" data-your-tools></div>
+
         <div class="section-head">
-          <span class="caption-mono section-eyebrow">THE PIPELINE</span>
-          <h2 id="pipeline-title" class="display-lg section-title">What's available &amp; what's next</h2>
+          <span class="caption-mono section-eyebrow">AVAILABLE NOW</span>
+          <h2 id="catalog-title" class="display-lg section-title">Pick a tool and start</h2>
           <p class="body-sm section-sub">
             Every tool shares one engine, one editor, one design language — and runs 100% locally.
+            Star the ones you reach for; they'll remember you.
           </p>
         </div>
 
-        {
-          liveExtras.length > 0 && (
-            <div class="live-extras" role="list" aria-label="More live tools">
-              {liveExtras.map((t) => (
-                <a class="live-card" role="listitem" href={t.href}>
-                  <span class="live-card-name body-md-strong">{t.name}</span>
-                  <span class="live-card-tag caption">{t.tagline}</span>
+        <div class="tool-grid" role="list">
+          {
+            availableTools.map((t) => (
+              <article class="tool-card is-live" role="listitem">
+                <button
+                  type="button"
+                  class="fav-star"
+                  data-tool={t.id}
+                  aria-pressed="false"
+                  aria-label={`Add ${t.name} to favorites`}
+                  title="Add to favorites"
+                >
+                  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                    <path d="M12 3.5l2.6 5.27 5.82.85-4.21 4.1.99 5.78L12 16.77l-5.2 2.73.99-5.78-4.21-4.1 5.82-.85L12 3.5z" />
+                  </svg>
+                </button>
+
+                <a class="tool-card-link" href={t.href}>
+                  <div class="card-top">
+                    <span class="mono-badge" aria-hidden="true">{monogram[t.category]}</span>
+                    <span class="cat-chip caption-mono" aria-hidden="true">
+                      {categoryLabel(t.category)}
+                    </span>
+                  </div>
+
+                  <h3 class="display-sm card-name">{t.name}</h3>
+                  <p class="body-sm card-tag">{t.tagline}</p>
+
+                  <div class="card-foot">
+                    <span class="pill pill-live" aria-hidden="true">
+                      <span class="pill-dot" />
+                      Available
+                    </span>
+                    <span class="card-cta body-sm-strong" aria-hidden="true">
+                      Open <span class="cta-arrow">→</span>
+                    </span>
+                  </div>
                 </a>
-              ))}
+              </article>
+            ))
+          }
+        </div>
+
+        {
+          pipeline.length > 0 && (
+            <div class="pipeline-block">
+              <div class="pipeline-head">
+                <h3 id="pipeline-title" class="display-sm pipeline-title">In the pipeline</h3>
+                <p class="caption pipeline-note">Shipped in the open — the roadmap follows demand.</p>
+              </div>
+              <div class="tool-grid tool-grid-pipeline" role="list" aria-labelledby="pipeline-title">
+                {
+                  pipeline.map((t) => (
+                    <article class="tool-card is-pipeline" role="listitem">
+                      <div class="tool-card-link">
+                        <div class="card-top">
+                          <span class="mono-badge" aria-hidden="true">{monogram[t.category]}</span>
+                          <span class="cat-chip caption-mono" aria-hidden="true">
+                            {categoryLabel(t.category)}
+                          </span>
+                        </div>
+
+                        <h3 class="display-sm card-name">{t.name}</h3>
+                        <p class="body-sm card-tag">{t.tagline}</p>
+
+                        <div class="card-foot">
+                          <span class="pill pill-soon" aria-hidden="true">
+                            {t.addedIn ? `Coming · ${t.addedIn}` : "Planned"}
+                          </span>
+                        </div>
+                      </div>
+                    </article>
+                  ))
+                }
+              </div>
             </div>
           )
         }
-
-        {
-          comingSoonByCategory().map((group) => (
-            <div class="cat-block">
-              <div class="cat-head">
-                <h3 class="display-sm cat-title">{group.meta.label}</h3>
-                <p class="caption cat-blurb">{group.meta.blurb}</p>
-              </div>
-              <ul class="cat-list" role="list">
-                {group.tools.map((t) => (
-                  <li class="tool-row" role="listitem">
-                    <div class="tool-row-main">
-                      <span class="tool-row-name body-md-strong">{t.name}</span>
-                      <span class="tool-row-tag caption">{t.tagline}</span>
-                    </div>
-                    <span
-                      class:list={[
-                        "row-status",
-                        t.status === "soon" ? "status-soon" : "status-planned",
-                      ]}
-                    >
-                      {t.status === "soon" ? "Coming soon" : "Planned"}
-                      {t.addedIn ? ` · ${t.addedIn}` : ""}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))
-        }
-
-        <!-- Honest, functional request affordance — links to the repo, no fake form -->
-        <div class="notify">
-          <h3 class="display-sm notify-title">Need a tool that isn't here yet?</h3>
-          <p class="body-sm notify-sub">
-            This toolkit is open source and built in the open. Request or vote on the next tool on
-            GitHub — the roadmap follows the demand.
-          </p>
-          <Button
-            variant="secondary"
-            size="md"
-            shape="square"
-            href="https://github.com/pelomehuliyo/freejsontoolkit.com/issues"
-          >
-            Request a tool on GitHub
-          </Button>
-        </div>
       </Container>
     </section>
   </main>
 
-  <!-- Scroll-reveal: progressive enhancement. Without JS the class is never
-       added, so everything stays visible. With JS, blocks fade/slide in as
-       they enter the viewport. The global prefers-reduced-motion rule in
-       global.css flattens the transition for users who opt out. -->
-  <script>
-    const targets = Array.from(document.querySelectorAll(".cat-block, .notify"));
-    if ("IntersectionObserver" in window && targets.length) {
-      targets.forEach((el, i) => {
-        el.classList.add("reveal");
-        (el as HTMLElement).style.transitionDelay = `${Math.min(i, 6) * 70}ms`;
-      });
-      const io = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add("is-visible");
-              io.unobserve(entry.target);
-            }
-          });
-        },
-        { threshold: 0.12 },
-      );
-      targets.forEach((el) => io.observe(el));
-    }
-  </script>
-
   <style>
-    /* Density pass: section-level air cut ~30-50%, internal rhythm preserved.
-       A tool directory should read dense and full, not airy and sparse. */
-
-    /* ── Hero ── */
+    /* ── Hero ─ */
     .catalog-hero {
-      padding: var(--spacing-3xl) 0 var(--spacing-xl); /* 48 / 32  (was 96 / 64) */
+      padding: var(--spacing-4xl) 0 var(--spacing-3xl);
       background-color: var(--color-canvas);
       border-bottom: 1px solid var(--color-hairline);
     }
     .hero-grid {
       display: grid;
       grid-template-columns: 1.05fr 0.95fr;
-      gap: var(--spacing-xl); /* 32 (was 48) */
+      gap: var(--spacing-xl);
       align-items: center;
     }
     .manifest-line {
       color: var(--color-mute);
-      margin: 0 0 var(--spacing-xs); /* 8 (was 12) */
+      margin: 0 0 var(--spacing-xs);
       letter-spacing: 0.02em;
     }
     .hero-title {
-      margin: 0 0 var(--spacing-sm); /* 12 (was 16) */
+      margin: 0 0 var(--spacing-sm);
       letter-spacing: -0.03em;
     }
     .hero-lede {
       color: var(--color-body);
-      margin: 0 0 var(--spacing-md); /* 16 (was 24) */
+      margin: 0 0 var(--spacing-md);
       max-width: 52ch;
-      line-height: 1.5; /* was 1.6 */
+      line-height: 1.5;
     }
     .hero-stats {
       list-style: none;
       display: flex;
-      gap: var(--spacing-lg); /* 24 (was 32) */
+      gap: var(--spacing-lg);
       padding: 0;
       margin: 0;
     }
@@ -239,102 +227,19 @@ const liveExtras = featuredTool
       text-transform: uppercase;
     }
 
-    /* ── Featured panel ── */
-    .featured-panel {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-sm);
-      padding: var(--spacing-md) var(--spacing-lg); /* 16 / 24 (was 24 all) */
-      background-color: var(--color-canvas);
-      border: 1px solid var(--color-hairline);
-      border-radius: var(--rounded-lg);
-      text-decoration: none;
-      color: inherit;
-      overflow: hidden;
-      transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease,
-        transform 0.2s ease;
-    }
-    .featured-panel::before {
-      content: "";
-      position: absolute;
-      inset: 0 0 auto 0;
-      height: 3px;
-      background-color: var(--color-accent);
-    }
-    .featured-panel:hover {
-      border-color: var(--color-accent);
-      box-shadow: 0 12px 32px rgba(33, 167, 138, 0.14);
-      transform: translateY(-2px);
-    }
-    .featured-panel:focus-visible {
-      outline: 3px solid var(--color-accent);
-      outline-offset: 2px;
-    }
-    .featured-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      padding: 3px 10px;
-      border-radius: var(--rounded-pill-sm);
-    }
-    .status-live {
-      color: var(--color-accent-active);
-      background-color: rgba(33, 167, 138, 0.1);
-    }
-    .pulse-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background-color: var(--color-accent);
-      animation: pulse 1.8s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%,
-      100% {
-        box-shadow: 0 0 0 0 rgba(33, 167, 138, 0.45);
-      }
-      50% {
-        box-shadow: 0 0 0 5px rgba(33, 167, 138, 0);
-      }
-    }
-    .featured-cat {
-      color: var(--color-mute);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-    .featured-name {
-      margin: 0;
-      color: var(--color-ink);
-    }
-    .featured-tagline {
-      margin: 0;
-      color: var(--color-body);
-      line-height: 1.5;
-    }
-
-    /* ── Terminal motif (decorative, aria-hidden) ── */
-    .terminal {
-      margin-top: var(--spacing-xs);
+    /* Decorative terminal — ambient brand voice, not a tool link */
+    .hero-terminal {
       border: 1px solid var(--color-hairline);
       border-radius: var(--rounded-md);
       overflow: hidden;
       background-color: var(--color-primary);
+      box-shadow: 0 18px 40px rgba(17, 17, 17, 0.12);
     }
     .terminal-bar {
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 8px 12px;
+      padding: 9px 12px;
       background-color: rgba(255, 255, 255, 0.04);
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
@@ -352,10 +257,10 @@ const liveExtras = featuredTool
     }
     .terminal-body {
       margin: 0;
-      padding: 12px 14px; /* was 14 / 16 */
+      padding: 14px 16px;
       font-family: var(--font-mono);
       font-size: 12.5px;
-      line-height: 1.7;
+      line-height: 1.75;
       color: rgba(255, 255, 255, 0.85);
       white-space: pre;
       overflow-x: auto;
@@ -363,10 +268,10 @@ const liveExtras = featuredTool
     .t-prompt {
       color: var(--color-accent);
     }
-    .t-in {
-      color: rgba(255, 255, 255, 0.65);
+    .t-cmd {
+      color: rgba(255, 255, 255, 0.7);
     }
-    .t-out {
+    .t-ok {
       color: var(--color-accent);
     }
     .t-caret {
@@ -379,30 +284,16 @@ const liveExtras = featuredTool
       }
     }
 
-    .featured-cta {
-      margin-top: var(--spacing-xs); /* 8 (was 12) */
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--color-ink);
-      font-weight: 600;
-    }
-    .cta-arrow {
-      color: var(--color-accent-active);
-      transition: transform 0.2s ease;
-    }
-    .featured-panel:hover .cta-arrow {
-      transform: translateX(4px);
-    }
-
-    /* ── Directory body ── */
-    .catalog-body {
-      padding: var(--spacing-xl) 0 var(--spacing-3xl); /* 32 / 48  (was 96 / 96) */
+    /* ── Catalog chrome (card visuals live in tool-cards.css) ── */
+    .catalog-section {
+      padding: var(--spacing-4xl) 0;
       background-color: var(--color-canvas-soft);
+      background-image: radial-gradient(var(--color-hairline) 1px, transparent 1px);
+      background-size: 22px 22px;
     }
     .section-head {
       max-width: 720px;
-      margin: 0 auto var(--spacing-lg); /* 24 (was 48) */
+      margin: 0 auto var(--spacing-xl);
       text-align: center;
       display: flex;
       flex-direction: column;
@@ -422,167 +313,43 @@ const liveExtras = featuredTool
       color: var(--color-body);
     }
 
-    /* live extras (auto-fills as more tools ship) */
-    .live-extras {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: var(--spacing-md);
-      margin-bottom: var(--spacing-xl); /* 32 (was 48) */
+    /* Pipeline heading */
+    .pipeline-block {
+      margin-top: var(--spacing-3xl);
+      padding-top: var(--spacing-xl);
+      border-top: 1px solid var(--color-hairline);
     }
-    .live-card {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: var(--spacing-md);
-      background-color: var(--color-canvas);
-      border: 1px solid var(--color-hairline);
-      border-radius: var(--rounded-md);
-      text-decoration: none;
-      color: inherit;
-      transition:
-        border-color 0.15s ease,
-        transform 0.15s ease;
-    }
-    .live-card:hover {
-      border-color: var(--color-accent);
-      transform: translateY(-2px);
-    }
-    .live-card-name {
-      color: var(--color-ink);
-    }
-    .live-card-tag {
-      color: var(--color-mute);
-    }
-
-    /* category ledger */
-    .cat-block {
-      margin-bottom: var(--spacing-lg); /* 24 (was 40) */
-    }
-    .cat-head {
+    .pipeline-head {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
       gap: var(--spacing-md);
-      padding-bottom: var(--spacing-xs); /* 8 (was 12) */
-      border-bottom: 1px solid var(--color-hairline);
-      margin-bottom: var(--spacing-xxs); /* 4 (was 8) */
+      margin-bottom: var(--spacing-md);
     }
-    .cat-title {
-      margin: 0;
+    .pipeline-title {
       color: var(--color-ink);
-    }
-    .cat-blurb {
       margin: 0;
-      color: var(--color-mute);
-      text-align: right;
     }
-    .cat-list {
-      list-style: none;
+    .pipeline-note {
+      color: var(--color-mute);
       margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-    }
-    .tool-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--spacing-md);
-      padding: var(--spacing-sm) var(--spacing-sm); /* 12 / 12 (was 16 / 12) */
-      border-bottom: 1px solid var(--color-hairline);
-      transition:
-        background-color 0.15s ease,
-        padding-left 0.15s ease;
-    }
-    .tool-row:hover {
-      background-color: var(--color-canvas);
-      padding-left: var(--spacing-md);
-    }
-    .tool-row-main {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      min-width: 0;
-    }
-    .tool-row-name {
-      color: var(--color-ink);
-    }
-    .tool-row-tag {
-      color: var(--color-mute);
-    }
-    .row-status {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      padding: 3px 10px;
-      border-radius: var(--rounded-sm);
-      border: 1px solid var(--color-hairline);
-      white-space: nowrap;
-    }
-    .status-soon {
-      color: var(--color-accent-active);
-      background-color: rgba(33, 167, 138, 0.08);
-      border-color: rgba(33, 167, 138, 0.2);
-    }
-    .status-planned {
-      color: var(--color-mute);
-      background-color: var(--color-canvas-soft-2);
     }
 
-    /* request / notify */
-    .notify {
-      margin-top: var(--spacing-xl); /* 32 (was 48) */
-      padding: var(--spacing-lg); /* 24 (was 32) */
-      background-color: var(--color-canvas);
-      border: 1px dashed var(--color-hairline-strong);
-      border-radius: var(--rounded-md);
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: var(--spacing-xs);
-    }
-    .notify-title {
-      margin: 0;
-      color: var(--color-ink);
-    }
-    .notify-sub {
-      margin: 0 0 var(--spacing-sm);
-      color: var(--color-body);
-      max-width: 56ch;
-      line-height: 1.5;
-    }
-
-    /* scroll-reveal (added by the script; no-JS = always visible) */
-    .reveal {
-      opacity: 0;
-      transform: translateY(14px);
-      transition:
-        opacity 0.55s ease,
-        transform 0.55s ease;
-    }
-    .reveal.is-visible {
-      opacity: 1;
-      transform: none;
-    }
-
-    /* ── Responsive ── */
+    /* ── Responsive ─ */
     @media (max-width: 959px) {
       .hero-grid {
         grid-template-columns: 1fr;
-        gap: var(--spacing-lg); /* 24 (was 32) */
+        gap: var(--spacing-lg);
       }
     }
     @media (max-width: 640px) {
-      .cat-head {
+      .hero-stats {
+        gap: var(--spacing-md);
+      }
+      .pipeline-head {
         flex-direction: column;
         align-items: flex-start;
         gap: 2px;
-      }
-      .cat-blurb {
-        text-align: left;
-      }
-      .hero-stats {
-        gap: var(--spacing-md); /* 16 (was 24) */
       }
     }
   </style>

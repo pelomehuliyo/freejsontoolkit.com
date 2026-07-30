@@ -1,0 +1,421 @@
+/* ─────────────────────────────────────────────────────────────────────
+   TOOL CARDS — shared, GLOBAL card language for Free JSON Toolkit.
+   Lives in a stylesheet (not a scoped <style>) on purpose: cards are now
+   built in two worlds — Astro templates AND client JS (the "Your tools"
+   row + the homepage "Jump back in" echo) — and a scoped block can only
+   see the first. One global file = one design language, everywhere.
+   ───────────────────────────────────────────────────────────────────── */
+
+/* ── The card shell ── */
+.tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(248px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.tool-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 168px;
+    padding: var(--spacing-md);
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    overflow: hidden;
+    transition:
+        border-color 0.16s ease,
+        box-shadow 0.16s ease,
+        transform 0.16s ease;
+}
+
+/* top accent rule = the brand thread, present only on live tools */
+.tool-card.is-live::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background-color: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s ease;
+}
+
+.tool-card.is-live:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(33, 167, 138, 0.12);
+}
+
+.tool-card.is-live:hover::before {
+    transform: scaleX(1);
+}
+
+/* pipeline state: same shell, deliberately quieter + dashed */
+.tool-card.is-pipeline {
+    border-style: dashed;
+    border-color: var(--color-hairline-strong);
+    background-color: transparent;
+}
+
+/* The single inner link; its ::after stretches over the whole card so any
+   click navigates. The fav-star sits above this overlay via z-index. */
+.tool-card-link {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: var(--spacing-xs);
+    text-decoration: none;
+    color: inherit;
+}
+
+.tool-card.is-live .tool-card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.tool-card.is-pipeline .tool-card-link {
+    cursor: default;
+}
+
+.card-top {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.mono-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--color-hairline-strong);
+    border-radius: var(--rounded-sm);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--color-mute);
+    background-color: var(--color-canvas-soft);
+    transition:
+        color 0.16s ease,
+        border-color 0.16s ease,
+        background-color 0.16s ease;
+}
+
+.tool-card.is-live:hover .mono-badge {
+    color: var(--color-accent-active);
+    border-color: var(--color-accent);
+    background-color: rgba(33, 167, 138, 0.08);
+}
+
+.cat-chip {
+    color: var(--color-mute);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.card-name {
+    color: var(--color-ink);
+    margin: var(--spacing-xxs) 0 0;
+}
+
+.card-tag {
+    color: var(--color-body);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.card-foot {
+    margin-top: auto;
+    padding-top: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-xs);
+}
+
+.card-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-ink);
+}
+
+.cta-arrow {
+    color: var(--color-accent-active);
+    transition: transform 0.16s ease;
+}
+
+.tool-card.is-live:hover .cta-arrow {
+    transform: translateX(4px);
+}
+
+/* Status pills — accessible colors */
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: max-content;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: var(--rounded-sm);
+    border: 1px solid var(--color-hairline);
+}
+
+.pill-live {
+    color: var(--color-accent-active);
+    background-color: rgba(33, 167, 138, 0.1);
+    border-color: rgba(33, 167, 138, 0.25);
+}
+
+.pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    animation: fjt-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes fjt-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(33, 167, 138, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 4px rgba(33, 167, 138, 0);
+    }
+}
+
+.pill-soon {
+    color: var(--color-mute);
+    background-color: var(--color-canvas-soft-2);
+}
+
+/* Favorite star — sibling of the link, lifted above the stretched overlay */
+.fav-star {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--rounded-sm);
+    background: transparent;
+    color: var(--color-hairline-strong);
+    cursor: pointer;
+    transition:
+        color 0.15s ease,
+        transform 0.15s ease,
+        background-color 0.15s ease;
+}
+
+.fav-star svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    transition:
+        fill 0.15s ease,
+        stroke 0.15s ease;
+}
+
+.fav-star:hover {
+    color: var(--color-accent);
+    background-color: rgba(33, 167, 138, 0.08);
+}
+
+.fav-star:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.fav-star.is-fav {
+    color: var(--color-accent);
+}
+
+.fav-star.is-fav svg {
+    fill: var(--color-accent);
+    stroke: var(--color-accent);
+}
+
+.fav-star:active {
+    transform: scale(0.86);
+}
+
+/* ── "Your tools" row (client-built on /tools) ── */
+.your-tools {
+    margin-bottom: var(--spacing-3xl);
+}
+
+.your-tools-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.your-tools-title {
+    color: var(--color-ink);
+    margin: 0;
+}
+
+.your-tools-sub {
+    color: var(--color-mute);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.your-tools-empty {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    border: 1px dashed var(--color-hairline-strong);
+    border-radius: var(--rounded-md);
+    color: var(--color-body);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.your-tools-empty>span:first-child {
+    color: var(--color-accent);
+    font-size: 16px;
+    line-height: 1;
+}
+
+/* ── Homepage "Jump back in" echo (client-built chips) ── */
+.jump-back-section {
+    background-color: var(--color-canvas);
+    padding: var(--spacing-md) 0;
+}
+
+.jump-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-sm);
+    margin: 0 0 var(--spacing-sm);
+}
+
+.jump-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-mute);
+    margin: 0;
+}
+
+.jump-hint {
+    color: var(--color-mute);
+    margin: 0;
+}
+
+.jump-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+}
+
+.jump-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: 8px 12px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    background-color: var(--color-canvas);
+    text-decoration: none;
+    color: inherit;
+    transition:
+        border-color 0.15s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.jump-chip:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(33, 167, 138, 0.12);
+}
+
+.jump-chip:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.jump-chip .mono-badge {
+    width: 26px;
+    height: 26px;
+    font-size: 9px;
+}
+
+.jump-chip-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-ink);
+}
+
+.jump-chip-arrow {
+    color: var(--color-accent-active);
+    transition: transform 0.15s ease;
+}
+
+.jump-chip:hover .jump-chip-arrow {
+    transform: translateX(3px);
+}
+
+/* ── Favorites toast (single global element, lives in BaseLayout) ── */
+.fav-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translate(-50%, 12px);
+    z-index: 9999;
+    padding: 9px 16px;
+    border-radius: var(--rounded-pill-sm);
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    box-shadow: 0 10px 30px rgba(17, 17, 17, 0.25);
+    opacity: 0;
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+    pointer-events: none;
+}
+
+.fav-toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+/* ── Scroll reveal (class added by the global script; no-JS = visible) ── */
+.reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+        opacity 0.5s ease,
+        transform 0.5s ease;
+}
+
+.reveal.is-visible {
+    opacity: 1;
+    transform: none;
+}

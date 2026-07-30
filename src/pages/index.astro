@@ -5,9 +5,7 @@ import Button from "../components/Button.astro";
 import Card from "../components/Card.astro";
 import { availableTools, comingSoon } from "../lib/tools/registry";
 
-// "What's next" teaser: the soonest upcoming tools (by roadmap version), so the
-// homepage communicates momentum instead of a static graveyard. The full grouped
-// pipeline lives on /tools — this is just a honest preview.
+// "What's next" teaser: the soonest upcoming tools (by roadmap version).
 function versionRank(v?: string): number {
   if (!v) return 999;
   const m = v.match(/(\d+)\.(\d+)/);
@@ -53,6 +51,16 @@ const pipeline = comingSoon
       </Container>
     </section>
 
+    {
+      /* bite 2: "Jump back in" — recent tools for returning visitors. Hidden until
+        the global script finds recents; first-timers never see an empty bar. */
+    }
+    <section class="jump-back-section" data-jump-back hidden>
+      <Container size="default">
+        <div data-jump-inner></div>
+      </Container>
+    </section>
+
     {/* Trust */}
     <section id="trust" class="trust-section" aria-labelledby="trust-title">
       <Container size="default">
@@ -88,10 +96,7 @@ const pipeline = comingSoon
       </Container>
     </section>
 
-    {
-      /* Featured Tools — registry-driven: live tools get real links, the rest is an
-        honest pipeline preview. Shipping a tool now updates this section automatically. */
-    }
+    {/* Featured Tools — registry-driven */}
     <section id="featured-tools" class="catalog-section" aria-labelledby="featured-tools-title">
       <Container size="default">
         <div class="section-header">
@@ -187,33 +192,6 @@ const pipeline = comingSoon
     </section>
   </main>
 
-  <!-- Scroll-reveal: progressive enhancement. No JS = everything visible. With JS,
-       blocks fade/slide in on entry. The global prefers-reduced-motion rule flattens
-       the transition for users who opt out. -->
-  <script>
-    const targets = Array.from(
-      document.querySelectorAll(".live-tool-card, .pipeline, .trust-card"),
-    );
-    if ("IntersectionObserver" in window && targets.length) {
-      targets.forEach((el, i) => {
-        el.classList.add("reveal");
-        (el as HTMLElement).style.transitionDelay = `${Math.min(i, 8) * 60}ms`;
-      });
-      const io = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add("is-visible");
-              io.unobserve(entry.target);
-            }
-          });
-        },
-        { threshold: 0.12 },
-      );
-      targets.forEach((el) => io.observe(el));
-    }
-  </script>
-
   <style>
     .sr-only {
       position: absolute;
@@ -227,7 +205,7 @@ const pipeline = comingSoon
       border-width: 0;
     }
 
-    /* Hero (density trimmed ~30% to match the /tools pass) */
+    /* Hero */
     .hero-container {
       padding-top: 0;
     }
@@ -318,8 +296,6 @@ const pipeline = comingSoon
       border-bottom: 1px solid var(--color-hairline);
     }
 
-    /* Live tools — each whole card is the link (no nested interactive elements).
-       The thin top accent rule is the brand fingerprint, echoing the logo mark. */
     .live-tools {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -392,7 +368,7 @@ const pipeline = comingSoon
       transform: translateX(4px);
     }
 
-    /* Status pills — accessible colors (the old bright teal on tint was 2.7:1) */
+    /* Status pills (homepage cards) */
     .pill {
       display: inline-flex;
       align-items: center;
@@ -416,11 +392,6 @@ const pipeline = comingSoon
       height: 6px;
       border-radius: 50%;
       background-color: var(--color-accent);
-    }
-
-    .pill-soon {
-      color: var(--color-mute);
-      background-color: var(--color-canvas-soft-2);
     }
 
     /* Pipeline preview */
@@ -492,7 +463,6 @@ const pipeline = comingSoon
       gap: var(--spacing-xl);
     }
 
-    /* shared by trust cards */
     .tool-title {
       color: var(--color-ink);
       margin: 0;
@@ -508,20 +478,6 @@ const pipeline = comingSoon
       .trust-grid {
         grid-template-columns: 1fr;
       }
-    }
-
-    /* Scroll-reveal (class added by the script; no-JS = always visible) */
-    .reveal {
-      opacity: 0;
-      transform: translateY(12px);
-      transition:
-        opacity 0.5s ease,
-        transform 0.5s ease;
-    }
-
-    .reveal.is-visible {
-      opacity: 1;
-      transform: none;
     }
   </style>
 </BaseLayout>

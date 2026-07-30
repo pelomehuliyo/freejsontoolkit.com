@@ -2,6 +2,8 @@
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import "../styles/global.css";
+import "../styles/tool-cards.css";
+import { tools, categoryLabel } from "../lib/tools/registry";
 
 interface Props {
   title?: string;
@@ -55,6 +57,21 @@ const jsonLd = isHomePage
         priceCurrency: "USD",
       },
     };
+
+// ── bite 2: shared registry payload so client-built cards (favorites row,
+//    "jump back in" echo) render identically to server cards, on any page. ──
+const registryPayload = tools.map((t) => ({
+  id: t.id,
+  name: t.name,
+  tagline: t.tagline,
+  category: t.category,
+  catLabel: categoryLabel(t.category),
+  status: t.status,
+  href: t.href ?? null,
+}));
+const toolIds = tools.map((t) => t.id);
+// escape "</" so the JSON can never prematurely close the script tag
+const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
 ---
 
 <!doctype html>
@@ -72,6 +89,12 @@ const jsonLd = isHomePage
 
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content="#171717" />
+
+    <!-- bite 2: lets the global script recognise real tool routes (so it never
+         records a 404 slug as a "recent") without shipping the whole registry. -->
+    <meta name="fjt:tool-ids" content={JSON.stringify(toolIds)} />
+    <!-- bite 2: the registry the client uses to build cards from ids. -->
+    <script type="application/json" id="fjt-registry" set:html={registryJson} />
 
     <!-- Search Indexing -->
     {noindex && <meta name="robots" content="noindex, nofollow" />}
@@ -129,6 +152,184 @@ const jsonLd = isHomePage
       </main>
       <Footer />
     </div>
+
+    <!-- bite 2: single global toast for favorite actions -->
+    <div class="fav-toast" id="fav-toast" role="status" aria-live="polite" hidden></div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         bite 2: the toolkit's client nervous system. ONE script, every page.
+         It (1) records a "recent" whenever a real tool page loads, (2) fills a
+         [data-your-tools] row with starred + recent tools, (3) fills a
+         [data-jump-back] homepage echo with recents, (4) handles every
+         favorite star via delegation (server- AND client-built cards), and
+         (5) reveals cards on scroll. Pages just drop in placeholders; future
+         tools inherit all of this for free — no per-tool wiring.
+         ═══════════════════════════════════════════════════════════════════ -->
+    <script is:inline>
+      (function () {
+        var FAV = "fjt:favorites", REC = "fjt:recents";
+        function parse(s) { try { return s ? JSON.parse(s) : []; } catch (e) { return []; } }
+        function load(k) { try { return parse(localStorage.getItem(k)); } catch (e) { return []; } }
+        function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+        function favs() { return load(FAV); }
+        function recents() { return load(REC); }
+
+        // registry map from the data island emitted above
+        var REG = [], byId = {};
+        var island = document.getElementById("fjt-registry");
+        if (island) REG = parse(island.textContent);
+        REG.forEach(function (t) { byId[t.id] = t; });
+
+        var MONO = { convert: "CON", format: "FOR", validate: "VAL", compare: "CMP", generate: "GEN", utilities: "UTL", api: "API" };
+        function esc(s) {
+          return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+          });
+        }
+
+        // 1) record a recent visit — only for known tool routes
+        var pm = location.pathname.replace(/\/+$/, "").match(/^\/tools\/([^\/]+)$/);
+        if (pm && byId[pm[1]]) {
+          var rid = pm[1];
+          var r = recents().filter(function (x) { return x !== rid; });
+          r.unshift(rid);
+          save(REC, r.slice(0, 8));
+        }
+
+        // 2) a live, favoritable card (same shell the server renders)
+        function liveCard(t, starred) {
+          var sLab = starred ? "Remove " : "Add ";
+          var sTtl = starred ? "Remove from favorites" : "Add to favorites";
+          return (
+            '<article class="tool-card is-live" role="listitem">' +
+              '<button type="button" class="fav-star" data-tool="' + esc(t.id) + '" aria-pressed="' + (starred ? "true" : "false") + '" aria-label="' + esc(sLab + t.name + (starred ? " from favorites" : " to favorites")) + '" title="' + esc(sTtl) + '">' +
+                '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 3.5l2.6 5.27 5.82.85-4.21 4.1.99 5.78L12 16.77l-5.2 2.73.99-5.78-4.21-4.1 5.82-.85L12 3.5z"/></svg>' +
+              '</button>' +
+              '<a class="tool-card-link" href="' + esc(t.href) + '">' +
+                '<div class="card-top"><span class="mono-badge" aria-hidden="true">' + esc(MONO[t.category] || "·") + '</span><span class="cat-chip caption-mono" aria-hidden="true">' + esc(t.catLabel || t.category) + '</span></div>' +
+                '<h3 class="display-sm card-name">' + esc(t.name) + '</h3>' +
+                '<p class="body-sm card-tag">' + esc(t.tagline) + '</p>' +
+                '<div class="card-foot"><span class="pill pill-live" aria-hidden="true"><span class="pill-dot"></span>Available</span><span class="card-cta body-sm-strong" aria-hidden="true">Open <span class="cta-arrow">→</span></span></div>' +
+              '</a>' +
+            '</article>'
+          );
+        }
+
+        // 3) "Your tools" row: starred first, then recent, capped
+        function buildRow() {
+          var host = document.querySelector("[data-your-tools]");
+          if (!host) return;
+          var f = favs(), rc = recents();
+          var order = f.slice();
+          rc.forEach(function (id) { if (order.indexOf(id) === -1) order.push(id); });
+          var ids = order.filter(function (id) { return byId[id]; }).slice(0, 8);
+
+          var html = '<div class="your-tools-head"><h2 class="display-sm your-tools-title">Your tools</h2><span class="caption-mono your-tools-sub">starred + recent</span></div>';
+          if (ids.length === 0) {
+            html += '<div class="your-tools-empty"><span aria-hidden="true">★</span><span>Star a tool, or just open one — it’ll pin here for quick access next time.</span></div>';
+          } else {
+            html += '<div class="tool-grid" role="list">';
+            ids.forEach(function (id) { html += liveCard(byId[id], f.indexOf(id) !== -1); });
+            html += '</div>';
+          }
+          host.innerHTML = html;
+        }
+
+        // 4) homepage "jump back in" echo: recents only, hidden when empty
+        function buildEcho() {
+          var inner = document.querySelector("[data-jump-inner]");
+          var sec = inner ? inner.closest("[data-jump-back]") : null;
+          if (!inner || !sec) return;
+          var rc = recents().filter(function (id) { return byId[id]; }).slice(0, 6);
+          if (rc.length === 0) { sec.hidden = true; return; }
+          var chips = rc.map(function (id) {
+            var t = byId[id];
+            return (
+              '<a class="jump-chip" href="' + esc(t.href) + '">' +
+                '<span class="mono-badge" aria-hidden="true">' + esc(MONO[t.category] || "·") + '</span>' +
+                '<span class="jump-chip-name">' + esc(t.name) + '</span>' +
+                '<span class="jump-chip-arrow" aria-hidden="true">↩</span>' +
+              '</a>'
+            );
+          }).join("");
+          inner.innerHTML =
+            '<div class="jump-head"><span class="jump-title">Jump back in</span><span class="jump-hint caption">your recent tools</span></div>' +
+            '<div class="jump-row">' + chips + '</div>';
+          sec.hidden = false;
+        }
+
+        // 5) keep EVERY star in the DOM consistent with storage
+        function syncStars() {
+          var f = favs();
+          document.querySelectorAll(".fav-star").forEach(function (star) {
+            var id = star.getAttribute("data-tool");
+            var on = !!(id && f.indexOf(id) !== -1);
+            star.classList.toggle("is-fav", on);
+            star.setAttribute("aria-pressed", on ? "true" : "false");
+            var card = star.closest(".tool-card");
+            var nm = card && card.querySelector(".card-name");
+            var name = nm ? nm.textContent.trim() : "Tool";
+            star.setAttribute("aria-label", (on ? "Remove " : "Add ") + name + (on ? " from favorites" : " to favorites"));
+            star.title = on ? "Remove from favorites" : "Add to favorites";
+          });
+        }
+
+        // 6) toast
+        var toast = document.getElementById("fav-toast");
+        var toastT = null;
+        function flash(msg) {
+          if (!toast) return;
+          toast.textContent = msg;
+          toast.hidden = false;
+          void toast.offsetWidth;
+          toast.classList.add("show");
+          if (toastT) clearTimeout(toastT);
+          toastT = setTimeout(function () {
+            toast.classList.remove("show");
+            setTimeout(function () { if (toast) toast.hidden = true; }, 220);
+          }, 1400);
+        }
+
+        // 7) delegated star toggle — works for server- and client-built cards
+        document.addEventListener("click", function (e) {
+          var star = e.target && e.target.closest ? e.target.closest(".fav-star") : null;
+          if (!star) return;
+          e.preventDefault();
+          e.stopPropagation();
+          var id = star.getAttribute("data-tool");
+          if (!id || !byId[id]) return;
+          var f = favs();
+          var on = f.indexOf(id) === -1;
+          if (on) f.push(id); else f = f.filter(function (x) { return x !== id; });
+          save(FAV, f);
+          buildRow();  // membership / order may change
+          syncStars(); // reflect across all stars (server + row)
+          flash(on ? ("★ " + byId[id].name + " saved to favorites") : (byId[id].name + " removed from favorites"));
+        });
+
+        // init
+        buildRow();
+        buildEcho();
+        syncStars();
+
+        // 8) scroll reveal — progressive enhancement; no-JS stays visible
+        if ("IntersectionObserver" in window) {
+          var targets = Array.prototype.slice.call(
+            document.querySelectorAll(".tool-card, .live-tool-card, .trust-card, .pipeline, .jump-chip")
+          );
+          targets.forEach(function (el, i) {
+            el.classList.add("reveal");
+            el.style.transitionDelay = Math.min(i, 10) * 50 + "ms";
+          });
+          var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (en) {
+              if (en.isIntersecting) { en.target.classList.add("is-visible"); io.unobserve(en.target); }
+            });
+          }, { threshold: 0.1 });
+          targets.forEach(function (el) { io.observe(el); });
+        }
+      })();
+    </script>
   </body>
 </html>
 
