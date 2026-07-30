@@ -67,7 +67,9 @@ html {
 
   /* Typography Fonts */
   --font-sans: "Inter Variable", "Inter", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+  --font-mono:
+    "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    monospace;
 }
 
 /* Reset styles */
@@ -271,7 +273,9 @@ body {
   height: 6px;
   border-radius: var(--rounded-full);
   background-color: var(--color-hairline-strong);
-  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    background-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .stage-step.active .stage-dot {
@@ -359,7 +363,6 @@ body {
 }
 
 @keyframes pulse {
-
   0%,
   100% {
     opacity: 1;

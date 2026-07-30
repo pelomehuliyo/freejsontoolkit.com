@@ -6,6 +6,23 @@ The format is inspired by Keep a Changelog.
 
 ---
 
+## [1.1.0] - 2026-07-30
+
+### Added
+
+- CSV → JSON converter (auto delimiter detection, header inference, runs in a Web Worker).
+- JSON Formatter (beautify/pretty-print with 2-space, 4-space, or tab indent; sort keys).
+- Shared document system: /why-local trust & architecture page, About, Contact, Privacy,
+  Terms, Disclaimer; registry-driven sitemap.
+- Catalog search, favorites & recently-used, keyboard shortcuts (? sheet, g-chords, / to
+  search), and living editor empty states.
+
+### Fixed
+
+- Release hygiene: benchmarks isolated from unit tests, lint/format clean, sitemap routes.
+
+---
+
 ## [1.0.0] - 2026-07-29
 
 ### Added
@@ -46,16 +63,3 @@ The format is inspired by Keep a Changelog.
 - Improved mobile Lighthouse from ~49 → ~79
 - Self-hosted fonts
 - Reduced render-blocking resources
-
----
-
-## Upcoming
-
-### v1.0.1
-
-- Bug fixes
-- Editor improvements
-
-### v1.1
-
-- CSV → JSON converter

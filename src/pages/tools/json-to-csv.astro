@@ -417,7 +417,7 @@ Example:
 
     connectors.forEach((conn) => {
       conn.classList.remove("done");
-      let isDone = true;
+      const isDone = true;
       for (const s of order) {
         if (s === currentStage) break;
         if (s === conn.getAttribute("data-connector")?.split("-")[0]) {
@@ -797,83 +797,6 @@ Example:
 
   // ── Keyboard shortcuts (global) ──
   document.addEventListener("keydown", handleKeyboardShortcuts);
-</script>
-
-<!-- ════════════════════════════════════════════════════════════════ -->
-<!-- LAYOUT INSTRUMENTATION — Step 1: Log computed heights          -->
-<!-- ════════════════════════════════════════════════════════════════ -->
-<script is:inline>
-  (function () {
-    /** Resolve element from CSS selector */
-    var q = function (sel) {
-      return document.querySelector(sel);
-    };
-
-    var SELECTORS = [
-      ".tool-workspace-section",
-      ".container-wide",
-      ".workspace-grid",
-      ".workspace-col",
-      ".workspace-card",
-      ".editor-outer",
-      ".editor-wrapper",
-      ".editor-textarea",
-    ];
-
-    /** Snapshot layout metrics for all target elements */
-    function snapshot(label) {
-      var rows = [];
-      SELECTORS.forEach(function (sel) {
-        var els = document.querySelectorAll(sel);
-        // If multiple matches (e.g. .workspace-col, .workspace-card),
-        // take the *first* one (input column)
-        var el = els.length > 0 ? els[0] : null;
-        if (!el) {
-          rows.push({
-            selector: sel,
-            found: false,
-            clientHeight: "-",
-            scrollHeight: "-",
-            offsetHeight: "-",
-            computedHeight: "-",
-          });
-          return;
-        }
-        var cs = getComputedStyle(el);
-        rows.push({
-          selector: sel,
-          found: true,
-          clientHeight: el.clientHeight,
-          scrollHeight: el.scrollHeight,
-          offsetHeight: el.offsetHeight,
-          computedHeight: cs.height,
-        });
-      });
-      console.log("=== LAYOUT " + label + " ===");
-      console.table(rows);
-      // Also log JSON for easy copy
-      console.log(JSON.stringify(rows, null, 2));
-      return rows;
-    }
-
-    // Delay first snapshot until layout is settled
-    var timer = setTimeout(function () {
-      snapshot("BEFORE");
-
-      // Hook into the existing paste handler — snapshot AFTER paste
-      var ta = document.getElementById("json-input-textarea");
-      if (ta) {
-        ta.addEventListener("paste", function () {
-          // snapshot after the DOM has updated from the paste
-          requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-              snapshot("AFTER PASTE");
-            });
-          });
-        });
-      }
-    }, 500);
-  })();
 </script>
 
 <style>

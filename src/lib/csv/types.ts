@@ -270,4 +270,3 @@ export interface TypeInferenceOptions {
    */
   detect?: InferredCellType[];
 }
-

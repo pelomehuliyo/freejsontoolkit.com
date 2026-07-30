@@ -266,20 +266,21 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
          ═══════════════════════════════════════════════════════════════════ -->
     <script is:inline>
       (function () {
-        var FAV = "fjt:favorites", REC = "fjt:recents";
+        const FAV = "fjt:favorites", REC = "fjt:recents";
         function parse(s) { try { return s ? JSON.parse(s) : []; } catch (e) { return []; } }
         function load(k) { try { return parse(localStorage.getItem(k)); } catch (e) { return []; } }
-        function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+        function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* localStorage unavailable */ } }
         function favs() { return load(FAV); }
         function recents() { return load(REC); }
 
         // registry map from the data island emitted above
-        var REG = [], byId = {};
-        var island = document.getElementById("fjt-registry");
+        let REG = [];
+        const byId = {};
+        const island = document.getElementById("fjt-registry");
         if (island) REG = parse(island.textContent);
         REG.forEach(function (t) { byId[t.id] = t; });
 
-        var MONO = { convert: "CON", format: "FOR", validate: "VAL", compare: "CMP", generate: "GEN", utilities: "UTL", api: "API" };
+        const MONO = { convert: "CON", format: "FOR", validate: "VAL", compare: "CMP", generate: "GEN", utilities: "UTL", api: "API" };
         function esc(s) {
           return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
             return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
@@ -287,18 +288,18 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
         }
 
         // 1) record a recent visit — only for known tool routes
-        var pm = location.pathname.replace(/\/+$/, "").match(/^\/tools\/([^\/]+)$/);
+        const pm = location.pathname.replace(/[/]+$/, "").match(/^\/tools\/([^/]+)$/);
         if (pm && byId[pm[1]]) {
-          var rid = pm[1];
-          var r = recents().filter(function (x) { return x !== rid; });
+          const rid = pm[1];
+          const r = recents().filter(function (x) { return x !== rid; });
           r.unshift(rid);
           save(REC, r.slice(0, 8));
         }
 
         // 2) a live, favoritable card (same shell the server renders)
         function liveCard(t, starred) {
-          var sLab = starred ? "Remove " : "Add ";
-          var sTtl = starred ? "Remove from favorites" : "Add to favorites";
+          const sLab = starred ? "Remove " : "Add ";
+          const sTtl = starred ? "Remove from favorites" : "Add to favorites";
           return (
             '<article class="tool-card is-live" role="listitem">' +
               '<button type="button" class="fav-star" data-tool="' + esc(t.id) + '" aria-pressed="' + (starred ? "true" : "false") + '" aria-label="' + esc(sLab + t.name + (starred ? " from favorites" : " to favorites")) + '" title="' + esc(sTtl) + '">' +
@@ -316,14 +317,14 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
 
         // 3) "Your tools" row: starred first, then recent, capped
         function buildRow() {
-          var host = document.querySelector("[data-your-tools]");
+          const host = document.querySelector("[data-your-tools]");
           if (!host) return;
-          var f = favs(), rc = recents();
-          var order = f.slice();
+          const f = favs(), rc = recents();
+          const order = f.slice();
           rc.forEach(function (id) { if (order.indexOf(id) === -1) order.push(id); });
-          var ids = order.filter(function (id) { return byId[id]; }).slice(0, 8);
+          const ids = order.filter(function (id) { return byId[id]; }).slice(0, 8);
 
-          var html = '<div class="your-tools-head"><h2 class="display-sm your-tools-title">Your tools</h2><span class="caption-mono your-tools-sub">starred + recent</span></div>';
+          let html = '<div class="your-tools-head"><h2 class="display-sm your-tools-title">Your tools</h2><span class="caption-mono your-tools-sub">starred + recent</span></div>';
           if (ids.length === 0) {
             html += '<div class="your-tools-empty"><span aria-hidden="true">★</span><span>Star a tool, or just open one — it’ll pin here for quick access next time.</span></div>';
           } else {
@@ -336,21 +337,21 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
 
         // 4) homepage "jump back in" echo: recents only, hidden when empty
         function buildEcho() {
-          var inner = document.querySelector("[data-jump-inner]");
-          var sec = inner ? inner.closest("[data-jump-back]") : null;
+          const inner = document.querySelector("[data-jump-inner]");
+          const sec = inner ? inner.closest("[data-jump-back]") : null;
           if (!inner || !sec) return;
-          var rc = recents().filter(function (id) { return byId[id]; }).slice(0, 6);
+          const rc = recents().filter(function (id) { return byId[id]; }).slice(0, 6);
           if (rc.length === 0) { sec.hidden = true; return; }
-          var chips = rc.map(function (id) {
-            var t = byId[id];
-            return (
-              '<a class="jump-chip" href="' + esc(t.href) + '">' +
-                '<span class="mono-badge" aria-hidden="true">' + esc(MONO[t.category] || "·") + '</span>' +
-                '<span class="jump-chip-name">' + esc(t.name) + '</span>' +
-                '<span class="jump-chip-arrow" aria-hidden="true">↩</span>' +
-              '</a>'
-            );
-          }).join("");
+          const chips = rc.map(function (id) {
+      const t = byId[id];
+      return (
+        '<a class="jump-chip" href="' + esc(t.href) + '">' +
+          '<span class="mono-badge" aria-hidden="true">' + esc(MONO[t.category] || "·") + '</span>' +
+          '<span class="jump-chip-name">' + esc(t.name) + '</span>' +
+          '<span class="jump-chip-arrow" aria-hidden="true">↩</span>' +
+        '</a>'
+      );
+    }).join("");
           inner.innerHTML =
             '<div class="jump-head"><span class="jump-title">Jump back in</span><span class="jump-hint caption">your recent tools</span></div>' +
             '<div class="jump-row">' + chips + '</div>';
@@ -359,23 +360,23 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
 
         // 5) keep EVERY star in the DOM consistent with storage
         function syncStars() {
-          var f = favs();
+          const f = favs();
           document.querySelectorAll(".fav-star").forEach(function (star) {
-            var id = star.getAttribute("data-tool");
-            var on = !!(id && f.indexOf(id) !== -1);
+            const id = star.getAttribute("data-tool");
+            const on = !!(id && f.indexOf(id) !== -1);
             star.classList.toggle("is-fav", on);
             star.setAttribute("aria-pressed", on ? "true" : "false");
-            var card = star.closest(".tool-card");
-            var nm = card && card.querySelector(".card-name");
-            var name = nm ? nm.textContent.trim() : "Tool";
+            const card = star.closest(".tool-card");
+            const nm = card && card.querySelector(".card-name");
+            const name = nm ? nm.textContent.trim() : "Tool";
             star.setAttribute("aria-label", (on ? "Remove " : "Add ") + name + (on ? " from favorites" : " to favorites"));
             star.title = on ? "Remove from favorites" : "Add to favorites";
           });
         }
 
         // 6) toast
-        var toast = document.getElementById("fav-toast");
-        var toastT = null;
+        const toast = document.getElementById("fav-toast");
+        let toastT = null;
         function flash(msg) {
           if (!toast) return;
           toast.textContent = msg;
@@ -391,14 +392,14 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
 
         // 7) delegated star toggle — works for server- and client-built cards
         document.addEventListener("click", function (e) {
-          var star = e.target && e.target.closest ? e.target.closest(".fav-star") : null;
+          const star = e.target && e.target.closest ? e.target.closest(".fav-star") : null;
           if (!star) return;
           e.preventDefault();
           e.stopPropagation();
-          var id = star.getAttribute("data-tool");
+          const id = star.getAttribute("data-tool");
           if (!id || !byId[id]) return;
-          var f = favs();
-          var on = f.indexOf(id) === -1;
+          let f = favs();
+          const on = f.indexOf(id) === -1;
           if (on) f.push(id); else f = f.filter(function (x) { return x !== id; });
           save(FAV, f);
           buildRow();
@@ -412,36 +413,36 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
         syncStars();
 
         // 8) bite 3 — command-line catalog search (only where a box exists)
-        var searchInput = document.querySelector("[data-tool-search]");
+        const searchInput = document.querySelector("[data-tool-search]");
         if (searchInput) {
-          var form = document.querySelector("[data-tool-search-form]");
-          var clearBtn = document.querySelector("[data-search-clear]");
-          var statusEl = document.querySelector("[data-search-status]");
-          var emptyEl = document.querySelector("[data-search-empty]");
-          var echoEl = emptyEl ? emptyEl.querySelector("[data-search-echo]") : null;
-          var yourTools = document.querySelector("[data-your-tools]");
-          var cards = Array.prototype.slice.call(document.querySelectorAll(".tool-card[data-search]"));
-          var gridAvail = document.querySelector('[data-grid="available"]');
-          var gridPipe = document.querySelector('[data-grid="pipeline"]');
-          var pipeBlock = document.querySelector(".pipeline-block");
-          var availTotal = REG.filter(function (t) { return t.status === "available"; }).length;
-          var primed = false;      // false on the very first run so reveal stagger survives
-          var prevVisible = null;  // identity set of cards visible after the previous run
+          const form = document.querySelector("[data-tool-search-form]");
+          const clearBtn = document.querySelector("[data-search-clear]");
+          const statusEl = document.querySelector("[data-search-status]");
+          const emptyEl = document.querySelector("[data-search-empty]");
+          const echoEl = emptyEl ? emptyEl.querySelector("[data-search-echo]") : null;
+          const yourTools = document.querySelector("[data-your-tools]");
+          const cards = Array.prototype.slice.call(document.querySelectorAll(".tool-card[data-search]"));
+          const gridAvail = document.querySelector('[data-grid="available"]');
+          const gridPipe = document.querySelector('[data-grid="pipeline"]');
+          const pipeBlock = document.querySelector(".pipeline-block");
+          const availTotal = REG.filter(function (t) { return t.status === "available"; }).length;
+          let primed = false;      // false on the very first run so reveal stagger survives
+          let prevVisible = null;  // identity set of cards visible after the previous run
 
           function toks(q) { return q.toLowerCase().trim().split(/\s+/).filter(Boolean); }
           // stable per-card identity (the haystack contains the id, so it's unique)
           function cid(card) { return card.getAttribute("data-search") || ""; }
 
           function runSearch() {
-            var q = searchInput.value;
-            var ts = toks(q);
-            var searching = ts.length > 0;
-            var visAvail = 0, visPipe = 0;
-            var nowVisible = new Set();
+            const q = searchInput.value;
+            const ts = toks(q);
+            const searching = ts.length > 0;
+            let visAvail = 0, visPipe = 0;
+            const nowVisible = new Set();
 
             cards.forEach(function (card) {
-              var hay = card.getAttribute("data-search") || "";
-              var match = ts.every(function (tk) { return hay.indexOf(tk) !== -1; });
+              const hay = card.getAttribute("data-search") || "";
+              const match = ts.every(function (tk) { return hay.indexOf(tk) !== -1; });
               card.classList.toggle("is-hidden", !match);
               if (match) {
                 if (primed || searching) card.classList.add("is-visible");
@@ -455,7 +456,7 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
             // and the first paint is skipped (no fight with the reveal stagger).
             if (primed && prevVisible) {
               cards.forEach(function (card) {
-                var id = cid(card);
+                const id = cid(card);
                 if (nowVisible.has(id) && !prevVisible.has(id)) {
                   card.classList.remove("just-shown");
                   void card.offsetWidth; // restart the keyframe cleanly
@@ -474,7 +475,7 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
             if (pipeBlock) pipeBlock.classList.toggle("is-hidden", searching && visPipe === 0);
             if (yourTools) yourTools.hidden = searching; // recents are noise during a search
 
-            var totalVis = visAvail + visPipe;
+            const totalVis = visAvail + visPipe;
             if (emptyEl) emptyEl.hidden = !(searching && totalVis === 0);
             if (echoEl) echoEl.textContent = q;
             if (clearBtn) clearBtn.hidden = q.length === 0;
@@ -508,23 +509,23 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
 
         // 9) bite 4 — keyboard layer: ? sheet, g-chords, context markers, and
         //    the global "/" focus (consolidated here so they can't collide).
-        var overlay = document.getElementById("kbd-overlay");
-        var sheetEl = document.getElementById("kbd-sheet");
-        var launcher = document.getElementById("kbd-launcher");
-        var closeBtn = document.getElementById("kbd-close");
-        var app = document.querySelector(".app-layout");
-        var kbOpen = false;
-        var kbLastFocus = null;
-        var gPending = false;
-        var gTimer = null;
+        const overlay = document.getElementById("kbd-overlay");
+        const sheetEl = document.getElementById("kbd-sheet");
+        const launcher = document.getElementById("kbd-launcher");
+        const closeBtn = document.getElementById("kbd-close");
+        const app = document.querySelector(".app-layout");
+        let kbOpen = false;
+        let kbLastFocus = null;
+        let gPending = false;
+        let gTimer = null;
 
-        var pathNow = location.pathname.replace(/\/+$/, "");
-        var isCatalog = pathNow === "/tools";
-        var isToolPage = /^\/tools\/[^\/]+$/.test(location.pathname);
+        const pathNow = location.pathname.replace(/\/+$/, "");
+        const isCatalog = pathNow === "/tools";
+        const isToolPage = /^\/tools\/[^/]+$/.test(location.pathname);
 
         // context markers ("here") — only the shortcuts that fire on this page
         document.querySelectorAll(".kbd-row[data-ctx]").forEach(function (row) {
-          var ctx = row.getAttribute("data-ctx");
+          const ctx = row.getAttribute("data-ctx");
           if ((ctx === "catalog" && isCatalog) || (ctx === "tool" && isToolPage)) {
             row.classList.add("is-here");
           }
@@ -556,7 +557,7 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
             }
           }, 200);
         }
-        function toggleKb() { kbOpen ? closeKb() : openKb(); }
+        function toggleKb() { if (kbOpen) { closeKb(); } else { openKb(); } }
 
         if (closeBtn) closeBtn.addEventListener("click", closeKb);
         if (launcher) launcher.addEventListener("click", openKb);
@@ -577,9 +578,9 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
 
           // ? toggles the sheet — unless you're typing it into a field
           if (e.key === "?") {
-            var aeQ = document.activeElement;
-            var tQ = aeQ && aeQ.tagName ? aeQ.tagName : "";
-            var typingQ = tQ === "INPUT" || tQ === "TEXTAREA" || tQ === "SELECT" || (aeQ && aeQ.isContentEditable);
+            const aeQ = document.activeElement;
+            const tQ = aeQ && aeQ.tagName ? aeQ.tagName : "";
+            const typingQ = tQ === "INPUT" || tQ === "TEXTAREA" || tQ === "SELECT" || (aeQ && aeQ.isContentEditable);
             if (typingQ) return;
             e.preventDefault();
             toggleKb();
@@ -588,14 +589,14 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
 
           // from here on: clean keystroke, not typing, sheet closed
           if (e.metaKey || e.ctrlKey || e.altKey) return;
-          var ae = document.activeElement;
-          var tag = ae && ae.tagName ? ae.tagName : "";
+          const ae = document.activeElement;
+          const tag = ae && ae.tagName ? ae.tagName : "";
           if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (ae && ae.isContentEditable)) return;
           if (kbOpen) return;
 
           // / focuses the catalog search (only present on /tools)
           if (e.key === "/") {
-            var si = document.querySelector("[data-tool-search]");
+            const si = document.querySelector("[data-tool-search]");
             if (si) {
               e.preventDefault();
               si.focus({ preventScroll: false });
@@ -621,14 +622,14 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
 
         // 10) scroll reveal — progressive enhancement; no-JS stays visible
         if ("IntersectionObserver" in window) {
-          var targets = Array.prototype.slice.call(
-            document.querySelectorAll(".tool-card, .live-tool-card, .trust-card, .pipeline, .jump-chip")
-          );
+          const targets = Array.prototype.slice.call(
+      document.querySelectorAll(".tool-card, .live-tool-card, .trust-card, .pipeline, .jump-chip")
+    );
           targets.forEach(function (el, i) {
             el.classList.add("reveal");
             el.style.transitionDelay = Math.min(i, 10) * 50 + "ms";
           });
-          var io = new IntersectionObserver(function (entries) {
+          const io = new IntersectionObserver(function (entries) {
             entries.forEach(function (en) {
               if (en.isIntersecting) { en.target.classList.add("is-visible"); io.unobserve(en.target); }
             });

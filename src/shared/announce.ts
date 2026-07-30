@@ -14,7 +14,7 @@ let announceRegion: HTMLElement | null = null;
  * @param elementId — ID of the aria-live element
  */
 export function initAnnounce(elementId: string = "status-announce"): void {
-    announceRegion = document.getElementById(elementId);
+  announceRegion = document.getElementById(elementId);
 }
 
 /**
@@ -23,8 +23,7 @@ export function initAnnounce(elementId: string = "status-announce"): void {
  * @param msg — The message to announce
  */
 export function announce(msg: string): void {
-    if (announceRegion) {
-        announceRegion.textContent = msg;
-    }
+  if (announceRegion) {
+    announceRegion.textContent = msg;
+  }
 }
-

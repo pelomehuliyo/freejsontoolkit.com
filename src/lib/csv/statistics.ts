@@ -26,64 +26,58 @@ import { serializeRecord } from "./helpers";
  * );
  * // { rowCount: 2, columnCount: 2, emptyCellCount: 1, ... }
  */
-export function computeStatistics(
-    records: CsvRecord[],
-    headers: string[],
-): CsvStatistics {
-    const rowCount = records.length;
-    const columnCount = headers.length;
+export function computeStatistics(records: CsvRecord[], headers: string[]): CsvStatistics {
+  const rowCount = records.length;
+  const columnCount = headers.length;
 
-    // ── Empty cell count ─────────────────────
-    let emptyCellCount = 0;
-    for (const record of records) {
-        for (const key of headers) {
-            if (record[key] === "") {
-                emptyCellCount++;
-            }
-        }
+  // ── Empty cell count ─────────────────────
+  let emptyCellCount = 0;
+  for (const record of records) {
+    for (const key of headers) {
+      if (record[key] === "") {
+        emptyCellCount++;
+      }
     }
+  }
 
-    // ── Duplicate header count ───────────────
-    const headerSeen = new Set<string>();
-    let duplicateHeaderCount = 0;
-    for (const header of headers) {
-        if (headerSeen.has(header)) {
-            duplicateHeaderCount++;
-        } else {
-            headerSeen.add(header);
-        }
+  // ── Duplicate header count ───────────────
+  const headerSeen = new Set<string>();
+  let duplicateHeaderCount = 0;
+  for (const header of headers) {
+    if (headerSeen.has(header)) {
+      duplicateHeaderCount++;
+    } else {
+      headerSeen.add(header);
     }
+  }
 
-    // ── Duplicate row count ──────────────────
-    const rowSeen = new Set<string>();
-    let duplicateRowCount = 0;
-    for (const record of records) {
-        const key = serializeRecord(record);
-        if (rowSeen.has(key)) {
-            duplicateRowCount++;
-        } else {
-            rowSeen.add(key);
-        }
+  // ── Duplicate row count ──────────────────
+  const rowSeen = new Set<string>();
+  let duplicateRowCount = 0;
+  for (const record of records) {
+    const key = serializeRecord(record);
+    if (rowSeen.has(key)) {
+      duplicateRowCount++;
+    } else {
+      rowSeen.add(key);
     }
+  }
 
-    // ── Inconsistent row count ───────────────
-    let inconsistentRowCount = 0;
-    for (const record of records) {
-        const actualCount = Object.keys(record).length;
-        if (actualCount !== columnCount) {
-            inconsistentRowCount++;
-        }
+  // ── Inconsistent row count ───────────────
+  let inconsistentRowCount = 0;
+  for (const record of records) {
+    const actualCount = Object.keys(record).length;
+    if (actualCount !== columnCount) {
+      inconsistentRowCount++;
     }
+  }
 
-    return {
-        rowCount,
-        columnCount,
-        emptyCellCount,
-        duplicateHeaderCount,
-        duplicateRowCount,
-        inconsistentRowCount,
-    };
+  return {
+    rowCount,
+    columnCount,
+    emptyCellCount,
+    duplicateHeaderCount,
+    duplicateRowCount,
+    inconsistentRowCount,
+  };
 }
-
-
-

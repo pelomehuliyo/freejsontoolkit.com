@@ -17,34 +17,38 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, "data");
 
 function main() {
-    mkdirSync(DATA_DIR, { recursive: true });
+  mkdirSync(DATA_DIR, { recursive: true });
 
-    for (const size of CSV_SIZES) {
-        const label = size.label.toLowerCase();
-        const filePath = join(DATA_DIR, `${label}.csv`);
+  for (const size of CSV_SIZES) {
+    const label = size.label.toLowerCase();
+    const filePath = join(DATA_DIR, `${label}.csv`);
 
-        console.log(`Generating ${size.label} (${size.rowCount.toLocaleString()} rows)...`);
-        const start = Date.now();
+    console.log(`Generating ${size.label} (${size.rowCount.toLocaleString()} rows)...`);
+    const start = Date.now();
 
-        const { csv, headers, rowCount } = generateBenchmarkCsv(size.rowCount);
+    const { csv, headers, rowCount } = generateBenchmarkCsv(size.rowCount);
 
-        writeFileSync(filePath, csv, "utf-8");
+    writeFileSync(filePath, csv, "utf-8");
 
-        const elapsed = ((Date.now() - start) / 1000).toFixed(1);
-        const fileSizeKb = (csv.length / 1024).toFixed(1);
-        console.log(`  → ${filePath} (${fileSizeKb} KB, ${rowCount.toLocaleString()} rows, ${elapsed}s)`);
-    }
-
-    // Generate edge case: quoted fields
-    console.log(`\nGenerating quoted.csv (10K rows all quoted)...`);
-    const { csv: quotedCsv } = generateBenchmarkCsv(10_000);
-    const quotedLines = quotedCsv.split("\n").map(
-        (line) => line.split(",").map((f) => `"${f}"`).join(",")
+    const elapsed = ((Date.now() - start) / 1000).toFixed(1);
+    const fileSizeKb = (csv.length / 1024).toFixed(1);
+    console.log(
+      `  → ${filePath} (${fileSizeKb} KB, ${rowCount.toLocaleString()} rows, ${elapsed}s)`,
     );
-    writeFileSync(join(DATA_DIR, "quoted.csv"), quotedLines.join("\n"), "utf-8");
+  }
 
-    console.log("\nDone! All benchmark data files generated.");
+  // Generate edge case: quoted fields
+  console.log(`\nGenerating quoted.csv (10K rows all quoted)...`);
+  const { csv: quotedCsv } = generateBenchmarkCsv(10_000);
+  const quotedLines = quotedCsv.split("\n").map((line) =>
+    line
+      .split(",")
+      .map((f) => `"${f}"`)
+      .join(","),
+  );
+  writeFileSync(join(DATA_DIR, "quoted.csv"), quotedLines.join("\n"), "utf-8");
+
+  console.log("\nDone! All benchmark data files generated.");
 }
 
 main();
-

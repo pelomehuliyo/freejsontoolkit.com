@@ -13,6 +13,8 @@ Convert, validate, format, and manipulate JSON without uploading your data to an
 ### Available
 
 - JSON → CSV Converter
+- CSV → JSON Converter
+- JSON Formatter
 - Drag & Drop file support
 - Large file support
 - Web Worker processing
@@ -24,8 +26,6 @@ Convert, validate, format, and manipulate JSON without uploading your data to an
 
 ### Coming Soon
 
-- CSV → JSON
-- JSON Formatter
 - JSON Validator
 - JSON Compare
 - JSON Minify
@@ -173,13 +173,15 @@ Free JSON Toolkit follows a few simple principles.
 - Responsive UI
 - Accessibility improvements
 
-### Version 1.1
+### Version 1.1 ✓ Shipped
 
-- CSV → JSON
+- CSV → JSON Converter
+- JSON Formatter
+- Registry-driven sitemap
+- Trust & architecture page (/why-local)
 
 ### Version 1.2
 
-- JSON Formatter
 - JSON Validator
 
 ### Future

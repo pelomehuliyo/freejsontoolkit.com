@@ -14,7 +14,15 @@
  * and contains no DOM or browser APIs.
  */
 
-import type { CsvDelimiter, CsvError, CsvRecord, DelimiterDetectionResult, ParseOptions, ParseResult, ParsedCsv } from "./types";
+import type {
+  CsvDelimiter,
+  CsvError,
+  CsvRecord,
+  DelimiterDetectionResult,
+  ParseOptions,
+  ParseResult,
+  ParsedCsv,
+} from "./types";
 import { detectDelimiter } from "./delimiterDetection";
 
 // ──────────────────────────────────────────────
@@ -118,7 +126,11 @@ export function parseCsv(csvStr: string, options: ParseOptions = {}): ParseResul
   }
 
   // 4. Build records
-  const { records, headers, warnings: buildWarnings } = buildRecords(rows, hasHeader, trimWhitespace);
+  const {
+    records,
+    headers,
+    warnings: buildWarnings,
+  } = buildRecords(rows, hasHeader, trimWhitespace);
   warnings.push(...buildWarnings);
 
   return {
@@ -186,11 +198,7 @@ function normalizeEOL(input: string): string {
  * @param skipEmptyLines Whether to skip blank/empty lines
  * @returns              Parsed rows with position metadata
  */
-function parseRawRows(
-  input: string,
-  delimiter: string,
-  skipEmptyLines: boolean,
-): RawParseResult {
+function parseRawRows(input: string, delimiter: string, skipEmptyLines: boolean): RawParseResult {
   const rows: ParsedField[][] = [];
   const errors: CsvError[] = [];
   let currentFields: ParsedField[] = [];

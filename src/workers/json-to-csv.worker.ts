@@ -169,4 +169,3 @@ function sendCancelled(requestId: string): void {
   };
   self.postMessage(response);
 }
-

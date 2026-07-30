@@ -19,13 +19,13 @@ npx vitest bench --run --reporter=verbose
 
 ## Sizes
 
-| Label | Rows    | Est. Size | Description                    |
-|-------|---------|-----------|--------------------------------|
-| 1K    | 1,000   | ~50 KB    | Small — quick smoke test       |
-| 10K   | 10,000  | ~500 KB   | Medium — typical user input    |
-| 100K  | 100,000 | ~5 MB     | Large — triggers worker path   |
-| 500K  | 500,000 | ~25 MB    | X-Large — stress test          |
-| 1M    | 1,000,000 | ~50 MB  | XX-Large — upper limit         |
+| Label | Rows      | Est. Size | Description                  |
+| ----- | --------- | --------- | ---------------------------- |
+| 1K    | 1,000     | ~50 KB    | Small — quick smoke test     |
+| 10K   | 10,000    | ~500 KB   | Medium — typical user input  |
+| 100K  | 100,000   | ~5 MB     | Large — triggers worker path |
+| 500K  | 500,000   | ~25 MB    | X-Large — stress test        |
+| 1M    | 1,000,000 | ~50 MB    | XX-Large — upper limit       |
 
 ## Metrics Collected
 
@@ -51,4 +51,3 @@ Results are reproducible across runs.
 ## Results
 
 After running, report results in `results/baseline-<date>.md`.
-

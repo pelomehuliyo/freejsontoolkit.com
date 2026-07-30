@@ -26,9 +26,9 @@ import type { CsvRecord, FlattenedRecord } from "./types";
  * // → "a:1|b:2"
  */
 export function serializeRecord(record: CsvRecord): string {
-    const keys = Object.keys(record).sort();
-    const parts = keys.map((k) => `${k}:${record[k]}`);
-    return parts.join("|");
+  const keys = Object.keys(record).sort();
+  const parts = keys.map((k) => `${k}:${record[k]}`);
+  return parts.join("|");
 }
 
 // ──────────────────────────────────────────────
@@ -49,49 +49,45 @@ export function serializeRecord(record: CsvRecord): string {
  * @param res     Accumulator object (default: {})
  * @returns       The accumulator with flattened keys
  */
-export function flattenJson(
-    obj: unknown,
-    prefix = "",
-    res: FlattenedRecord = {},
-): FlattenedRecord {
-    if (obj === null || obj === undefined) {
-        if (prefix) res[prefix] = "";
-        return res;
-    }
+export function flattenJson(obj: unknown, prefix = "", res: FlattenedRecord = {}): FlattenedRecord {
+  if (obj === null || obj === undefined) {
+    if (prefix) res[prefix] = "";
+    return res;
+  }
 
-    if (Array.isArray(obj)) {
-        if (obj.length === 0) {
-            if (prefix) res[prefix] = "";
-        } else {
-            for (let i = 0; i < obj.length; i++) {
-                const propName = prefix ? `${prefix}.${i}` : `${i}`;
-                flattenJson(obj[i], propName, res);
-            }
-        }
-        return res;
-    }
-
-    if (typeof obj === "object" && obj !== null) {
-        const keys = Object.keys(obj as Record<string, unknown>);
-        if (keys.length === 0) {
-            if (prefix) res[prefix] = "";
-        } else {
-            for (const key of keys) {
-                const val = (obj as Record<string, unknown>)[key];
-                const propName = prefix ? `${prefix}.${key}` : key;
-                if (val !== null && typeof val === "object") {
-                    flattenJson(val, propName, res);
-                } else {
-                    res[propName] = val;
-                }
-            }
-        }
-        return res;
-    }
-
-    // Primitive value
-    if (prefix) {
-        res[prefix] = obj;
+  if (Array.isArray(obj)) {
+    if (obj.length === 0) {
+      if (prefix) res[prefix] = "";
+    } else {
+      for (let i = 0; i < obj.length; i++) {
+        const propName = prefix ? `${prefix}.${i}` : `${i}`;
+        flattenJson(obj[i], propName, res);
+      }
     }
     return res;
+  }
+
+  if (typeof obj === "object" && obj !== null) {
+    const keys = Object.keys(obj as Record<string, unknown>);
+    if (keys.length === 0) {
+      if (prefix) res[prefix] = "";
+    } else {
+      for (const key of keys) {
+        const val = (obj as Record<string, unknown>)[key];
+        const propName = prefix ? `${prefix}.${key}` : key;
+        if (val !== null && typeof val === "object") {
+          flattenJson(val, propName, res);
+        } else {
+          res[propName] = val;
+        }
+      }
+    }
+    return res;
+  }
+
+  // Primitive value
+  if (prefix) {
+    res[prefix] = obj;
+  }
+  return res;
 }

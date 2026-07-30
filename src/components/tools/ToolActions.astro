@@ -82,20 +82,20 @@ for (var i = 0; i < actionIds.length; i++) {
 
 <script>
   (function () {
-    var roots = document.querySelectorAll("[data-actions-id]");
-    for (var i = 0; i < roots.length; i++) {
+    const roots = document.querySelectorAll("[data-actions-id]");
+    for (let i = 0; i < roots.length; i++) {
       (function (el) {
         // Guard: already initialized
         if (el.__toolActionsInitialized) return;
         el.__toolActionsInitialized = true;
 
         el.addEventListener("click", function (e) {
-          var target = e.target;
-          var btn = target.closest ? target.closest("[data-action]") : null;
+          const target = e.target;
+          const btn = target.closest ? target.closest("[data-action]") : null;
           if (!btn) return;
           if (btn.disabled) return;
 
-          var action = btn.getAttribute("data-action");
+          const action = btn.getAttribute("data-action");
           if (!action) return;
 
           el.dispatchEvent(

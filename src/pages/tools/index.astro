@@ -37,9 +37,7 @@ function versionRank(v?: string): number {
   const m = v.match(/(\d+)\.(\d+)/);
   return m ? Number(m[1]) * 100 + Number(m[2]) : 999;
 }
-const pipeline = [...comingSoon].sort(
-  (a, b) => versionRank(a.addedIn) - versionRank(b.addedIn),
-);
+const pipeline = [...comingSoon].sort((a, b) => versionRank(a.addedIn) - versionRank(b.addedIn));
 ---
 
 <BaseLayout
@@ -77,10 +75,15 @@ const pipeline = [...comingSoon].sort(
 
           <div class="hero-terminal" aria-hidden="true">
             <div class="terminal-bar">
-              <span class="t-dot" /><span class="t-dot" /><span class="t-dot" />
+              <span class="t-dot"></span><span class="t-dot"></span><span class="t-dot"></span>
               <span class="t-title caption-mono">local · offline · no telemetry</span>
             </div>
-            <pre class="terminal-body caption-mono"><span class="t-prompt">$</span> <span class="t-cmd">toolkit --local</span>{"\n"}<span class="t-ok">✓ {counts.available} tools ready</span>{"\n"}<span class="t-ok">✓ 0 bytes uploaded</span>{"\n"}<span class="t-ok">✓ processed in your browser</span>{"\n"}<span class="t-prompt">$</span> <span class="t-caret">▍</span></pre>
+            <pre
+              class="terminal-body caption-mono"><span class="t-prompt">$</span> <span class="t-cmd">toolkit --local</span>
+<span class="t-ok">✓ {counts.available} tools ready</span>
+<span class="t-ok">✓ 0 bytes uploaded</span>
+<span class="t-ok">✓ processed in your browser</span>
+<span class="t-prompt">$</span> <span class="t-caret">▍</span></pre>
           </div>
         </div>
       </Container>
@@ -89,8 +92,10 @@ const pipeline = [...comingSoon].sort(
     {/* ── Catalog ── */}
     <section class="catalog-section" aria-labelledby="catalog-title">
       <Container size="default">
-        {/* bite 3 — command-line search. Filters the catalog live by name,
-            tagline, category, and SEO keywords; "/" focuses it from anywhere. */}
+        {
+          /* bite 3 — command-line search. Filters the catalog live by name,
+            tagline, category, and SEO keywords; "/" focuses it from anywhere. */
+        }
         <form class="tool-search" role="search" data-tool-search-form aria-label="Filter tools">
           <span class="search-prompt" data-search-focus aria-hidden="true">$</span>
           <input
@@ -151,7 +156,9 @@ const pipeline = [...comingSoon].sort(
 
                 <a class="tool-card-link" href={t.href}>
                   <div class="card-top">
-                    <span class="mono-badge" aria-hidden="true">{monogram[t.category]}</span>
+                    <span class="mono-badge" aria-hidden="true">
+                      {monogram[t.category]}
+                    </span>
                     <span class="cat-chip caption-mono" aria-hidden="true">
                       {categoryLabel(t.category)}
                     </span>
@@ -179,8 +186,12 @@ const pipeline = [...comingSoon].sort(
           pipeline.length > 0 && (
             <div class="pipeline-block">
               <div class="pipeline-head">
-                <h3 id="pipeline-title" class="display-sm pipeline-title">In the pipeline</h3>
-                <p class="caption pipeline-note">Shipped in the open — the roadmap follows demand.</p>
+                <h3 id="pipeline-title" class="display-sm pipeline-title">
+                  In the pipeline
+                </h3>
+                <p class="caption pipeline-note">
+                  Shipped in the open — the roadmap follows demand.
+                </p>
               </div>
               <div
                 class="tool-grid tool-grid-pipeline"
@@ -188,34 +199,34 @@ const pipeline = [...comingSoon].sort(
                 aria-labelledby="pipeline-title"
                 data-grid="pipeline"
               >
-                {
-                  pipeline.map((t) => (
-                    <article
-                      class="tool-card is-pipeline"
-                      role="listitem"
-                      data-status={t.status}
-                      data-search={searchText(t)}
-                    >
-                      <div class="tool-card-link">
-                        <div class="card-top">
-                          <span class="mono-badge" aria-hidden="true">{monogram[t.category]}</span>
-                          <span class="cat-chip caption-mono" aria-hidden="true">
-                            {categoryLabel(t.category)}
-                          </span>
-                        </div>
-
-                        <h3 class="display-sm card-name">{t.name}</h3>
-                        <p class="body-sm card-tag">{t.tagline}</p>
-
-                        <div class="card-foot">
-                          <span class="pill pill-soon" aria-hidden="true">
-                            {t.addedIn ? `Coming · ${t.addedIn}` : "Planned"}
-                          </span>
-                        </div>
+                {pipeline.map((t) => (
+                  <article
+                    class="tool-card is-pipeline"
+                    role="listitem"
+                    data-status={t.status}
+                    data-search={searchText(t)}
+                  >
+                    <div class="tool-card-link">
+                      <div class="card-top">
+                        <span class="mono-badge" aria-hidden="true">
+                          {monogram[t.category]}
+                        </span>
+                        <span class="cat-chip caption-mono" aria-hidden="true">
+                          {categoryLabel(t.category)}
+                        </span>
                       </div>
-                    </article>
-                  ))
-                }
+
+                      <h3 class="display-sm card-name">{t.name}</h3>
+                      <p class="body-sm card-tag">{t.tagline}</p>
+
+                      <div class="card-foot">
+                        <span class="pill pill-soon" aria-hidden="true">
+                          {t.addedIn ? `Coming · ${t.addedIn}` : "Planned"}
+                        </span>
+                      </div>
+                    </div>
+                  </article>
+                ))}
               </div>
             </div>
           )

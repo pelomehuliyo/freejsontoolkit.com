@@ -26,34 +26,34 @@ import { serializeRecord } from "./helpers";
  * // → [{ severity: "warning", code: "DUPLICATE_HEADER", message: "...", column: 2, suggestion: "..." }]
  */
 export function checkDuplicateHeaders(headers: string[]): ValidationIssue[] {
-    const issues: ValidationIssue[] = [];
-    const seen = new Map<string, number[]>();
+  const issues: ValidationIssue[] = [];
+  const seen = new Map<string, number[]>();
 
-    for (let i = 0; i < headers.length; i++) {
-        const header = headers[i];
-        if (!seen.has(header)) {
-            seen.set(header, []);
-        }
-        seen.get(header)!.push(i);
+  for (let i = 0; i < headers.length; i++) {
+    const header = headers[i];
+    if (!seen.has(header)) {
+      seen.set(header, []);
     }
+    seen.get(header)!.push(i);
+  }
 
-    for (const [name, positions] of seen) {
-        if (positions.length > 1) {
-            // Report each duplicate after the first occurrence
-            for (let j = 1; j < positions.length; j++) {
-                const col = positions[j];
-                issues.push({
-                    severity: "warning",
-                    code: "DUPLICATE_HEADER",
-                    message: `Duplicate header "${name}" found at column ${col + 1}.`,
-                    column: col,
-                    suggestion: `Rename or deduplicate the header at column ${col + 1} to make it unique.`,
-                });
-            }
-        }
+  for (const [name, positions] of seen) {
+    if (positions.length > 1) {
+      // Report each duplicate after the first occurrence
+      for (let j = 1; j < positions.length; j++) {
+        const col = positions[j];
+        issues.push({
+          severity: "warning",
+          code: "DUPLICATE_HEADER",
+          message: `Duplicate header "${name}" found at column ${col + 1}.`,
+          column: col,
+          suggestion: `Rename or deduplicate the header at column ${col + 1} to make it unique.`,
+        });
+      }
     }
+  }
 
-    return issues;
+  return issues;
 }
 
 // ──────────────────────────────────────────────
@@ -71,22 +71,22 @@ export function checkDuplicateHeaders(headers: string[]): ValidationIssue[] {
  * // → [{ severity: "error", code: "EMPTY_HEADER", message: "...", column: 1, suggestion: "..." }]
  */
 export function checkEmptyHeaders(headers: string[]): ValidationIssue[] {
-    const issues: ValidationIssue[] = [];
+  const issues: ValidationIssue[] = [];
 
-    for (let i = 0; i < headers.length; i++) {
-        const header = headers[i];
-        if (header === "" || header.trim() === "") {
-            issues.push({
-                severity: "error",
-                code: "EMPTY_HEADER",
-                message: `Header at column ${i + 1} is empty or whitespace-only.`,
-                column: i,
-                suggestion: `Provide a descriptive header name for column ${i + 1}.`,
-            });
-        }
+  for (let i = 0; i < headers.length; i++) {
+    const header = headers[i];
+    if (header === "" || header.trim() === "") {
+      issues.push({
+        severity: "error",
+        code: "EMPTY_HEADER",
+        message: `Header at column ${i + 1} is empty or whitespace-only.`,
+        column: i,
+        suggestion: `Provide a descriptive header name for column ${i + 1}.`,
+      });
     }
+  }
 
-    return issues;
+  return issues;
 }
 
 // ──────────────────────────────────────────────
@@ -107,28 +107,28 @@ export function checkEmptyHeaders(headers: string[]): ValidationIssue[] {
  * // → [{ severity: "error", code: "INCONSISTENT_COLUMN_COUNT", row: 1, ... }]
  */
 export function checkInconsistentColumnCounts(
-    records: CsvRecord[],
-    expectedColumnCount: number,
+  records: CsvRecord[],
+  expectedColumnCount: number,
 ): ValidationIssue[] {
-    const issues: ValidationIssue[] = [];
+  const issues: ValidationIssue[] = [];
 
-    for (let i = 0; i < records.length; i++) {
-        const actualCount = Object.keys(records[i]).length;
-        if (actualCount !== expectedColumnCount) {
-            issues.push({
-                severity: "error",
-                code: "INCONSISTENT_COLUMN_COUNT",
-                message: `Row ${i + 1} has ${actualCount} columns, but expected ${expectedColumnCount}.`,
-                row: i,
-                suggestion:
-                    actualCount < expectedColumnCount
-                        ? `Add missing values for row ${i + 1} to match the ${expectedColumnCount} expected columns.`
-                        : `Remove extra values in row ${i + 1} to match the ${expectedColumnCount} expected columns.`,
-            });
-        }
+  for (let i = 0; i < records.length; i++) {
+    const actualCount = Object.keys(records[i]).length;
+    if (actualCount !== expectedColumnCount) {
+      issues.push({
+        severity: "error",
+        code: "INCONSISTENT_COLUMN_COUNT",
+        message: `Row ${i + 1} has ${actualCount} columns, but expected ${expectedColumnCount}.`,
+        row: i,
+        suggestion:
+          actualCount < expectedColumnCount
+            ? `Add missing values for row ${i + 1} to match the ${expectedColumnCount} expected columns.`
+            : `Remove extra values in row ${i + 1} to match the ${expectedColumnCount} expected columns.`,
+      });
     }
+  }
 
-    return issues;
+  return issues;
 }
 
 // ──────────────────────────────────────────────
@@ -146,25 +146,25 @@ export function checkInconsistentColumnCounts(
  * // → [{ severity: "warning", code: "DUPLICATE_ROW", row: 1, suggestion: "..." }]
  */
 export function checkDuplicateRows(records: CsvRecord[]): ValidationIssue[] {
-    const issues: ValidationIssue[] = [];
-    const seen = new Map<string, number>();
+  const issues: ValidationIssue[] = [];
+  const seen = new Map<string, number>();
 
-    for (let i = 0; i < records.length; i++) {
-        const key = serializeRecord(records[i]);
-        if (seen.has(key)) {
-            issues.push({
-                severity: "warning",
-                code: "DUPLICATE_ROW",
-                message: `Row ${i + 1} is a duplicate of row ${(seen.get(key) as number) + 1}.`,
-                row: i,
-                suggestion: `Remove the duplicate row ${i + 1} unless it is intentional.`,
-            });
-        } else {
-            seen.set(key, i);
-        }
+  for (let i = 0; i < records.length; i++) {
+    const key = serializeRecord(records[i]);
+    if (seen.has(key)) {
+      issues.push({
+        severity: "warning",
+        code: "DUPLICATE_ROW",
+        message: `Row ${i + 1} is a duplicate of row ${(seen.get(key) as number) + 1}.`,
+        row: i,
+        suggestion: `Remove the duplicate row ${i + 1} unless it is intentional.`,
+      });
+    } else {
+      seen.set(key, i);
     }
+  }
 
-    return issues;
+  return issues;
 }
 
 // ──────────────────────────────────────────────
@@ -184,34 +184,34 @@ export function checkDuplicateRows(records: CsvRecord[]): ValidationIssue[] {
  * // → [{ severity: "warning", code: "EMPTY_VALUE", row: 0, column: 1, suggestion: "..." }]
  */
 export function checkEmptyValues(
-    records: CsvRecord[],
-    ignoreColumns?: Set<string>,
+  records: CsvRecord[],
+  ignoreColumns?: Set<string>,
 ): ValidationIssue[] {
-    const issues: ValidationIssue[] = [];
+  const issues: ValidationIssue[] = [];
 
-    for (let i = 0; i < records.length; i++) {
-        const record = records[i];
-        let col = 0;
-        for (const [key, value] of Object.entries(record)) {
-            if (ignoreColumns?.has(key)) {
-                col++;
-                continue;
-            }
-            if (value === "") {
-                issues.push({
-                    severity: "warning",
-                    code: "EMPTY_VALUE",
-                    message: `Empty value found in row ${i + 1}, column "${key}".`,
-                    row: i,
-                    column: col,
-                    suggestion: `Provide a value for "${key}" in row ${i + 1}, or use a placeholder if intentionally empty.`,
-                });
-            }
-            col++;
-        }
+  for (let i = 0; i < records.length; i++) {
+    const record = records[i];
+    let col = 0;
+    for (const [key, value] of Object.entries(record)) {
+      if (ignoreColumns?.has(key)) {
+        col++;
+        continue;
+      }
+      if (value === "") {
+        issues.push({
+          severity: "warning",
+          code: "EMPTY_VALUE",
+          message: `Empty value found in row ${i + 1}, column "${key}".`,
+          row: i,
+          column: col,
+          suggestion: `Provide a value for "${key}" in row ${i + 1}, or use a placeholder if intentionally empty.`,
+        });
+      }
+      col++;
     }
+  }
 
-    return issues;
+  return issues;
 }
 
 // ──────────────────────────────────────────────
@@ -231,34 +231,34 @@ export function checkEmptyValues(
  * // → [{ severity: "warning", code: "WHITESPACE_VALUE", row: 0, column: 1, suggestion: "..." }]
  */
 export function checkWhitespaceValues(
-    records: CsvRecord[],
-    ignoreColumns?: Set<string>,
+  records: CsvRecord[],
+  ignoreColumns?: Set<string>,
 ): ValidationIssue[] {
-    const issues: ValidationIssue[] = [];
+  const issues: ValidationIssue[] = [];
 
-    for (let i = 0; i < records.length; i++) {
-        const record = records[i];
-        let col = 0;
-        for (const [key, value] of Object.entries(record)) {
-            if (ignoreColumns?.has(key)) {
-                col++;
-                continue;
-            }
-            if (value !== "" && value.trim() === "") {
-                issues.push({
-                    severity: "warning",
-                    code: "WHITESPACE_VALUE",
-                    message: `Whitespace-only value found in row ${i + 1}, column "${key}".`,
-                    row: i,
-                    column: col,
-                    suggestion: `Remove the invisible whitespace characters or provide a real value for "${key}" in row ${i + 1}.`,
-                });
-            }
-            col++;
-        }
+  for (let i = 0; i < records.length; i++) {
+    const record = records[i];
+    let col = 0;
+    for (const [key, value] of Object.entries(record)) {
+      if (ignoreColumns?.has(key)) {
+        col++;
+        continue;
+      }
+      if (value !== "" && value.trim() === "") {
+        issues.push({
+          severity: "warning",
+          code: "WHITESPACE_VALUE",
+          message: `Whitespace-only value found in row ${i + 1}, column "${key}".`,
+          row: i,
+          column: col,
+          suggestion: `Remove the invisible whitespace characters or provide a real value for "${key}" in row ${i + 1}.`,
+        });
+      }
+      col++;
     }
+  }
 
-    return issues;
+  return issues;
 }
 
 // ──────────────────────────────────────────────
@@ -276,15 +276,15 @@ export function checkWhitespaceValues(
  * // → [{ severity: "error", code: "EMPTY_FILE", message: "...", suggestion: "..." }]
  */
 export function checkEmptyFile(records: CsvRecord[]): ValidationIssue[] {
-    if (records.length === 0) {
-        return [
-            {
-                severity: "error",
-                code: "EMPTY_FILE",
-                message: "CSV file contains no data records.",
-                suggestion: "Ensure the CSV has at least one data row after the optional header.",
-            },
-        ];
-    }
-    return [];
+  if (records.length === 0) {
+    return [
+      {
+        severity: "error",
+        code: "EMPTY_FILE",
+        message: "CSV file contains no data records.",
+        suggestion: "Ensure the CSV has at least one data row after the optional header.",
+      },
+    ];
+  }
+  return [];
 }

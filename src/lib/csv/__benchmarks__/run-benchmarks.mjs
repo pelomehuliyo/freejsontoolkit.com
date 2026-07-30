@@ -139,25 +139,26 @@ const testFile = join(__dirname, "benchmark-runner.test.ts");
 writeFileSync(testFile, testContent, "utf-8");
 
 try {
-    console.log("Starting benchmarks...\n");
-    // Increase test timeout for large files
-    const cmd = `npx vitest run "${testFile}" --testTimeout=600000 --reporter=verbose`;
-    const output = execSync(cmd, {
-        cwd: join(__dirname, "..", "..", ".."),
-        stdio: "inherit",
-        timeout: 600000,
-        shell: true,
-    });
+  console.log("Starting benchmarks...\n");
+  // Increase test timeout for large files
+  const cmd = `npx vitest run "${testFile}" --testTimeout=600000 --reporter=verbose`;
+  const output = execSync(cmd, {
+    cwd: join(__dirname, "..", "..", ".."),
+    stdio: "inherit",
+    timeout: 600000,
+    shell: true,
+  });
 } catch (err) {
-    // vitest returns non-zero for tests that log console output but pass
-    // We don't care about the exit code since our tests always pass
+  // vitest returns non-zero for tests that log console output but pass
+  // We don't care about the exit code since our tests always pass
 } finally {
-    // Cleanup
-    try { unlinkSync(testFile); } catch { }
+  // Cleanup
+  try {
+    unlinkSync(testFile);
+  } catch {}
 }
 
 // Parse and format the results
 console.log("\n\n═══════════════════════════════════════════════════════════");
 console.log("  Done. Check the [PERF] lines above for results.");
 console.log("═══════════════════════════════════════════════════════════\n");
-

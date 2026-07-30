@@ -14,89 +14,80 @@
 
 // ── Worker Stages ──
 
-export type WorkerStage =
-    | "parsing"
-    | "flattening"
-    | "formatting"
-    | "complete";
+export type WorkerStage = "parsing" | "flattening" | "formatting" | "complete";
 
 // ── Request Types (page → worker) ──
 
 export type WorkerRequest = ConvertRequest | CancelRequest;
 
 export interface ConvertRequest {
-    readonly type: "convert";
-    readonly requestId: string;
-    readonly payload: {
-        readonly jsonStr: string;
-        readonly options: {
-            readonly delimiter: string;
-            readonly includeHeaders: boolean;
-            readonly flatten: boolean;
-        };
+  readonly type: "convert";
+  readonly requestId: string;
+  readonly payload: {
+    readonly jsonStr: string;
+    readonly options: {
+      readonly delimiter: string;
+      readonly includeHeaders: boolean;
+      readonly flatten: boolean;
     };
+  };
 }
 
 export interface CancelRequest {
-    readonly type: "cancel";
-    readonly requestId: string;
+  readonly type: "cancel";
+  readonly requestId: string;
 }
 
 // ── Response Types (worker → page) ──
 
-export type WorkerResponse =
-    | ProgressResponse
-    | DoneResponse
-    | ErrorResponse
-    | CancelledResponse;
+export type WorkerResponse = ProgressResponse | DoneResponse | ErrorResponse | CancelledResponse;
 
 export interface ProgressResponse {
-    readonly type: "progress";
-    readonly requestId: string;
-    readonly payload: {
-        readonly stage: WorkerStage;
-        /** Only set when real measurable progress exists (e.g. record count) */
-        readonly percentage?: number;
-    };
+  readonly type: "progress";
+  readonly requestId: string;
+  readonly payload: {
+    readonly stage: WorkerStage;
+    /** Only set when real measurable progress exists (e.g. record count) */
+    readonly percentage?: number;
+  };
 }
 
 export interface DoneResponse {
-    readonly type: "done";
-    readonly requestId: string;
-    readonly payload: {
-        readonly csv: string;
-    };
+  readonly type: "done";
+  readonly requestId: string;
+  readonly payload: {
+    readonly csv: string;
+  };
 }
 
 export interface ErrorResponse {
-    readonly type: "error";
-    readonly requestId: string;
-    readonly payload: {
-        readonly message: string;
-        readonly code?: string;
-    };
+  readonly type: "error";
+  readonly requestId: string;
+  readonly payload: {
+    readonly message: string;
+    readonly code?: string;
+  };
 }
 
 export interface CancelledResponse {
-    readonly type: "cancelled";
-    readonly requestId: string;
+  readonly type: "cancelled";
+  readonly requestId: string;
 }
 
 // ── Worker Client Types (for the Promise-based API) ──
 
 export interface WorkerProgress {
-    readonly stage: WorkerStage;
-    readonly percentage?: number;
+  readonly stage: WorkerStage;
+  readonly percentage?: number;
 }
 
 export interface WorkerClientResult {
-    readonly csv: string;
+  readonly csv: string;
 }
 
 export interface WorkerClientHandle {
-    /** Promise that resolves with the result on success, rejects on error/cancel */
-    readonly result: Promise<WorkerClientResult>;
-    /** Request cancellation of this specific conversion */
-    cancel(): void;
+  /** Promise that resolves with the result on success, rejects on error/cancel */
+  readonly result: Promise<WorkerClientResult>;
+  /** Request cancellation of this specific conversion */
+  cancel(): void;
 }
-

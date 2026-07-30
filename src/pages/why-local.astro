@@ -254,56 +254,65 @@ const toc = [
 </DocLayout>
 
 <script>
-  // ── Live network proof: count fetch/XHR the page issues after load. ──
+  // ── Live network proof ─────────────────────────────────────────────────
+  // Counts the fetch/XHR calls THIS page's own code makes after load, so the
+  // "your data never leaves the tab" promise is observable, not just claimed.
+  // The wrappers are deliberately defensive: if patching fails for any reason we
+  // swallow it, because this widget must never break the page or interfere with
+  // analytics. The patch lives for the page's lifetime by design.
   (function () {
-    var countEl = document.getElementById("netproof-count");
-    var secEl = document.getElementById("netproof-seconds");
-    var spark = document.getElementById("netproof-spark");
+    const countEl = document.getElementById("netproof-count");
+    const secEl = document.getElementById("netproof-seconds");
+    const spark = document.getElementById("netproof-spark");
     if (!countEl || !spark) return;
 
-    var BARS = 40;
-    var bars = [];
-    for (var i = 0; i < BARS; i++) {
-      var s = document.createElement("span");
+    const BARS = 40;
+    const bars = [];
+    for (let i = 0; i < BARS; i++) {
+      const s = document.createElement("span");
       spark.appendChild(s);
       bars.push(s);
     }
 
-    var count = 0;
-    var barIdx = 0;
-    var start = Date.now();
+    let count = 0;
+    let barIdx = 0;
+    const start = Date.now();
 
     function bump() {
-      count++;
+      count += 1;
       countEl.textContent = String(count);
-      var b = bars[barIdx % BARS];
+      const b = bars[barIdx % BARS];
       if (b) b.classList.add("hit");
-      barIdx++;
+      barIdx += 1;
     }
 
     try {
-      var origFetch = window.fetch;
+      const origFetch = window.fetch;
       if (typeof origFetch === "function") {
-        window.fetch = function () {
+        window.fetch = function (...args) {
           bump();
-          return origFetch.apply(this, arguments);
+          return origFetch.apply(this, args);
         };
       }
-    } catch (e) {}
+    } catch {
+      /* best-effort: never let the proof widget break the page */
+    }
 
     try {
-      var XHR = window.XMLHttpRequest;
+      const XHR = window.XMLHttpRequest;
       if (XHR && XHR.prototype && XHR.prototype.open) {
-        var origOpen = XHR.prototype.open;
-        XHR.prototype.open = function () {
+        const origOpen = XHR.prototype.open;
+        XHR.prototype.open = function (...args) {
           bump();
-          return origOpen.apply(this, arguments);
+          return origOpen.apply(this, args);
         };
       }
-    } catch (e) {}
+    } catch {
+      /* best-effort, as above */
+    }
 
     if (secEl) {
-      setInterval(function () {
+      setInterval(() => {
         secEl.textContent = String(Math.floor((Date.now() - start) / 1000));
       }, 1000);
     }

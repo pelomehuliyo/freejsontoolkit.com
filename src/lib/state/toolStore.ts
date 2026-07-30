@@ -28,53 +28,53 @@ type EqualityFn<T> = (a: T, b: T) => boolean;
  * Skips subscriber notifications when the new value is equal to the current value.
  */
 export class Store<T> {
-    private value: T;
-    private subscribers: Set<Subscriber<T>> = new Set();
-    private equals: EqualityFn<T>;
+  private value: T;
+  private subscribers: Set<Subscriber<T>> = new Set();
+  private equals: EqualityFn<T>;
 
-    constructor(initial: T, equals?: EqualityFn<T>) {
-        this.value = initial;
-        this.equals = equals ?? defaultEquals;
-    }
+  constructor(initial: T, equals?: EqualityFn<T>) {
+    this.value = initial;
+    this.equals = equals ?? defaultEquals;
+  }
 
-    /** Returns the current value. */
-    get(): T {
-        return this.value;
-    }
+  /** Returns the current value. */
+  get(): T {
+    return this.value;
+  }
 
-    /** Sets a new value. Notifies subscribers only if the value changed. */
-    set(next: T): void {
-        if (this.equals(this.value, next)) return;
-        this.value = next;
-        this.subscribers.forEach((fn) => fn(this.value));
-    }
+  /** Sets a new value. Notifies subscribers only if the value changed. */
+  set(next: T): void {
+    if (this.equals(this.value, next)) return;
+    this.value = next;
+    this.subscribers.forEach((fn) => fn(this.value));
+  }
 
-    /** Applies a transformation function to the current value. */
-    update(fn: (prev: T) => T): void {
-        this.set(fn(this.value));
-    }
+  /** Applies a transformation function to the current value. */
+  update(fn: (prev: T) => T): void {
+    this.set(fn(this.value));
+  }
 
-    /**
-     * Registers a subscriber. The subscriber is called immediately with the
-     * current value, then again on every change.
-     *
-     * Returns an unsubscribe function.
-     */
-    subscribe(fn: Subscriber<T>): () => void {
-        this.subscribers.add(fn);
-        fn(this.value);
-        return () => {
-            this.subscribers.delete(fn);
-        };
-    }
+  /**
+   * Registers a subscriber. The subscriber is called immediately with the
+   * current value, then again on every change.
+   *
+   * Returns an unsubscribe function.
+   */
+  subscribe(fn: Subscriber<T>): () => void {
+    this.subscribers.add(fn);
+    fn(this.value);
+    return () => {
+      this.subscribers.delete(fn);
+    };
+  }
 
-    /**
-     * Clears all subscribers and releases references.
-     * Call when the store is no longer needed (e.g. page navigation).
-     */
-    destroy(): void {
-        this.subscribers.clear();
-    }
+  /**
+   * Clears all subscribers and releases references.
+   * Call when the store is no longer needed (e.g. page navigation).
+   */
+  destroy(): void {
+    this.subscribers.clear();
+  }
 }
 
 /**
@@ -82,7 +82,7 @@ export class Store<T> {
  * value equality for primitives.
  */
 function defaultEquals<T>(a: T, b: T): boolean {
-    return a === b;
+  return a === b;
 }
 
 /**
@@ -91,13 +91,12 @@ function defaultEquals<T>(a: T, b: T): boolean {
  * unnecessary updates when only reference changes.
  */
 export function shallowEqual<T extends Record<string, unknown>>(a: T, b: T): boolean {
-    if (a === b) return true;
-    const aKeys = Object.keys(a);
-    const bKeys = Object.keys(b);
-    if (aKeys.length !== bKeys.length) return false;
-    for (const key of aKeys) {
-        if (a[key] !== b[key]) return false;
-    }
-    return true;
+  if (a === b) return true;
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
+  if (aKeys.length !== bKeys.length) return false;
+  for (const key of aKeys) {
+    if (a[key] !== b[key]) return false;
+  }
+  return true;
 }
-

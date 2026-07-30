@@ -72,16 +72,16 @@ const statusId = id + "-status";
 
 <script>
   (function () {
-    var roots = document.querySelectorAll("[data-drop-id]");
-    for (var ri = 0; ri < roots.length; ri++) {
+    const roots = document.querySelectorAll("[data-drop-id]");
+    for (let ri = 0; ri < roots.length; ri++) {
       (function () {
-        var container = roots[ri];
-        var dropId = container.getAttribute("data-drop-id");
+        const container = roots[ri];
+        const dropId = container.getAttribute("data-drop-id");
         if (!dropId) return;
 
-        var dropZone = document.getElementById(dropId + "-dropzone");
-        var fileInput = document.getElementById(dropId + "-file-input");
-        var statusEl = document.getElementById(dropId + "-status");
+        const dropZone = document.getElementById(dropId + "-dropzone");
+        const fileInput = document.getElementById(dropId + "-file-input");
+        const statusEl = document.getElementById(dropId + "-status");
         if (!dropZone || !fileInput || !statusEl) return;
 
         // Guard: already initialized
@@ -94,7 +94,7 @@ const statusId = id + "-status";
 
         function readFileAsText(file) {
           return new Promise(function (resolve, reject) {
-            var reader = new FileReader();
+            const reader = new FileReader();
             reader.onload = function (e) {
               resolve(e.target ? e.target.result || "" : "");
             };
@@ -110,7 +110,7 @@ const statusId = id + "-status";
           announce("Reading file: " + file.name);
 
           try {
-            var text = await readFileAsText(file);
+            const text = await readFileAsText(file);
             announce(
               "File loaded: " + file.name + " (" + text.length.toLocaleString() + " characters)",
             );
@@ -138,7 +138,7 @@ const statusId = id + "-status";
         });
 
         fileInput.addEventListener("change", function () {
-          var file = fileInput.files ? fileInput.files[0] : null;
+          const file = fileInput.files ? fileInput.files[0] : null;
           handleFile(file);
           fileInput.value = "";
         });
@@ -155,7 +155,7 @@ const statusId = id + "-status";
         dropZone.addEventListener("drop", function (e) {
           e.preventDefault();
           dropZone.classList.remove("drag-over");
-          var file = e.dataTransfer ? e.dataTransfer.files[0] : null;
+          const file = e.dataTransfer ? e.dataTransfer.files[0] : null;
           handleFile(file);
         });
       })();

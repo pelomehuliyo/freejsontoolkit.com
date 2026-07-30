@@ -12,5 +12,3 @@
   - [x] small JSON -> works
   - [x] large JSON > MAX_INPUT_CHARS -> warning shown
   - [x] medium/large JSON -> worker progress updates and UI stays responsive
-
-

@@ -81,15 +81,15 @@ const isHidden = !message;
 
 <script>
   (function () {
-    var roots = document.querySelectorAll("[data-err-id]");
-    for (var ri = 0; ri < roots.length; ri++) {
+    const roots = document.querySelectorAll("[data-err-id]");
+    for (let ri = 0; ri < roots.length; ri++) {
       (function () {
-        var banner = roots[ri];
-        var errId = banner.getAttribute("data-err-id");
+        const banner = roots[ri];
+        const errId = banner.getAttribute("data-err-id");
         if (!errId) return;
 
-        var messageEl = document.getElementById(errId + "-message");
-        var closeBtn = document.getElementById(errId + "-close");
+        const messageEl = document.getElementById(errId + "-message");
+        const closeBtn = document.getElementById(errId + "-close");
         if (!messageEl || !closeBtn) return;
 
         // Guard: already initialized
@@ -127,8 +127,8 @@ const isHidden = !message;
           }
         });
 
-        var observer = new MutationObserver(function () {
-          var msg = banner.getAttribute("data-message");
+        const observer = new MutationObserver(function () {
+          const msg = banner.getAttribute("data-message");
           if (msg) {
             banner.show(msg);
           } else {

@@ -102,17 +102,17 @@ const emptyValue = readonly
 
 <script>
   (function () {
-    var roots = document.querySelectorAll("[data-editor-id]");
-    for (var ri = 0; ri < roots.length; ri++) {
+    const roots = document.querySelectorAll("[data-editor-id]");
+    for (let ri = 0; ri < roots.length; ri++) {
       (function () {
-        var container = roots[ri];
-        var editorId = container.getAttribute("data-editor-id");
+        const container = roots[ri];
+        const editorId = container.getAttribute("data-editor-id");
         if (!editorId) return;
 
-        var textarea = document.getElementById(editorId + "-textarea");
-        var gutter = document.getElementById(editorId + "-gutter");
-        var gutterContent = document.getElementById(editorId + "-gutter-content");
-        var wrapper = container.querySelector(".editor-wrapper");
+        const textarea = document.getElementById(editorId + "-textarea");
+        const gutter = document.getElementById(editorId + "-gutter");
+        const gutterContent = document.getElementById(editorId + "-gutter-content");
+        const wrapper = container.querySelector(".editor-wrapper");
         if (!textarea || !gutter || !gutterContent) return;
 
         // Guard: already initialized
@@ -125,24 +125,32 @@ const emptyValue = readonly
         textarea.setAttribute("placeholder", "");
 
         // Track current line count to avoid unnecessary DOM rebuilds
-        var currentLineCount = 1;
+        let currentLineCount = 1;
 
         /**
          * Re-render gutter spans when line count changes.
          * Simple rendering — no virtualization for v1.0 stability.
          */
         function renderGutterLines() {
-          var lineCount = textarea.value.split("\n").length;
+          function countLines(str) {
+            let n = 1;
+            for (let i = 0; i < str.length; i++) {
+              if (str.charCodeAt(i) === 10) n++;
+            }
+            return n;
+          }
+          let lineCount = countLines(textarea.value);
           if (lineCount < 1) lineCount = 1;
 
           // Skip DOM rebuild if line count hasn't changed
           if (lineCount === currentLineCount) return;
           currentLineCount = lineCount;
 
-          var parts = new Array(lineCount);
-          for (var i = 0; i < lineCount; i++) {
+          const parts = new Array(lineCount);
+          for (let i = 0; i < lineCount; i++) {
             parts[i] = String(i + 1);
           }
+          gutter.style.width = gutter.style.minWidth = String(lineCount).length + 2 + "ch";
           // textContent (not innerHTML) — safe, fast, no per-line elements
           gutterContent.textContent = parts.join("\n");
         }

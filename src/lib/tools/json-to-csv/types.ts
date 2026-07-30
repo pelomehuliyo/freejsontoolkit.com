@@ -19,8 +19,8 @@ export type Delimiter = "," | ";" | "\t";
 
 /** A single delimiter option for the UI select */
 export interface DelimiterOption {
-    value: Delimiter;
-    label: string;
+  value: Delimiter;
+  label: string;
 }
 
 /**
@@ -31,8 +31,8 @@ export type ConfirmDelegate = (message: string) => boolean;
 
 /** Structured conversion progress reported by the worker */
 export interface ConversionProgress {
-    stage: WorkerStage;
-    percentage?: number;
+  stage: WorkerStage;
+  percentage?: number;
 }
 
 /**
@@ -44,53 +44,52 @@ export interface ConversionProgress {
  *   - All settings are stored here so actions don't need DOM access
  */
 export interface JsonToCsvState {
-    // ── Content ──
-    jsonInput: string;
-    csvOutput: string;
-    /** Full text for large files (>500 KB) kept separate from preview */
-    largeJsonContent: string | null;
-    /** Full CSV kept separate for copy/download when output is large */
-    largeCsvContent: string | null;
+  // ── Content ──
+  jsonInput: string;
+  csvOutput: string;
+  /** Full text for large files (>500 KB) kept separate from preview */
+  largeJsonContent: string | null;
+  /** Full CSV kept separate for copy/download when output is large */
+  largeCsvContent: string | null;
 
-    // ── Settings ──
-    delimiter: Delimiter;
-    flatten: boolean;
-    includeHeaders: boolean;
+  // ── Settings ──
+  delimiter: Delimiter;
+  flatten: boolean;
+  includeHeaders: boolean;
 
-    // ── Status ──
-    inputStatus: InputStatus;
-    outputStatus: OutputStatus;
-    error: string | null;
-    /** Non-error informational notice shown in the output panel (e.g. empty array) */
-    outputNotice: string | null;
-    /** True when the displayed CSV is a truncated preview of a larger output */
-    isPreview: boolean;
+  // ── Status ──
+  inputStatus: InputStatus;
+  outputStatus: OutputStatus;
+  error: string | null;
+  /** Non-error informational notice shown in the output panel (e.g. empty array) */
+  outputNotice: string | null;
+  /** True when the displayed CSV is a truncated preview of a larger output */
+  isPreview: boolean;
 
-    // ── Worker Lifecycle ──
-    /** True while a conversion is in progress */
-    isConverting: boolean;
-    /** True when the user has requested cancellation */
-    isCancelling: boolean;
-    /** Structured progress from the worker (null when not converting) */
-    conversionProgress: ConversionProgress | null;
+  // ── Worker Lifecycle ──
+  /** True while a conversion is in progress */
+  isConverting: boolean;
+  /** True when the user has requested cancellation */
+  isCancelling: boolean;
+  /** Structured progress from the worker (null when not converting) */
+  conversionProgress: ConversionProgress | null;
 }
 
 /** Factory for the default/initial state */
 export const DEFAULT_STATE: JsonToCsvState = {
-    jsonInput: "",
-    csvOutput: "",
-    largeJsonContent: null,
-    largeCsvContent: null,
-    delimiter: ",",
-    flatten: true,
-    includeHeaders: true,
-    inputStatus: "empty",
-    outputStatus: "empty",
-    error: null,
-    outputNotice: null,
-    isPreview: false,
-    isConverting: false,
-    isCancelling: false,
-    conversionProgress: null,
+  jsonInput: "",
+  csvOutput: "",
+  largeJsonContent: null,
+  largeCsvContent: null,
+  delimiter: ",",
+  flatten: true,
+  includeHeaders: true,
+  inputStatus: "empty",
+  outputStatus: "empty",
+  error: null,
+  outputNotice: null,
+  isPreview: false,
+  isConverting: false,
+  isCancelling: false,
+  conversionProgress: null,
 };
-

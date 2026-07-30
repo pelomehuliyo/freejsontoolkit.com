@@ -196,18 +196,20 @@ const docPath = "~/freejsontoolkit " + (Astro.url.pathname.replace(/\/+$/, "") |
     // lock so the highlight can't flicker to a neighbour mid-animation; any
     // manual scroll (wheel / touch / arrow keys) breaks the lock at once.
     (function () {
-      var tocLinks = Array.prototype.slice.call(document.querySelectorAll(".doc-toc-link"));
-      var mobileLinks = Array.prototype.slice.call(document.querySelectorAll(".doc-toc-mobile a"));
-      var sections = Array.prototype.slice.call(document.querySelectorAll(".doc-section"));
+      const tocLinks = Array.prototype.slice.call(document.querySelectorAll(".doc-toc-link"));
+      const mobileLinks = Array.prototype.slice.call(
+        document.querySelectorAll(".doc-toc-mobile a"),
+      );
+      const sections = Array.prototype.slice.call(document.querySelectorAll(".doc-section"));
       if (!sections.length) return;
 
-      var THRESHOLD = 120; // px from top; > scroll-margin-top (92) so a clicked
+      const THRESHOLD = 120; // px from top; > scroll-margin-top (92) so a clicked
       // section always qualifies at rest, while the next one (a real section's
       // height below) does not.
-      var current = null;
-      var locked = false;
-      var lockTimer = null;
-      var reduce =
+      let current = null;
+      let locked = false;
+      let lockTimer = null;
+      const reduce =
         window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
       function setActive(id) {
@@ -224,8 +226,8 @@ const docPath = "~/freejsontoolkit " + (Astro.url.pathname.replace(/\/+$/, "") |
 
       function compute() {
         if (locked) return;
-        var activeId = sections[0].id; // default = first (covers the very top)
-        for (var i = 0; i < sections.length; i++) {
+        let activeId = sections[0].id; // default = first (covers the very top)
+        for (let i = 0; i < sections.length; i++) {
           if (sections[i].getBoundingClientRect().top - THRESHOLD <= 0) {
             activeId = sections[i].id;
           } else {
@@ -240,7 +242,7 @@ const docPath = "~/freejsontoolkit " + (Astro.url.pathname.replace(/\/+$/, "") |
         setActive(activeId);
       }
 
-      var ticking = false;
+      let ticking = false;
       function onScroll() {
         if (ticking) return;
         ticking = true;
@@ -260,7 +262,7 @@ const docPath = "~/freejsontoolkit " + (Astro.url.pathname.replace(/\/+$/, "") |
       }
 
       function goTo(id) {
-        var el = document.getElementById(id);
+        const el = document.getElementById(id);
         if (!el) return;
         setActive(id); // optimistic — and, with the lock, authoritative until settle
         locked = true;
@@ -270,12 +272,12 @@ const docPath = "~/freejsontoolkit " + (Astro.url.pathname.replace(/\/+$/, "") |
       }
 
       function onClick(e) {
-        var id = idOfLink(e.currentTarget);
+        const id = idOfLink(e.currentTarget);
         if (!id) return;
         e.preventDefault();
         goTo(id);
         // mobile: collapse the disclosure after jumping so it doesn't linger
-        var det = e.currentTarget.closest("details");
+        const det = e.currentTarget.closest("details");
         if (det) det.open = false;
       }
       tocLinks.forEach(function (l) {
@@ -297,7 +299,7 @@ const docPath = "~/freejsontoolkit " + (Astro.url.pathname.replace(/\/+$/, "") |
         );
       });
       window.addEventListener("keydown", function (e) {
-        var k = e.key;
+        const k = e.key;
         if (
           locked &&
           (k === "ArrowUp" ||
@@ -322,14 +324,14 @@ const docPath = "~/freejsontoolkit " + (Astro.url.pathname.replace(/\/+$/, "") |
 
     // ── Scroll reveal for head / sheet / sections ──
     if ("IntersectionObserver" in window) {
-      var revealables = Array.prototype.slice.call(
+      const revealables = Array.prototype.slice.call(
         document.querySelectorAll(".doc-reveal, .doc-section"),
       );
       revealables.forEach(function (el, i) {
         el.classList.add("doc-reveal");
         el.style.transitionDelay = Math.min(i, 8) * 60 + "ms";
       });
-      var rev = new IntersectionObserver(
+      const rev = new IntersectionObserver(
         function (entries) {
           entries.forEach(function (en) {
             if (en.isIntersecting) {
@@ -346,9 +348,9 @@ const docPath = "~/freejsontoolkit " + (Astro.url.pathname.replace(/\/+$/, "") |
     }
 
     // ── Back to top ──
-    var topBtn = document.getElementById("doc-top");
+    const topBtn = document.getElementById("doc-top");
     if (topBtn) {
-      var onScrollTop = function () {
+      const onScrollTop = function () {
         topBtn.classList.toggle("show", window.scrollY > 420);
       };
       window.addEventListener("scroll", onScrollTop, { passive: true });

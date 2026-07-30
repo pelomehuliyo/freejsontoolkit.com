@@ -14,17 +14,16 @@
  * @returns   A debounced version of the function
  */
 export function debounce<T extends (...args: any[]) => void>(
-    fn: T,
-    ms: number,
+  fn: T,
+  ms: number,
 ): (...args: Parameters<T>) => void {
-    let timer: ReturnType<typeof setTimeout> | null = null;
+  let timer: ReturnType<typeof setTimeout> | null = null;
 
-    return (...args: Parameters<T>) => {
-        if (timer) clearTimeout(timer);
-        timer = setTimeout(() => {
-            timer = null;
-            fn(...args);
-        }, ms);
-    };
+  return (...args: Parameters<T>) => {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => {
+      timer = null;
+      fn(...args);
+    }, ms);
+  };
 }
-
