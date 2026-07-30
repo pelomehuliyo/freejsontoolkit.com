@@ -9,39 +9,40 @@ import ErrorBanner from "../../components/tools/ErrorBanner.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
-import { INDENT_OPTIONS } from "../../lib/tools/json-formatter/constants";
+import { DELIMITER_OPTIONS, INDENT_OPTIONS } from "../../lib/tools/csv-to-json/constants";
 ---
 
 <ToolShell
-  title="JSON Formatter — Beautify & Pretty-Print JSON Online (Free, Local)"
-  description="Free online JSON formatter. Beautify, pretty-print, and sort JSON keys with 2-space, 4-space, or tab indentation — 100% local, no upload, no server."
-  activePath="/tools/json-formatter"
+  title="CSV to JSON Converter — Convert CSV to JSON Online (Free, Local)"
+  description="Free online CSV to JSON converter. Turn CSV tables into structured JSON arrays with auto delimiter detection and header inference — 100% local, no upload, no server."
+  activePath="/tools/csv-to-json"
 >
   <ToolHeader
     slot="header"
-    breadcrumbs={[{ label: "Home", href: "/" }, { label: "JSON Formatter" }]}
-    title="JSON Formatter"
-    subtitle="Beautify and pretty-print JSON with consistent indentation — offline."
+    breadcrumbs={[{ label: "Home", href: "/" }, { label: "CSV to JSON" }]}
+    title="CSV → JSON Converter"
+    subtitle="Turn CSV tables into structured JSON arrays — offline."
   />
 
   <ToolWorkspace slot="workspace" layout="3-col">
     <div slot="input" class="ws-fill">
       <Card variant="flat" class="workspace-card">
         <div class="card-header">
-          <span class="caption-mono column-title">INPUT JSON</span>
+          <span class="caption-mono column-title">INPUT CSV</span>
           <ToolActions id="input-actions" variant="inset" actions={["sample", "clear"]} />
         </div>
-        <DragDropZone id="json-input" accept=".json" label="Upload JSON file" />
+        <DragDropZone id="csv-input" accept=".csv,.txt" label="Upload CSV file" />
         <CodeEditor
-          id="json-input"
-          label="JSON input"
-          placeholder='Paste JSON here to format it
+          id="csv-input"
+          label="CSV input"
+          placeholder="Paste CSV here to convert it
 Example:
-{"id":1,"name":"Ada","roles":["admin"]}'
+id,name,email
+1,Ada,ada@example.com"
         >
           <div class="editor-info-bar" slot>
-            <span class="info-status" id="json-validation-status">JSON Status: Empty</span>
-            <span class="info-meta" id="json-char-count">0 chars</span>
+            <span class="info-status" id="csv-validation-status">CSV Status: Empty</span>
+            <span class="info-meta" id="csv-char-count">0 chars</span>
           </div>
         </CodeEditor>
       </Card>
@@ -53,7 +54,16 @@ Example:
         <div class="settings-divider"></div>
 
         <div class="settings-group">
-          <label class="settings-label caption-mono" for="indent-select">Indentation</label>
+          <label class="settings-label caption-mono" for="delimiter-select">Delimiter</label>
+          <div class="select-wrapper">
+            <select id="delimiter-select" class="settings-select">
+              {DELIMITER_OPTIONS.map((opt) => <option value={opt.value}>{opt.label}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <label class="settings-label caption-mono" for="indent-select">Output indentation</label>
           <div class="select-wrapper">
             <select id="indent-select" class="settings-select">
               {INDENT_OPTIONS.map((opt) => <option value={opt.value}>{opt.label}</option>)}
@@ -63,26 +73,32 @@ Example:
 
         <div class="settings-group checkbox-group">
           <label class="checkbox-container body-sm">
-            <input type="checkbox" id="sort-keys-checkbox" />
+            <input type="checkbox" id="has-header-checkbox" checked />
             <span class="checkbox-checkmark"></span>
-            Sort object keys (A→Z)
+            First row is a header
           </label>
-          <p class="caption settings-help">
-            Produces deterministic output; array order is preserved.
-          </p>
+          <p class="caption settings-help">Use the first row as object keys.</p>
+        </div>
+
+        <div class="settings-group checkbox-group">
+          <label class="checkbox-container body-sm">
+            <input type="checkbox" id="skip-empty-checkbox" checked />
+            <span class="checkbox-checkmark"></span>
+            Skip empty lines
+          </label>
         </div>
 
         <div class="settings-divider"></div>
 
-        <Button id="format-btn" variant="primary" size="lg" shape="square" class="action-btn">
-          Format JSON
+        <Button id="convert-btn" variant="primary" size="lg" shape="square" class="action-btn">
+          Convert to JSON
         </Button>
 
-        <ErrorBanner id="format-error" />
+        <ErrorBanner id="convert-error" />
 
         <div class="status-banner caption">
           <span class="status-indicator"><span class="dot idle"></span></span>
-          <span class="sr-only" id="format-status-announce" aria-live="polite"></span>
+          <span class="sr-only" id="convert-status-announce" aria-live="polite"></span>
           Local sandbox active
         </div>
       </Card>
@@ -91,18 +107,18 @@ Example:
     <div slot="output" class="ws-fill ws-output">
       <Card variant="flat" class="workspace-card">
         <div class="card-header">
-          <span class="caption-mono column-title">FORMATTED OUTPUT</span>
+          <span class="caption-mono column-title">OUTPUT JSON</span>
           <ToolActions id="output-actions" variant="inset" actions={["copy", "download"]} />
         </div>
         <CodeEditor
-          id="formatted-output"
-          label="Formatted JSON output"
-          placeholder="Formatted JSON will appear here..."
+          id="json-output"
+          label="JSON output"
+          placeholder="JSON output will appear here..."
           readonly
         >
           <div class="editor-info-bar" slot>
-            <span class="info-status" id="format-output-status">Output: Empty</span>
-            <span class="info-meta" id="format-output-count">0 chars</span>
+            <span class="info-status" id="json-output-status">Output: Empty</span>
+            <span class="info-meta" id="json-output-count">0 chars</span>
           </div>
         </CodeEditor>
       </Card>
@@ -113,28 +129,28 @@ Example:
     <Container size="narrow">
       <div class="content-section-header">
         <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
-        <h2 id="how-title" class="display-md section-title">Format JSON in three steps</h2>
+        <h2 id="how-title" class="display-md section-title">Convert CSV to JSON in three steps</h2>
       </div>
       <div class="steps-grid">
         <div class="step-card">
           <span class="step-number" aria-hidden="true">1</span>
           <h3 class="body-sm-strong step-title">Paste or upload</h3>
           <p class="caption step-desc">
-            Drop in raw, minified, or messy JSON — up to 15M characters.
+            Drop in CSV — comma, semicolon, tab, or pipe delimited. We auto-detect.
           </p>
         </div>
         <div class="step-card">
           <span class="step-number" aria-hidden="true">2</span>
-          <h3 class="body-sm-strong step-title">Pick indentation</h3>
+          <h3 class="body-sm-strong step-title">Set options</h3>
           <p class="caption step-desc">
-            Choose 2 spaces, 4 spaces, or tabs, and optionally sort keys A→Z.
+            Choose delimiter, header handling, and output indentation.
           </p>
         </div>
         <div class="step-card">
           <span class="step-number" aria-hidden="true">3</span>
-          <h3 class="body-sm-strong step-title">Format &amp; export</h3>
+          <h3 class="body-sm-strong step-title">Convert &amp; export</h3>
           <p class="caption step-desc">
-            Click Format, then copy or download the beautified result — all offline.
+            Click Convert, then copy or download the JSON array — all offline.
           </p>
         </div>
       </div>
@@ -149,23 +165,23 @@ Example:
       </div>
       <div class="faq-list">
         <details class="faq-item">
-          <summary class="faq-summary">Is my JSON uploaded anywhere?</summary>
+          <summary class="faq-summary">Is my CSV uploaded anywhere?</summary>
           <p class="body-md faq-answer">
-            No. Formatting happens entirely in your browser. Your data never leaves your machine.
+            No. Conversion happens entirely in your browser. Your data never leaves your machine.
           </p>
         </details>
         <details class="faq-item">
-          <summary class="faq-summary">What does "sort keys" do?</summary>
+          <summary class="faq-summary">Which delimiters are supported?</summary>
           <p class="body-md faq-answer">
-            It reorders every object's properties alphabetically for deterministic output — handy
-            for diffing. Array element order is always preserved.
+            Comma, semicolon, tab, and pipe — plus auto-detection that figures it out for you.
+            Quoted fields containing delimiters and newlines are handled correctly (RFC 4180).
           </p>
         </details>
         <details class="faq-item">
-          <summary class="faq-summary">Can it validate JSON too?</summary>
+          <summary class="faq-summary">How are headers handled?</summary>
           <p class="body-md faq-answer">
-            Yes — if the input isn't valid JSON, the status bar shows the parse error with its
-            position. A dedicated JSON Validator with richer diagnostics ships in v1.2.
+            With "First row is a header" on (default), the first row becomes the object keys. Turn
+            it off to get synthetic keys (column1, column2, …) and keep every row as data.
           </p>
         </details>
       </div>
@@ -174,83 +190,85 @@ Example:
 </ToolShell>
 
 <script>
-  import { jsonFormatterStore } from "../../lib/tools/json-formatter/store";
+  import { csvToJsonStore } from "../../lib/tools/csv-to-json/store";
   import {
     handleInput,
-    format,
+    convert,
     loadSample,
     clearAll,
-    getFormattedContent,
+    getJsonContent,
+    setDelimiter,
+    setHasHeader,
+    setSkipEmptyLines,
     setIndent,
-    setSortKeys,
-  } from "../../lib/tools/json-formatter/actions";
-  import type { IndentOption } from "../../lib/tools/json-formatter/types";
+  } from "../../lib/tools/csv-to-json/actions";
+  import { delimiterLabel } from "../../lib/tools/csv-to-json/constants";
+  import type { CsvDelimiterOption, IndentOption } from "../../lib/tools/csv-to-json/types";
   import { debounce } from "../../shared/debounce";
   import { announce, initAnnounce } from "../../shared/announce";
   import { copyToClipboard } from "../../shared/clipboard";
   import { downloadFile } from "../../shared/download";
 
-  const jsonTextarea = document.getElementById("json-input-textarea") as HTMLTextAreaElement | null;
-  const outTextarea = document.getElementById(
-    "formatted-output-textarea",
-  ) as HTMLTextAreaElement | null;
-  const inputStatus = document.getElementById("json-validation-status") as HTMLElement | null;
-  const inputCharCount = document.getElementById("json-char-count") as HTMLElement | null;
-  const outputStatus = document.getElementById("format-output-status") as HTMLElement | null;
-  const outputCharCount = document.getElementById("format-output-count") as HTMLElement | null;
+  const csvTextarea = document.getElementById("csv-input-textarea") as HTMLTextAreaElement | null;
+  const outTextarea = document.getElementById("json-output-textarea") as HTMLTextAreaElement | null;
+  const inputStatus = document.getElementById("csv-validation-status") as HTMLElement | null;
+  const inputCharCount = document.getElementById("csv-char-count") as HTMLElement | null;
+  const outputStatus = document.getElementById("json-output-status") as HTMLElement | null;
+  const outputCharCount = document.getElementById("json-output-count") as HTMLElement | null;
+  const delimiterSelect = document.getElementById("delimiter-select") as HTMLSelectElement | null;
   const indentSelect = document.getElementById("indent-select") as HTMLSelectElement | null;
-  const sortCheckbox = document.getElementById("sort-keys-checkbox") as HTMLInputElement | null;
-  const formatBtn = document.getElementById("format-btn") as HTMLButtonElement | null;
-  const errorBanner = document.getElementById("format-error") as HTMLElement | null;
+  const hasHeaderCheckbox = document.getElementById(
+    "has-header-checkbox",
+  ) as HTMLInputElement | null;
+  const skipEmptyCheckbox = document.getElementById(
+    "skip-empty-checkbox",
+  ) as HTMLInputElement | null;
+  const convertBtn = document.getElementById("convert-btn") as HTMLButtonElement | null;
+  const errorBanner = document.getElementById("convert-error") as HTMLElement | null;
 
-  initAnnounce("format-status-announce");
+  initAnnounce("convert-status-announce");
 
   const debouncedInput = debounce((value: string) => {
-    handleInput(jsonFormatterStore, value);
+    handleInput(csvToJsonStore, value);
   }, 150);
 
-  jsonFormatterStore.subscribe((state) => {
-    const inputFocused = jsonTextarea && document.activeElement === jsonTextarea;
-    if (jsonTextarea && jsonTextarea.value !== state.jsonInput && !inputFocused) {
-      jsonTextarea.value = state.jsonInput;
-      jsonTextarea.dispatchEvent(new Event("editor-refresh"));
+  csvToJsonStore.subscribe((state) => {
+    const inputFocused = csvTextarea && document.activeElement === csvTextarea;
+    if (csvTextarea && csvTextarea.value !== state.csvInput && !inputFocused) {
+      csvTextarea.value = state.csvInput;
+      csvTextarea.dispatchEvent(new Event("editor-refresh"));
     }
-    if (outTextarea && outTextarea.value !== state.formattedOutput) {
-      outTextarea.value = state.formattedOutput;
+    if (outTextarea && outTextarea.value !== state.jsonOutput) {
+      outTextarea.value = state.jsonOutput;
       outTextarea.dispatchEvent(new Event("editor-refresh"));
     }
 
     if (inputStatus) {
-      switch (state.inputStatus) {
-        case "empty":
-          inputStatus.textContent = "JSON Status: Empty";
-          inputStatus.style.color = "";
-          break;
-        case "ready":
-          inputStatus.textContent = "JSON Status: Valid";
-          inputStatus.style.color = "var(--color-success)";
-          break;
-        case "invalid":
-          inputStatus.textContent = "JSON Status: Invalid";
-          inputStatus.style.color = "var(--color-error)";
-          break;
-      }
+      inputStatus.textContent =
+        state.inputStatus === "ready" ? "CSV Status: Ready" : "CSV Status: Empty";
+      inputStatus.style.color = state.inputStatus === "ready" ? "var(--color-success)" : "";
     }
     if (inputCharCount)
-      inputCharCount.textContent = state.jsonInput.length.toLocaleString() + " chars";
-    if (outputStatus)
-      outputStatus.textContent =
-        state.outputStatus === "formatted" ? "Output: Ready" : "Output: Empty";
-    if (outputCharCount)
-      outputCharCount.textContent = state.formattedOutput.length.toLocaleString() + " chars";
+      inputCharCount.textContent = state.csvInput.length.toLocaleString() + " chars";
 
-    if (formatBtn) {
-      if (state.isFormatting) {
-        formatBtn.textContent = "Formatting…";
-        formatBtn.disabled = true;
+    if (outputStatus) {
+      outputStatus.textContent =
+        state.outputStatus === "converted"
+          ? `Output: ${state.recordCount.toLocaleString()} record${state.recordCount === 1 ? "" : "s"}`
+          : "Output: Empty";
+    }
+    if (outputCharCount) {
+      const delim = state.delimiterUsed ? " · " + delimiterLabel(state.delimiterUsed) : "";
+      outputCharCount.textContent = state.jsonOutput.length.toLocaleString() + " chars" + delim;
+    }
+
+    if (convertBtn) {
+      if (state.isConverting) {
+        convertBtn.textContent = "Converting…";
+        convertBtn.disabled = true;
       } else {
-        formatBtn.textContent = "Format JSON";
-        formatBtn.disabled = false;
+        convertBtn.textContent = "Convert to JSON";
+        convertBtn.disabled = false;
       }
     }
 
@@ -261,17 +279,25 @@ Example:
     if (state.error) announce("Error: " + state.error);
   });
 
-  if (jsonTextarea) {
-    jsonTextarea.addEventListener("input", () => debouncedInput(jsonTextarea.value));
+  if (csvTextarea) {
+    csvTextarea.addEventListener("input", () => debouncedInput(csvTextarea.value));
   }
-  if (formatBtn) formatBtn.addEventListener("click", () => format(jsonFormatterStore));
+  if (convertBtn) convertBtn.addEventListener("click", () => convert(csvToJsonStore));
+  if (delimiterSelect)
+    delimiterSelect.addEventListener("change", () =>
+      setDelimiter(csvToJsonStore, delimiterSelect.value as CsvDelimiterOption),
+    );
   if (indentSelect)
     indentSelect.addEventListener("change", () =>
-      setIndent(jsonFormatterStore, indentSelect.value as IndentOption),
+      setIndent(csvToJsonStore, indentSelect.value as IndentOption),
     );
-  if (sortCheckbox)
-    sortCheckbox.addEventListener("change", () =>
-      setSortKeys(jsonFormatterStore, sortCheckbox.checked),
+  if (hasHeaderCheckbox)
+    hasHeaderCheckbox.addEventListener("change", () =>
+      setHasHeader(csvToJsonStore, hasHeaderCheckbox.checked),
+    );
+  if (skipEmptyCheckbox)
+    skipEmptyCheckbox.addEventListener("change", () =>
+      setSkipEmptyLines(csvToJsonStore, skipEmptyCheckbox.checked),
     );
 
   const inputActions = document.getElementById("input-actions");
@@ -279,11 +305,11 @@ Example:
     inputActions.addEventListener("tool-action", (e: Event) => {
       const action = (e as CustomEvent).detail?.action;
       if (action === "sample") {
-        loadSample(jsonFormatterStore);
-        announce("Sample JSON loaded");
+        loadSample(csvToJsonStore);
+        announce("Sample CSV loaded");
       }
       if (action === "clear") {
-        clearAll(jsonFormatterStore);
+        clearAll(csvToJsonStore);
         announce("Input cleared");
       }
     });
@@ -294,35 +320,35 @@ Example:
     outputActions.addEventListener("tool-action", async (e: Event) => {
       const action = (e as CustomEvent).detail?.action;
       if (action === "copy") {
-        const out = getFormattedContent(jsonFormatterStore);
+        const out = getJsonContent(csvToJsonStore);
         const ok = out ? await copyToClipboard(out) : false;
         const btn = outputActions.querySelector("[data-action='copy']");
         if (ok && btn) {
           const orig = btn.textContent || "Copy";
           btn.textContent = "Copied!";
-          announce("Formatted JSON copied");
+          announce("JSON copied");
           setTimeout(() => {
             btn.textContent = orig;
           }, 1500);
         }
       }
       if (action === "download") {
-        const out = getFormattedContent(jsonFormatterStore);
+        const out = getJsonContent(csvToJsonStore);
         if (out) {
-          downloadFile(out, "formatted.json", "application/json;charset=utf-8;");
+          downloadFile(out, "converted.json", "application/json;charset=utf-8;");
           announce("Download started");
         }
       }
     });
   }
 
-  const dropZone = document.getElementById("json-input-dropzone");
+  const dropZone = document.getElementById("csv-input-dropzone");
   if (dropZone) {
     dropZone.addEventListener("file-dropped", (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail?.text) {
-        handleInput(jsonFormatterStore, detail.text);
-        announce("File loaded: " + (detail.name || "file") + " — click Format JSON");
+        handleInput(csvToJsonStore, detail.text);
+        announce("File loaded: " + (detail.name || "file") + " — click Convert to JSON");
       }
     });
   }
@@ -332,7 +358,7 @@ Example:
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "SELECT") return;
       e.preventDefault();
-      format(jsonFormatterStore);
+      convert(csvToJsonStore);
     }
   });
 </script>
@@ -656,7 +682,10 @@ Example:
   }
 </style>
 
-<!-- LAYOUT ONLY — equal-height editor cards (see csv-to-json for the explanation). -->
+<!-- LAYOUT ONLY — make the output card the same height as the input card so the
+     two editors line up top & bottom (the input card is taller because it carries
+     the drag-and-drop zone). Identical block to the one proven on json-to-csv.
+     Global on purpose: the card is rendered by <Card>, outside this page's scope. -->
 <style is:global>
   @media (min-width: 960px) {
     .workspace-grid.grid-3-col {

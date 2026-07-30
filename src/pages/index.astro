@@ -3,6 +3,20 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Container from "../components/Container.astro";
 import Button from "../components/Button.astro";
 import Card from "../components/Card.astro";
+import { availableTools, comingSoon } from "../lib/tools/registry";
+
+// "What's next" teaser: the soonest upcoming tools (by roadmap version), so the
+// homepage communicates momentum instead of a static graveyard. The full grouped
+// pipeline lives on /tools — this is just a honest preview.
+function versionRank(v?: string): number {
+  if (!v) return 999;
+  const m = v.match(/(\d+)\.(\d+)/);
+  return m ? Number(m[1]) * 100 + Number(m[2]) : 999;
+}
+const pipeline = comingSoon
+  .filter((t) => t.status === "soon")
+  .sort((a, b) => versionRank(a.addedIn) - versionRank(b.addedIn))
+  .slice(0, 4);
 ---
 
 <BaseLayout
@@ -74,77 +88,65 @@ import Card from "../components/Card.astro";
       </Container>
     </section>
 
-    {/* Featured Tools */}
+    {
+      /* Featured Tools — registry-driven: live tools get real links, the rest is an
+        honest pipeline preview. Shipping a tool now updates this section automatically. */
+    }
     <section id="featured-tools" class="catalog-section" aria-labelledby="featured-tools-title">
       <Container size="default">
         <div class="section-header">
           <span class="caption-mono section-eyebrow">FEATURED TOOLS</span>
           <h2 id="featured-tools-title" class="display-lg section-title">
-            Convert JSON with confidence
+            Tools that never upload your data
           </h2>
+          <p class="body-sm section-sub">
+            Every tool runs 100% in your browser — pick one and start.
+          </p>
         </div>
 
-        <div class="catalog-grid" aria-label="Available and upcoming tools">
-          <Card variant="default" hoverable={true} class="tool-card tool-card-available">
-            <div class="tool-card-content">
-              <h3 class="display-sm tool-title">JSON → CSV Converter</h3>
-              <div class="tool-status" aria-label="Status: Available">
-                <span class="status-label status-available">Available</span>
-              </div>
-              <p class="body-sm tool-description">
-                Flatten nested JSON objects and export clean CSV spreadsheets.
-              </p>
-            </div>
-
-            <div class="tool-footer">
-              <Button
-                variant="primary"
-                size="sm"
-                shape="square"
-                href="/tools/json-to-csv"
-                class="launch-btn"
-              >
-                Open Tool
-              </Button>
-            </div>
-          </Card>
-
-          <Card variant="soft" class="tool-card tool-card-disabled" aria-disabled="true">
-            <div class="tool-card-content">
-              <h3 class="display-sm tool-title">CSV → JSON</h3>
-              <div class="tool-status" aria-label="Status: Coming Soon">
-                <span class="status-label status-coming">Coming Soon</span>
-              </div>
-              <p class="body-sm tool-description">Convert CSV files into structured JSON.</p>
-            </div>
-          </Card>
-
-          <Card variant="soft" class="tool-card tool-card-disabled" aria-disabled="true">
-            <div class="tool-card-content">
-              <h3 class="display-sm tool-title">JSON Formatter</h3>
-              <div class="tool-status" aria-label="Status: Coming Soon">
-                <span class="status-label status-coming">Coming Soon</span>
-              </div>
-              <p class="body-sm tool-description">
-                Beautify and minify JSON with customizable formatting.
-              </p>
-            </div>
-          </Card>
-
-          <Card variant="soft" class="tool-card tool-card-disabled" aria-disabled="true">
-            <div class="tool-card-content">
-              <h3 class="display-sm tool-title">JSON Validator</h3>
-              <div class="tool-status" aria-label="Status: Coming Soon">
-                <span class="status-label status-coming">Coming Soon</span>
-              </div>
-              <p class="body-sm tool-description">
-                Validate JSON syntax and identify errors instantly.
-              </p>
-            </div>
-          </Card>
+        <div class="live-tools">
+          {
+            availableTools.map((t) => (
+              <a class="live-tool-card" href={t.href}>
+                <span class="pill pill-live">
+                  <span class="pill-dot" aria-hidden="true" />
+                  Available
+                </span>
+                <h3 class="display-sm live-tool-name">{t.name}</h3>
+                <p class="body-sm live-tool-tag">{t.tagline}</p>
+                <span class="live-tool-cta body-sm-strong">
+                  Open tool{" "}
+                  <span class="cta-arrow" aria-hidden="true">
+                    →
+                  </span>
+                </span>
+              </a>
+            ))
+          }
         </div>
 
-        {/* Small internal anchor target for hero CTA scroll */}
+        {
+          pipeline.length > 0 && (
+            <div class="pipeline">
+              <div class="pipeline-head">
+                <h3 class="body-sm-strong pipeline-title">In the pipeline</h3>
+                <a class="pipeline-all body-sm-strong" href="/tools">
+                  View all tools &amp; roadmap →
+                </a>
+              </div>
+              <ul class="pipeline-list">
+                {pipeline.map((t) => (
+                  <li class="pipeline-chip">
+                    <span class="pipeline-name">{t.name}</span>
+                    <span class="pipeline-ver caption-mono">{t.addedIn}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
+
+        {/* Internal anchor target for the hero "Browse Tools" scroll */}
         <span id="tools" class="sr-only" aria-hidden="true"></span>
       </Container>
     </section>
@@ -184,207 +186,342 @@ import Card from "../components/Card.astro";
       </Container>
     </section>
   </main>
-</BaseLayout>
 
-<style>
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border-width: 0;
-  }
+  <!-- Scroll-reveal: progressive enhancement. No JS = everything visible. With JS,
+       blocks fade/slide in on entry. The global prefers-reduced-motion rule flattens
+       the transition for users who opt out. -->
+  <script>
+    const targets = Array.from(
+      document.querySelectorAll(".live-tool-card, .pipeline, .trust-card"),
+    );
+    if ("IntersectionObserver" in window && targets.length) {
+      targets.forEach((el, i) => {
+        el.classList.add("reveal");
+        (el as HTMLElement).style.transitionDelay = `${Math.min(i, 8) * 60}ms`;
+      });
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              io.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.12 },
+      );
+      targets.forEach((el) => io.observe(el));
+    }
+  </script>
 
-  /* Hero */
-  .hero-container {
-    padding-top: 0;
-  }
+  <style>
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
 
-  .hero-section {
-    padding-top: var(--spacing-5xl);
-    padding-bottom: var(--spacing-4xl);
-    background-color: var(--color-canvas);
-    border-bottom: 1px solid var(--color-hairline);
-  }
+    /* Hero (density trimmed ~30% to match the /tools pass) */
+    .hero-container {
+      padding-top: 0;
+    }
 
-  .hero-content {
-    max-width: 800px;
-    margin: 0 auto;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-md);
-  }
-
-  .hero-title {
-    margin-top: 0;
-  }
-
-  .hero-subtitle,
-  .hero-description {
-    color: var(--color-body);
-    max-width: 720px;
-    margin: 0;
-    line-height: 1.6;
-  }
-
-  .hero-actions {
-    display: flex;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-lg);
-    justify-content: center;
-  }
-
-  @media (max-width: 600px) {
     .hero-section {
-      padding-top: var(--spacing-3xl);
+      padding-top: var(--spacing-4xl);
       padding-bottom: var(--spacing-3xl);
+      background-color: var(--color-canvas);
+      border-bottom: 1px solid var(--color-hairline);
+    }
+
+    .hero-content {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .hero-title {
+      margin-top: 0;
+    }
+
+    .hero-subtitle,
+    .hero-description {
+      color: var(--color-body);
+      max-width: 720px;
+      margin: 0;
+      line-height: 1.6;
     }
 
     .hero-actions {
+      display: flex;
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-md);
+      justify-content: center;
+    }
+
+    @media (max-width: 600px) {
+      .hero-section {
+        padding-top: var(--spacing-3xl);
+        padding-bottom: var(--spacing-3xl);
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: var(--spacing-sm);
+      }
+
+      .hero-actions > :global(a),
+      .hero-actions > :global(button) {
+        width: 100%;
+      }
+    }
+
+    /* Section headers */
+    .section-header {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto var(--spacing-xl);
+      display: flex;
       flex-direction: column;
-      width: 100%;
-      gap: var(--spacing-sm);
+      align-items: center;
+      gap: var(--spacing-xs);
     }
 
-    .hero-actions > :global(a),
-    .hero-actions > :global(button) {
-      width: 100%;
+    .section-eyebrow {
+      color: var(--color-mute);
+      letter-spacing: 0.1em;
     }
-  }
 
-  /* Section headers */
-  .section-header {
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto var(--spacing-3xl);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-xs);
-  }
-
-  .section-eyebrow {
-    color: var(--color-mute);
-    letter-spacing: 0.1em;
-  }
-
-  .section-title {
-    color: var(--color-ink);
-  }
-
-  /* Featured Tools */
-  .catalog-section {
-    padding: var(--spacing-5xl) 0;
-    background-color: var(--color-canvas-soft);
-    border-bottom: 1px solid var(--color-hairline);
-  }
-
-  .catalog-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-xl);
-  }
-
-  @media (min-width: 1020px) {
-    .catalog-grid {
-      grid-template-columns: repeat(4, 1fr);
+    .section-title {
+      color: var(--color-ink);
     }
-  }
 
-  @media (max-width: 959px) {
-    .catalog-grid {
-      grid-template-columns: 1fr;
+    .section-sub {
+      color: var(--color-body);
+      margin: 0;
     }
-  }
 
-  .tool-card {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
-    background-color: var(--color-canvas);
-  }
+    /* Featured Tools */
+    .catalog-section {
+      padding: var(--spacing-4xl) 0;
+      background-color: var(--color-canvas-soft);
+      border-bottom: 1px solid var(--color-hairline);
+    }
 
-  .tool-card-available {
-    border-color: var(--color-hairline-strong);
-  }
+    /* Live tools — each whole card is the link (no nested interactive elements).
+       The thin top accent rule is the brand fingerprint, echoing the logo mark. */
+    .live-tools {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: var(--spacing-md);
+    }
 
-  .tool-card-disabled {
-    opacity: 0.85;
-    background-color: var(--color-canvas-soft);
-  }
+    .live-tool-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+      padding: var(--spacing-lg) var(--spacing-md) var(--spacing-md);
+      background-color: var(--color-canvas);
+      border: 1px solid var(--color-hairline);
+      border-radius: var(--rounded-md);
+      text-decoration: none;
+      color: inherit;
+      overflow: hidden;
+      transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        transform 0.15s ease;
+    }
 
-  .tool-card-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-  }
+    .live-tool-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 2px;
+      background-color: var(--color-accent);
+    }
 
-  .tool-title {
-    color: var(--color-ink);
-    margin: 0;
-  }
+    .live-tool-card:hover {
+      border-color: var(--color-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 26px rgba(33, 167, 138, 0.12);
+    }
 
-  .tool-description {
-    color: var(--color-body);
-    margin: 0;
-    line-height: 1.5;
-  }
+    .live-tool-card:focus-visible {
+      outline: 3px solid var(--color-accent);
+      outline-offset: 2px;
+    }
 
-  .tool-status {
-    display: flex;
-    align-items: center;
-  }
+    .live-tool-name {
+      color: var(--color-ink);
+      margin: var(--spacing-xxs) 0 0;
+    }
 
-  .status-label {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    padding: 2px var(--spacing-xs);
-    border-radius: var(--rounded-sm);
-    border: 1px solid var(--color-hairline);
-  }
+    .live-tool-tag {
+      color: var(--color-body);
+      margin: 0;
+      line-height: 1.5;
+    }
 
-  .status-available {
-    color: var(--color-accent);
-    background-color: rgba(33, 167, 138, 0.1);
-    border-color: rgba(33, 167, 138, 0.2);
-  }
+    .live-tool-cta {
+      margin-top: auto;
+      padding-top: var(--spacing-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-ink);
+    }
 
-  .status-coming {
-    color: var(--color-mute);
-    background-color: var(--color-canvas-soft);
-  }
+    .cta-arrow {
+      color: var(--color-accent-active);
+      transition: transform 0.15s ease;
+    }
 
-  .tool-footer {
-    margin-top: var(--spacing-lg);
-    padding-top: var(--spacing-md);
-    border-top: 1px solid var(--color-hairline);
-  }
+    .live-tool-card:hover .cta-arrow {
+      transform: translateX(4px);
+    }
 
-  .launch-btn {
-    width: 100%;
-  }
+    /* Status pills — accessible colors (the old bright teal on tint was 2.7:1) */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      width: max-content;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: var(--rounded-sm);
+      border: 1px solid var(--color-hairline);
+    }
 
-  /* Trust */
-  .trust-section {
-    padding: var(--spacing-5xl) 0;
-  }
+    .pill-live {
+      color: var(--color-accent-active);
+      background-color: rgba(33, 167, 138, 0.1);
+      border-color: rgba(33, 167, 138, 0.25);
+    }
 
-  .trust-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-xl);
-  }
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--color-accent);
+    }
 
-  @media (max-width: 959px) {
+    .pill-soon {
+      color: var(--color-mute);
+      background-color: var(--color-canvas-soft-2);
+    }
+
+    /* Pipeline preview */
+    .pipeline {
+      margin-top: var(--spacing-xl);
+      padding-top: var(--spacing-lg);
+      border-top: 1px solid var(--color-hairline);
+    }
+
+    .pipeline-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .pipeline-title {
+      color: var(--color-ink);
+      margin: 0;
+    }
+
+    .pipeline-all {
+      color: var(--color-accent-active);
+      text-decoration: none;
+    }
+
+    .pipeline-all:hover {
+      text-decoration: underline;
+    }
+
+    .pipeline-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-xs);
+    }
+
+    .pipeline-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border: 1px solid var(--color-hairline);
+      border-radius: var(--rounded-pill-sm);
+      background-color: var(--color-canvas);
+    }
+
+    .pipeline-name {
+      font-size: 13px;
+      color: var(--color-body);
+    }
+
+    .pipeline-ver {
+      color: var(--color-mute);
+      font-size: 10px;
+    }
+
+    /* Trust */
+    .trust-section {
+      padding: var(--spacing-4xl) 0;
+    }
+
     .trust-grid {
-      grid-template-columns: 1fr;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--spacing-xl);
     }
-  }
-</style>
+
+    /* shared by trust cards */
+    .tool-title {
+      color: var(--color-ink);
+      margin: 0;
+    }
+
+    .tool-description {
+      color: var(--color-body);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 959px) {
+      .trust-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Scroll-reveal (class added by the script; no-JS = always visible) */
+    .reveal {
+      opacity: 0;
+      transform: translateY(12px);
+      transition:
+        opacity 0.5s ease,
+        transform 0.5s ease;
+    }
+
+    .reveal.is-visible {
+      opacity: 1;
+      transform: none;
+    }
+  </style>
+</BaseLayout>
