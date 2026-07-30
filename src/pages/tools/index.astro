@@ -7,6 +7,7 @@ import {
   categoryLabel,
   counts,
   type ToolCategory,
+  type ToolManifest,
 } from "../../lib/tools/registry";
 
 // 3-letter technical monogram per category — typographic, not iconographic.
@@ -19,6 +20,16 @@ const monogram: Record<ToolCategory, string> = {
   utilities: "UTL",
   api: "API",
 };
+
+// Lowercased, token-friendly haystack: name + tagline + category + id + the SEO
+// keywords. Searching the keywords is the point — "prettify" finds the Formatter,
+// "yaml" surfaces the planned YAML tools, "csv json" (any order) finds the converter.
+function searchText(t: ToolManifest): string {
+  return [t.name, t.tagline, categoryLabel(t.category), t.id, ...(t.keywords ?? [])]
+    .join(" ")
+    .toLowerCase()
+    .replace(/[→]/g, " ");
+}
 
 // "In the pipeline" preview: soonest upcoming tools by roadmap version.
 function versionRank(v?: string): number {
@@ -78,8 +89,33 @@ const pipeline = [...comingSoon].sort(
     {/* ── Catalog ── */}
     <section class="catalog-section" aria-labelledby="catalog-title">
       <Container size="default">
-        {/* bite 2: personalized row — filled client-side from favorites + recents.
-            Empty on first visit (the global script shows an onboarding hint). */}
+        {/* bite 3 — command-line search. Filters the catalog live by name,
+            tagline, category, and SEO keywords; "/" focuses it from anywhere. */}
+        <form class="tool-search" role="search" data-tool-search-form aria-label="Filter tools">
+          <span class="search-prompt" data-search-focus aria-hidden="true">$</span>
+          <input
+            class="search-input"
+            type="search"
+            data-tool-search
+            placeholder="find a tool — name, keyword, or category"
+            aria-label="Filter tools by name, keyword, or category"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button
+            type="button"
+            class="search-clear"
+            data-search-clear
+            aria-label="Clear search"
+            hidden
+          >
+            &times;
+          </button>
+          <kbd class="kbd search-kbd" data-search-focus aria-hidden="true">/</kbd>
+        </form>
+        <p class="search-status caption-mono" data-search-status aria-live="polite"></p>
+
+        {/* bite 2: personalized row — hidden automatically while searching */}
         <div class="your-tools" data-your-tools></div>
 
         <div class="section-head">
@@ -91,10 +127,15 @@ const pipeline = [...comingSoon].sort(
           </p>
         </div>
 
-        <div class="tool-grid" role="list">
+        <div class="tool-grid" role="list" data-grid="available">
           {
             availableTools.map((t) => (
-              <article class="tool-card is-live" role="listitem">
+              <article
+                class="tool-card is-live"
+                role="listitem"
+                data-status="available"
+                data-search={searchText(t)}
+              >
                 <button
                   type="button"
                   class="fav-star"
@@ -141,10 +182,20 @@ const pipeline = [...comingSoon].sort(
                 <h3 id="pipeline-title" class="display-sm pipeline-title">In the pipeline</h3>
                 <p class="caption pipeline-note">Shipped in the open — the roadmap follows demand.</p>
               </div>
-              <div class="tool-grid tool-grid-pipeline" role="list" aria-labelledby="pipeline-title">
+              <div
+                class="tool-grid tool-grid-pipeline"
+                role="list"
+                aria-labelledby="pipeline-title"
+                data-grid="pipeline"
+              >
                 {
                   pipeline.map((t) => (
-                    <article class="tool-card is-pipeline" role="listitem">
+                    <article
+                      class="tool-card is-pipeline"
+                      role="listitem"
+                      data-status={t.status}
+                      data-search={searchText(t)}
+                    >
                       <div class="tool-card-link">
                         <div class="card-top">
                           <span class="mono-badge" aria-hidden="true">{monogram[t.category]}</span>
@@ -169,12 +220,26 @@ const pipeline = [...comingSoon].sort(
             </div>
           )
         }
+
+        {/* bite 3 — no-match empty state (mono voice, honest, with an out) */}
+        <div class="search-empty" data-search-empty hidden>
+          <p class="caption-mono search-empty-cmd">
+            $ toolkit find "<span data-search-echo></span>"
+          </p>
+          <p class="body-sm search-empty-msg">No tools match — yet. The roadmap follows demand.</p>
+          <a
+            class="body-sm-strong search-empty-link"
+            href="https://github.com/pelomehuliyo/freejsontoolkit.com/issues"
+          >
+            Request it on GitHub →
+          </a>
+        </div>
       </Container>
     </section>
   </main>
 
   <style>
-    /* ── Hero ─ */
+    /* ── Hero  */
     .catalog-hero {
       padding: var(--spacing-4xl) 0 var(--spacing-3xl);
       background-color: var(--color-canvas);
@@ -284,7 +349,7 @@ const pipeline = [...comingSoon].sort(
       }
     }
 
-    /* ── Catalog chrome (card visuals live in tool-cards.css) ── */
+    /* ── Catalog chrome (card + search visuals live in tool-cards.css) ── */
     .catalog-section {
       padding: var(--spacing-4xl) 0;
       background-color: var(--color-canvas-soft);

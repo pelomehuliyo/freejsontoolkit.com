@@ -1,9 +1,11 @@
 /* ─────────────────────────────────────────────────────────────────────
    TOOL CARDS — shared, GLOBAL card language for Free JSON Toolkit.
-   Lives in a stylesheet (not a scoped <style>) on purpose: cards are now
-   built in two worlds — Astro templates AND client JS (the "Your tools"
-   row + the homepage "Jump back in" echo) — and a scoped block can only
-   see the first. One global file = one design language, everywhere.
+   Lives in a stylesheet (not a scoped <style>) on purpose: cards are built
+   in two worlds — Astro templates AND client JS (the "Your tools" row + the
+   homepage "Jump back in" echo) — and a scoped block can only see the first.
+   One global file = one design language, everywhere. This file holds BOTH
+   the card/row/toast/reveal rules AND the catalog search rules; keep them
+   together so an "append" never accidentally wipes one half.
    ───────────────────────────────────────────────────────────────────── */
 
 /* ── The card shell ── */
@@ -418,4 +420,191 @@
 .reveal.is-visible {
     opacity: 1;
     transform: none;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   bite 3 — command-line catalog search + reusable keyboard chip.
+   ───────────────────────────────────────────────────────────────────── */
+
+/* The command line */
+.tool-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto var(--spacing-lg);
+    padding: 0 var(--spacing-sm) 0 0;
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline-strong);
+    border-radius: var(--rounded-md);
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.tool-search:focus-within {
+    border-color: var(--color-accent);
+    box-shadow:
+        0 0 0 3px rgba(33, 167, 138, 0.12),
+        0 8px 24px rgba(17, 17, 17, 0.06);
+}
+
+.search-prompt {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: stretch;
+    padding: 0 var(--spacing-sm);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-mute);
+    background-color: var(--color-canvas-soft);
+    border-right: 1px solid var(--color-hairline);
+    border-top-left-radius: var(--rounded-md);
+    border-bottom-left-radius: var(--rounded-md);
+    cursor: text;
+    user-select: none;
+    transition:
+        color 0.15s ease,
+        background-color 0.15s ease;
+}
+
+.tool-search:focus-within .search-prompt {
+    color: var(--color-accent-active);
+    background-color: rgba(33, 167, 138, 0.08);
+}
+
+.search-input {
+    flex: 1;
+    min-width: 0;
+    height: 46px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--color-ink);
+}
+
+.search-input::placeholder {
+    color: var(--color-hairline-strong);
+}
+
+.search-input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+    display: none;
+}
+
+.search-clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: var(--rounded-sm);
+    background: transparent;
+    color: var(--color-mute);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+
+.search-clear:hover {
+    background-color: var(--color-canvas-soft-2);
+    color: var(--color-ink);
+}
+
+.search-clear:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.search-clear[hidden] {
+    display: none;
+}
+
+.search-status {
+    max-width: 680px;
+    margin: 0 auto var(--spacing-xl);
+    text-align: center;
+    color: var(--color-mute);
+    min-height: 16px;
+}
+
+/* Reusable keyboard chip (search hint now; shortcuts sheet later) */
+.kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--color-body);
+    background-color: var(--color-canvas-soft);
+    border: 1px solid var(--color-hairline-strong);
+    border-bottom-width: 2px;
+    border-radius: var(--rounded-xs);
+}
+
+/* Filter mechanics + no-match empty state */
+.tool-card.is-hidden {
+    display: none !important;
+}
+
+.tool-grid.is-hidden,
+.pipeline-block.is-hidden {
+    display: none;
+}
+
+.search-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+    max-width: 680px;
+    margin: var(--spacing-xl) auto 0;
+    padding: var(--spacing-xl) var(--spacing-md);
+    border: 1px dashed var(--color-hairline-strong);
+    border-radius: var(--rounded-md);
+    text-align: center;
+}
+
+.search-empty[hidden] {
+    display: none;
+}
+
+.search-empty-cmd {
+    margin: 0;
+    color: var(--color-mute);
+}
+
+.search-empty-cmd span {
+    color: var(--color-accent-active);
+}
+
+.search-empty-msg {
+    margin: 0;
+    color: var(--color-body);
+}
+
+.search-empty-link {
+    color: var(--color-accent-active);
+    text-decoration: none;
+}
+
+.search-empty-link:hover {
+    text-decoration: underline;
 }

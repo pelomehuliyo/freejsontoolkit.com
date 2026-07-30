@@ -58,7 +58,7 @@ const jsonLd = isHomePage
       },
     };
 
-// ── bite 2: shared registry payload so client-built cards (favorites row,
+// ── shared registry payload so client-built cards (favorites row,
 //    "jump back in" echo) render identically to server cards, on any page. ──
 const registryPayload = tools.map((t) => ({
   id: t.id,
@@ -90,10 +90,8 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content="#171717" />
 
-    <!-- bite 2: lets the global script recognise real tool routes (so it never
-         records a 404 slug as a "recent") without shipping the whole registry. -->
+    <!-- registry the client uses to build cards from ids -->
     <meta name="fjt:tool-ids" content={JSON.stringify(toolIds)} />
-    <!-- bite 2: the registry the client uses to build cards from ids. -->
     <script type="application/json" id="fjt-registry" set:html={registryJson} />
 
     <!-- Search Indexing -->
@@ -153,17 +151,16 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
       <Footer />
     </div>
 
-    <!-- bite 2: single global toast for favorite actions -->
+    <!-- single global toast for favorite actions -->
     <div class="fav-toast" id="fav-toast" role="status" aria-live="polite" hidden></div>
 
     <!-- ═══════════════════════════════════════════════════════════════════
-         bite 2: the toolkit's client nervous system. ONE script, every page.
-         It (1) records a "recent" whenever a real tool page loads, (2) fills a
-         [data-your-tools] row with starred + recent tools, (3) fills a
-         [data-jump-back] homepage echo with recents, (4) handles every
-         favorite star via delegation (server- AND client-built cards), and
-         (5) reveals cards on scroll. Pages just drop in placeholders; future
-         tools inherit all of this for free — no per-tool wiring.
+         The toolkit's client nervous system. ONE script, every page.
+         (1) records a "recent" on real tool pages, (2) fills [data-your-tools],
+         (3) fills the homepage [data-jump-back] echo, (4) handles every fav
+         star via delegation, (5) powers the catalog command-line search +
+         the global "/" focus shortcut, (6) reveals cards on scroll.
+         Pages just drop in placeholders; future tools inherit all of it.
          ═══════════════════════════════════════════════════════════════════ -->
     <script is:inline>
       (function () {
@@ -302,17 +299,105 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
           var on = f.indexOf(id) === -1;
           if (on) f.push(id); else f = f.filter(function (x) { return x !== id; });
           save(FAV, f);
-          buildRow();  // membership / order may change
-          syncStars(); // reflect across all stars (server + row)
+          buildRow();
+          syncStars();
           flash(on ? ("★ " + byId[id].name + " saved to favorites") : (byId[id].name + " removed from favorites"));
         });
 
-        // init
+        // init personalization
         buildRow();
         buildEcho();
         syncStars();
 
-        // 8) scroll reveal — progressive enhancement; no-JS stays visible
+        // 8) bite 3 — command-line catalog search (only where a box exists)
+        var searchInput = document.querySelector("[data-tool-search]");
+        if (searchInput) {
+          var form = document.querySelector("[data-tool-search-form]");
+          var clearBtn = document.querySelector("[data-search-clear]");
+          var statusEl = document.querySelector("[data-search-status]");
+          var emptyEl = document.querySelector("[data-search-empty]");
+          var echoEl = emptyEl ? emptyEl.querySelector("[data-search-echo]") : null;
+          var yourTools = document.querySelector("[data-your-tools]");
+          var cards = Array.prototype.slice.call(document.querySelectorAll(".tool-card[data-search]"));
+          var gridAvail = document.querySelector('[data-grid="available"]');
+          var gridPipe = document.querySelector('[data-grid="pipeline"]');
+          var pipeBlock = document.querySelector(".pipeline-block");
+          var availTotal = REG.filter(function (t) { return t.status === "available"; }).length;
+          var primed = false; // false on the very first run so the scroll-reveal stagger survives
+
+          function toks(q) { return q.toLowerCase().trim().split(/\s+/).filter(Boolean); }
+
+          function runSearch() {
+            var q = searchInput.value;
+            var ts = toks(q);
+            var searching = ts.length > 0;
+            var visAvail = 0, visPipe = 0;
+
+            cards.forEach(function (card) {
+              var hay = card.getAttribute("data-search") || "";
+              var match = ts.every(function (tk) { return hay.indexOf(tk) !== -1; });
+              card.classList.toggle("is-hidden", !match);
+              if (match) {
+                // once the user has searched, never leave a shown card stuck at
+                // opacity 0 (reveal-safe); on first paint we skip this so the
+                // IntersectionObserver stagger still plays.
+                if (primed || searching) card.classList.add("is-visible");
+                if ((card.getAttribute("data-status") || "") === "available") visAvail++; else visPipe++;
+              }
+            });
+
+            if (gridAvail) gridAvail.classList.toggle("is-hidden", searching && visAvail === 0);
+            if (gridPipe) gridPipe.classList.toggle("is-hidden", searching && visPipe === 0);
+            if (pipeBlock) pipeBlock.classList.toggle("is-hidden", searching && visPipe === 0);
+            if (yourTools) yourTools.hidden = searching; // recents are noise during a search
+
+            var totalVis = visAvail + visPipe;
+            if (emptyEl) emptyEl.hidden = !(searching && totalVis === 0);
+            if (echoEl) echoEl.textContent = q;
+            if (clearBtn) clearBtn.hidden = q.length === 0;
+
+            if (statusEl) {
+              statusEl.textContent = searching
+                ? totalVis + " of " + cards.length + " match “" + q + "”"
+                : "filter " + availTotal + " live tools · type, or press / to focus";
+            }
+            primed = true;
+          }
+
+          searchInput.addEventListener("input", runSearch);
+          if (form) form.addEventListener("submit", function (e) { e.preventDefault(); });
+          if (clearBtn) clearBtn.addEventListener("click", function () {
+            searchInput.value = ""; runSearch(); searchInput.focus();
+          });
+          searchInput.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") {
+              if (searchInput.value) { searchInput.value = ""; runSearch(); }
+              else searchInput.blur();
+              e.preventDefault();
+            }
+          });
+          document.querySelectorAll("[data-search-focus]").forEach(function (el) {
+            el.addEventListener("click", function () { searchInput.focus(); });
+          });
+
+          runSearch(); // paint the idle hint
+        }
+
+        // global "/" focuses the catalog search. No-op on pages without a box;
+        // never hijacks typing in a field or in the search box itself.
+        document.addEventListener("keydown", function (e) {
+          if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
+          var si = document.querySelector("[data-tool-search]");
+          if (!si) return;
+          var ae = document.activeElement;
+          var tag = ae && ae.tagName ? ae.tagName : "";
+          if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (ae && ae.isContentEditable)) return;
+          e.preventDefault();
+          si.focus({ preventScroll: false });
+          if (si.scrollIntoView) si.scrollIntoView({ block: "nearest" });
+        });
+
+        // 9) scroll reveal — progressive enhancement; no-JS stays visible
         if ("IntersectionObserver" in window) {
           var targets = Array.prototype.slice.call(
             document.querySelectorAll(".tool-card, .live-tool-card, .trust-card, .pipeline, .jump-chip")
