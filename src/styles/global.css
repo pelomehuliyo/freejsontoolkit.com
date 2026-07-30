@@ -1,6 +1,16 @@
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/jetbrains-mono";
 
+/* Reserve the scrollbar gutter so the page never shifts sideways when its
+   height changes (e.g. the catalog search hiding cards). NOTE: this only works
+   because html/body do NOT set width:100% — a percentage width binds the page
+   to the raw viewport (which changes when the scrollbar toggles) and defeats
+   the reservation. width:auto (the default) lets the content fill the
+   gutter-aware box, so the width stays constant whether or not the bar draws. */
+html {
+  scrollbar-gutter: stable;
+}
+
 :root {
   /* Stark Palette */
   --color-primary: #171717;
@@ -18,6 +28,7 @@
   --color-accent: #21a78a;
   --color-accent-hover: #1b8971;
   --color-accent-active: #16725e;
+  --color-accent-strong: #198069;
 
   /* Semantic */
   --color-success: #0070f3;
@@ -70,7 +81,6 @@ html,
 body {
   margin: 0;
   padding: 0;
-  width: 100%;
   min-height: 100%;
   background-color: var(--color-canvas-soft);
   color: var(--color-ink);
@@ -286,7 +296,7 @@ body {
   background-color: var(--color-accent);
 }
 
-/* ── Spinner ── */
+/* ── Spinner ─ */
 
 .spinner {
   display: inline-block;

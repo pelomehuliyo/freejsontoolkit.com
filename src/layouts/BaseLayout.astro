@@ -90,7 +90,7 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content="#171717" />
 
-    <!-- registry the client uses to build cards from ids -->
+    <!-- registry the client uses to build cards from ids */
     <meta name="fjt:tool-ids" content={JSON.stringify(toolIds)} />
     <script type="application/json" id="fjt-registry" set:html={registryJson} />
 
@@ -154,13 +154,115 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
     <!-- single global toast for favorite actions -->
     <div class="fav-toast" id="fav-toast" role="status" aria-live="polite" hidden></div>
 
+    <!-- bite 4: discoverability launcher for the shortcuts sheet. Hidden by
+         default (so no-JS users never see a dead button) and on tool pages
+         (corners are occupied by editor status bars); the global script reveals
+         it elsewhere. The "?" key works everywhere regardless. -->
+    <button
+      type="button"
+      class="kbd-launcher"
+      id="kbd-launcher"
+      hidden
+      aria-haspopup="dialog"
+      aria-label="Open keyboard shortcuts"
+    >
+      <kbd class="kbd">?</kbd> shortcuts
+    </button>
+
+    <!-- bite 4: the shortcuts sheet. A real modal — opening it makes the rest
+         of the page inert (focus can't escape, a11y tree ignores the backdrop),
+         so the focus trap is free. Context rows get a "here" marker per page. -->
+    <div class="kbd-overlay" id="kbd-overlay" hidden>
+      <div class="kbd-sheet" role="dialog" aria-modal="true" aria-labelledby="kbd-title" id="kbd-sheet">
+        <div class="kbd-head">
+          <div class="kbd-head-left">
+            <span class="kbd-eyebrow">Keyboard</span>
+            <h2 class="kbd-title" id="kbd-title">Shortcuts</h2>
+          </div>
+          <button type="button" class="kbd-close" id="kbd-close" aria-label="Close shortcuts">
+            close <kbd class="kbd">Esc</kbd>
+          </button>
+        </div>
+
+        <div class="kbd-body">
+          <div class="kbd-group">
+            <span class="kbd-group-label">Navigate</span>
+            <div class="kbd-rows">
+              <div class="kbd-row">
+                <span class="kbd-desc">Home</span>
+                <span class="kbd-keys">
+                  <kbd class="kbd">g</kbd><span class="kbd-then">then</span><kbd class="kbd">h</kbd>
+                </span>
+              </div>
+              <div class="kbd-row">
+                <span class="kbd-desc">Tools catalog</span>
+                <span class="kbd-keys">
+                  <kbd class="kbd">g</kbd><span class="kbd-then">then</span><kbd class="kbd">t</kbd>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="kbd-group">
+            <span class="kbd-group-label">Search</span>
+            <div class="kbd-rows">
+              <div class="kbd-row" data-ctx="catalog">
+                <span class="kbd-desc">Focus tool search</span>
+                <span class="kbd-keys">
+                  <kbd class="kbd">/</kbd>
+                  <span class="kbd-here"><span class="kbd-here-dot"></span>here</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="kbd-group">
+            <span class="kbd-group-label">In a tool</span>
+            <div class="kbd-rows">
+              <div class="kbd-row" data-ctx="tool">
+                <span class="kbd-desc">Run (Convert / Format)</span>
+                <span class="kbd-keys">
+                  <kbd class="kbd">Ctrl / ⌘</kbd><span class="kbd-plus">+</span><kbd class="kbd">Enter</kbd>
+                  <span class="kbd-here"><span class="kbd-here-dot"></span>here</span>
+                </span>
+              </div>
+              <div class="kbd-row" data-ctx="tool">
+                <span class="kbd-desc">Cancel conversion</span>
+                <span class="kbd-keys">
+                  <kbd class="kbd">Esc</kbd>
+                  <span class="kbd-here"><span class="kbd-here-dot"></span>here</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="kbd-group">
+            <span class="kbd-group-label">This panel</span>
+            <div class="kbd-rows">
+              <div class="kbd-row">
+                <span class="kbd-desc">Toggle this panel</span>
+                <span class="kbd-keys"><kbd class="kbd">?</kbd></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="kbd-foot">
+          <span>chords: press <kbd class="kbd">g</kbd> then a letter</span>
+          <span>runs 100% locally</span>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══════════════════════════════════════════════════════════════════
          The toolkit's client nervous system. ONE script, every page.
          (1) records a "recent" on real tool pages, (2) fills [data-your-tools],
          (3) fills the homepage [data-jump-back] echo, (4) handles every fav
-         star via delegation, (5) powers the catalog command-line search +
-         the global "/" focus shortcut, (6) reveals cards on scroll.
-         Pages just drop in placeholders; future tools inherit all of it.
+         star via delegation, (5) powers the catalog command-line search —
+         with an entrance animation on newly-matched cards, (6) the keyboard
+         layer: ? sheet + g-chords + context markers + the global "/" focus,
+         (7) reveals cards on scroll. Pages just drop in placeholders; future
+         tools inherit all of it.
          ═══════════════════════════════════════════════════════════════════ -->
     <script is:inline>
       (function () {
@@ -323,28 +425,49 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
           var gridPipe = document.querySelector('[data-grid="pipeline"]');
           var pipeBlock = document.querySelector(".pipeline-block");
           var availTotal = REG.filter(function (t) { return t.status === "available"; }).length;
-          var primed = false; // false on the very first run so the scroll-reveal stagger survives
+          var primed = false;      // false on the very first run so reveal stagger survives
+          var prevVisible = null;  // identity set of cards visible after the previous run
 
           function toks(q) { return q.toLowerCase().trim().split(/\s+/).filter(Boolean); }
+          // stable per-card identity (the haystack contains the id, so it's unique)
+          function cid(card) { return card.getAttribute("data-search") || ""; }
 
           function runSearch() {
             var q = searchInput.value;
             var ts = toks(q);
             var searching = ts.length > 0;
             var visAvail = 0, visPipe = 0;
+            var nowVisible = new Set();
 
             cards.forEach(function (card) {
               var hay = card.getAttribute("data-search") || "";
               var match = ts.every(function (tk) { return hay.indexOf(tk) !== -1; });
               card.classList.toggle("is-hidden", !match);
               if (match) {
-                // once the user has searched, never leave a shown card stuck at
-                // opacity 0 (reveal-safe); on first paint we skip this so the
-                // IntersectionObserver stagger still plays.
                 if (primed || searching) card.classList.add("is-visible");
                 if ((card.getAttribute("data-status") || "") === "available") visAvail++; else visPipe++;
+                nowVisible.add(cid(card));
               }
             });
+
+            // Entrance motion: animate ONLY the cards that newly appeared since
+            // the last run. Survivors are untouched (no strobe on fast typing),
+            // and the first paint is skipped (no fight with the reveal stagger).
+            if (primed && prevVisible) {
+              cards.forEach(function (card) {
+                var id = cid(card);
+                if (nowVisible.has(id) && !prevVisible.has(id)) {
+                  card.classList.remove("just-shown");
+                  void card.offsetWidth; // restart the keyframe cleanly
+                  card.classList.add("just-shown");
+                  card.addEventListener("animationend", function h() {
+                    card.classList.remove("just-shown");
+                    card.removeEventListener("animationend", h);
+                  });
+                }
+              });
+            }
+            prevVisible = nowVisible;
 
             if (gridAvail) gridAvail.classList.toggle("is-hidden", searching && visAvail === 0);
             if (gridPipe) gridPipe.classList.toggle("is-hidden", searching && visPipe === 0);
@@ -380,24 +503,123 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
             el.addEventListener("click", function () { searchInput.focus(); });
           });
 
-          runSearch(); // paint the idle hint
+          runSearch(); // paint the idle hint + seed prevVisible (no animation)
         }
 
-        // global "/" focuses the catalog search. No-op on pages without a box;
-        // never hijacks typing in a field or in the search box itself.
+        // 9) bite 4 — keyboard layer: ? sheet, g-chords, context markers, and
+        //    the global "/" focus (consolidated here so they can't collide).
+        var overlay = document.getElementById("kbd-overlay");
+        var sheetEl = document.getElementById("kbd-sheet");
+        var launcher = document.getElementById("kbd-launcher");
+        var closeBtn = document.getElementById("kbd-close");
+        var app = document.querySelector(".app-layout");
+        var kbOpen = false;
+        var kbLastFocus = null;
+        var gPending = false;
+        var gTimer = null;
+
+        var pathNow = location.pathname.replace(/\/+$/, "");
+        var isCatalog = pathNow === "/tools";
+        var isToolPage = /^\/tools\/[^\/]+$/.test(location.pathname);
+
+        // context markers ("here") — only the shortcuts that fire on this page
+        document.querySelectorAll(".kbd-row[data-ctx]").forEach(function (row) {
+          var ctx = row.getAttribute("data-ctx");
+          if ((ctx === "catalog" && isCatalog) || (ctx === "tool" && isToolPage)) {
+            row.classList.add("is-here");
+          }
+        });
+
+        // reveal the launcher everywhere except inside a tool (corners are busy)
+        if (launcher) launcher.hidden = isToolPage;
+
+        function openKb() {
+          if (!overlay || !sheetEl) return;
+          kbLastFocus = document.activeElement;
+          kbOpen = true;
+          overlay.hidden = false;
+          if (app) app.inert = true;          // background leaves tab order + a11y tree
+          if (launcher) launcher.hidden = true;
+          requestAnimationFrame(function () { overlay.classList.add("is-open"); });
+          (closeBtn || sheetEl).focus();
+        }
+        function closeKb() {
+          if (!overlay) return;
+          kbOpen = false;
+          overlay.classList.remove("is-open");
+          if (app) app.inert = false;
+          if (kbLastFocus && kbLastFocus.focus) kbLastFocus.focus();
+          setTimeout(function () {
+            if (!kbOpen) {
+              overlay.hidden = true;
+              if (launcher) launcher.hidden = isToolPage;
+            }
+          }, 200);
+        }
+        function toggleKb() { kbOpen ? closeKb() : openKb(); }
+
+        if (closeBtn) closeBtn.addEventListener("click", closeKb);
+        if (launcher) launcher.addEventListener("click", openKb);
+        if (overlay) overlay.addEventListener("mousedown", function (e) {
+          if (e.target === overlay) closeKb(); // click the backdrop, not the sheet
+        });
+
+        // one global key handler for ?, /, g-chords, and Esc-close
         document.addEventListener("keydown", function (e) {
-          if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
-          var si = document.querySelector("[data-tool-search]");
-          if (!si) return;
+          if (e.repeat) return;
+
+          // Esc closes the sheet if open; otherwise fall through to page
+          // handlers (e.g. a converter's own Esc-to-cancel)
+          if (e.key === "Escape") {
+            if (kbOpen) { e.preventDefault(); closeKb(); }
+            return;
+          }
+
+          // ? toggles the sheet — unless you're typing it into a field
+          if (e.key === "?") {
+            var aeQ = document.activeElement;
+            var tQ = aeQ && aeQ.tagName ? aeQ.tagName : "";
+            var typingQ = tQ === "INPUT" || tQ === "TEXTAREA" || tQ === "SELECT" || (aeQ && aeQ.isContentEditable);
+            if (typingQ) return;
+            e.preventDefault();
+            toggleKb();
+            return;
+          }
+
+          // from here on: clean keystroke, not typing, sheet closed
+          if (e.metaKey || e.ctrlKey || e.altKey) return;
           var ae = document.activeElement;
           var tag = ae && ae.tagName ? ae.tagName : "";
           if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (ae && ae.isContentEditable)) return;
-          e.preventDefault();
-          si.focus({ preventScroll: false });
-          if (si.scrollIntoView) si.scrollIntoView({ block: "nearest" });
+          if (kbOpen) return;
+
+          // / focuses the catalog search (only present on /tools)
+          if (e.key === "/") {
+            var si = document.querySelector("[data-tool-search]");
+            if (si) {
+              e.preventDefault();
+              si.focus({ preventScroll: false });
+              if (si.scrollIntoView) si.scrollIntoView({ block: "nearest" });
+            }
+            return;
+          }
+
+          // g-chords: g then h / g then t, within a short window
+          if (e.key === "g") {
+            gPending = true;
+            if (gTimer) clearTimeout(gTimer);
+            gTimer = setTimeout(function () { gPending = false; }, 900);
+            return;
+          }
+          if (gPending) {
+            gPending = false;
+            if (gTimer) clearTimeout(gTimer);
+            if (e.key === "h") { e.preventDefault(); location.assign("/"); }
+            else if (e.key === "t") { e.preventDefault(); location.assign("/tools"); }
+          }
         });
 
-        // 9) scroll reveal — progressive enhancement; no-JS stays visible
+        // 10) scroll reveal — progressive enhancement; no-JS stays visible
         if ("IntersectionObserver" in window) {
           var targets = Array.prototype.slice.call(
             document.querySelectorAll(".tool-card, .live-tool-card, .trust-card, .pipeline, .jump-chip")

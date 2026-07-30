@@ -8,32 +8,23 @@
  *   - Readonly / editable mode
  *   - Simple line rendering for all file sizes (single text node — fast)
  *   - Mobile-friendly
+ *   - bite 5: a living empty state (overlay) that needs NO per-page config —
+ *     it derives its voice from `readonly` and reuses `placeholder` as a faint
+ *     example watermark, so every tool inherits it for free.
  *
  * Props:
  *   id          — Unique element ID
  *   value       — Initial text content
- *   placeholder — Placeholder text
+ *   placeholder — Placeholder text (also feeds the empty-state watermark)
  *   readonly    — Whether the textarea is readonly (default: false)
  *   label       — Accessible label for screen readers
  *
  * Events (on textarea element):
- *   'editor-refresh' — Dispatch to force gutter re-render after
+ *   'editor-refresh' — Dispatch to force gutter + empty-state re-sync after
  *                      programmatic value changes.
  *
  * Slots:
  *   (default) — Content rendered below the editor (e.g. status bar)
- *
- * NOTE on the gutter:
- *   The numbers are rendered as ONE text node (with real line breaks)
- *   inside a single static element (.gutter-content). We do this on
- *   purpose: Astro's scoped <style> only reaches elements that exist in
- *   the template at build time, NOT elements a script creates later.
- *   The old approach (one <span> per line, created via innerHTML) meant
- *   the "stack each number vertically" rule never applied to those spans,
- *   so the numbers collapsed onto one horizontal row ("123456…") and the
- *   scroll sync drifted on large files. A single static element + real
- *   line breaks (white-space: pre) avoids that entirely and is also much
- *   faster for big files.
  */
 
 interface Props {
@@ -48,6 +39,16 @@ const { id, value = "", placeholder = "", readonly = false, label } = Astro.prop
 const gutterId = `${id}-gutter`;
 const gutterContentId = `${id}-gutter-content`;
 const textareaId = `${id}-textarea`;
+
+// bite 5 — the rich empty state reuses the existing `placeholder` prop as a
+// faint "watermark" example, so each tool's example flows in for free with no
+// per-page changes. For input editors we drop the leading instruction line
+// (the overlay's own sentence supersedes it) and keep just the example code.
+const phLines = placeholder.split("\n");
+const ghostText = !readonly && phLines.length > 1 ? phLines.slice(1).join("\n") : placeholder;
+const emptyValue = readonly
+  ? "Run the tool — your result appears right here, processed fully offline."
+  : "Paste your data, drop a file above, or load the sample — it never leaves this tab.";
 ---
 
 <div class="editor-outer" data-editor-id={id}>
@@ -64,6 +65,37 @@ const textareaId = `${id}-textarea`;
       spellcheck="false"
       aria-label={label}
       aria-multiline="true"></textarea>
+
+    <!-- bite 5 — living empty state. Decorative + non-interactive + aria-hidden:
+         the textarea's label/placeholder own accessibility and no-JS, this owns
+         the "feel". pointer-events:none means it never blocks typing or clicks;
+         visibility is driven by the .is-empty class the script toggles. -->
+    <div class="editor-empty" aria-hidden="true">
+      {
+        readonly ? (
+          <p class="ee-prompt">
+            <span class="ee-dot idle" aria-hidden="true" />
+            <span>no output yet</span>
+          </p>
+        ) : (
+          <p class="ee-prompt">
+            <span class="ee-dollar" aria-hidden="true">
+              $
+            </span>
+            <span>awaiting input</span>
+            <span class="ee-caret" aria-hidden="true">
+              ▍
+            </span>
+          </p>
+        )
+      }
+      <p class="ee-value">{emptyValue}</p>
+      <p class="ee-trust">
+        <span class="ee-dot" aria-hidden="true"></span>
+        local sandbox · 0 bytes uploaded
+      </p>
+      {ghostText ? <pre class="ee-ghost">{ghostText}</pre> : null}
+    </div>
   </div>
   <slot />
 </div>
@@ -80,27 +112,30 @@ const textareaId = `${id}-textarea`;
         var textarea = document.getElementById(editorId + "-textarea");
         var gutter = document.getElementById(editorId + "-gutter");
         var gutterContent = document.getElementById(editorId + "-gutter-content");
+        var wrapper = container.querySelector(".editor-wrapper");
         if (!textarea || !gutter || !gutterContent) return;
 
         // Guard: already initialized
         if (textarea.__ceInitialized) return;
         textarea.__ceInitialized = true;
 
-        // Track current line count to avoid unnecessary work
+        // Under JS the rich overlay owns the empty visual, so retire the native
+        // placeholder to avoid two texts stacking. (No-JS still gets it from the
+        // server-rendered attribute, since this line never runs there.)
+        textarea.setAttribute("placeholder", "");
+
+        // Track current line count to avoid unnecessary DOM rebuilds
         var currentLineCount = 1;
 
         /**
-         * Re-render the gutter when the line count changes.
-         * We build a single string "1\n2\n3\n…\nN" and drop it in as one
-         * text node. The CSS `white-space: pre` on .gutter-content turns
-         * each "\n" into a real line break, so the numbers stack vertically
-         * and stay perfectly aligned with the textarea's lines.
+         * Re-render gutter spans when line count changes.
+         * Simple rendering — no virtualization for v1.0 stability.
          */
         function renderGutterLines() {
           var lineCount = textarea.value.split("\n").length;
           if (lineCount < 1) lineCount = 1;
 
-          // Skip work if nothing changed
+          // Skip DOM rebuild if line count hasn't changed
           if (lineCount === currentLineCount) return;
           currentLineCount = lineCount;
 
@@ -114,40 +149,54 @@ const textareaId = `${id}-textarea`;
 
         /**
          * Sync gutter scroll position with textarea scroll.
-         * (overflow-y is hidden on the gutter, but programmatic scrollTop
-         *  still works — so the numbers follow the code as you scroll.)
          */
         function syncGutterScroll() {
           gutter.scrollTop = textarea.scrollTop;
         }
 
-        // Scroll: keep the numbers lined up with the visible code
+        /**
+         * bite 5 — show the living empty state only while the box is empty.
+         * Runs on every path that can change the value (typing, paste, and the
+         * programmatic editor-refresh the pages dispatch after setting value),
+         * so the overlay can never linger over real content or stay hidden over
+         * an emptied box.
+         */
+        function syncEmpty() {
+          if (!wrapper) return;
+          wrapper.classList.toggle("is-empty", textarea.value.length === 0);
+        }
+
+        // Scroll: sync gutter position to match textarea
         textarea.addEventListener("scroll", syncGutterScroll);
 
-        // Typing: re-render numbers, then re-sync scroll
+        // Input (typing): re-render line numbers, sync scroll, refresh empty state
         textarea.addEventListener("input", function () {
           renderGutterLines();
           syncGutterScroll();
+          syncEmpty();
         });
 
-        // Paste: re-render after the browser has inserted the text
+        // Paste: ensure gutter + empty state update after paste (RAF for DOM settle)
         textarea.addEventListener("paste", function () {
           requestAnimationFrame(function () {
             renderGutterLines();
             syncGutterScroll();
+            syncEmpty();
           });
         });
 
         // Custom event: re-render after the page sets the value in code
         textarea.addEventListener("editor-refresh", function () {
-          currentLineCount = -1; // force a fresh render
+          currentLineCount = -1; // force re-render
           renderGutterLines();
           syncGutterScroll();
+          syncEmpty();
         });
 
-        // First paint
+        // Initial render
         renderGutterLines();
         syncGutterScroll();
+        syncEmpty();
       })();
     }
   })();
@@ -175,9 +224,9 @@ const textareaId = `${id}-textarea`;
   }
 
   .editor-gutter {
-    /* top + bottom padding now MATCH the textarea's vertical padding so the
-       numbers line up with the code from the first line to the very last,
-       and the scroll ranges are identical (no drift at the bottom). */
+    /* top + bottom padding match the textarea's vertical padding so the numbers
+       line up with the code from the first line to the very last, and the scroll
+       ranges are identical (no drift at the bottom). */
     padding: var(--spacing-md) var(--spacing-sm) var(--spacing-md) 0;
     text-align: right;
     color: var(--color-mute);
@@ -192,10 +241,9 @@ const textareaId = `${id}-textarea`;
   }
 
   /* The numbers live here as plain text with real line breaks.
-     `white-space: pre` is what makes them stack vertically — one number
-     per line — instead of running sideways. font-size / line-height /
-     text-align are inherited from the wrappers above, so they always
-     match the textarea exactly. */
+     `white-space: pre` is what makes them stack vertically — one number per
+     line — instead of running sideways. font-size / line-height / text-align
+     are inherited from the wrappers above, so they always match the textarea. */
   .gutter-content {
     white-space: pre;
     font-variant-numeric: tabular-nums;
@@ -224,5 +272,120 @@ const textareaId = `${id}-textarea`;
     outline: 3px solid var(--color-accent);
     outline-offset: -3px;
     border-radius: var(--rounded-xs);
+  }
+
+  /* ── bite 5: the living empty state ──────────────────────────────────────
+     Sits over the textarea's text column (left = gutter width, padding = the
+     textarea's padding) so its first line aligns with gutter line "1". It is
+     purely decorative: pointer-events:none (never blocks typing/clicks),
+     aria-hidden (the textarea label owns a11y), and visibility-gated by the
+     .is-empty class so it fades in only while the box is empty. */
+  .editor-empty {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 48px; /* must match .editor-gutter width */
+    right: 0;
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    pointer-events: none;
+    user-select: none;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.18s ease,
+      visibility 0.18s ease;
+  }
+  .editor-wrapper.is-empty .editor-empty {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .ee-prompt {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.5; /* 19.5px → aligns with gutter line 1 */
+    color: var(--color-mute);
+  }
+  .ee-dollar {
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+  .ee-caret {
+    color: var(--color-accent);
+    animation: ee-blink 1.1s step-end infinite;
+  }
+  @keyframes ee-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .ee-value {
+    margin: 2px 0 0;
+    max-width: 46ch;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--color-body);
+  }
+
+  .ee-trust {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 2px 0 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--color-mute);
+  }
+  .ee-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    animation: ee-pulse 1.8s ease-in-out infinite;
+  }
+  .ee-dot.idle {
+    background-color: var(--color-hairline-strong);
+    animation: none;
+  }
+  @keyframes ee-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(33, 167, 138, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 4px rgba(33, 167, 138, 0);
+    }
+  }
+
+  /* the per-tool example, rendered as a faint watermark; lifts a hair on hover
+     for a quiet "come closer" cue (hover reaches the wrapper through the
+     pointer-events:none overlay) */
+  .ee-ghost {
+    margin: 8px 0 0;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--color-hairline-strong);
+    white-space: pre;
+    opacity: 0.7;
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+  .editor-wrapper.is-empty:hover .ee-ghost {
+    opacity: 1;
+    transform: translateY(-1px);
   }
 </style>
