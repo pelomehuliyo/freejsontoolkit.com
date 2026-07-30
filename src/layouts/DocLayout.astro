@@ -11,6 +11,13 @@
  * Prose is authored in the page as <section class="doc-section" id="…"> blocks;
  * the `toc` prop lists those ids/labels. Styles live in the global doc.css so
  * they reach the slotted content (a scoped block here could not).
+ *
+ * Scroll-spy note: the active TOC entry is computed deterministically from each
+ * section's live position on every scroll/resize tick (NOT via an
+ * IntersectionObserver, whose "what's in the band" proxy misfires on clicks and
+ * window resizes). A click sets the highlight + smooth-scrolls + holds a short
+ * lock so the highlight can't flicker mid-animation; manual scrolling breaks
+ * the lock instantly.
  */
 import BaseLayout from "./BaseLayout.astro";
 import Container from "../components/Container.astro";
@@ -34,8 +41,10 @@ interface Props {
 const { title, description, eyebrow, lede, toc = [], updated, tag, notice } = Astro.props;
 
 // Pager order + grouping — the single source for prev/next across all docs.
+// Grouping only drives adjacency in the pager (the group name is never shown),
+// so /why-local chains with About/Contact and the legal trio chains together.
 const DOC_ORDER: { href: string; group: string; label: string }[] = [
-  { href: "/why-local", group: "trust", label: "Why local" },
+  { href: "/why-local", group: "company", label: "Why local" },
   { href: "/about", group: "company", label: "About" },
   { href: "/contact", group: "company", label: "Contact" },
   { href: "/privacy", group: "legal", label: "Privacy" },
@@ -107,7 +116,9 @@ const docPath = "~/freejsontoolkit " + (Astro.url.pathname.replace(/\/+$/, "") |
                     <ul>
                       {toc.map((t) => (
                         <li>
-                          <a href={`#${t.id}`}>{t.label}</a>
+                          <a href={`#${t.id}`} data-toc={t.id}>
+                            {t.label}
+                          </a>
                         </li>
                       ))}
                     </ul>
@@ -173,26 +184,141 @@ const docPath = "~/freejsontoolkit " + (Astro.url.pathname.replace(/\/+$/, "") |
   <button type="button" class="doc-top" id="doc-top" aria-label="Back to top">↑</button>
 
   <script>
-    // ── Scroll-spy: highlight the TOC entry for the section near the top ──
-    var tocLinks = Array.prototype.slice.call(document.querySelectorAll(".doc-toc-link"));
-    var sections = Array.prototype.slice.call(document.querySelectorAll(".doc-section"));
-    if (tocLinks.length && sections.length && "IntersectionObserver" in window) {
-      var spy = new IntersectionObserver(
-        function (entries) {
-          entries.forEach(function (en) {
-            if (!en.isIntersecting) return;
-            var id = en.target.id;
-            tocLinks.forEach(function (l) {
-              l.classList.toggle("is-active", l.getAttribute("data-toc") === id);
-            });
-          });
-        },
-        { rootMargin: "-45% 0px -50% 0px", threshold: 0 },
-      );
-      sections.forEach(function (s) {
-        spy.observe(s);
+    // ── Scroll-spy: deterministic, position-based, resize- and click-proof. ──
+    // The active entry = the last section whose top has crossed a fixed line
+    // near the top of the viewport (THRESHOLD). We read live positions on every
+    // scroll/resize tick, so there is no observer band to drift on resize and no
+    // async callback to race a click. Sections stack top-to-bottom, so their
+    // tops are monotonic — once a section's top is past the line, every later
+    // one is too, and we stop. A bottom-of-page override ensures a short final
+    // section still lights up. Clicking a link sets the highlight immediately,
+    // smooth-scrolls (scoped here; reduced-motion → instant), and holds a short
+    // lock so the highlight can't flicker to a neighbour mid-animation; any
+    // manual scroll (wheel / touch / arrow keys) breaks the lock at once.
+    (function () {
+      var tocLinks = Array.prototype.slice.call(document.querySelectorAll(".doc-toc-link"));
+      var mobileLinks = Array.prototype.slice.call(document.querySelectorAll(".doc-toc-mobile a"));
+      var sections = Array.prototype.slice.call(document.querySelectorAll(".doc-section"));
+      if (!sections.length) return;
+
+      var THRESHOLD = 120; // px from top; > scroll-margin-top (92) so a clicked
+      // section always qualifies at rest, while the next one (a real section's
+      // height below) does not.
+      var current = null;
+      var locked = false;
+      var lockTimer = null;
+      var reduce =
+        window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      function setActive(id) {
+        if (id === current) return;
+        current = id;
+        tocLinks.forEach(function (l) {
+          l.classList.toggle("is-active", l.getAttribute("data-toc") === id);
+        });
+      }
+
+      function idOfLink(el) {
+        return el.getAttribute("data-toc") || (el.getAttribute("href") || "").replace(/^#/, "");
+      }
+
+      function compute() {
+        if (locked) return;
+        var activeId = sections[0].id; // default = first (covers the very top)
+        for (var i = 0; i < sections.length; i++) {
+          if (sections[i].getBoundingClientRect().top - THRESHOLD <= 0) {
+            activeId = sections[i].id;
+          } else {
+            break; // tops are monotonic; nothing later can qualify
+          }
+        }
+        // At the very bottom, a short last section may never reach the line —
+        // force it active so the rail never ends on the wrong item.
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {
+          activeId = sections[sections.length - 1].id;
+        }
+        setActive(activeId);
+      }
+
+      var ticking = false;
+      function onScroll() {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(function () {
+          ticking = false;
+          compute();
+        });
+      }
+
+      function releaseLock() {
+        locked = false;
+        if (lockTimer) {
+          clearTimeout(lockTimer);
+          lockTimer = null;
+        }
+        compute();
+      }
+
+      function goTo(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        setActive(id); // optimistic — and, with the lock, authoritative until settle
+        locked = true;
+        if (lockTimer) clearTimeout(lockTimer);
+        el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+        lockTimer = setTimeout(releaseLock, 650); // covers the smooth scroll
+      }
+
+      function onClick(e) {
+        var id = idOfLink(e.currentTarget);
+        if (!id) return;
+        e.preventDefault();
+        goTo(id);
+        // mobile: collapse the disclosure after jumping so it doesn't linger
+        var det = e.currentTarget.closest("details");
+        if (det) det.open = false;
+      }
+      tocLinks.forEach(function (l) {
+        l.addEventListener("click", onClick);
       });
-    }
+      mobileLinks.forEach(function (l) {
+        l.addEventListener("click", onClick);
+      });
+
+      // Manual interaction breaks a programmatic lock immediately, so the user
+      // is never stuck watching a held highlight while they scroll by hand.
+      ["wheel", "touchstart"].forEach(function (ev) {
+        window.addEventListener(
+          ev,
+          function () {
+            if (locked) releaseLock();
+          },
+          { passive: true },
+        );
+      });
+      window.addEventListener("keydown", function (e) {
+        var k = e.key;
+        if (
+          locked &&
+          (k === "ArrowUp" ||
+            k === "ArrowDown" ||
+            k === "PageUp" ||
+            k === "PageDown" ||
+            k === " " ||
+            k === "Home" ||
+            k === "End")
+        ) {
+          releaseLock();
+        }
+      });
+
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll); // recompute → resize can't desync
+      requestAnimationFrame(compute); // first paint
+      window.addEventListener("load", function () {
+        requestAnimationFrame(compute); // recompute after fonts/images shift layout
+      });
+    })();
 
     // ── Scroll reveal for head / sheet / sections ──
     if ("IntersectionObserver" in window) {
@@ -222,11 +348,11 @@ const docPath = "~/freejsontoolkit " + (Astro.url.pathname.replace(/\/+$/, "") |
     // ── Back to top ──
     var topBtn = document.getElementById("doc-top");
     if (topBtn) {
-      var onScroll = function () {
+      var onScrollTop = function () {
         topBtn.classList.toggle("show", window.scrollY > 420);
       };
-      window.addEventListener("scroll", onScroll, { passive: true });
-      onScroll();
+      window.addEventListener("scroll", onScrollTop, { passive: true });
+      onScrollTop();
       topBtn.addEventListener("click", function () {
         window.scrollTo({ top: 0, behavior: "smooth" });
       });

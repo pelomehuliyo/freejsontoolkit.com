@@ -3,23 +3,30 @@ import Container from "./Container.astro";
 import { availableTools } from "../lib/tools/registry";
 
 // Tools column is generated from the registry: live tools as links, plus a
-// "browse all" entry. The "coming soon" pipeline lives on /tools, not as dead
-// footer links. As tools ship, this column fills itself — zero hand-editing.
+// "browse all" entry. As tools ship, this column fills itself — zero hand-editing.
 const toolLinks = [
   ...availableTools.map((t) => ({ label: t.name, href: t.href as string })),
   { label: "Browse all tools →", href: "/tools" },
 ];
 
+// Company / Legal are split honestly (About & Contact are not legal docs), and
+// the trust page (/why-local) finally gets a permanent navigation home.
 const footerSections = [
   { title: "Tools", links: toolLinks },
   {
-    title: "Legal",
+    title: "Company",
     links: [
       { label: "About", href: "/about" },
+      { label: "Why local", href: "/why-local" },
+      { label: "Contact", href: "/contact" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms & Conditions", href: "/terms" },
       { label: "Disclaimer", href: "/disclaimer" },
-      { label: "Contact", href: "/contact" },
     ],
   },
   {
@@ -153,6 +160,7 @@ const footerSections = [
 
   .footer-nav-groups {
     display: flex;
+    flex-wrap: wrap; /* four columns now — wrap gracefully on narrow viewports */
     gap: var(--spacing-3xl);
   }
 
@@ -160,7 +168,7 @@ const footerSections = [
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
-    min-width: 140px;
+    min-width: 130px;
   }
 
   .footer-title {

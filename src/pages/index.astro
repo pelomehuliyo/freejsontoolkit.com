@@ -69,6 +69,9 @@ const pipeline = comingSoon
           <h2 id="trust-title" class="display-lg section-title">
             Developer-first privacy and reliability
           </h2>
+          <a class="trust-link body-sm-strong" href="/why-local">
+            See the proof — how we keep it that way <span aria-hidden="true">→</span>
+          </a>
         </div>
 
         <div class="trust-grid" role="list" aria-label="Trust information">
@@ -455,6 +458,16 @@ const pipeline = comingSoon
     /* Trust */
     .trust-section {
       padding: var(--spacing-4xl) 0;
+    }
+
+    .trust-link {
+      color: var(--color-accent-active);
+      text-decoration: none;
+      margin-top: var(--spacing-xxs);
+    }
+
+    .trust-link:hover {
+      text-decoration: underline;
     }
 
     .trust-grid {

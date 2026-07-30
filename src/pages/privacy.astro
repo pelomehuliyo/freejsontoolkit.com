@@ -1,178 +1,108 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import Container from "../components/Container.astro";
-import Card from "../components/Card.astro";
+import DocLayout from "../layouts/DocLayout.astro";
+
+const toc = [
+  { id: "summary", label: "The short version" },
+  { id: "your-data", label: "Your data" },
+  { id: "device", label: "On your device" },
+  { id: "network", label: "Over the network" },
+  { id: "cookies", label: "Cookies" },
+  { id: "rights", label: "Your rights" },
+];
 ---
 
-<BaseLayout
-  title="Privacy Policy - Free JSON Toolkit"
-  description="Read our privacy policy. Learn how Free JSON Toolkit processes all JSON files and conversion data locally inside your browser sandbox."
-  activePath="/privacy"
+<DocLayout
+  title="Privacy Policy"
+  description="How Free JSON Toolkit handles data: your input is processed in your browser and never uploaded. This page explains exactly what is stored, where, and why."
+  eyebrow="Legal"
+  lede="The simplest privacy policy is the one with nothing to hide. Here is everything this site stores and sends — which, for your content, is nothing at all."
+  toc={toc}
+  updated="2026-07-30"
+  tag="Plain-language"
 >
-  <main>
-    {/* Page Header */}
-    <section class="page-header" aria-labelledby="privacy-title">
-      <Container size="narrow" class="header-container">
-        <span class="caption-mono section-eyebrow">LEGAL POLICY</span>
-        <h1 id="privacy-title" class="display-xl page-title">Privacy Policy</h1>
-        <p class="caption-mono last-updated">Last updated: July 2026</p>
-      </Container>
-    </section>
+  <section class="doc-section" id="summary">
+    <h2>The short version</h2>
+    <ul class="guarantees">
+      <li>We never receive, store, or process the data you paste or upload.</li>
+      <li>There is no account, so there is no profile of you to keep.</li>
+      <li>The only analytics we run measure page visits, not your input.</li>
+      <li>A handful of preferences are saved on your own device, under your control.</li>
+    </ul>
+  </section>
 
-    {/* Content Sections */}
-    <section class="content-section" aria-label="Privacy Policy Details">
-      <Container size="narrow">
-        <div class="policy-wrapper">
-          <Card variant="flat" class="policy-card">
-            <h2 class="display-md policy-heading">1. Local Processing</h2>
-            <p class="body-md policy-text">
-              One of our core principles is that your data belongs to you. Free JSON Toolkit
-              operates as a client-side utility suite:
-            </p>
-            <ul class="body-md policy-list">
-              <li>
-                <strong>In-Browser Execution:</strong> All JSON formatting, conversion, and validation
-                are performed locally in your browser sandbox using JavaScript.
-              </li>
-              <li>
-                <strong>No Data Uploads:</strong> Your data inputs, files, and outputs are never uploaded
-                to Free JSON Toolkit servers or transmitted across the network.
-              </li>
-              <li>
-                <strong>Ephemeral State:</strong> Once you close the browser tab or refresh the page,
-                all processed data and state are completely cleared from your system's memory.
-              </li>
-            </ul>
-          </Card>
+  <section class="doc-section" id="your-data">
+    <h2>Your data</h2>
+    <p>
+      When you paste JSON, CSV, XML, or YAML into a tool, or drop a file onto one, that content is
+      handled entirely by your browser. It is read into memory, processed by JavaScript (or a
+      background Web Worker for large files), and the result is returned to the page for you to copy
+      or download.
+    </p>
+    <p>
+      At no point is that content transmitted to our servers, because there is no server involved in
+      the processing. When you close the tab, the in-memory copy is gone.
+    </p>
+  </section>
 
-          <Card variant="flat" class="policy-card">
-            <h2 class="display-md policy-heading">2. Analytics and Measurement</h2>
-            <p class="body-md policy-text">
-              We aim to minimize unnecessary tracking while keeping the toolkit fast and
-              privacy-focused. We may utilize basic, privacy-respecting analytics services to
-              monitor page popularity, count user visits, and detect broken links. These analytics
-              do not log your files, input text, or output data.
-            </p>
-          </Card>
+  <section class="doc-section" id="device">
+    <h2>On your device</h2>
+    <p>
+      The site stores a small amount of information in your browser's <code>localStorage</code> so the
+      toolkit can remember you between visits:
+    </p>
+    <ul>
+      <li><strong>Favorites</strong> — the tools you star, so they pin to the top.</li>
+      <li><strong>Recent tools</strong> — the last few tools you opened, for quick return.</li>
+    </ul>
+    <p>
+      This data never leaves your device and contains none of your processed content. You can clear
+      it at any time from your browser's settings (site data / cookies and storage), or by clearing
+      the site's local storage.
+    </p>
+  </section>
 
-          <Card variant="flat" class="policy-card">
-            <h2 class="display-md policy-heading">3. Cookies</h2>
-            <p class="body-md policy-text">
-              Free JSON Toolkit does not set tracking cookies to build user profiles or monitor you
-              across the web. However, third-party providers (such as hosting infrastructure or
-              future ad networks) may use standard functional cookies or local storage to keep the
-              service functional and secure.
-            </p>
-          </Card>
+  <section class="doc-section" id="network">
+    <h2>Over the network</h2>
+    <p>The site makes two kinds of network request, neither of which carries your input:</p>
+    <ul>
+      <li>
+        <strong>The application itself</strong> — HTML, styles, scripts, and fonts — loaded from the host
+        so the toolkit can render.
+      </li>
+      <li>
+        <strong>An anonymized pageview</strong> via Google Analytics, in production only, used to understand
+        which tools are visited. This ping includes the page URL and standard browser metadata, but <em
+          >not</em
+        > the contents of any editor, file, or result.
+      </li>
+    </ul>
+    <p>
+      The analytics request is disabled in local development. Standard browser tracking protection
+      or a privacy extension will block it without affecting any tool.
+    </p>
+  </section>
 
-          <Card variant="flat" class="policy-card">
-            <h2 class="display-md policy-heading">4. Third-Party Links</h2>
-            <p class="body-md policy-text">
-              Our website contains links to external platforms like GitHub and documentation sites.
-              Once you click these links and leave Free JSON Toolkit, our privacy terms no longer
-              apply. We encourage you to review the privacy statements of those external platforms.
-            </p>
-          </Card>
+  <section class="doc-section" id="cookies">
+    <h2>Cookies</h2>
+    <p>
+      The toolkit's own features (favorites and recents) use <code>localStorage</code>, not cookies.
+      The only cookies that may be set are those placed by Google Analytics in production (such as <code
+        >_ga</code
+      >), used solely to distinguish page visits. No cookie stores your processed data.
+    </p>
+  </section>
 
-          <Card variant="flat" class="policy-card">
-            <h2 class="display-md policy-heading">5. Contact Information</h2>
-            <p class="body-md policy-text">
-              If you have any questions or feedback about our privacy practices, you can submit an
-              issue on our public GitHub repository or check back when contact details are
-              published.
-            </p>
-          </Card>
-        </div>
-      </Container>
-    </section>
-  </main>
-</BaseLayout>
-
-<style>
-  .page-header {
-    padding-top: var(--spacing-5xl);
-    padding-bottom: var(--spacing-3xl);
-    background-color: var(--color-canvas);
-    border-bottom: 1px solid var(--color-hairline);
-    text-align: center;
-  }
-
-  .header-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-sm);
-  }
-
-  .section-eyebrow {
-    color: var(--color-mute);
-    letter-spacing: 0.1em;
-  }
-
-  .page-title {
-    margin-top: 0;
-    margin-bottom: var(--spacing-xxs);
-    color: var(--color-ink);
-  }
-
-  .last-updated {
-    color: var(--color-mute);
-    margin: 0;
-  }
-
-  .content-section {
-    padding: var(--spacing-4xl) 0;
-    background-color: var(--color-canvas-soft);
-  }
-
-  .policy-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xl);
-  }
-
-  .policy-card {
-    border: 1px solid var(--color-hairline);
-    background-color: var(--color-canvas);
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-    padding: var(--spacing-xl) !important;
-  }
-
-  .policy-heading {
-    color: var(--color-ink);
-    margin: 0;
-  }
-
-  .policy-text {
-    color: var(--color-body);
-    line-height: 1.7;
-    margin: 0;
-  }
-
-  .policy-list {
-    margin: 0;
-    padding-left: var(--spacing-xl);
-    color: var(--color-body);
-    line-height: 1.7;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-  }
-
-  @media (max-width: 600px) {
-    .page-header {
-      padding-top: var(--spacing-3xl);
-      padding-bottom: var(--spacing-2xl);
-    }
-
-    .content-section {
-      padding: var(--spacing-2xl) 0;
-    }
-
-    .policy-card {
-      padding: var(--spacing-lg) !important;
-    }
-  }
-</style>
+  <section class="doc-section" id="rights">
+    <h2>Your rights</h2>
+    <p>
+      Because we do not collect or store personal data on a server, there is no account record to
+      request, correct, or delete on our side. The information that does exist — your favorites and
+      recents — lives on your device and is fully under your control through your browser's storage
+      settings.
+    </p>
+    <p>
+      For questions about this policy, the fastest path is a GitHub issue, or the contact details on
+      the <a href="/contact">contact page</a>.
+    </p>
+  </section>
+</DocLayout>
