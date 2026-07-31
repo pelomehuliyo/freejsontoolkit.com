@@ -1,0 +1,1000 @@
+---
+import ToolShell from "../../components/tools/ToolShell.astro";
+import ToolHeader from "../../components/tools/ToolHeader.astro";
+import ToolWorkspace from "../../components/tools/ToolWorkspace.astro";
+import CodeEditor from "../../components/tools/CodeEditor.astro";
+import ToolActions from "../../components/tools/ToolActions.astro";
+import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import Card from "../../components/Card.astro";
+import Button from "../../components/Button.astro";
+import Container from "../../components/Container.astro";
+import { COUNT_PRESETS, LEGEND } from "../../lib/tools/fake-json/constants";
+---
+
+<ToolShell
+  title="Fake JSON Generator — Mock Data Online (Free, Local)"
+  description="Free online fake JSON generator. Describe a shape with a template of faker tokens and materialize realistic mock records — seeded, reproducible, 100% local, no upload."
+  activePath="/tools/fake-json"
+>
+  <ToolHeader
+    slot="header"
+    breadcrumbs={[{ label: "Home", href: "/" }, { label: "Fake JSON" }]}
+    title="Fake JSON Generator"
+    subtitle="Describe a shape, get realistic mock data. Seeded and reproducible — offline."
+  />
+
+  <ToolWorkspace slot="workspace" layout="3-col">
+    <div slot="input" class="ws-fill">
+      <Card variant="flat" class="workspace-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">TEMPLATE</span>
+          <ToolActions id="input-actions" variant="inset" actions={["sample", "clear"]} />
+        </div>
+        <CodeEditor
+          id="fj-template"
+          label="JSON template with faker tokens"
+          placeholder='{"id":"{{index1}}","name":"{{name}}"}'
+        >
+          <div class="editor-info-bar" slot>
+            <span class="info-status" id="fj-template-status">Template: Empty</span>
+            <span class="info-meta" id="fj-template-count">0 chars</span>
+          </div>
+        </CodeEditor>
+      </Card>
+    </div>
+
+    <div slot="controls">
+      <Card variant="flat" class="workspace-card settings-card">
+        <h2 class="display-sm settings-title">Options</h2>
+        <div class="settings-divider"></div>
+
+        <div class="settings-group">
+          <span class="settings-label caption-mono">records</span>
+          <div class="fj-count">
+            <input
+              type="number"
+              id="fj-count"
+              class="fj-num"
+              min="1"
+              max="5000"
+              value="5"
+              inputmode="numeric"
+              aria-label="How many records"
+            />
+            <div class="fj-chips" role="group" aria-label="Quick counts">
+              {
+                COUNT_PRESETS.map((n) => (
+                  <button type="button" class="fj-chip" data-fj-count={n}>
+                    {n}
+                  </button>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <label class="settings-label caption-mono" for="fj-seed">seed (optional)</label>
+          <input
+            type="text"
+            id="fj-seed"
+            class="fj-text"
+            placeholder="leave empty for random"
+            spellcheck="false"
+            autocomplete="off"
+          />
+          <p class="caption settings-help">Same seed = same data, every time.</p>
+        </div>
+
+        <div class="settings-group checkbox-group">
+          <label class="checkbox-container body-sm">
+            <input type="checkbox" id="fj-pretty" checked />
+            <span class="checkbox-checkmark"></span>
+            Pretty-print output
+          </label>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <Button id="fj-run" variant="primary" size="lg" shape="square" class="action-btn">
+          <span class="fj-dice" aria-hidden="true">⚄</span> Generate
+        </Button>
+
+        {
+          /* live readout — in the controls card so the editors keep the exact
+            structure the global equal-height rule aligns */
+        }
+        <div class="fj-readout" id="fj-readout" hidden>
+          <div class="fj-valid" id="fj-valid">
+            <span class="fj-dot" id="fj-dot"></span>
+            <span class="caption-mono" id="fj-valid-text">template ok</span>
+          </div>
+          <div class="fj-row">
+            <span class="fj-label caption-mono">records</span>
+            <span class="fj-val" id="fj-n-rec">0</span>
+          </div>
+          <div class="fj-row">
+            <span class="fj-label caption-mono">size</span>
+            <span class="fj-val fj-accent" id="fj-n-bytes">0 B</span>
+          </div>
+          <div class="fj-row">
+            <span class="fj-label caption-mono">generated in</span>
+            <span class="fj-val" id="fj-n-ms">0 ms</span>
+          </div>
+          <div class="fj-row">
+            <span class="fj-label caption-mono">seed</span>
+            <span class="fj-val fj-seed-echo" id="fj-seed-echo">random</span>
+          </div>
+          <div class="fj-shape" id="fj-shape" aria-hidden="true"></div>
+        </div>
+
+        <ErrorBanner id="fj-error" />
+
+        <div class="status-banner caption">
+          <span class="status-indicator"><span class="dot idle" id="fj-status-dot"></span></span>
+          <span class="sr-only" id="fj-announce" aria-live="polite"></span>
+          Local sandbox active
+        </div>
+      </Card>
+    </div>
+
+    <div slot="output" class="ws-fill ws-output">
+      <Card variant="flat" class="workspace-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">GENERATED JSON</span>
+          <ToolActions id="output-actions" variant="inset" actions={["copy", "download"]} />
+        </div>
+        <CodeEditor
+          id="fj-output"
+          label="Generated JSON"
+          placeholder="Your mock data appears here…"
+          readonly
+        >
+          <div class="editor-info-bar" slot>
+            <span class="info-status" id="fj-output-status">Output: Empty</span>
+            <span class="info-meta" id="fj-output-count">0 chars</span>
+          </div>
+        </CodeEditor>
+      </Card>
+    </div>
+  </ToolWorkspace>
+
+  {/* token reference — varied grouped rows, not equal cards; the docs */}
+  <section class="fj-ref">
+    <Container size="narrow">
+      <div class="fj-ref-head">
+        <span class="caption-mono section-eyebrow">THE TOKENS</span>
+        <h2 class="display-md fj-ref-title">Write a shape, get the data</h2>
+        <p class="body-sm fj-ref-sub">
+          The template is ordinary JSON. Put a faker token in any string value — a value that is
+          <em> only </em> a token keeps its real type, so <code>"{"{{int:1..9}}"}</code> becomes a number.
+        </p>
+      </div>
+      <div class="fj-ref-groups">
+        {
+          LEGEND.map((g) => (
+            <div class="fj-ref-group">
+              <h3 class="fj-ref-group-title caption-mono">{g.group}</h3>
+              <div class="fj-ref-rows">
+                {g.rows.map((r) => (
+                  <div class="fj-ref-row">
+                    <code class="fj-ref-token">{r.syntax}</code>
+                    <span class="fj-ref-ex">{r.example}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </Container>
+  </section>
+
+  <section class="faq-section" aria-labelledby="faq-title">
+    <Container size="narrow">
+      <div class="faq-header">
+        <span class="caption-mono section-eyebrow">FAQ</span>
+        <h2 id="faq-title" class="display-lg section-title">Quick answers</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary class="faq-summary">Is my template sent anywhere?</summary>
+          <p class="body-md faq-answer">
+            No. Generation runs entirely in your browser. The template and the data it produces
+            never leave your machine.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">What does the seed do?</summary>
+          <p class="body-md faq-answer">
+            It makes the output reproducible. Type any word and the same template + count + seed
+            always yields the same records — handy for fixtures and CI. Leave it empty for fresh
+            random data each time.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Why did my number come out as a string?</summary>
+          <p class="body-md faq-answer">
+            It didn't, if the value was only the token. The unbox rule keeps <code
+              >"{"{{int}}"}</code
+            > as a number. If you write text around a token — <code>"id-{"{{int}}"}</code> — the whole
+            value is text, so you get a string.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Can I nest objects and arrays?</summary>
+          <p class="body-md faq-answer">
+            Yes. The template is real JSON, so any structure works — tokens expand wherever they
+            appear, including inside nested objects and arrays. For a variable-length array, list
+            the tokens you want; a repeat-count token is on the roadmap.
+          </p>
+        </details>
+      </div>
+    </Container>
+  </section>
+</ToolShell>
+
+<script>
+  import { fakeJsonStore } from "../../lib/tools/fake-json/store";
+  import {
+    setTemplate,
+    setCount,
+    setSeed,
+    setPretty,
+    clearAll,
+    run,
+  } from "../../lib/tools/fake-json/actions";
+  import { shapeOf } from "../../lib/tools/fake-json/engine";
+  import { debounce } from "../../shared/debounce";
+  import { announce, initAnnounce } from "../../shared/announce";
+  import { copyToClipboard } from "../../shared/clipboard";
+  import { downloadFile } from "../../shared/download";
+
+  const tplTextarea = document.getElementById("fj-template-textarea") as HTMLTextAreaElement | null;
+  const outTextarea = document.getElementById("fj-output-textarea") as HTMLTextAreaElement | null;
+  const tplStatus = document.getElementById("fj-template-status") as HTMLElement | null;
+  const tplCount = document.getElementById("fj-template-count") as HTMLElement | null;
+  const outStatus = document.getElementById("fj-output-status") as HTMLElement | null;
+  const outCount = document.getElementById("fj-output-count") as HTMLElement | null;
+  const runBtn = document.getElementById("fj-run") as HTMLButtonElement | null;
+  const dice = runBtn ? runBtn.querySelector(".fj-dice") : null;
+  const countInput = document.getElementById("fj-count") as HTMLInputElement | null;
+  const countChips = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-fj-count]"));
+  const seedInput = document.getElementById("fj-seed") as HTMLInputElement | null;
+  const prettyCb = document.getElementById("fj-pretty") as HTMLInputElement | null;
+  const errorBanner = document.getElementById("fj-error") as HTMLElement | null;
+  const statusDot = document.getElementById("fj-status-dot") as HTMLElement | null;
+
+  const readout = document.getElementById("fj-readout") as HTMLElement | null;
+  const validBox = document.getElementById("fj-valid") as HTMLElement | null;
+  const validDot = document.getElementById("fj-dot") as HTMLElement | null;
+  const validText = document.getElementById("fj-valid-text") as HTMLElement | null;
+  const nRec = document.getElementById("fj-n-rec") as HTMLElement | null;
+  const nBytes = document.getElementById("fj-n-bytes") as HTMLElement | null;
+  const nMs = document.getElementById("fj-n-ms") as HTMLElement | null;
+  const seedEcho = document.getElementById("fj-seed-echo") as HTMLElement | null;
+  const shapeEl = document.getElementById("fj-shape") as HTMLElement | null;
+
+  initAnnounce("fj-announce");
+
+  const fmtBytes = (n: number): string => (n >= 1024 ? (n / 1024).toFixed(1) + " KB" : n + " B");
+
+  const debouncedTemplate = debounce((value: string) => {
+    setTemplate(fakeJsonStore, value);
+    run(fakeJsonStore, false);
+  }, 220);
+
+  let lastShapeKey = "";
+
+  fakeJsonStore.subscribe((state) => {
+    const focused = tplTextarea && document.activeElement === tplTextarea;
+    if (tplTextarea && tplTextarea.value !== state.template && !focused) {
+      tplTextarea.value = state.template;
+      tplTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+    const outText = state.result ? state.result.output : "";
+    if (outTextarea && outTextarea.value !== outText) {
+      outTextarea.value = outText;
+      outTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+
+    // template status bar
+    if (tplStatus) {
+      if (state.template.trim() === "") {
+        tplStatus.textContent = "Template: Empty";
+        tplStatus.style.color = "";
+      } else if (state.validity.ok) {
+        tplStatus.textContent = "Template: Valid";
+        tplStatus.style.color = "var(--color-success)";
+      } else {
+        tplStatus.textContent = "Template: Invalid";
+        tplStatus.style.color = "var(--color-error)";
+      }
+    }
+    if (tplCount) tplCount.textContent = state.template.length.toLocaleString() + " chars";
+
+    if (outStatus) {
+      outStatus.textContent = state.result ? "Output: Ready" : "Output: Empty";
+      outStatus.style.color = state.result ? "var(--color-success)" : "";
+    }
+    if (outCount)
+      outCount.textContent =
+        (state.result ? state.result.output.length : 0).toLocaleString() + " chars";
+
+    if (statusDot) {
+      statusDot.classList.remove("idle", "active", "error");
+      statusDot.classList.add(state.isRunning ? "active" : !state.validity.ok ? "error" : "idle");
+    }
+
+    // button + dice micro-interaction
+    if (runBtn) {
+      if (state.isRunning) {
+        runBtn.disabled = true;
+        if (runBtn.lastChild) runBtn.lastChild.textContent = " Generating…";
+        if (dice) dice.classList.add("spin");
+      } else if (state.needsManual) {
+        runBtn.disabled = false;
+        if (runBtn.lastChild) runBtn.lastChild.textContent = " Generate (large batch)";
+        if (dice) dice.classList.remove("spin");
+      } else {
+        runBtn.disabled = false;
+        if (runBtn.lastChild) runBtn.lastChild.textContent = " Generate";
+        if (dice) dice.classList.remove("spin");
+      }
+    }
+
+    // readout
+    if (readout) readout.hidden = !state.result && state.template.trim() === "";
+    if (validBox) {
+      if (state.template.trim() === "") {
+        validBox.classList.add("is-idle");
+        if (validDot) validDot.className = "fj-dot";
+        if (validText) validText.textContent = "awaiting template";
+      } else if (state.validity.ok) {
+        validBox.classList.remove("is-idle");
+        if (validDot) validDot.className = "fj-dot ok";
+        if (validText) validText.textContent = "template ok";
+      } else {
+        validBox.classList.remove("is-idle");
+        if (validDot) validDot.className = "fj-dot err";
+        if (validText) validText.textContent = state.validity.message;
+      }
+    }
+    if (state.result) {
+      if (nRec) nRec.textContent = state.result.records.toLocaleString();
+      if (nBytes) nBytes.textContent = fmtBytes(state.result.bytes);
+      if (nMs) nMs.textContent = state.result.ms.toFixed(1) + " ms";
+      if (seedEcho) seedEcho.textContent = state.result.seedEcho;
+    }
+
+    // shape strip (rebuilt only when the key set changes)
+    if (shapeEl) {
+      const shape = shapeOf(state.template);
+      const key = shape.map((s) => s.key + s.glyph).join("|");
+      if (key !== lastShapeKey) {
+        lastShapeKey = key;
+        if (shape.length === 0) {
+          shapeEl.innerHTML = "";
+          shapeEl.hidden = true;
+        } else {
+          shapeEl.hidden = false;
+          shapeEl.innerHTML = shape
+            .map(
+              (s) =>
+                `<span class="fj-shape-chip"><span class="fj-shape-g">${s.glyph}</span>${s.key.replace(
+                  /[&<>]/g,
+                  (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c] as string,
+                )}</span>`,
+            )
+            .join("");
+        }
+      }
+    }
+
+    if (errorBanner) {
+      if (state.error) (errorBanner as any).show?.(state.error);
+      else (errorBanner as any).hide?.();
+    }
+    if (state.error) announce("Error: " + state.error);
+  });
+
+  if (tplTextarea)
+    tplTextarea.addEventListener("input", () => debouncedTemplate(tplTextarea.value));
+
+  if (runBtn) runBtn.addEventListener("click", () => run(fakeJsonStore, true));
+  if (countInput)
+    countInput.addEventListener("input", () => {
+      setCount(fakeJsonStore, parseInt(countInput.value, 10) || 1);
+      run(fakeJsonStore, false);
+    });
+  countChips.forEach((b) =>
+    b.addEventListener("click", () => {
+      const n = parseInt(b.getAttribute("data-fj-count") || "1", 10);
+      setCount(fakeJsonStore, n);
+      if (countInput) countInput.value = String(n);
+      run(fakeJsonStore, false);
+    }),
+  );
+  if (seedInput)
+    seedInput.addEventListener("input", () => {
+      setSeed(fakeJsonStore, seedInput.value);
+      run(fakeJsonStore, false);
+    });
+  if (prettyCb)
+    prettyCb.addEventListener("change", () => {
+      setPretty(fakeJsonStore, prettyCb.checked);
+      run(fakeJsonStore, true);
+    });
+
+  const inputActions = document.getElementById("input-actions");
+  if (inputActions)
+    inputActions.addEventListener("tool-action", (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      if (action === "sample") {
+        // reset to the default template + regenerate
+        setTemplate(
+          fakeJsonStore,
+          `{
+  "id": "{{index1}}",
+  "name": "{{name}}",
+  "email": "{{email}}",
+  "age": "{{int:18..65}}",
+  "active": "{{bool}}",
+  "score": "{{float:0..10}}",
+  "role": "{{enum:admin|editor|viewer}}",
+  "ip": "{{ipv4}}",
+  "joined": "{{date:2021..2024}}",
+  "bio": "{{sentence}}"
+}`,
+        );
+        run(fakeJsonStore, true);
+        announce("Sample template loaded");
+      }
+      if (action === "clear") {
+        clearAll(fakeJsonStore);
+        announce("Cleared");
+      }
+    });
+
+  const outputActions = document.getElementById("output-actions");
+  if (outputActions)
+    outputActions.addEventListener("tool-action", async (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      const out = fakeJsonStore.get().result?.output ?? "";
+      if (action === "copy") {
+        const ok = out ? await copyToClipboard(out) : false;
+        const btn = outputActions.querySelector("[data-action='copy']");
+        if (ok && btn) {
+          const orig = btn.textContent || "Copy";
+          btn.textContent = "Copied!";
+          announce("Generated JSON copied");
+          setTimeout(() => {
+            btn.textContent = orig;
+          }, 1500);
+        }
+      }
+      if (action === "download") {
+        if (out) {
+          downloadFile(out, "fake-data.json", "application/json;charset=utf-8;");
+          announce("Download started");
+        }
+      }
+    });
+
+  document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "SELECT") return;
+      e.preventDefault();
+      run(fakeJsonStore, true);
+    }
+  });
+</script>
+
+<!-- Shape chips are injected via innerHTML, so their styles must be global.
+     Names are fj-shape-* to avoid any collision. -->
+<style is:global>
+  .fj-shape {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 2px;
+  }
+  .fj-shape-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-pill-sm);
+    background-color: var(--color-canvas);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-body);
+    animation: fj-chip-in 0.3s ease both;
+  }
+  .fj-shape-g {
+    color: var(--color-accent-active);
+    font-weight: 700;
+  }
+  @keyframes fj-chip-in {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
+
+<style>
+  .settings-card {
+    padding: var(--spacing-lg);
+  }
+  .settings-title {
+    margin: 0;
+  }
+  .settings-divider {
+    height: 1px;
+    background-color: var(--color-hairline);
+    margin: var(--spacing-xs) 0;
+  }
+  .settings-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-md);
+  }
+  .settings-label {
+    color: var(--color-mute);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .settings-help {
+    color: var(--color-mute);
+    margin: 2px 0 0;
+    line-height: 1.4;
+  }
+
+  .fj-count {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .fj-num {
+    width: 72px;
+    height: 36px;
+    padding: 0 8px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    outline: none;
+  }
+  .fj-num:focus {
+    border-color: var(--color-accent);
+  }
+  .fj-chips {
+    display: flex;
+    gap: 4px;
+  }
+  .fj-chip {
+    border: 1px solid var(--color-hairline);
+    background: var(--color-canvas);
+    color: var(--color-mute);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 6px 8px;
+    border-radius: var(--rounded-sm);
+    cursor: pointer;
+    transition:
+      color 0.12s ease,
+      border-color 0.12s ease;
+  }
+  .fj-chip:hover {
+    color: var(--color-accent-active);
+    border-color: var(--color-accent);
+  }
+  .fj-text {
+    width: 100%;
+    height: 36px;
+    padding: 0 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    outline: none;
+  }
+  .fj-text:focus {
+    border-color: var(--color-accent);
+  }
+
+  .checkbox-group {
+    margin-bottom: var(--spacing-sm);
+  }
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    padding-left: 24px;
+    cursor: pointer;
+    user-select: none;
+    color: var(--color-ink);
+  }
+  .checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  .checkbox-checkmark {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    height: 16px;
+    width: 16px;
+    border: 1px solid var(--color-hairline-strong);
+    border-radius: 4px;
+    background-color: var(--color-canvas);
+    transition:
+      background-color 0.1s ease,
+      border-color 0.1s ease;
+  }
+  .checkbox-container:hover input ~ .checkbox-checkmark {
+    border-color: var(--color-ink);
+  }
+  .checkbox-container input:checked ~ .checkbox-checkmark {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+  .checkbox-checkmark::after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+  .checkbox-container input:checked ~ .checkbox-checkmark::after {
+    display: block;
+  }
+  .checkbox-container .checkbox-checkmark::after {
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+  }
+
+  .action-btn {
+    width: 100%;
+    margin-top: var(--spacing-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .fj-dice {
+    display: inline-block;
+    transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  .fj-dice.spin {
+    transform: rotate(180deg);
+  }
+
+  /* live readout */
+  .fj-readout {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .fj-valid {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--color-hairline);
+    margin-bottom: 1px;
+    color: var(--color-body);
+  }
+  .fj-valid.is-idle {
+    color: var(--color-mute);
+  }
+  .fj-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--color-hairline-strong);
+    flex: none;
+  }
+  .fj-dot.ok {
+    background-color: var(--color-accent);
+    animation: fj-pulse 1.8s ease-in-out infinite;
+  }
+  .fj-dot.err {
+    background-color: var(--color-error);
+  }
+  @keyframes fj-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(33, 167, 138, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 4px rgba(33, 167, 138, 0);
+    }
+  }
+  .fj-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .fj-label {
+    color: var(--color-mute);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .fj-val {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .fj-val.fj-accent {
+    color: var(--color-accent-active);
+  }
+  .fj-seed-echo {
+    font-size: 12px;
+    color: var(--color-body);
+    max-width: 60%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .status-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-mute);
+    margin-top: auto;
+    padding-top: var(--spacing-md);
+  }
+  .status-indicator .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-hairline-strong);
+  }
+  .status-indicator .dot.active {
+    background-color: var(--color-accent);
+  }
+  .status-indicator .dot.error {
+    background-color: var(--color-error);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .workspace-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    gap: var(--spacing-md);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-hairline);
+    padding-bottom: var(--spacing-sm);
+  }
+  .column-title {
+    color: var(--color-mute);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+  .editor-info-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--color-hairline);
+    border-top: none;
+    border-bottom-left-radius: var(--rounded-sm);
+    border-bottom-right-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    padding: 6px var(--spacing-sm);
+    font-size: 11px;
+    color: var(--color-mute);
+    font-family: var(--font-sans);
+  }
+  .info-status {
+    font-weight: 500;
+  }
+
+  /* token reference */
+  .fj-ref {
+    padding: var(--spacing-4xl) 0 var(--spacing-5xl);
+    background-color: var(--color-canvas-soft);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .fj-ref-head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-xl);
+  }
+  .fj-ref-title {
+    color: var(--color-ink);
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+  .fj-ref-sub {
+    color: var(--color-body);
+    margin: 0;
+    max-width: 64ch;
+    line-height: 1.6;
+  }
+  .fj-ref-sub code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background-color: var(--color-canvas-soft-2);
+    padding: 1px 5px;
+    border-radius: var(--rounded-xs);
+    color: var(--color-ink);
+  }
+  .fj-ref-groups {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+  .fj-ref-group {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    background-color: var(--color-canvas);
+    overflow: hidden;
+  }
+  .fj-ref-group-title {
+    padding: 9px var(--spacing-md);
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--color-hairline);
+    background-color: var(--color-canvas-soft);
+    margin: 0;
+  }
+  .fj-ref-rows {
+    display: flex;
+    flex-direction: column;
+  }
+  .fj-ref-row {
+    display: grid;
+    grid-template-columns: minmax(120px, 1fr) 1fr;
+    gap: var(--spacing-sm);
+    align-items: center;
+    padding: 8px var(--spacing-md);
+    transition: background-color 0.12s ease;
+  }
+  .fj-ref-row + .fj-ref-row {
+    border-top: 1px solid var(--color-hairline);
+  }
+  .fj-ref-row:hover {
+    background-color: var(--color-canvas-soft);
+  }
+  .fj-ref-token {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-accent-active);
+  }
+  .fj-ref-ex {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-mute);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .section-eyebrow {
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+  }
+  .faq-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .faq-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .faq-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft);
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  .faq-summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink);
+    padding: var(--spacing-xs) 0;
+    user-select: none;
+  }
+  .faq-summary:hover {
+    color: var(--color-accent);
+  }
+  .faq-answer {
+    margin-top: var(--spacing-sm);
+    font-size: 13px;
+    color: var(--color-body);
+    line-height: 1.6;
+  }
+  .faq-answer code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background-color: var(--color-canvas-soft-2);
+    padding: 1px 4px;
+    border-radius: var(--rounded-xs);
+  }
+
+  @media (min-width: 960px) {
+    .workspace-card :global(.editor-outer) {
+      flex: none;
+      height: 650px;
+      min-height: 650px;
+    }
+    .workspace-card :global(.editor-wrapper) {
+      height: 100%;
+    }
+  }
+  @media (max-width: 959px) {
+    .workspace-card :global(.editor-outer) {
+      height: 350px;
+      flex: 0 0 350px;
+      min-height: 0;
+    }
+    .workspace-card :global(.editor-wrapper) {
+      height: 100%;
+    }
+    .fj-ref-groups {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
