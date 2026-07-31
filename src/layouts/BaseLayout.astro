@@ -8,6 +8,7 @@ import { tools, categoryLabel } from "../lib/tools/registry";
 interface Props {
   title?: string;
   description?: string;
+  keywords?: string;
   activePath?: string;
   noindex?: boolean;
 }
@@ -15,6 +16,7 @@ interface Props {
 const {
   title = "Free JSON Toolkit - Modern Developer Utilities",
   description = "A suite of clean, developer-first, JSON tools to transform, validate, and format data.",
+  keywords = "",
   activePath = "/",
   noindex = false,
 } = Astro.props;
