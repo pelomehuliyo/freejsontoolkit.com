@@ -1,0 +1,1241 @@
+---
+import ToolShell from "../../components/tools/ToolShell.astro";
+import ToolHeader from "../../components/tools/ToolHeader.astro";
+import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import Card from "../../components/Card.astro";
+import Button from "../../components/Button.astro";
+import Container from "../../components/Container.astro";
+import {
+  COUNT_PRESETS,
+  NAMESPACE_PRESETS,
+  VERSION_LEGEND,
+  maxCount,
+} from "../../lib/tools/uuid/constants";
+import type { UuidVersion } from "../../lib/tools/uuid/types";
+
+const versions: { v: UuidVersion; label: string }[] = [
+  { v: "v4", label: "v4" },
+  { v: "v7", label: "v7" },
+  { v: "v1", label: "v1" },
+  { v: "v5", label: "v5" },
+];
+const formats = [
+  { f: "hyphen", label: "8-4-4-4-12" },
+  { f: "compact", label: "compact" },
+  { f: "braces", label: "{ braces }" },
+  { f: "urn", label: "urn:" },
+];
+---
+
+<ToolShell
+  title="UUID Generator — v1, v4, v5, v7 Online (Free, Local)"
+  description="Free online UUID generator for v1, v4, v5 and v7. Bulk-generate sortable time-ordered v7s, random v4s, or deterministic name-based v5s — 100% local, no upload, no server."
+  activePath="/tools/uuid"
+>
+  <ToolHeader
+    slot="header"
+    breadcrumbs={[{ label: "Home", href: "/" }, { label: "UUID Generator" }]}
+    title="UUID Generator"
+    subtitle="Generate v1, v4, v5 or v7 identifiers in bulk — sortable, random, or name-based. Offline."
+  />
+
+  <section class="uu-stage">
+    <Container size="wide">
+      {/* ── Config ── */}
+      <Card variant="flat" class="workspace-card uu-config">
+        <div class="uu-config-grid">
+          <div class="uu-field">
+            <span class="uu-flabel caption-mono">version</span>
+            <div class="seg" role="group" aria-label="UUID version">
+              {
+                versions.map((x, i) => (
+                  <button
+                    type="button"
+                    class:list={["seg-btn", { "is-active": i === 0 }]}
+                    data-uu-version={x.v}
+                    aria-pressed={i === 0 ? "true" : "false"}
+                  >
+                    {x.label}
+                  </button>
+                ))
+              }
+            </div>
+          </div>
+
+          <div class="uu-field">
+            <span class="uu-flabel caption-mono">count</span>
+            <div class="uu-count">
+              <input
+                type="number"
+                id="uu-count"
+                class="uu-num"
+                min="1"
+                max="5000"
+                value="5"
+                inputmode="numeric"
+                aria-label="How many UUIDs"
+              />
+              <div class="uu-chips" role="group" aria-label="Quick counts">
+                {
+                  COUNT_PRESETS.map((n) => (
+                    <button type="button" class="uu-chip" data-uu-count={n}>
+                      {n}
+                    </button>
+                  ))
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="uu-field">
+            <span class="uu-flabel caption-mono">format</span>
+            <div class="seg" role="group" aria-label="Output format">
+              {
+                formats.map((x, i) => (
+                  <button
+                    type="button"
+                    class:list={["seg-btn", { "is-active": i === 0 }]}
+                    data-uu-format={x.f}
+                    aria-pressed={i === 0 ? "true" : "false"}
+                  >
+                    {x.label}
+                  </button>
+                ))
+              }
+            </div>
+          </div>
+
+          <div class="uu-field uu-field-case">
+            <span class="uu-flabel caption-mono">case</span>
+            <label class="uu-toggle body-sm">
+              <input type="checkbox" id="uu-upper" />
+              <span class="uu-switch" aria-hidden="true"></span>
+              <span id="uu-case-label">lower</span>
+            </label>
+          </div>
+        </div>
+
+        {/* v5-only inputs */}
+        <div class="uu-v5" id="uu-v5" hidden>
+          <div class="uu-field">
+            <span class="uu-flabel caption-mono">namespace</span>
+            <div class="select-wrapper uu-ns-select">
+              <select id="uu-ns" class="settings-select">
+                {NAMESPACE_PRESETS.map((p) => <option value={p.id}>{p.label}</option>)}
+                <option value="custom">custom…</option>
+              </select>
+            </div>
+            <input
+              type="text"
+              id="uu-ns-custom"
+              class="uu-text"
+              placeholder="6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+              hidden
+              spellcheck="false"
+              aria-label="Custom namespace UUID"
+            />
+          </div>
+          <div class="uu-field uu-field-grow">
+            <span class="uu-flabel caption-mono">name</span>
+            <input
+              type="text"
+              id="uu-name"
+              class="uu-text"
+              placeholder="example.com"
+              spellcheck="false"
+              aria-label="Name to hash"
+            />
+          </div>
+        </div>
+
+        <div class="uu-go">
+          <Button id="uu-generate" variant="primary" size="lg" shape="square" class="uu-gen-btn">
+            Generate
+          </Button>
+          <span class="uu-cap caption-mono" id="uu-cap"></span>
+        </div>
+
+        <ErrorBanner id="uu-error" />
+      </Card>
+
+      {/* ── Session readout ── */}
+      <div class="uu-stats" id="uu-stats" hidden>
+        <div class="uu-stat">
+          <span class="uu-stat-num" id="uu-total">0</span>
+          <span class="uu-stat-label caption-mono">generated this session</span>
+        </div>
+        <div class="uu-stat">
+          <span class="uu-stat-num uu-accent" id="uu-throughput">—</span>
+          <span class="uu-stat-label caption-mono">last batch</span>
+        </div>
+        <div class="uu-order" id="uu-order" hidden>
+          <span class="uu-order-dot" id="uu-order-dot"></span>
+          <span class="caption-mono" id="uu-order-text"></span>
+        </div>
+      </div>
+
+      {/* ── Ledger ─ */}
+      <Card variant="flat" class="workspace-card uu-ledger-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">OUTPUT</span>
+          <div class="uu-out-actions">
+            <div class="seg uu-copy-seg" role="group" aria-label="Copy format">
+              <button
+                type="button"
+                class="seg-btn is-active"
+                data-uu-copymode="lines"
+                aria-pressed="true">lines</button
+              >
+              <button type="button" class="seg-btn" data-uu-copymode="json" aria-pressed="false"
+                >json</button
+              >
+            </div>
+            <button
+              type="button"
+              class="uu-iconbtn"
+              id="uu-copyall"
+              data-action="copy"
+              aria-label="Copy all"
+              disabled>copy</button
+            >
+            <button
+              type="button"
+              class="uu-iconbtn"
+              id="uu-download"
+              data-action="download"
+              aria-label="Download"
+              disabled>download</button
+            >
+          </div>
+        </div>
+
+        <div class="uu-idle" id="uu-idle">
+          <p class="uu-idle-cmd caption-mono">$ uuidgen --version 7 --count 1000</p>
+          <p class="body-sm uu-idle-msg">
+            Pick a version and a count, then Generate. v7 batches come out already sorted; v5 turns
+            a name into the same id every time.
+          </p>
+        </div>
+
+        <div class="uu-list-head" id="uu-list-head" hidden>
+          <span class="caption-mono">#</span>
+          <span class="caption-mono">identifier</span>
+          <span class="caption-mono">ver</span>
+          <span class="caption-mono"></span>
+        </div>
+        <div class="uu-list" id="uu-list" role="list"></div>
+        <p class="uu-tail caption-mono" id="uu-tail" hidden></p>
+      </Card>
+
+      {/* ── Version legend (the documentation, not a steps row) ── */}
+      <div class="uu-legend">
+        <div class="uu-legend-head">
+          <span class="caption-mono section-eyebrow">THE FOUR VERSIONS</span>
+          <h2 class="display-md uu-legend-title">Not all UUIDs are random</h2>
+        </div>
+        <div class="uu-legend-rows">
+          {
+            VERSION_LEGEND.map((m) => (
+              <div class="uu-leg-row">
+                <span class="uu-leg-badge caption-mono">{m.version}</span>
+                <div class="uu-leg-body">
+                  <h3 class="body-sm-strong uu-leg-name">{m.name}</h3>
+                  <p class="caption uu-leg-blurb">{m.blurb}</p>
+                  <div class="uu-leg-tags">
+                    {m.tags.map((t) => (
+                      <span class="uu-leg-tag caption-mono">{t}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+        <p class="caption uu-legend-note">
+          Version 3 (name-based, MD5) is intentionally not offered: MD5 isn't available in Web
+          Crypto, and a hand-rolled copy would risk silent corruption. v5 is its correct successor.
+        </p>
+      </div>
+    </Container>
+  </section>
+
+  <section class="faq-section" aria-labelledby="faq-title">
+    <Container size="narrow">
+      <div class="faq-header">
+        <span class="caption-mono section-eyebrow">FAQ</span>
+        <h2 id="faq-title" class="display-lg section-title">Quick answers</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary class="faq-summary">Which version should I use?</summary>
+          <p class="body-md faq-answer">
+            For an opaque id, v4. For a primary key you'll sort or insert in order, v7 — its time
+            prefix keeps inserts sequential. For a stable id derived from a name (a URL, a DNS
+            name), v5.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Are these generated on a server?</summary>
+          <p class="body-md faq-answer">
+            No. Every UUID is produced in your browser using the platform's cryptographic RNG (and
+            SHA-1 for v5). Nothing you generate is transmitted or stored.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Why aren't v1 UUIDs sortable as strings?</summary>
+          <p class="body-md faq-answer">
+            v1 stores the low 32 bits of the timestamp first, so the string order doesn't follow
+            time. That limitation is exactly what v7 was designed to fix — it puts the
+            most-significant time bits at the front.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">What does "deterministic" mean for v5?</summary>
+          <p class="body-md faq-answer">
+            The same namespace + name always hashes to the same UUID, on any machine. Generating a
+            batch appends an index to the name so you get distinct ids; remove the index logic and
+            you'd get the same id repeated.
+          </p>
+        </details>
+      </div>
+    </Container>
+  </section>
+</ToolShell>
+
+<script>
+  import { uuidStore } from "../../lib/tools/uuid/store";
+  import {
+    setVersion,
+    setCount,
+    setFormat,
+    setUpper,
+    setNamespacePreset,
+    setCustomNamespace,
+    setName,
+    clearAll,
+    runGenerate,
+  } from "../../lib/tools/uuid/actions";
+  import { maxCount, RENDER_CAP } from "../../lib/tools/uuid/constants";
+  import type { UuidFormat, UuidItem, UuidVersion } from "../../lib/tools/uuid/types";
+  import { announce, initAnnounce } from "../../shared/announce";
+  import { copyToClipboard } from "../../shared/clipboard";
+  import { downloadFile } from "../../shared/download";
+
+  const genBtn = document.getElementById("uu-generate") as HTMLButtonElement | null;
+  const countInput = document.getElementById("uu-count") as HTMLInputElement | null;
+  const countChips = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-uu-count]"));
+  const verBtns = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-uu-version]"));
+  const fmtBtns = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-uu-format]"));
+  const upperCb = document.getElementById("uu-upper") as HTMLInputElement | null;
+  const caseLabel = document.getElementById("uu-case-label") as HTMLElement | null;
+  const v5Box = document.getElementById("uu-v5") as HTMLElement | null;
+  const nsSel = document.getElementById("uu-ns") as HTMLSelectElement | null;
+  const nsCustom = document.getElementById("uu-ns-custom") as HTMLInputElement | null;
+  const nameInput = document.getElementById("uu-name") as HTMLInputElement | null;
+  const capEl = document.getElementById("uu-cap") as HTMLElement | null;
+  const errorBanner = document.getElementById("uu-error") as HTMLElement | null;
+
+  const statsEl = document.getElementById("uu-stats") as HTMLElement | null;
+  const totalEl = document.getElementById("uu-total") as HTMLElement | null;
+  const thruEl = document.getElementById("uu-throughput") as HTMLElement | null;
+  const orderBox = document.getElementById("uu-order") as HTMLElement | null;
+  const orderDot = document.getElementById("uu-order-dot") as HTMLElement | null;
+  const orderText = document.getElementById("uu-order-text") as HTMLElement | null;
+
+  const idleEl = document.getElementById("uu-idle") as HTMLElement | null;
+  const listHead = document.getElementById("uu-list-head") as HTMLElement | null;
+  const listEl = document.getElementById("uu-list") as HTMLElement | null;
+  const tailEl = document.getElementById("uu-tail") as HTMLElement | null;
+  const copyAllBtn = document.getElementById("uu-copyall") as HTMLButtonElement | null;
+  const dlBtn = document.getElementById("uu-download") as HTMLButtonElement | null;
+  const copyModeBtns = Array.from(
+    document.querySelectorAll<HTMLButtonElement>("[data-uu-copymode]"),
+  );
+
+  initAnnounce("uu-error");
+
+  let copyMode: "lines" | "json" = "lines";
+  let currentUpper = false;
+
+  function esc(s: unknown): string {
+    return String(s == null ? "" : s).replace(
+      /[&<>"]/g,
+      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c] as string,
+    );
+  }
+  const up = (s: string): string => (currentUpper ? s.toUpperCase() : s);
+
+  function idHtml(item: UuidItem): string {
+    const g = item.groups
+      .map((s, k) => `<span class="g${k}">${esc(up(s))}</span>`)
+      .join('<span class="gh">-</span>');
+    // for compact/braces/urn the stored `formatted` already encodes the shape;
+    // rebuild the decorated wrapper to match, reusing the tinted groups.
+    const noHy = item.groups.map((s) => `<span class="g0">${esc(up(s))}</span>`).join("");
+    // simpler: derive decoration from format via the formatted string's prefix/suffix
+    const f = item.formatted;
+    if (f.startsWith("urn:uuid:")) {
+      return `<span class="uu-deco">urn:uuid:</span>${g}`;
+    }
+    if (f.startsWith("{")) {
+      return `<span class="uu-deco">{</span>${g}<span class="uu-deco">}</span>`;
+    }
+    if (f.indexOf("-") === -1) {
+      return noHy;
+    }
+    return g;
+  }
+
+  function rowHtml(item: UuidItem, i: number): string {
+    const idx = String(i + 1).padStart(3, "0");
+    return (
+      `<div class="uu-row" role="listitem" data-i="${i}">` +
+      `<span class="uu-idx">${idx}</span>` +
+      `<span class="uu-id">${idHtml(item)}</span>` +
+      `<span class="uu-ver caption-mono">${item.version}</span>` +
+      `<button type="button" class="uu-rowcopy" data-i="${i}" aria-label="Copy this UUID">copy</button>` +
+      `</div>`
+    );
+  }
+
+  function renderList(): void {
+    const r = uuidStore.get().result;
+    const has = !!r && r.items.length > 0;
+    if (idleEl) idleEl.hidden = has;
+    if (listHead) listHead.hidden = !has;
+    if (statsEl) statsEl.hidden = !has;
+    if (copyAllBtn) copyAllBtn.disabled = !has;
+    if (dlBtn) dlBtn.disabled = !has;
+    if (!listEl) return;
+
+    if (!r) {
+      listEl.innerHTML = "";
+      if (tailEl) tailEl.hidden = true;
+      return;
+    }
+
+    const shown = r.rendered;
+    const parts: string[] = [];
+    for (let i = 0; i < shown; i++) parts.push(rowHtml(r.items[i], i));
+    listEl.innerHTML = parts.join("");
+
+    if (tailEl) {
+      if (r.items.length > shown) {
+        tailEl.hidden = false;
+        tailEl.textContent = `showing ${shown.toLocaleString()} of ${r.items.length.toLocaleString()} — copy-all & download include every one`;
+      } else {
+        tailEl.hidden = true;
+      }
+    }
+
+    // session readout
+    if (totalEl) totalEl.textContent = uuidStore.get().sessionTotal.toLocaleString();
+    if (thruEl) thruEl.textContent = `${r.items.length.toLocaleString()} in ${r.ms.toFixed(1)} ms`;
+    if (orderBox) {
+      orderBox.hidden = false;
+      let txt = r.orderTag;
+      let cls = "neutral";
+      if (r.orderTag === "sortable") {
+        txt = r.orderOk ? "monotonic · sortable" : "not monotonic";
+        cls = r.orderOk ? "ok" : "warn";
+      } else if (r.orderTag === "time-based") {
+        txt = "time-based · not lex-sorted";
+        cls = "neutral";
+      } else if (r.orderTag === "deterministic") {
+        txt = "deterministic";
+        cls = "neutral";
+      } else {
+        txt = "random order";
+        cls = "neutral";
+      }
+      if (orderDot) orderDot.className = "uu-order-dot " + cls;
+      if (orderText) orderText.textContent = txt;
+    }
+  }
+
+  uuidStore.subscribe((state) => {
+    currentUpper = state.upper;
+
+    // segmented + control reflection
+    verBtns.forEach((b) => {
+      const on = b.getAttribute("data-uu-version") === state.version;
+      b.classList.toggle("is-active", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    fmtBtns.forEach((b) => {
+      const on = b.getAttribute("data-uu-format") === state.format;
+      b.classList.toggle("is-active", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    if (caseLabel) caseLabel.textContent = state.upper ? "UPPER" : "lower";
+
+    // v5 panel
+    if (v5Box) v5Box.hidden = state.version !== "v5";
+    if (nsCustom) nsCustom.hidden = state.namespaceMode !== "custom";
+
+    // cap hint
+    if (capEl) capEl.textContent = `max ${maxCount(state.version).toLocaleString()} / batch`;
+    if (countInput && document.activeElement !== countInput) countInput.value = String(state.count);
+
+    // button state
+    if (genBtn) {
+      genBtn.textContent = state.isRunning ? "Generating…" : "Generate";
+      genBtn.disabled = state.isRunning;
+    }
+
+    if (errorBanner) {
+      if (state.error) (errorBanner as any).show?.(state.error);
+      else (errorBanner as any).hide?.();
+    }
+
+    renderList();
+  });
+
+  // ── events ──
+  if (genBtn) genBtn.addEventListener("click", () => runGenerate(uuidStore));
+  verBtns.forEach((b) =>
+    b.addEventListener("click", () =>
+      setVersion(uuidStore, b.getAttribute("data-uu-version") as UuidVersion),
+    ),
+  );
+  fmtBtns.forEach((b) =>
+    b.addEventListener("click", () =>
+      setFormat(uuidStore, b.getAttribute("data-uu-format") as UuidFormat),
+    ),
+  );
+  if (upperCb) upperCb.addEventListener("change", () => setUpper(uuidStore, upperCb.checked));
+  if (countInput)
+    countInput.addEventListener("input", () =>
+      setCount(uuidStore, parseInt(countInput.value, 10) || 1),
+    );
+  countChips.forEach((b) =>
+    b.addEventListener("click", () => {
+      const n = parseInt(b.getAttribute("data-uu-count") || "1", 10);
+      setCount(uuidStore, n);
+      if (countInput) countInput.value = String(n);
+    }),
+  );
+  if (nsSel)
+    nsSel.addEventListener("change", () => {
+      if (nsSel.value === "custom") {
+        setCustomNamespace(uuidStore, nsCustom ? nsCustom.value : "");
+      } else {
+        setNamespacePreset(uuidStore, nsSel.value);
+      }
+    });
+  if (nsCustom)
+    nsCustom.addEventListener("input", () => setCustomNamespace(uuidStore, nsCustom.value));
+  if (nameInput) nameInput.addEventListener("input", () => setName(uuidStore, nameInput.value));
+
+  copyModeBtns.forEach((b) =>
+    b.addEventListener("click", () => {
+      copyMode = b.getAttribute("data-uu-copymode") as "lines" | "json";
+      copyModeBtns.forEach((x) => {
+        const on = x === b;
+        x.classList.toggle("is-active", on);
+        x.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+    }),
+  );
+
+  function allFormatted(): string[] {
+    const r = uuidStore.get().result;
+    return r ? r.items.map((it) => it.formatted) : [];
+  }
+
+  if (copyAllBtn)
+    copyAllBtn.addEventListener("click", async () => {
+      const arr = allFormatted();
+      if (!arr.length) return;
+      const text = copyMode === "json" ? JSON.stringify(arr) : arr.join("\n");
+      const ok = await copyToClipboard(text);
+      if (ok) {
+        const orig = copyAllBtn.textContent || "copy";
+        copyAllBtn.textContent = "copied!";
+        announce("Copied " + arr.length + " UUIDs");
+        setTimeout(() => {
+          copyAllBtn.textContent = orig;
+        }, 1500);
+      }
+    });
+  if (dlBtn)
+    dlBtn.addEventListener("click", () => {
+      const arr = allFormatted();
+      if (!arr.length) return;
+      downloadFile(arr.join("\n"), "uuids.txt", "text/plain;charset=utf-8;");
+      announce("Download started");
+    });
+
+  // per-row copy (delegated)
+  if (listEl)
+    listEl.addEventListener("click", async (e) => {
+      const btn = (e.target as HTMLElement).closest?.(".uu-rowcopy") as HTMLElement | null;
+      if (!btn) return;
+      const i = parseInt(btn.getAttribute("data-i") || "-1", 10);
+      const item = uuidStore.get().result?.items[i];
+      if (!item) return;
+      const ok = await copyToClipboard(item.formatted);
+      if (ok) {
+        const orig = btn.textContent || "copy";
+        btn.textContent = "✓";
+        setTimeout(() => {
+          btn.textContent = orig;
+        }, 1100);
+      }
+    });
+
+  // Ctrl/Cmd+Enter = Generate
+  document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "SELECT") return;
+      e.preventDefault();
+      runGenerate(uuidStore);
+    }
+  });
+
+  // prime the cap hint on first paint
+  if (capEl) capEl.textContent = `max ${maxCount("v4").toLocaleString()} / batch`;
+</script>
+
+<!-- Ledger rows are injected via innerHTML, so their styles must be global.
+     Names are uu-/g0..g4-prefixed to avoid any collision. -->
+<style is:global>
+  .uu-list {
+    display: flex;
+    flex-direction: column;
+    max-height: 460px;
+    overflow: auto;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+  }
+  .uu-list-head {
+    display: grid;
+    grid-template-columns: 44px 1fr 36px 52px;
+    gap: var(--spacing-sm);
+    align-items: center;
+    padding: 8px var(--spacing-sm);
+    border: 1px solid var(--color-hairline);
+    border-bottom: none;
+    border-radius: var(--rounded-sm) var(--rounded-sm) 0 0;
+    background-color: var(--color-canvas-soft);
+    color: var(--color-mute);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .uu-row {
+    display: grid;
+    grid-template-columns: 44px 1fr 36px 52px;
+    gap: var(--spacing-sm);
+    align-items: center;
+    padding: 7px var(--spacing-sm);
+    border-bottom: 1px solid var(--color-hairline);
+    font-family: var(--font-mono);
+    transition: background-color 0.12s ease;
+    animation: uu-row-in 0.32s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+  .uu-row:last-child {
+    border-bottom: none;
+  }
+  .uu-row:hover {
+    background-color: var(--color-canvas-soft);
+  }
+  @keyframes uu-row-in {
+    from {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .uu-idx {
+    color: var(--color-hairline-strong);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+  .uu-id {
+    font-size: 14px;
+    letter-spacing: 0.01em;
+    color: var(--color-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* group tinting — alternating ink / mute so the 8-4-4-4-12 shape is legible */
+  .uu-id .g0 {
+    color: var(--color-ink);
+  }
+  .uu-id .g1 {
+    color: var(--color-body);
+  }
+  .uu-id .g2 {
+    color: var(--color-ink);
+  }
+  .uu-id .g3 {
+    color: var(--color-body);
+  }
+  .uu-id .g4 {
+    color: var(--color-ink);
+  }
+  .uu-id .gh {
+    color: var(--color-hairline-strong);
+    margin: 0 1px;
+  }
+  .uu-id .uu-deco {
+    color: var(--color-mute);
+  }
+  .uu-ver {
+    color: var(--color-mute);
+    font-size: 10px;
+    text-align: center;
+  }
+  .uu-rowcopy {
+    opacity: 0;
+    border: 1px solid var(--color-hairline);
+    background: var(--color-canvas);
+    color: var(--color-mute);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: var(--rounded-sm);
+    cursor: pointer;
+    transition:
+      opacity 0.12s ease,
+      color 0.12s ease,
+      border-color 0.12s ease;
+  }
+  .uu-row:hover .uu-rowcopy,
+  .uu-rowcopy:focus-visible {
+    opacity: 1;
+  }
+  .uu-rowcopy:hover {
+    color: var(--color-accent-active);
+    border-color: var(--color-accent);
+  }
+</style>
+
+<style>
+  .uu-stage {
+    padding: var(--spacing-3xl) 0 var(--spacing-5xl);
+    background-color: var(--color-canvas-soft);
+    background-image: radial-gradient(var(--color-hairline) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  /* config card */
+  .uu-config {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+  .uu-config-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--spacing-md);
+    align-items: end;
+  }
+  .uu-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+  }
+  .uu-flabel {
+    color: var(--color-mute);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .uu-field-case {
+    align-items: flex-start;
+  }
+
+  /* segmented control */
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    overflow: hidden;
+    width: 100%;
+  }
+  .seg-btn {
+    flex: 1;
+    border: none;
+    background: var(--color-canvas);
+    color: var(--color-body);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 8px 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      background-color 0.18s ease,
+      color 0.18s ease;
+  }
+  .seg-btn + .seg-btn {
+    border-left: 1px solid var(--color-hairline);
+  }
+  .seg-btn.is-active {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+  }
+  .seg-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+  }
+
+  .uu-count {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .uu-num {
+    width: 72px;
+    height: 36px;
+    padding: 0 8px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    outline: none;
+  }
+  .uu-num:focus {
+    border-color: var(--color-accent);
+  }
+  .uu-chips {
+    display: flex;
+    gap: 4px;
+  }
+  .uu-chip {
+    border: 1px solid var(--color-hairline);
+    background: var(--color-canvas);
+    color: var(--color-mute);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 6px 8px;
+    border-radius: var(--rounded-sm);
+    cursor: pointer;
+    transition:
+      color 0.12s ease,
+      border-color 0.12s ease;
+  }
+  .uu-chip:hover {
+    color: var(--color-accent-active);
+    border-color: var(--color-accent);
+  }
+
+  /* case toggle */
+  .uu-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    color: var(--color-ink);
+    height: 36px;
+  }
+  .uu-toggle input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .uu-switch {
+    width: 34px;
+    height: 18px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-hairline-strong);
+    position: relative;
+    transition: background-color 0.18s ease;
+  }
+  .uu-switch::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: var(--color-canvas);
+    transition: transform 0.18s ease;
+  }
+  .uu-toggle input:checked ~ .uu-switch {
+    background-color: var(--color-accent);
+  }
+  .uu-toggle input:checked ~ .uu-switch::after {
+    transform: translateX(16px);
+  }
+  .uu-toggle input:focus-visible ~ .uu-switch {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  /* v5 inputs */
+  .uu-v5 {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) 2fr;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .uu-field-grow {
+    width: 100%;
+  }
+  .select-wrapper {
+    position: relative;
+    width: 100%;
+  }
+  .settings-select {
+    width: 100%;
+    height: 36px;
+    padding: 0 var(--spacing-md);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    appearance: none;
+    outline: none;
+    cursor: pointer;
+  }
+  .select-wrapper::after {
+    content: "▼";
+    font-size: 9px;
+    color: var(--color-body);
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+  .uu-text {
+    width: 100%;
+    height: 36px;
+    padding: 0 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    outline: none;
+  }
+  .uu-text:focus {
+    border-color: var(--color-accent);
+  }
+
+  .uu-go {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+  }
+  .uu-gen-btn {
+    min-width: 160px;
+  }
+  .uu-cap {
+    color: var(--color-mute);
+  }
+
+  /* session readout */
+  .uu-stats {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-md);
+    padding: 0 var(--spacing-xs);
+  }
+  .uu-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .uu-stat-num {
+    font-family: var(--font-mono);
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--color-ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .uu-stat-num.uu-accent {
+    font-size: 20px;
+    color: var(--color-accent-active);
+  }
+  .uu-stat-label {
+    color: var(--color-mute);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .uu-order {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-left: auto;
+    padding: 5px 11px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-pill-sm);
+    background-color: var(--color-canvas);
+    color: var(--color-body);
+    animation: uu-chip-in 0.3s ease both;
+  }
+  .uu-order-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--color-hairline-strong);
+  }
+  .uu-order-dot.ok {
+    background-color: var(--color-accent);
+    animation: uu-pulse 1.8s ease-in-out infinite;
+  }
+  .uu-order-dot.warn {
+    background-color: var(--color-warning);
+  }
+  @keyframes uu-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(33, 167, 138, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 4px rgba(33, 167, 138, 0);
+    }
+  }
+  @keyframes uu-chip-in {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ledger card */
+  .uu-ledger-card {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-3xl);
+  }
+  .uu-out-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .uu-copy-seg {
+    width: auto;
+  }
+  .uu-copy-seg .seg-btn {
+    flex: none;
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+  .uu-iconbtn {
+    border: 1px solid var(--color-hairline);
+    background: var(--color-canvas);
+    color: var(--color-body);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: var(--rounded-sm);
+    cursor: pointer;
+    transition:
+      color 0.12s ease,
+      border-color 0.12s ease;
+  }
+  .uu-iconbtn:hover:not(:disabled) {
+    color: var(--color-accent-active);
+    border-color: var(--color-accent);
+  }
+  .uu-iconbtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .uu-idle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+    text-align: center;
+    padding: var(--spacing-4xl) var(--spacing-md);
+    color: var(--color-body);
+  }
+  .uu-idle-cmd {
+    color: var(--color-accent-active);
+  }
+  .uu-idle-msg {
+    max-width: 48ch;
+    margin: 0;
+    line-height: 1.6;
+  }
+  .uu-tail {
+    margin: var(--spacing-xs) 0 0;
+    color: var(--color-mute);
+    text-align: center;
+  }
+
+  /* version legend */
+  .uu-legend {
+    max-width: 880px;
+    margin: 0 auto;
+  }
+  .uu-legend-head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-lg);
+  }
+  .uu-legend-title {
+    color: var(--color-ink);
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+  .uu-legend-rows {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    overflow: hidden;
+    background-color: var(--color-canvas);
+  }
+  .uu-leg-row {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    transition: background-color 0.15s ease;
+  }
+  .uu-leg-row + .uu-leg-row {
+    border-top: 1px solid var(--color-hairline);
+  }
+  .uu-leg-row:hover {
+    background-color: var(--color-canvas-soft);
+  }
+  .uu-leg-badge {
+    display: inline-flex;
+    align-items: flex-start;
+    justify-content: center;
+    height: 28px;
+    padding-top: 6px;
+    border: 1px solid var(--color-hairline-strong);
+    border-radius: var(--rounded-sm);
+    color: var(--color-accent-active);
+    font-weight: 600;
+  }
+  .uu-leg-name {
+    color: var(--color-ink);
+    margin: 0 0 3px;
+  }
+  .uu-leg-blurb {
+    color: var(--color-body);
+    margin: 0 0 8px;
+    line-height: 1.5;
+  }
+  .uu-leg-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .uu-leg-tag {
+    padding: 2px 8px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-pill-sm);
+    color: var(--color-mute);
+    font-size: 10px;
+  }
+  .uu-legend-note {
+    margin: var(--spacing-md) 0 0;
+    color: var(--color-mute);
+    line-height: 1.5;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-hairline);
+    padding-bottom: var(--spacing-sm);
+  }
+  .column-title {
+    color: var(--color-mute);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+
+  .faq-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .faq-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .section-eyebrow {
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+  }
+  .faq-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft);
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  .faq-summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink);
+    padding: var(--spacing-xs) 0;
+    user-select: none;
+  }
+  .faq-summary:hover {
+    color: var(--color-accent);
+  }
+  .faq-answer {
+    margin-top: var(--spacing-sm);
+    font-size: 13px;
+    color: var(--color-body);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 900px) {
+    .uu-config-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .uu-v5 {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .uu-config-grid {
+      grid-template-columns: 1fr;
+    }
+    .uu-stats {
+      gap: var(--spacing-md);
+    }
+    .uu-order {
+      margin-left: 0;
+    }
+  }
+</style>

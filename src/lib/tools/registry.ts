@@ -205,7 +205,9 @@ export const tools: ToolManifest[] = [
     name: "UUID Generator",
     tagline: "Generate v4 UUIDs in bulk, instantly.",
     category: "generate",
-    status: "soon",
+    status: "available",
+    href: "/tools/uuid",
+
     keywords: ["uuid generator", "generate uuid v4"],
     addedIn: "v1.3",
   },
