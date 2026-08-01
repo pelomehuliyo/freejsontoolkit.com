@@ -93,10 +93,10 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content="#171717" />
 
-    <!-- registry the client uses to build cards from ids */
-    <meta name="fjt:tool-ids" content={JSON.stringify(toolIds)} />
-    <script type="application/json" id="fjt-registry" set:html={registryJson} />
 
+    <meta name="fjt:tool-ids" content={JSON.stringify(toolIds)} />
+    <script type="application/json" id="fjt-registry" set:html={registryJson}></script>
+    
     <!-- Search Indexing -->
     {noindex && <meta name="robots" content="noindex, nofollow" />}
 
@@ -292,9 +292,10 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
         }
 
         // 1) record a recent visit — only for known tool routes
-        const pm = location.pathname.replace(/[/]+$/, "").match(/^\/tools\/([^/]+)$/);
-        if (pm && byId[pm[1]]) {
-          const rid = pm[1];
+       const recPath = location.pathname.replace(/\/+$/, "");
+        const curTool = REG.find(function (t) { return t.href === recPath; });
+        if (curTool) {
+          const rid = curTool.id;
           const r = recents().filter(function (x) { return x !== rid; });
           r.unshift(rid);
           save(REC, r.slice(0, 8));

@@ -25,6 +25,7 @@ const formats = [
   { f: "braces", label: "{ braces }" },
   { f: "urn", label: "urn:" },
 ];
+import RelatedTools from "../../components/tools/RelatedTools.astro";
 ---
 
 <ToolShell
@@ -260,6 +261,7 @@ const formats = [
   </section>
 
   <section class="faq-section" aria-labelledby="faq-title">
+    <RelatedTools />
     <Container size="narrow">
       <div class="faq-header">
         <span class="caption-mono section-eyebrow">FAQ</span>

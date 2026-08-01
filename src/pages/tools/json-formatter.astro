@@ -10,6 +10,7 @@ import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
 import { INDENT_OPTIONS } from "../../lib/tools/json-formatter/constants";
+import RelatedTools from "../../components/tools/RelatedTools.astro";
 ---
 
 <ToolShell
@@ -142,6 +143,7 @@ Example:
   </section>
 
   <section class="faq-section" aria-labelledby="faq-title">
+    <RelatedTools />
     <Container size="narrow">
       <div class="faq-header">
         <span class="caption-mono section-eyebrow">FAQ</span>

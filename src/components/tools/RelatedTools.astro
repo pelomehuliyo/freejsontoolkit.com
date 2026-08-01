@@ -1,0 +1,182 @@
+---
+/**
+ * RelatedTools — a server-rendered "where to next" rail. Drop `<RelatedTools />`
+ * into any tool page; it reads the registry + the relationship graph at build
+ * time, infers the current tool from the URL, and renders up to three related
+ * cards. Renders nothing on non-tool pages or for a tool with no relations, so
+ * it is safe to include unconditionally. No client JS, no props, no island
+ * dependency — immune to the scoping/registry traps the client-built widgets
+ * have to dodge.
+ */
+import Container from "../Container.astro";
+import { tools } from "../../lib/tools/registry";
+import { RELATIONS } from "../../lib/tools/relations";
+
+const MONO: Record<string, string> = {
+  convert: "CON",
+  format: "FOR",
+  validate: "VAL",
+  compare: "CMP",
+  generate: "GEN",
+  utilities: "UTL",
+  api: "API",
+};
+
+type Tool = (typeof tools)[number];
+const byId: Record<string, Tool> = {};
+tools.forEach((t) => {
+  byId[t.id] = t;
+});
+
+const path = Astro.url.pathname.replace(/\/+$/, "");
+const current = tools.find((t) => t.href === path);
+
+interface Resolved {
+  id: string;
+  label: string;
+  kind: string;
+  tool: Tool;
+}
+const rels: Resolved[] = current
+  ? (RELATIONS[current.id] || [])
+      .map((r) => ({ id: r.id, label: r.label, kind: r.kind, tool: byId[r.id] }))
+      .filter((x): x is Resolved => !!x.tool && !!x.tool.href)
+      .slice(0, 3)
+  : [];
+---
+
+{
+  rels.length > 0 && (
+    <section class="rel-section" aria-labelledby="rel-title">
+      <Container size="default">
+        <div class="rel-head">
+          <span class="rel-eyebrow caption-mono">Related</span>
+          <h2 id="rel-title" class="rel-title display-sm">
+            Where to next
+          </h2>
+        </div>
+        <div class="rel-grid" role="list">
+          {rels.map((r) => (
+            <a class="rel-card" href={r.tool.href} role="listitem">
+              <span class="rel-kicker caption-mono">{r.label}</span>
+              <div class="rel-top">
+                <span class="mono-badge" aria-hidden="true">
+                  {MONO[r.tool.category] || "·"}
+                </span>
+                <span class="rel-name">{r.tool.name}</span>
+              </div>
+              <p class="rel-tag body-sm">{r.tool.tagline}</p>
+              <span class="rel-go body-sm-strong">
+                Open{" "}
+                <span class="rel-arrow" aria-hidden="true">
+                  →
+                </span>
+              </span>
+            </a>
+          ))}
+        </div>
+      </Container>
+    </section>
+  )
+}
+
+<style>
+  .rel-section {
+    padding: var(--spacing-3xl) 0;
+    background-color: var(--color-canvas-soft);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .rel-head {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: var(--spacing-md);
+  }
+  .rel-eyebrow {
+    color: var(--color-mute);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .rel-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+  .rel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--spacing-md);
+  }
+  .rel-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: var(--spacing-md);
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+    transition:
+      border-color 0.15s ease,
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .rel-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background-color: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s ease;
+  }
+  .rel-card:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(33, 167, 138, 0.12);
+  }
+  .rel-card:hover::before {
+    transform: scaleX(1);
+  }
+  .rel-kicker {
+    color: var(--color-accent-active);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 10px;
+  }
+  .rel-top {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .rel-name {
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .rel-tag {
+    color: var(--color-body);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .rel-go {
+    margin-top: auto;
+    padding-top: var(--spacing-xs);
+    color: var(--color-ink);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .rel-arrow {
+    color: var(--color-accent-active);
+    transition: transform 0.15s ease;
+  }
+  .rel-card:hover .rel-arrow {
+    transform: translateX(4px);
+  }
+</style>
