@@ -1,4 +1,5 @@
 ---
+import CommandPalette from "../components/CommandPalette.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import "../styles/global.css";
@@ -154,6 +155,7 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
     </div>
 
     <!-- single global toast for favorite actions -->
+         <CommandPalette />
     <div class="fav-toast" id="fav-toast" role="status" aria-live="polite" hidden></div>
 
     <!-- bite 4: discoverability launcher for the shortcuts sheet. Hidden by

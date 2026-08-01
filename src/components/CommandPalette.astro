@@ -1,0 +1,502 @@
+---
+/**
+ * CommandPalette — the toolkit's shell. ⌘K / Ctrl+K everywhere, "/" off the
+ * catalog (where the page's own inline filter owns "/").
+ *
+ * Instant fuzzy search over tools + categories, keyboard navigation, curated
+ * aliases, and the user's recent tools surfaced as shell history. It reads the
+ * registry from the #fjt-registry data island the layout already emits and
+ * recents from localStorage, so it takes no props and renders identically on
+ * every page. It is included as a sibling of .app-layout (after it) so it sits
+ * above everything and is never caught by an `inert` set on the app shell; it
+ * traps focus itself and exposes aria-modal + aria-activedescendant.
+ */
+---
+
+<div class="cmdk-overlay" id="cmdk-overlay" hidden>
+  <div
+    class="cmdk-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Command palette"
+    id="cmdk-panel"
+  >
+    <span class="cmdk-scan" aria-hidden="true"></span>
+
+    <div class="cmdk-search" id="cmdk-search">
+      <span class="cmdk-prompt" aria-hidden="true">›<span class="cmdk-caret">_</span></span>
+      <input
+        type="text"
+        class="cmdk-input"
+        id="cmdk-input"
+        placeholder="search tools · jump to a category"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Search tools and categories"
+        aria-controls="cmdk-list"
+        aria-activedescendant=""
+      />
+      <span class="cmdk-count caption-mono" id="cmdk-count" hidden></span>
+      <button type="button" class="cmdk-close" id="cmdk-close" aria-label="Close palette"
+        >esc</button
+      >
+    </div>
+
+    <div class="cmdk-list" id="cmdk-list" role="listbox" aria-label="Results"></div>
+
+    <div class="cmdk-foot" aria-hidden="true">
+      <span class="cmdk-keys">
+        <span><kbd class="kbd">↑</kbd><kbd class="kbd">↓</kbd> move</span>
+        <span><kbd class="kbd">↵</kbd> open</span>
+        <span><kbd class="kbd">esc</kbd> close</span>
+      </span>
+      <span class="cmdk-index caption-mono" id="cmdk-index"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const overlay = document.getElementById("cmdk-overlay");
+    const panel = document.getElementById("cmdk-panel");
+    const searchWrap = document.getElementById("cmdk-search");
+    const input = document.getElementById("cmdk-input") as HTMLInputElement | null;
+    const list = document.getElementById("cmdk-list");
+    const closeBtn = document.getElementById("cmdk-close");
+    const countChip = document.getElementById("cmdk-count");
+    const indexReadout = document.getElementById("cmdk-index");
+    if (!overlay || !panel || !input || !list) return;
+    if ((overlay as HTMLElement & { __cmdk?: boolean }).__cmdk) return;
+    (overlay as HTMLElement & { __cmdk?: boolean }).__cmdk = true;
+
+    const MONO: Record<string, string> = {
+      convert: "CON",
+      format: "FOR",
+      validate: "VAL",
+      compare: "CMP",
+      generate: "GEN",
+      utilities: "UTL",
+      api: "API",
+    };
+
+    // Curated colloquial terms folded into the search haystack so the palette
+    // answers the way people actually think ("prettify", "guid", "escape").
+    const ALIASES: Record<string, string[]> = {
+      "json-to-csv": ["convert", "spreadsheet", "excel", "table", "export", "flatten"],
+      "csv-to-json": ["convert", "import", "table", "parse", "rows"],
+      "json-formatter": ["beautify", "prettify", "pretty", "indent", "format", "expand"],
+      "json-validator": ["lint", "check", "syntax", "parse error", "verify", "errors"],
+      "json-diff": ["compare", "merge", "changes", "delta", "vs"],
+      "json-minifier": ["compress", "compact", "uglify", "strip", "minify", "shrink"],
+      base64: ["encode", "decode", "b64", "data uri", "datauri"],
+      "uuid-generator": ["guid", "id", "v4", "v7", "random id", "sortable"],
+      "fake-json": ["mock", "fixture", "faker", "sample data", "dummy", "seed"],
+      "url-encode": ["percent", "escape", "uri", "query string", "decode", "component"],
+    };
+
+    type T = {
+      id: string;
+      name: string;
+      tagline: string;
+      category: string;
+      catLabel: string;
+      status: string;
+      href: string | null;
+    };
+    let tools: T[] = [];
+    const byId: Record<string, T> = {};
+    const catLabel: Record<string, string> = {};
+    try {
+      const island = document.getElementById("fjt-registry");
+      tools = island ? (JSON.parse(island.textContent || "[]") as T[]) : [];
+      tools.forEach((t) => {
+        byId[t.id] = t;
+        if (t.category) catLabel[t.category] = t.catLabel || t.category;
+      });
+    } catch {
+      tools = [];
+    }
+    const categories = Object.keys(catLabel).map((id) => ({ id, label: catLabel[id] }));
+
+    function recents(): T[] {
+      try {
+        const raw = localStorage.getItem("fjt:recents");
+        const ids: string[] = raw ? (JSON.parse(raw) as string[]) : [];
+        return ids.map((id) => byId[id]).filter(Boolean) as T[];
+      } catch {
+        return [];
+      }
+    }
+
+    // live readouts in the footer + empty state
+    function syncCounts(): void {
+      const rc = recents().length;
+      if (indexReadout) indexReadout.textContent = `${tools.length} tools indexed · ${rc} recent`;
+    }
+
+    // ── fuzzy: subsequence over a haystack, with prefix + word-boundary bonuses ──
+    function isBoundary(s: string, i: number): boolean {
+      if (i === 0) return true;
+      return !/[a-z0-9]/.test(s[i - 1]);
+    }
+    function subseq(needle: string, hay: string): number[] | null {
+      const idx: number[] = [];
+      let q = 0;
+      for (let h = 0; h < hay.length && q < needle.length; h++) {
+        if (hay[h] === needle[q]) {
+          idx.push(h);
+          q++;
+        }
+      }
+      return q === needle.length ? idx : null;
+    }
+    function scoreTool(q: string, t: T): { score: number; hl: number[] } | null {
+      const alias = (ALIASES[t.id] || []).join(" ");
+      const hay = `${t.name} ${t.tagline} ${alias}`.toLowerCase();
+      if (subseq(q, hay) === null) return null;
+      const m = subseq(q, hay)!;
+      let s = 1;
+      for (let i = 0; i < m.length; i++) {
+        if (i > 0 && m[i] === m[i - 1] + 1) s += 1.5; // consecutive run
+        if (isBoundary(hay, m[i])) s += 2; // word start
+      }
+      const nameL = t.name.toLowerCase();
+      if (nameL.includes(q)) s += 10;
+      if (nameL.startsWith(q)) s += 16;
+      s += 6 / (1 + hay.length / 40); // brevity tie-break
+      return { score: s, hl: subseq(q, nameL) || [] };
+    }
+    function scoreCat(q: string, label: string): number | null {
+      const l = label.toLowerCase();
+      if (subseq(q, l) === null) return null;
+      let s = 1;
+      if (l.includes(q)) s += 8;
+      if (l.startsWith(q)) s += 10;
+      return s;
+    }
+
+    type Row = {
+      kind: "tool" | "cat";
+      id: string;
+      href: string;
+      name: string;
+      tag: string;
+      badge: string;
+      hl: number[];
+    };
+    let rows: Row[] = [];
+    let cursor = 0;
+    let committing = false;
+
+    const esc = (s: string): string =>
+      s.replace(
+        /[&<>"]/g,
+        (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c] as string,
+      );
+
+    function hlName(name: string, hl: number[]): string {
+      if (hl.length === 0) return esc(name);
+      const set = new Set(hl);
+      let out = "";
+      let open = false;
+      for (let i = 0; i < name.length; i++) {
+        const on = set.has(i);
+        if (on && !open) {
+          out += '<mark class="cmdk-hl">';
+          open = true;
+        } else if (!on && open) {
+          out += "</mark>";
+          open = false;
+        }
+        out += esc(name[i]);
+      }
+      if (open) out += "</mark>";
+      return out;
+    }
+
+    function rowHtml(r: Row, i: number): string {
+      return (
+        `<div class="cmdk-row" role="option" id="cmdk-opt-${i}" data-idx="${i}" data-href="${esc(r.href)}" aria-selected="${i === cursor ? "true" : "false"}">` +
+        `<span class="cmdk-badge" aria-hidden="true">${esc(r.badge)}</span>` +
+        `<span class="cmdk-row-main">` +
+        `<span class="cmdk-name">${r.kind === "tool" ? hlName(r.name, r.hl) : esc(r.name)}</span>` +
+        `<span class="cmdk-tag">${esc(r.tag)}</span>` +
+        `</span>` +
+        `<kbd class="kbd cmdk-enter" aria-hidden="true">↵</kbd>` +
+        `</div>`
+      );
+    }
+
+    function group(label: string, html: string): string {
+      return `<p class="cmdk-group-label caption-mono"><span class="cmdk-tilde" aria-hidden="true">~</span> ${esc(label)}</p>${html}`;
+    }
+
+    function render(): void {
+      if (committing) return;
+      const q = input!.value.trim().toLowerCase();
+      if (searchWrap) searchWrap.classList.toggle("has-text", input!.value.length > 0);
+      rows = [];
+      const blocks: string[] = [];
+
+      if (q === "") {
+        if (countChip) countChip.hidden = true;
+        const rc = recents().slice(0, 4);
+        if (rc.length) {
+          const start = rows.length;
+          rc.forEach((t) =>
+            rows.push({
+              kind: "tool",
+              id: t.id,
+              href: t.href!,
+              name: t.name,
+              tag: t.tagline,
+              badge: MONO[t.category] || "·",
+              hl: [],
+            }),
+          );
+          blocks.push(
+            group("history", rc.map((_, k) => rowHtml(rows[start + k], start + k)).join("")),
+          );
+        }
+        const cstart = rows.length;
+        categories.forEach((c) =>
+          rows.push({
+            kind: "cat",
+            id: c.id,
+            href: "/tools",
+            name: c.label,
+            tag: "browse category",
+            badge: (c.label.slice(0, 3) || "CAT").toUpperCase(),
+            hl: [],
+          }),
+        );
+        blocks.push(
+          group("browse", categories.map((_, k) => rowHtml(rows[cstart + k], cstart + k)).join("")),
+        );
+
+        // shell-style MOTD when there's no history at all
+        if (rc.length === 0) {
+          blocks.unshift(
+            `<div class="cmdk-motd">` +
+              `<p class="cmdk-motd-line caption-mono">freejsontoolkit ~ % <span class="cmdk-motd-caret" aria-hidden="true">▍</span></p>` +
+              `<p class="caption-mono cmdk-motd-meta">${tools.length} tools indexed — type to search, or pick a directory below</p>` +
+              `</div>`,
+          );
+        }
+      } else {
+        const matched = tools
+          .map((t) => ({ t, r: scoreTool(q, t) }))
+          .filter((x): x is { t: T; r: { score: number; hl: number[] } } => x.r !== null)
+          .sort((a, b) => b.r.score - a.r.score)
+          .slice(0, 8);
+        if (matched.length) {
+          const start = rows.length;
+          matched.forEach((m) =>
+            rows.push({
+              kind: "tool",
+              id: m.t.id,
+              href: m.t.href!,
+              name: m.t.name,
+              tag: m.t.tagline,
+              badge: MONO[m.t.category] || "·",
+              hl: m.r.hl,
+            }),
+          );
+          blocks.push(
+            group("tools", matched.map((_, k) => rowHtml(rows[start + k], start + k)).join("")),
+          );
+        }
+        const cm = categories
+          .map((c) => ({ c, s: scoreCat(q, c.label) }))
+          .filter((x): x is { c: { id: string; label: string }; s: number } => x.s !== null)
+          .sort((a, b) => b.s - a.s);
+        if (cm.length) {
+          const start = rows.length;
+          cm.forEach((m) =>
+            rows.push({
+              kind: "cat",
+              id: m.c.id,
+              href: "/tools",
+              name: m.c.label,
+              tag: "browse category",
+              badge: (m.c.label.slice(0, 3) || "CAT").toUpperCase(),
+              hl: [],
+            }),
+          );
+          blocks.push(
+            group("categories", cm.map((_, k) => rowHtml(rows[start + k], start + k)).join("")),
+          );
+        }
+        if (countChip) {
+          countChip.hidden = false;
+          countChip.textContent = String(rows.length);
+        }
+        if (blocks.length === 0) {
+          blocks.push(
+            `<div class="cmdk-empty">` +
+              `<p class="cmdk-empty-cmd caption-mono">$ toolkit find "${esc(input!.value)}"<span class="cmdk-motd-caret" aria-hidden="true">▍</span></p>` +
+              `<p class="body-sm cmdk-empty-msg">No match — yet. The roadmap follows demand.</p>` +
+              `<a class="body-sm-strong cmdk-empty-link" href="https://github.com/pelomehuliyo/freejsontoolkit.com/issues">Request it on GitHub →</a>` +
+              `</div>`,
+          );
+        }
+      }
+
+      cursor = 0;
+      list!.innerHTML = blocks.join("");
+      const rowEls = list!.querySelectorAll<HTMLElement>(".cmdk-row");
+      rowEls.forEach((el, i) => {
+        el.style.animationDelay = `${Math.min(i, 8) * 26}ms`;
+      });
+      paintCursor();
+    }
+
+    function paintCursor(): void {
+      const els = list!.querySelectorAll<HTMLElement>(".cmdk-row");
+      els.forEach((el, i) => {
+        const on = i === cursor;
+        el.classList.toggle("is-cursor", on);
+        el.setAttribute("aria-selected", on ? "true" : "false");
+        if (on) {
+          el.scrollIntoView({ block: "nearest" });
+          input!.setAttribute("aria-activedescendant", el.id);
+        }
+      });
+    }
+
+    function open(): void {
+      committing = false;
+      overlay!.hidden = false;
+      // restart the open scan-line flourish
+      const scan = panel!.querySelector(".cmdk-scan");
+      if (scan) {
+        scan.classList.remove("run");
+        void (scan as HTMLElement).offsetWidth;
+        scan.classList.add("run");
+      }
+      requestAnimationFrame(() => overlay!.classList.add("is-open"));
+      input!.value = "";
+      syncCounts();
+      render();
+      input!.focus();
+    }
+    function close(): void {
+      overlay!.classList.remove("is-open");
+      input!.setAttribute("aria-activedescendant", "");
+      setTimeout(() => {
+        if (!overlay!.classList.contains("is-open")) overlay!.hidden = true;
+      }, 180);
+    }
+    function isOpen(): boolean {
+      return !overlay!.hidden && overlay!.classList.contains("is-open");
+    }
+
+    function go(href: string, idx: number): void {
+      if (committing) return;
+      committing = true;
+      input!.blur();
+      const rowEl = list!.querySelector<HTMLElement>(`.cmdk-row[data-idx="${idx}"]`);
+      if (rowEl) rowEl.classList.add("is-committing");
+      // let the commit flash read before the (full-page) navigation tears down
+      setTimeout(() => location.assign(href), 120);
+    }
+
+    // ── events ──
+    input!.addEventListener("input", render);
+
+    list!.addEventListener("click", (e) => {
+      const row = (e.target as HTMLElement).closest?.(".cmdk-row") as HTMLElement | null;
+      if (!row) return;
+      const idx = parseInt(row.getAttribute("data-idx") || "-1", 10);
+      const href = row.getAttribute("data-href");
+      if (href && idx >= 0) go(href, idx);
+    });
+    list!.addEventListener("mousemove", (e) => {
+      const row = (e.target as HTMLElement).closest?.(".cmdk-row") as HTMLElement | null;
+      if (!row) return;
+      const idx = parseInt(row.getAttribute("data-idx") || "-1", 10);
+      if (idx >= 0 && idx !== cursor) {
+        cursor = idx;
+        paintCursor();
+      }
+    });
+
+    if (closeBtn) closeBtn.addEventListener("click", close);
+    overlay!.addEventListener("mousedown", (e) => {
+      if (e.target === overlay) close();
+    });
+
+    // focus trap between the input and the close chip (rows are arrow-navigated)
+    panel!.addEventListener("keydown", (e) => {
+      if (e.key !== "Tab") return;
+      const first = input!;
+      const last = closeBtn || input!;
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    });
+
+    input!.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (rows.length) {
+          cursor = (cursor + 1) % rows.length;
+          paintCursor();
+        }
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        if (rows.length) {
+          cursor = (cursor - 1 + rows.length) % rows.length;
+          paintCursor();
+        }
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        const r = rows[cursor];
+        if (r) go(r.href, cursor);
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        close();
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        cursor = 0;
+        paintCursor();
+      } else if (e.key === "End") {
+        e.preventDefault();
+        cursor = Math.max(0, rows.length - 1);
+        paintCursor();
+      }
+    });
+
+    // global open: ⌘K / Ctrl+K everywhere; "/" only where the catalog's inline
+    // search isn't present (so on /tools, "/" keeps focusing that page's filter).
+    document.addEventListener("keydown", (e) => {
+      const k = e.key;
+      if ((e.metaKey || e.ctrlKey) && (k === "k" || k === "K")) {
+        e.preventDefault();
+        isOpen() ? close() : open();
+        return;
+      }
+      if (k === "/" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        if (document.querySelector("[data-tool-search]")) return;
+        const ae = document.activeElement;
+        const tag = ae && ae.tagName ? ae.tagName : "";
+        if (
+          tag === "INPUT" ||
+          tag === "TEXTAREA" ||
+          tag === "SELECT" ||
+          (ae && (ae as HTMLElement).isContentEditable)
+        )
+          return;
+        if (isOpen()) return;
+        e.preventDefault();
+        open();
+      }
+    });
+
+    syncCounts();
+  })();
+</script>

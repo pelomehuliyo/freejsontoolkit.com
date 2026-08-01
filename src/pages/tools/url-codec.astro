@@ -1,0 +1,1105 @@
+---
+import ToolShell from "../../components/tools/ToolShell.astro";
+import ToolHeader from "../../components/tools/ToolHeader.astro";
+import ToolWorkspace from "../../components/tools/ToolWorkspace.astro";
+import CodeEditor from "../../components/tools/CodeEditor.astro";
+import ToolActions from "../../components/tools/ToolActions.astro";
+import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import Card from "../../components/Card.astro";
+import Button from "../../components/Button.astro";
+import Container from "../../components/Container.astro";
+import { ENCODINGS, MODES } from "../../lib/tools/url-codec/constants";
+---
+
+<ToolShell
+  title="URL Encode / Decode — Online, Local, Free"
+  description="Free online URL encoder and decoder with component, whole-URL and form modes. See exactly which characters get percent-encoded, byte-accurate, 100% local, no upload."
+  activePath="/tools/url-codec"
+>
+  <ToolHeader
+    slot="header"
+    breadcrumbs={[{ label: "Home", href: "/" }, { label: "URL Encode / Decode" }]}
+    title="URL Encode / Decode"
+    subtitle="Percent-encode a value, a whole URL, or a form body — and see exactly what changes. Offline."
+  />
+
+  <ToolWorkspace slot="workspace" layout="3-col">
+    <div slot="input" class="ws-fill">
+      <Card variant="flat" class="workspace-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">INPUT</span>
+          <ToolActions id="input-actions" variant="inset" actions={["sample", "clear"]} />
+        </div>
+        <CodeEditor
+          id="url-input"
+          label="URL codec input"
+          placeholder="Paste text to encode, or %XX to decode…"
+        >
+          <div class="editor-info-bar" slot>
+            <span class="info-status" id="url-input-status">Status: Empty</span>
+            <span class="info-meta" id="url-input-count">0 chars</span>
+          </div>
+        </CodeEditor>
+      </Card>
+    </div>
+
+    <div slot="controls">
+      <Card variant="flat" class="workspace-card settings-card">
+        <h2 class="display-sm settings-title">Options</h2>
+        <div class="settings-divider"></div>
+
+        <div class="settings-group">
+          <span class="settings-label caption-mono">direction</span>
+          <div class="seg" role="group" aria-label="Direction">
+            {
+              MODES.map((m, i) => (
+                <button
+                  type="button"
+                  class:list={["seg-btn", { "is-active": i === 0 }]}
+                  data-url-mode={m.id}
+                  aria-pressed={i === 0 ? "true" : "false"}
+                >
+                  {m.label}
+                </button>
+              ))
+            }
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <span class="settings-label caption-mono">encoding</span>
+          <div class="seg seg-3" role="group" aria-label="Encoding">
+            {
+              ENCODINGS.map((e, i) => (
+                <button
+                  type="button"
+                  class:list={["seg-btn", { "is-active": i === 0 }]}
+                  data-url-enc={e.id}
+                  aria-pressed={i === 0 ? "true" : "false"}
+                >
+                  {e.label}
+                </button>
+              ))
+            }
+          </div>
+        </div>
+
+        <div class="settings-group checkbox-group" id="url-plus-group">
+          <label class="checkbox-container body-sm">
+            <input type="checkbox" id="url-plus" checked />
+            <span class="checkbox-checkmark"></span>
+            Decode <span class="caption-mono">+</span> as space
+          </label>
+          <p class="caption settings-help">
+            For query strings &amp; form bodies. Encode always follows the mode.
+          </p>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <Button id="url-run" variant="primary" size="lg" shape="square" class="action-btn"
+          >Encode</Button
+        >
+
+        {
+          /* live readout + the footprint view — in the controls card so the two
+            editors keep the exact structure the global equal-height rule aligns */
+        }
+        <div class="url-readout" id="url-readout" hidden>
+          <div class="url-valid" id="url-valid">
+            <span class="url-dot" id="url-dot"></span>
+            <span class="caption-mono" id="url-valid-text">ready</span>
+          </div>
+          <div class="url-row">
+            <span class="url-label caption-mono">input</span>
+            <span class="url-val" id="url-in-bytes">0 B</span>
+          </div>
+          <div class="url-row">
+            <span class="url-label caption-mono">output</span>
+            <span class="url-val url-accent" id="url-out-bytes">0 B</span>
+          </div>
+          <div class="url-meter" aria-hidden="true">
+            <span class="url-meter-fill" id="url-meter" style="width: 0%"></span>
+          </div>
+          <p class="url-ratio caption-mono" id="url-ratio">×100%</p>
+
+          <div class="url-foot-head">
+            <span class="caption-mono">footprint</span>
+            <span class="caption-mono url-foot-legend">
+              <span class="url-lg-chip" aria-hidden="true">%XX</span> encoded
+            </span>
+          </div>
+          <div class="url-foot" id="url-foot" aria-hidden="true"></div>
+          <p class="url-foot-tail caption-mono" id="url-foot-tail" hidden></p>
+        </div>
+
+        <ErrorBanner id="url-error" />
+
+        <div class="status-banner caption">
+          <span class="status-indicator"><span class="dot idle" id="url-status-dot"></span></span>
+          <span class="sr-only" id="url-announce" aria-live="polite"></span>
+          Local sandbox active
+        </div>
+      </Card>
+    </div>
+
+    <div slot="output" class="ws-fill ws-output">
+      <Card variant="flat" class="workspace-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">OUTPUT</span>
+          <ToolActions id="output-actions" variant="inset" actions={["copy", "download"]} />
+        </div>
+        <CodeEditor
+          id="url-output"
+          label="URL codec output"
+          placeholder="Result appears here…"
+          readonly
+        >
+          <div class="editor-info-bar" slot>
+            <span class="info-status" id="url-output-status">Output: Empty</span>
+            <span class="info-meta" id="url-output-count">0 chars</span>
+          </div>
+        </CodeEditor>
+      </Card>
+    </div>
+  </ToolWorkspace>
+
+  {/* the three encodings, as a comparison matrix — the documentation, not cards */}
+  <section class="url-ref url-reveal">
+    <Container size="narrow">
+      <div class="url-ref-head">
+        <span class="caption-mono section-eyebrow">THE THREE ENCODINGS</span>
+        <h2 class="display-md url-ref-title">Same string, three different answers</h2>
+        <p class="body-sm url-ref-sub">
+          Percent-encoding looks uniform, but the three modes disagree on exactly the characters
+          that cause bugs. Pick the one that matches where the string is going.
+        </p>
+      </div>
+
+      <div class="url-table">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Component</th>
+              <th>Whole URL</th>
+              <th>Form</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>space</td>
+              <td><code>%20</code></td>
+              <td><code>%20</code></td>
+              <td><code>+</code></td>
+            </tr>
+            <tr>
+              <td>reserved <code>/ : ? &amp; =</code></td>
+              <td>encoded</td>
+              <td>kept</td>
+              <td>encoded</td>
+            </tr>
+            <tr>
+              <td>tilde <code>~</code></td>
+              <td>kept</td>
+              <td>kept</td>
+              <td><code>%7E</code></td>
+            </tr>
+            <tr>
+              <td>use when</td>
+              <td>a query value or path segment</td>
+              <td>an entire link</td>
+              <td>a form / <code>x-www-form-urlencoded</code> body</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="caption url-ref-note">
+        Non-ASCII always expands to its UTF-8 bytes — <code>é</code> is two (<code>%C3%A9</code>),
+        an emoji is four. The readout reports bytes, not characters, so the expansion number is
+        honest.
+      </p>
+    </Container>
+  </section>
+
+  <section class="faq-section url-reveal" aria-labelledby="faq-title">
+    <Container size="narrow">
+      <div class="faq-header">
+        <span class="caption-mono section-eyebrow">FAQ</span>
+        <h2 id="faq-title" class="display-lg section-title">Quick answers</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary class="faq-summary">Is my input sent anywhere?</summary>
+          <p class="body-md faq-answer">
+            No. Encoding and decoding run entirely in your browser. Nothing you paste leaves your
+            machine.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Component vs whole URL — which do I want?</summary>
+          <p class="body-md faq-answer">
+            If you're encoding a single value to drop into a query string, use Component — it
+            encodes the reserved characters so they can't break the URL. If you already have a full
+            URL and just want the unsafe characters escaped, use Whole URL, which leaves the
+            structure intact.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Why is there a plus sign instead of %20?</summary>
+          <p class="body-md faq-answer">
+            That's form encoding (and many real query strings), where a space is written as <code
+              >+</code
+            >. The "decode + as space" toggle reads it back correctly; turn it off to keep <code
+              >+</code
+            > literal.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">What does the footprint show?</summary>
+          <p class="body-md faq-answer">
+            Each teal chip is a character that the current mode encodes, shown as its percent-bytes;
+            plain characters pass through untouched. It's the encoding's effect on your exact
+            string, made visible — and in decode mode it shows the encoded structure you're
+            unpacking.
+          </p>
+        </details>
+      </div>
+    </Container>
+  </section>
+</ToolShell>
+
+<script>
+  import { urlCodecStore } from "../../lib/tools/url-codec/store";
+  import {
+    setInput,
+    setMode,
+    setEncoding,
+    setPlusSpace,
+    clearAll,
+    transform,
+    loadSample,
+  } from "../../lib/tools/url-codec/actions";
+  import { footprint } from "../../lib/tools/url-codec/engine";
+  import type { UrlEncoding, UrlMode } from "../../lib/tools/url-codec/types";
+  import { debounce } from "../../shared/debounce";
+  import { announce, initAnnounce } from "../../shared/announce";
+  import { copyToClipboard } from "../../shared/clipboard";
+  import { downloadFile } from "../../shared/download";
+
+  const inTextarea = document.getElementById("url-input-textarea") as HTMLTextAreaElement | null;
+  const outTextarea = document.getElementById("url-output-textarea") as HTMLTextAreaElement | null;
+  const inStatus = document.getElementById("url-input-status") as HTMLElement | null;
+  const inCount = document.getElementById("url-input-count") as HTMLElement | null;
+  const outStatus = document.getElementById("url-output-status") as HTMLElement | null;
+  const outCount = document.getElementById("url-output-count") as HTMLElement | null;
+  const runBtn = document.getElementById("url-run") as HTMLButtonElement | null;
+  const plusCb = document.getElementById("url-plus") as HTMLInputElement | null;
+  const plusGroup = document.getElementById("url-plus-group") as HTMLElement | null;
+  const modeBtns = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-url-mode]"));
+  const encBtns = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-url-enc]"));
+  const errorBanner = document.getElementById("url-error") as HTMLElement | null;
+  const statusDot = document.getElementById("url-status-dot") as HTMLElement | null;
+
+  const readout = document.getElementById("url-readout") as HTMLElement | null;
+  const validBox = document.getElementById("url-valid") as HTMLElement | null;
+  const validDot = document.getElementById("url-dot") as HTMLElement | null;
+  const validText = document.getElementById("url-valid-text") as HTMLElement | null;
+  const inBytes = document.getElementById("url-in-bytes") as HTMLElement | null;
+  const outBytes = document.getElementById("url-out-bytes") as HTMLElement | null;
+  const meter = document.getElementById("url-meter") as HTMLElement | null;
+  const ratioEl = document.getElementById("url-ratio") as HTMLElement | null;
+  const footEl = document.getElementById("url-foot") as HTMLElement | null;
+  const footTail = document.getElementById("url-foot-tail") as HTMLElement | null;
+
+  initAnnounce("url-announce");
+
+  const fmtBytes = (n: number): string => (n >= 1024 ? (n / 1024).toFixed(1) + " KB" : n + " B");
+  const esc = (s: string): string =>
+    s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c] as string);
+
+  const debouncedInput = debounce((value: string) => {
+    setInput(urlCodecStore, value);
+    transform(urlCodecStore, false);
+  }, 180);
+
+  let lastFootKey = "";
+
+  function renderFoot(
+    input: string,
+    mode: UrlMode,
+    encoding: UrlEncoding,
+    plusSpace: boolean,
+  ): void {
+    if (!footEl) return;
+    if (input.length === 0) {
+      footEl.innerHTML = "";
+      if (footTail) footTail.hidden = true;
+      lastFootKey = "";
+      return;
+    }
+    const key = mode + "|" + encoding + "|" + (plusSpace ? "1" : "0") + "|" + input;
+    if (key === lastFootKey) return;
+    lastFootKey = key;
+
+    const { tokens, truncated } = footprint(input, { mode, encoding, plusSpace });
+    const parts: string[] = [];
+    for (const t of tokens) {
+      if (t.kind === "lit") {
+        parts.push(`<span class="url-lit">${esc(t.text)}</span>`);
+      } else if (t.kind === "err") {
+        parts.push(`<span class="url-chip url-chip-err">${esc(t.text)}</span>`);
+      } else {
+        parts.push(`<span class="url-chip">${esc(t.text)}</span>`);
+      }
+    }
+    footEl.innerHTML = parts.join("");
+    if (footTail) {
+      footTail.hidden = !truncated;
+      if (truncated) footTail.textContent = "footprint truncated for performance";
+    }
+  }
+
+  urlCodecStore.subscribe((state) => {
+    const focused = inTextarea && document.activeElement === inTextarea;
+    if (inTextarea && inTextarea.value !== state.input && !focused) {
+      inTextarea.value = state.input;
+      inTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+    const outText = state.result ? state.result.output : "";
+    if (outTextarea && outTextarea.value !== outText) {
+      outTextarea.value = outText;
+      outTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+
+    // segmented reflection
+    modeBtns.forEach((b) => {
+      const on = b.getAttribute("data-url-mode") === state.mode;
+      b.classList.toggle("is-active", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    encBtns.forEach((b) => {
+      const on = b.getAttribute("data-url-enc") === state.encoding;
+      b.classList.toggle("is-active", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+
+    // plus-as-space only meaningful on decode
+    if (plusGroup) plusGroup.classList.toggle("is-disabled", state.mode !== "decode");
+    if (plusCb) plusCb.disabled = state.mode !== "decode";
+
+    // button label
+    if (runBtn) {
+      if (state.isRunning) {
+        runBtn.disabled = true;
+        runBtn.textContent = state.mode === "encode" ? "Encoding…" : "Decoding…";
+      } else if (state.needsManual) {
+        runBtn.disabled = false;
+        runBtn.textContent =
+          state.mode === "encode" ? "Encode (large input)" : "Decode (large input)";
+      } else {
+        runBtn.disabled = false;
+        runBtn.textContent = state.mode === "encode" ? "Encode" : "Decode";
+      }
+    }
+
+    // input status bar
+    if (inStatus) {
+      if (state.input.length === 0) {
+        inStatus.textContent = "Status: Empty";
+        inStatus.style.color = "";
+      } else if (state.mode === "decode" && !state.validity.ok) {
+        inStatus.textContent = "Status: Invalid encoding";
+        inStatus.style.color = "var(--color-error)";
+      } else {
+        inStatus.textContent = state.mode === "encode" ? "Status: Ready" : "Status: Valid";
+        inStatus.style.color = "var(--color-success)";
+      }
+    }
+    if (inCount) inCount.textContent = state.input.length.toLocaleString() + " chars";
+
+    if (outStatus) {
+      if (!state.result) {
+        outStatus.textContent = "Output: Empty";
+        outStatus.style.color = "";
+      } else if (!state.result.valid) {
+        outStatus.textContent = "Output: Error";
+        outStatus.style.color = "var(--color-error)";
+      } else {
+        outStatus.textContent = state.mode === "encode" ? "Output: Encoded" : "Output: Decoded";
+        outStatus.style.color = "var(--color-success)";
+      }
+    }
+    if (outCount)
+      outCount.textContent =
+        (state.result ? state.result.output.length : 0).toLocaleString() + " chars";
+
+    if (statusDot) {
+      statusDot.classList.remove("idle", "active", "error");
+      statusDot.classList.add(
+        state.isRunning
+          ? "active"
+          : state.mode === "decode" && !state.validity.ok
+            ? "error"
+            : "idle",
+      );
+    }
+
+    // readout + footprint
+    const has = state.input.length > 0;
+    if (readout) readout.hidden = !has;
+    if (has) {
+      const r = state.result;
+      if (validBox) {
+        if (state.mode === "decode" && !state.validity.ok) {
+          if (validDot) validDot.className = "url-dot err";
+          if (validText) validText.textContent = state.validity.message;
+        } else {
+          if (validDot) validDot.className = "url-dot ok";
+          if (validText)
+            validText.textContent = state.mode === "encode" ? "encoding ok" : "decodes cleanly";
+        }
+      }
+      if (r) {
+        if (inBytes) inBytes.textContent = `${r.inputChars} cp · ${fmtBytes(r.inputBytes)}`;
+        if (outBytes) outBytes.textContent = `${r.outputChars} cp · ${fmtBytes(r.outputBytes)}`;
+        if (ratioEl) ratioEl.textContent = `×${r.ratio}%`;
+        if (meter) meter.style.width = Math.min(r.ratio, 400) / 4 + "%";
+      }
+      renderFoot(state.input, state.mode, state.encoding, state.plusSpace);
+    } else if (footEl) {
+      footEl.innerHTML = "";
+      if (footTail) footTail.hidden = true;
+      lastFootKey = "";
+    }
+
+    if (errorBanner) {
+      if (state.error) (errorBanner as any).show?.(state.error);
+      else (errorBanner as any).hide?.();
+    }
+    if (state.error) announce("Error: " + state.error);
+  });
+
+  if (inTextarea) inTextarea.addEventListener("input", () => debouncedInput(inTextarea.value));
+
+  if (runBtn) runBtn.addEventListener("click", () => transform(urlCodecStore, true));
+  modeBtns.forEach((b) =>
+    b.addEventListener("click", () => {
+      setMode(urlCodecStore, b.getAttribute("data-url-mode") as UrlMode);
+      transform(urlCodecStore, true);
+    }),
+  );
+  encBtns.forEach((b) =>
+    b.addEventListener("click", () => {
+      setEncoding(urlCodecStore, b.getAttribute("data-url-enc") as UrlEncoding);
+      transform(urlCodecStore, true);
+    }),
+  );
+  if (plusCb)
+    plusCb.addEventListener("change", () => {
+      setPlusSpace(urlCodecStore, plusCb.checked);
+      transform(urlCodecStore, true);
+    });
+
+  const inputActions = document.getElementById("input-actions");
+  if (inputActions)
+    inputActions.addEventListener("tool-action", (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      if (action === "sample") {
+        loadSample(urlCodecStore);
+        announce("Sample loaded");
+      }
+      if (action === "clear") {
+        clearAll(urlCodecStore);
+        announce("Cleared");
+      }
+    });
+
+  const outputActions = document.getElementById("output-actions");
+  if (outputActions)
+    outputActions.addEventListener("tool-action", async (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      const out = urlCodecStore.get().result?.output ?? "";
+      if (action === "copy") {
+        const ok = out ? await copyToClipboard(out) : false;
+        const btn = outputActions.querySelector("[data-action='copy']");
+        if (ok && btn) {
+          const orig = btn.textContent || "Copy";
+          btn.textContent = "Copied!";
+          announce("Output copied");
+          setTimeout(() => {
+            btn.textContent = orig;
+          }, 1500);
+        }
+      }
+      if (action === "download") {
+        if (out) {
+          const ext = urlCodecStore.get().mode === "encode" ? "encoded.txt" : "decoded.txt";
+          downloadFile(out, ext, "text/plain;charset=utf-8;");
+          announce("Download started");
+        }
+      }
+    });
+
+  document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "SELECT") return;
+      e.preventDefault();
+      transform(urlCodecStore, true);
+    }
+  });
+
+  // subtle scroll-reveal on the two lower sections (reduced-motion flattens it)
+  if ("IntersectionObserver" in window) {
+    const revs = Array.from(document.querySelectorAll<HTMLElement>(".url-reveal"));
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((en) => {
+          if (en.isIntersecting) {
+            en.target.classList.add("is-visible");
+            io.unobserve(en.target);
+          }
+        });
+      },
+      { threshold: 0.12 },
+    );
+    revs.forEach((el) => io.observe(el));
+  }
+</script>
+
+<!-- Footprint chips are injected via innerHTML, so their styles must be global.
+     Names are url-chip / url-lit to avoid any collision. -->
+<style is:global>
+  .url-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    max-height: 132px;
+    overflow: auto;
+    padding: 8px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.5;
+    align-content: flex-start;
+  }
+  .url-lit {
+    color: var(--color-ink);
+    white-space: pre;
+  }
+  .url-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 4px;
+    border-radius: var(--rounded-xs);
+    background-color: rgba(33, 167, 138, 0.12);
+    color: var(--color-accent-active);
+    border: 1px solid rgba(33, 167, 138, 0.28);
+    transition:
+      transform 0.12s ease,
+      background-color 0.12s ease;
+  }
+  .url-chip:hover {
+    transform: translateY(-1px);
+    background-color: rgba(33, 167, 138, 0.2);
+  }
+  .url-chip-err {
+    background-color: rgba(238, 0, 0, 0.1);
+    border-color: rgba(238, 0, 0, 0.35);
+    color: var(--color-error);
+  }
+  .url-lg-chip {
+    display: inline-flex;
+    padding: 0 4px;
+    border-radius: var(--rounded-xs);
+    background-color: rgba(33, 167, 138, 0.12);
+    color: var(--color-accent-active);
+    border: 1px solid rgba(33, 167, 138, 0.28);
+    font-size: 10px;
+  }
+</style>
+
+<style>
+  .settings-card {
+    padding: var(--spacing-lg);
+  }
+  .settings-title {
+    margin: 0;
+  }
+  .settings-divider {
+    height: 1px;
+    background-color: var(--color-hairline);
+    margin: var(--spacing-xs) 0;
+  }
+  .settings-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-md);
+  }
+  .settings-label {
+    color: var(--color-mute);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .settings-help {
+    color: var(--color-mute);
+    margin: 2px 0 0;
+    line-height: 1.4;
+  }
+
+  /* segmented control */
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    overflow: hidden;
+    width: 100%;
+  }
+  .seg-btn {
+    flex: 1;
+    border: none;
+    background: var(--color-canvas);
+    color: var(--color-body);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 8px 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      background-color 0.18s ease,
+      color 0.18s ease;
+  }
+  .seg-btn + .seg-btn {
+    border-left: 1px solid var(--color-hairline);
+  }
+  .seg-btn.is-active {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+  }
+  .seg-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+  }
+
+  .checkbox-group {
+    margin-bottom: var(--spacing-sm);
+  }
+  .checkbox-group.is-disabled {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    padding-left: 24px;
+    cursor: pointer;
+    user-select: none;
+    color: var(--color-ink);
+  }
+  .checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  .checkbox-checkmark {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    height: 16px;
+    width: 16px;
+    border: 1px solid var(--color-hairline-strong);
+    border-radius: 4px;
+    background-color: var(--color-canvas);
+    transition:
+      background-color 0.1s ease,
+      border-color 0.1s ease;
+  }
+  .checkbox-container:hover input ~ .checkbox-checkmark {
+    border-color: var(--color-ink);
+  }
+  .checkbox-container input:checked ~ .checkbox-checkmark {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+  .checkbox-checkmark::after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+  .checkbox-container input:checked ~ .checkbox-checkmark::after {
+    display: block;
+  }
+  .checkbox-container .checkbox-checkmark::after {
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+  }
+
+  .action-btn {
+    width: 100%;
+    margin-top: var(--spacing-sm);
+  }
+
+  /* live readout */
+  .url-readout {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .url-valid {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--color-hairline);
+    margin-bottom: 1px;
+    color: var(--color-body);
+  }
+  .url-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--color-hairline-strong);
+    flex: none;
+  }
+  .url-dot.ok {
+    background-color: var(--color-accent);
+    animation: url-pulse 1.8s ease-in-out infinite;
+  }
+  .url-dot.err {
+    background-color: var(--color-error);
+  }
+  @keyframes url-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(33, 167, 138, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 4px rgba(33, 167, 138, 0);
+    }
+  }
+  .url-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .url-label {
+    color: var(--color-mute);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .url-val {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .url-val.url-accent {
+    color: var(--color-accent-active);
+  }
+  .url-meter {
+    height: 6px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-hairline);
+    overflow: hidden;
+    margin-top: 2px;
+  }
+  .url-meter-fill {
+    display: block;
+    height: 100%;
+    background-color: var(--color-accent);
+    transition: width 0.45s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  .url-ratio {
+    margin: 0;
+    color: var(--color-accent-active);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+  .url-foot-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+    color: var(--color-mute);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .url-foot-legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .url-foot-tail {
+    margin: 2px 0 0;
+    color: var(--color-mute);
+  }
+
+  .status-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-mute);
+    margin-top: auto;
+    padding-top: var(--spacing-md);
+  }
+  .status-indicator .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-hairline-strong);
+  }
+  .status-indicator .dot.active {
+    background-color: var(--color-accent);
+  }
+  .status-indicator .dot.error {
+    background-color: var(--color-error);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .workspace-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    gap: var(--spacing-md);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-hairline);
+    padding-bottom: var(--spacing-sm);
+  }
+  .column-title {
+    color: var(--color-mute);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+  .editor-info-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--color-hairline);
+    border-top: none;
+    border-bottom-left-radius: var(--rounded-sm);
+    border-bottom-right-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    padding: 6px var(--spacing-sm);
+    font-size: 11px;
+    color: var(--color-mute);
+    font-family: var(--font-sans);
+  }
+  .info-status {
+    font-weight: 500;
+  }
+
+  /* comparison matrix */
+  .url-ref {
+    padding: var(--spacing-4xl) 0 var(--spacing-5xl);
+    background-color: var(--color-canvas-soft);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .url-ref-head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-xl);
+  }
+  .url-ref-title {
+    color: var(--color-ink);
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+  .url-ref-sub {
+    color: var(--color-body);
+    margin: 0;
+    max-width: 64ch;
+    line-height: 1.6;
+  }
+  .url-table {
+    overflow-x: auto;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    background-color: var(--color-canvas);
+  }
+  .url-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .url-table th,
+  .url-table td {
+    text-align: left;
+    padding: 10px var(--spacing-md);
+    border-bottom: 1px solid var(--color-hairline);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .url-table tr:last-child td {
+    border-bottom: none;
+  }
+  .url-table th {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--color-ink);
+    background-color: var(--color-canvas-soft);
+    border-bottom: 1px solid var(--color-hairline-strong);
+  }
+  .url-table th:first-child {
+    color: var(--color-mute);
+  }
+  .url-table td {
+    color: var(--color-body);
+  }
+  .url-table td:first-child {
+    color: var(--color-ink);
+    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .url-table td code,
+  .url-ref-note code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background-color: var(--color-canvas-soft-2);
+    padding: 1px 5px;
+    border-radius: var(--rounded-xs);
+    color: var(--color-accent-active);
+  }
+  .url-table tbody tr:hover td {
+    background-color: var(--color-canvas-soft);
+  }
+  .url-ref-note {
+    margin: var(--spacing-md) 0 0;
+    color: var(--color-mute);
+    line-height: 1.5;
+  }
+
+  .section-eyebrow {
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+  }
+
+  /* scroll reveal for the two lower sections */
+  .url-reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s ease;
+  }
+  .url-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .faq-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .faq-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .faq-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft);
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  .faq-summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink);
+    padding: var(--spacing-xs) 0;
+    user-select: none;
+  }
+  .faq-summary:hover {
+    color: var(--color-accent);
+  }
+  .faq-answer {
+    margin-top: var(--spacing-sm);
+    font-size: 13px;
+    color: var(--color-body);
+    line-height: 1.6;
+  }
+  .faq-answer code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background-color: var(--color-canvas-soft-2);
+    padding: 1px 4px;
+    border-radius: var(--rounded-xs);
+  }
+
+  @media (min-width: 960px) {
+    .workspace-card :global(.editor-outer) {
+      flex: none;
+      height: 650px;
+      min-height: 650px;
+    }
+    .workspace-card :global(.editor-wrapper) {
+      height: 100%;
+    }
+  }
+  @media (max-width: 959px) {
+    .workspace-card :global(.editor-outer) {
+      height: 350px;
+      flex: 0 0 350px;
+      min-height: 0;
+    }
+    .workspace-card :global(.editor-wrapper) {
+      height: 100%;
+    }
+  }
+</style>
