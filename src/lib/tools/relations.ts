@@ -62,4 +62,10 @@ export const RELATIONS: Record<string, Relation[]> = {
     { id: "base64", label: "Base64 instead", kind: "pair" },
     { id: "json-to-csv", label: "Build a query table", kind: "pair" },
   ],
+  "json-to-xml": [
+    { id: "xml-to-json", label: "Reverse it", kind: "pair" },
+    { id: "json-formatter", label: "Format the source", kind: "next" },
+    { id: "json-validator", label: "Validate the source", kind: "pair" },
+    { id: "json-to-csv", label: "Or flatten to CSV", kind: "pair" },
+  ],
 };
