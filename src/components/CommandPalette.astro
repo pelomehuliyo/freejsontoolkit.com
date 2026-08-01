@@ -477,7 +477,11 @@
       const k = e.key;
       if ((e.metaKey || e.ctrlKey) && (k === "k" || k === "K")) {
         e.preventDefault();
-        isOpen() ? close() : open();
+        if (isOpen()) {
+          close();
+        } else {
+          open();
+        }
         return;
       }
       if (k === "/" && !e.metaKey && !e.ctrlKey && !e.altKey) {

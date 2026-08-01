@@ -1,0 +1,567 @@
+---
+/**
+ * Comparison pages — one URL per entry in COMPARISONS. getStaticPaths generates
+ * a static page for each pair at build time; the layout reads tool metadata from
+ * the registry so names/badges/links never drift from the catalog. Optional
+ * aLabel/bLabel/aBadge/bBadge/aTag/bTag overrides let a format-vs-format
+ * comparison (CSV vs JSON) name its sides as formats rather than tools. A "more
+ * comparisons" block lists the other published pairs, so cross-linking grows
+ * automatically as entries are added.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Container from "../../components/Container.astro";
+import { tools } from "../../lib/tools/registry";
+import { COMPARISONS } from "../../lib/tools/comparisons";
+
+export function getStaticPaths() {
+  return Object.values(COMPARISONS).map((c) => ({ params: { slug: c.slug } }));
+}
+
+const slug = Astro.params.slug as string;
+const comp = COMPARISONS[slug];
+
+const byId = Object.fromEntries(tools.map((t) => [t.id, t]));
+const a = byId[comp.aId];
+const b = byId[comp.bId];
+
+const MONO: Record<string, string> = {
+  convert: "CON",
+  format: "FOR",
+  validate: "VAL",
+  compare: "CMP",
+  generate: "GEN",
+  utilities: "UTL",
+  api: "API",
+};
+
+// display values — overrides for format-vs-format, else the registry tool
+const aName = comp.aLabel ?? a.name;
+const bName = comp.bLabel ?? b.name;
+const aBadge = comp.aBadge ?? MONO[a.category] ?? "·";
+const bBadge = comp.bBadge ?? MONO[b.category] ?? "·";
+const aTag = comp.aTag ?? a.tagline;
+const bTag = comp.bTag ?? b.tagline;
+
+const others = Object.values(COMPARISONS).filter((c) => c.slug !== slug);
+
+const pageTitle = `${comp.title} — Which Should You Use?`;
+const pageDescription = comp.intro.length > 155 ? comp.intro.slice(0, 152) + "…" : comp.intro;
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} activePath={`/compare/${slug}`}>
+  <main>
+    {/* hero — the two sides face to face */}
+    <section class="cmp-hero">
+      <Container size="default">
+        <nav class="cmp-crumb caption-mono" aria-label="Breadcrumb">
+          <a href="/">Home</a>
+          <span class="cmp-crumb-sep">/</span>
+          <span>Compare</span>
+          <span class="cmp-crumb-sep">/</span>
+          <span class="cmp-crumb-here">{aName} vs {bName}</span>
+        </nav>
+
+        <div class="cmp-versus">
+          <a class="cmp-side" href={a.href}>
+            <span class="cmp-badge" aria-hidden="true">{aBadge}</span>
+            <span class="cmp-name display-md">{aName}</span>
+            <span class="cmp-tag body-sm">{aTag}</span>
+            <span class="cmp-open body-sm-strong">Open tool <span aria-hidden="true">→</span></span>
+          </a>
+
+          <div class="cmp-vs" aria-hidden="true">
+            <span class="cmp-vs-core">vs</span>
+          </div>
+
+          <a class="cmp-side" href={b.href}>
+            <span class="cmp-badge" aria-hidden="true">{bBadge}</span>
+            <span class="cmp-name display-md">{bName}</span>
+            <span class="cmp-tag body-sm">{bTag}</span>
+            <span class="cmp-open body-sm-strong">Open tool <span aria-hidden="true">→</span></span>
+          </a>
+        </div>
+
+        <p class="cmp-intro body-lg">{comp.intro}</p>
+      </Container>
+    </section>
+
+    {/* when to use which */}
+    <section class="cmp-section">
+      <Container size="default">
+        <div class="cmp-use">
+          <div class="cmp-use-col doc-reveal">
+            <h2 class="cmp-use-head display-sm">{comp.useA.heading}</h2>
+            <ul class="cmp-use-list">
+              {comp.useA.points.map((p) => <li class="body-sm">{p}</li>)}
+            </ul>
+          </div>
+          <div class="cmp-use-col doc-reveal">
+            <h2 class="cmp-use-head display-sm">{comp.useB.heading}</h2>
+            <ul class="cmp-use-list">
+              {comp.useB.points.map((p) => <li class="body-sm">{p}</li>)}
+            </ul>
+          </div>
+        </div>
+      </Container>
+    </section>
+
+    {/* attribute table */}
+    <section class="cmp-section cmp-section-alt">
+      <Container size="default">
+        <h2 class="cmp-block-title display-sm doc-reveal">Side by side</h2>
+        <div class="cmp-table-wrap doc-reveal">
+          <table class="cmp-table">
+            <thead>
+              <tr>
+                <th class="cmp-th-attr"></th>
+                <th>{aName}</th>
+                <th>{bName}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                comp.attributes.map((row) => (
+                  <tr>
+                    <td class="cmp-attr">{row.label}</td>
+                    <td>{row.a}</td>
+                    <td>{row.b}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+
+        {
+          comp.note && (
+            <div class="cmp-note doc-reveal">
+              <span class="cmp-note-k caption-mono">under the hood</span>
+              <p class="body-sm">{comp.note}</p>
+            </div>
+          )
+        }
+      </Container>
+    </section>
+
+    {/* verdict + try both */}
+    <section class="cmp-section">
+      <Container size="default">
+        <div class="cmp-verdict doc-reveal">
+          <span class="cmp-verdict-k caption-mono">bottom line</span>
+          <p class="cmp-verdict-text display-sm">{comp.verdict}</p>
+          <div class="cmp-try">
+            <a class="cmp-try-btn" href={a.href}>Open {aName} <span aria-hidden="true">→</span></a>
+            <a class="cmp-try-btn" href={b.href}>Open {bName} <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+
+        {
+          others.length > 0 && (
+            <div class="cmp-more doc-reveal">
+              <span class="cmp-more-k caption-mono">more comparisons</span>
+              <div class="cmp-more-links">
+                {others.map((o) => (
+                  <a class="cmp-more-link body-sm" href={`/compare/${o.slug}`}>
+                    {o.title} →
+                  </a>
+                ))}
+              </div>
+            </div>
+          )
+        }
+      </Container>
+    </section>
+  </main>
+</BaseLayout>
+
+<script>
+  // scoped scroll-reveal for this page's blocks
+  if ("IntersectionObserver" in window) {
+    const els = Array.from(document.querySelectorAll<HTMLElement>(".doc-reveal"));
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((en) => {
+          if (en.isIntersecting) {
+            en.target.classList.add("is-visible");
+            io.unobserve(en.target);
+          }
+        });
+      },
+      { threshold: 0.12 },
+    );
+    els.forEach((el, i) => {
+      el.style.transitionDelay = `${Math.min(i, 6) * 60}ms`;
+      io.observe(el);
+    });
+  }
+</script>
+
+<style>
+  /* hero */
+  .cmp-hero {
+    padding: var(--spacing-4xl) 0 var(--spacing-3xl);
+    background-color: var(--color-canvas-soft);
+    background-image: radial-gradient(var(--color-hairline) 1px, transparent 1px);
+    background-size: 22px 22px;
+    border-bottom: 1px solid var(--color-hairline);
+  }
+  .cmp-crumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    color: var(--color-mute);
+    margin-bottom: var(--spacing-xl);
+  }
+  .cmp-crumb a {
+    color: var(--color-mute);
+    text-decoration: none;
+  }
+  .cmp-crumb a:hover {
+    color: var(--color-accent-active);
+  }
+  .cmp-crumb-sep {
+    color: var(--color-hairline-strong);
+  }
+  .cmp-crumb-here {
+    color: var(--color-ink);
+  }
+
+  .cmp-versus {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: stretch;
+    gap: var(--spacing-md);
+  }
+  .cmp-side {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: var(--spacing-lg);
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+    transition:
+      border-color 0.15s ease,
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .cmp-side::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background-color: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s ease;
+  }
+  .cmp-side:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 34px rgba(33, 167, 138, 0.12);
+  }
+  .cmp-side:hover::before {
+    transform: scaleX(1);
+  }
+  .cmp-badge {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-hairline-strong);
+    border-radius: var(--rounded-sm);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-accent-active);
+    background-color: var(--color-canvas-soft);
+  }
+  .cmp-name {
+    color: var(--color-ink);
+    margin: 4px 0 0;
+    letter-spacing: -0.02em;
+  }
+  .cmp-tag {
+    color: var(--color-body);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .cmp-open {
+    margin-top: auto;
+    padding-top: var(--spacing-sm);
+    color: var(--color-ink);
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .cmp-side:hover .cmp-open span {
+    transform: translateX(3px);
+  }
+  .cmp-open span {
+    transition: transform 0.15s ease;
+    color: var(--color-accent-active);
+  }
+
+  .cmp-vs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--spacing-xs);
+  }
+  .cmp-vs-core {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    animation: cmp-vs-pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes cmp-vs-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(23, 23, 23, 0.25);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgba(23, 23, 23, 0);
+    }
+  }
+
+  .cmp-intro {
+    color: var(--color-body);
+    line-height: 1.7;
+    max-width: 72ch;
+    margin: var(--spacing-xl) auto 0;
+    text-align: center;
+  }
+
+  /* sections */
+  .cmp-section {
+    padding: var(--spacing-3xl) 0;
+  }
+  .cmp-section-alt {
+    background-color: var(--color-canvas-soft);
+    border-top: 1px solid var(--color-hairline);
+    border-bottom: 1px solid var(--color-hairline);
+  }
+  .cmp-block-title {
+    color: var(--color-ink);
+    margin: 0 0 var(--spacing-md);
+  }
+
+  /* when to use */
+  .cmp-use {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+  }
+  .cmp-use-col {
+    padding: var(--spacing-lg);
+    border: 1px solid var(--color-hairline);
+    border-top: 3px solid var(--color-accent);
+    border-radius: var(--rounded-md);
+    background-color: var(--color-canvas);
+  }
+  .cmp-use-head {
+    color: var(--color-ink);
+    margin: 0 0 var(--spacing-sm);
+  }
+  .cmp-use-list {
+    margin: 0;
+    padding-left: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .cmp-use-list li {
+    color: var(--color-body);
+    line-height: 1.55;
+  }
+  .cmp-use-list li::marker {
+    color: var(--color-accent);
+  }
+
+  /* table */
+  .cmp-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    background-color: var(--color-canvas);
+  }
+  .cmp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .cmp-table th,
+  .cmp-table td {
+    text-align: left;
+    padding: 12px var(--spacing-md);
+    border-bottom: 1px solid var(--color-hairline);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .cmp-table thead th {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-ink);
+    background-color: var(--color-canvas-soft);
+    border-bottom: 1px solid var(--color-hairline-strong);
+  }
+  .cmp-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  .cmp-table tbody tr:hover td {
+    background-color: var(--color-canvas-soft);
+  }
+  .cmp-attr {
+    color: var(--color-ink);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .cmp-table td {
+    color: var(--color-body);
+  }
+
+  /* note */
+  .cmp-note {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-hairline);
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .cmp-note-k {
+    color: var(--color-accent-active);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .cmp-note p {
+    color: var(--color-body);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  /* verdict */
+  .cmp-verdict {
+    padding: var(--spacing-xl);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    background-color: var(--color-canvas);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+  .cmp-verdict-k {
+    color: var(--color-mute);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .cmp-verdict-text {
+    color: var(--color-ink);
+    margin: 0;
+    max-width: 60ch;
+    line-height: 1.5;
+  }
+  .cmp-try {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: var(--spacing-xs);
+  }
+  .cmp-try-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    text-decoration: none;
+    transition:
+      background-color 0.15s ease,
+      transform 0.1s ease;
+  }
+  .cmp-try-btn:hover {
+    background-color: var(--color-accent-active);
+  }
+  .cmp-try-btn:active {
+    transform: translateY(1px);
+  }
+
+  /* more comparisons */
+  .cmp-more {
+    margin-top: var(--spacing-xl);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .cmp-more-k {
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .cmp-more-links {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .cmp-more-link {
+    color: var(--color-accent-active);
+    text-decoration: none;
+    width: max-content;
+  }
+  .cmp-more-link:hover {
+    text-decoration: underline;
+  }
+
+  /* reveal */
+  .doc-reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s ease;
+  }
+  .doc-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (max-width: 720px) {
+    .cmp-versus {
+      grid-template-columns: 1fr;
+    }
+    .cmp-vs {
+      padding: var(--spacing-xs) 0;
+    }
+    .cmp-vs-core {
+      transform: rotate(90deg);
+    }
+    .cmp-use {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

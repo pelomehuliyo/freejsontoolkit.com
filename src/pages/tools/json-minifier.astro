@@ -10,6 +10,9 @@ import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
 import RelatedTools from "../../components/tools/RelatedTools.astro";
+import ToolDocs from "../../components/tools/ToolDocs.astro";
+import CompareLinks from "../../components/tools/CompareLinks.astro";
+import ToolNudge from "../../components/tools/ToolNudge.astro";
 ---
 
 <ToolShell
@@ -158,9 +161,12 @@ Example:
       </div>
     </Container>
   </section>
+  <ToolDocs />
+  <CompareLinks />
+  <RelatedTools />
+  <ToolNudge />
 
   <section class="faq-section" aria-labelledby="faq-title">
-    <RelatedTools />
     <Container size="narrow">
       <div class="faq-header">
         <span class="caption-mono section-eyebrow">FAQ</span>

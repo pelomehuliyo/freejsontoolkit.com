@@ -15,7 +15,9 @@ interface WorkerRequest {
 ctx.onmessage = (e: MessageEvent) => {
   const { id, input, options } = e.data as WorkerRequest;
   try {
-    const result = validateJson(input, { ...options, authoritative: true } as ValidatorOptions & { authoritative: boolean });
+    const result = validateJson(input, { ...options, authoritative: true } as ValidatorOptions & {
+      authoritative: boolean;
+    });
     // validateJson ignores unknown keys; stamp authoritative on the way out.
     (result as { authoritative: boolean }).authoritative = true;
     ctx.postMessage({ id, ok: true, result });

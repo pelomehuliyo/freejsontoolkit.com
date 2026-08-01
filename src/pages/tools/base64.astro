@@ -10,6 +10,8 @@ import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
 import { MIME_PRESETS } from "../../lib/tools/base64/constants";
+import CompareLinks from "../../components/tools/CompareLinks.astro";
+import ToolNudge from "../../components/tools/ToolNudge.astro";
 ---
 
 <ToolShell
@@ -201,6 +203,8 @@ import { MIME_PRESETS } from "../../lib/tools/base64/constants";
       </div>
     </Container>
   </section>
+  <ToolNudge />
+  <CompareLinks />
 
   <section class="faq-section" aria-labelledby="faq-title">
     <Container size="narrow">

@@ -1,0 +1,325 @@
+---
+/**
+ * ToolNudge — bite 5 "tool intelligence". A contextual coach bar that stays
+ * silent until the user produces output, then slides up with the best next
+ * step. It is TEMPORAL (appears on first result, not statically) and
+ * OUTPUT-AWARE (promotes "Convert to CSV" when the result is a flat JSON
+ * array) — which is what separates it from the static RelatedTools rail.
+ *
+ * Universal hooks, no per-tool store wiring:
+ *   - listens for `editor-refresh` / `input` on `.ws-output .editor-textarea`
+ *     (the event every tool fires after filling its output editor);
+ *   - suggestions read from relations.ts (the same graph as bites 2 & 4);
+ *   - one safe output sniff (flat array of records → suggest CSV).
+ *
+ * Self-hides on non-tool pages, tools with no relations, and tools with no
+ * output editor (e.g. the UUID ledger) — so the tag is safe everywhere.
+ * Dismissible; dismissal remembered per-tool for the session.
+ */
+import { tools } from "../../lib/tools/registry";
+import { RELATIONS } from "../../lib/tools/relations";
+
+type Tool = (typeof tools)[number];
+const byId: Record<string, Tool> = {};
+tools.forEach((t) => {
+  byId[t.id] = t;
+});
+
+const path = Astro.url.pathname.replace(/\/+$/, "");
+const current = tools.find((t) => t.href === path);
+
+const VERB: Record<string, string> = {
+  "json-formatter": "formatted",
+  "json-validator": "validated",
+  "json-minifier": "minified",
+  "json-diff": "compared",
+  "json-to-csv": "converted",
+  "csv-to-json": "converted",
+  base64: "processed",
+  "fake-json": "generated",
+  "url-encode": "processed",
+  "uuid-generator": "generated",
+};
+const verb = current ? (VERB[current.id] ?? "done") : "done";
+
+const rels = current ? RELATIONS[current.id] || [] : [];
+const resolved = rels
+  .map((r) => ({ id: r.id, label: r.label, kind: r.kind, tool: byId[r.id] }))
+  .filter(
+    (x): x is { id: string; label: string; kind: string; tool: Tool } => !!x.tool && !!x.tool.href,
+  );
+const leadRel = resolved.find((r) => r.kind === "next") ?? resolved[0];
+const altRels = resolved.filter((r) => r !== leadRel).slice(0, 2);
+
+// smart, output-driven suggestion: CSV when the result is a flat record array
+const csvTool = byId["json-to-csv"];
+const showCsvLead = !!(current && current.id !== "json-to-csv" && csvTool && csvTool.href);
+---
+
+{
+  current && leadRel && (
+    <div class="nudge" id="nudge-root" data-tool={current.id} data-verb={verb} hidden>
+      <div class="nudge-inner">
+        <span class="nudge-kicker caption-mono" id="nudge-kicker">
+          ✓ {verb}
+        </span>
+        <div class="nudge-actions" id="nudge-actions">
+          {showCsvLead && (
+            <a class="nudge-lead" data-lead="csv" href={csvTool.href} hidden>
+              Convert to CSV{" "}
+              <span class="nudge-arr" aria-hidden="true">
+                →
+              </span>
+            </a>
+          )}
+          <a class="nudge-lead" data-lead="graph" href={leadRel.tool.href}>
+            {leadRel.label}{" "}
+            <span class="nudge-arr" aria-hidden="true">
+              →
+            </span>
+          </a>
+          {altRels.map((r) => (
+            <a class="nudge-chip body-sm" href={r.tool.href}>
+              {r.tool.name}
+            </a>
+          ))}
+        </div>
+        <button type="button" class="nudge-x" id="nudge-x" aria-label="Dismiss suggestion">
+          ×
+        </button>
+      </div>
+    </div>
+  )
+}
+<script>
+  (function () {
+    const root = document.getElementById("nudge-root") as
+      (HTMLElement & { __nudge?: boolean }) | null;
+    if (!root || root.__nudge) return;
+    root.__nudge = true;
+
+    const toolId = root.getAttribute("data-tool") || "";
+    const verb = root.getAttribute("data-verb") || "done";
+    const kicker = document.getElementById("nudge-kicker");
+    const xBtn = document.getElementById("nudge-x");
+    // the universal output hook — bails cleanly on tools without an output editor
+    const out = document.querySelector(".ws-output .editor-textarea") as HTMLTextAreaElement | null;
+    if (!out) return;
+
+    // dismissed for this tool this session? then never show
+    try {
+      if (sessionStorage.getItem("fjt:nudge:" + toolId)) return;
+    } catch {
+      /* sessionStorage unavailable — just show it */
+    }
+
+    function looksTabular(text: string): boolean {
+      try {
+        const v = JSON.parse(text);
+        if (!Array.isArray(v) || v.length === 0) return false;
+        return v.every(
+          (el) =>
+            el !== null &&
+            typeof el === "object" &&
+            !Array.isArray(el) &&
+            Object.values(el as Record<string, unknown>).every(
+              (x) => x === null || ["string", "number", "boolean"].includes(typeof x),
+            ),
+        );
+      } catch {
+        return false;
+      }
+    }
+
+    function refreshLead(): void {
+      const csvLead = root!.querySelector<HTMLElement>('[data-lead="csv"]');
+      const graphLead = root!.querySelector<HTMLElement>('[data-lead="graph"]');
+      const tabular = !!csvLead && looksTabular(out!.value);
+      if (csvLead) csvLead.hidden = !tabular;
+      if (graphLead) graphLead.hidden = tabular;
+      if (kicker) kicker.textContent = tabular ? "↳ looks tabular" : "✓ " + verb;
+    }
+
+    let revealed = false;
+    function reveal(): void {
+      if (revealed) {
+        refreshLead();
+        return;
+      }
+      revealed = true;
+      refreshLead();
+      root!.hidden = false;
+      requestAnimationFrame(() => root!.classList.add("is-open"));
+    }
+
+    let timer: number | null = null;
+    function onOut(): void {
+      if (!out!.value.trim()) return;
+      if (timer) clearTimeout(timer);
+      timer = window.setTimeout(reveal, revealed ? 0 : 500);
+    }
+    out.addEventListener("editor-refresh", onOut);
+    out.addEventListener("input", onOut);
+    // tools that auto-generate on load (e.g. Fake JSON) already have output
+    if (out.value.trim()) window.setTimeout(reveal, 700);
+
+    if (xBtn)
+      xBtn.addEventListener("click", () => {
+        root!.classList.remove("is-open");
+        try {
+          sessionStorage.setItem("fjt:nudge:" + toolId, "1");
+        } catch {
+          /* ignore */
+        }
+        window.setTimeout(() => {
+          root!.hidden = true;
+        }, 220);
+      });
+  })();
+</script>
+<style>
+  .nudge {
+    position: fixed;
+    left: 50%;
+    bottom: 20px;
+    z-index: 9500;
+    width: min(700px, calc(100vw - 32px));
+    transform: translateX(-50%) translateY(16px);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.24s ease,
+      transform 0.28s cubic-bezier(0.2, 0.8, 0.25, 1),
+      visibility 0.24s ease;
+  }
+  .nudge.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+  .nudge-inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: 11px 12px 11px 16px;
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    box-shadow: 0 20px 55px rgba(17, 17, 17, 0.2);
+    overflow: hidden;
+  }
+  .nudge-inner::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background-color: var(--color-accent);
+  }
+  .nudge-kicker {
+    flex: none;
+    color: var(--color-accent-active);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    animation: nudge-pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes nudge-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
+  }
+  .nudge-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex: 1;
+    min-width: 0;
+  }
+  .nudge-lead {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background-color 0.15s ease,
+      transform 0.1s ease;
+  }
+  .nudge-lead:hover {
+    background-color: var(--color-accent-active);
+  }
+  .nudge-lead:active {
+    transform: translateY(1px);
+  }
+  .nudge-arr {
+    transition: transform 0.15s ease;
+  }
+  .nudge-lead:hover .nudge-arr {
+    transform: translateX(3px);
+  }
+  .nudge-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 12px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-pill-sm);
+    background-color: var(--color-canvas);
+    color: var(--color-body);
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      color 0.12s ease,
+      border-color 0.12s ease,
+      transform 0.12s ease;
+  }
+  .nudge-chip:hover {
+    color: var(--color-accent-active);
+    border-color: var(--color-accent);
+    transform: translateY(-1px);
+  }
+  .nudge-x {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: var(--rounded-sm);
+    background: transparent;
+    color: var(--color-mute);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      color 0.12s ease,
+      border-color 0.12s ease;
+  }
+  .nudge-x:hover {
+    color: var(--color-ink);
+    border-color: var(--color-hairline);
+  }
+  @media (max-width: 560px) {
+    .nudge-inner {
+      flex-wrap: wrap;
+      gap: var(--spacing-xs);
+    }
+    .nudge-x {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+    }
+  }
+</style>

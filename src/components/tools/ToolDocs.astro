@@ -1,0 +1,815 @@
+---
+/**
+ * ToolDocs — a self-contained, server-rendered reference block. Drop
+ * <ToolDocs /> into any tool page; it infers the tool from the URL, looks it
+ * up in DOCS, and renders concept → common errors → examples → "pair this
+ * with". Renders nothing on non-tool pages or for tools without a doc entry,
+ * so the tag is safe to include unconditionally.
+ *
+ * Self-contained on purpose: scoped styles, a script that only touches its own
+ * subtree, and the one outward reach ("load into tool") uses a contract every
+ * page already honors — set the first editor's value, fire input, then dispatch
+ * the Ctrl+Enter the page already listens for. No shared-layout touch, no
+ * per-page wiring, no island dependency.
+ */
+import Container from "../Container.astro";
+import { tools } from "../../lib/tools/registry";
+import { RELATIONS } from "../../lib/tools/relations";
+import { DOCS } from "../../lib/tools/docs";
+type Tool = (typeof tools)[number];
+const byId: Record<string, Tool> = {};
+tools.forEach((t) => {
+  byId[t.id] = t;
+});
+const path = Astro.url.pathname.replace(/\/+$/, "");
+const current = tools.find((t) => t.href === path);
+const doc = current ? DOCS[current.id] : undefined;
+// pairs for the closing line, reusing the bite-2 relationship graph
+const pairs = current
+  ? (RELATIONS[current.id] || [])
+      .map((r) => ({ label: r.label, tool: byId[r.id] }))
+      .filter((x): x is { label: string; tool: Tool } => !!x.tool && !!x.tool.href)
+      .slice(0, 3)
+  : [];
+// snippets the client needs for copy / load, shipped via a JSON island so
+// multi-line content never touches a data-attribute escaping hazard
+const snippets: Record<string, string> = {};
+if (doc) {
+  doc.items.forEach((it, i) => {
+    if (it.snippet) snippets["it-" + i] = it.snippet;
+  });
+  doc.examples.forEach((ex, i) => {
+    snippets["ex-" + i] = ex.snippet;
+  });
+}
+const snipJson = JSON.stringify(snippets).replace(/</g, "\\u003c");
+---
+
+{
+  doc && current && (
+    <section class="tool-docs" id="tool-docs-root" aria-labelledby="td-title">
+      <script type="application/json" id="docs-snips" set:html={snipJson} />
+      <Container size="default">
+        <div class="td-grid">
+          {/* sticky on-this-page rail (desktop) */}
+          <nav class="td-nav" aria-label="On this page">
+            <p class="td-nav-title caption-mono">On this page</p>
+            <a class="td-nav-link is-active" href="#td-concept" data-doc-nav="concept">
+              Concept
+            </a>
+            <a class="td-nav-link" href="#td-items" data-doc-nav="items">
+              {doc.itemsLabel}
+            </a>
+            <a class="td-nav-link" href="#td-examples" data-doc-nav="examples">
+              {doc.examplesLabel}
+            </a>
+          </nav>
+          <div class="td-body">
+            <header class="td-head doc-reveal">
+              <span class="td-eyebrow caption-mono">{doc.eyebrow}</span>
+              <h2 id="td-title" class="td-title display-lg">
+                {doc.conceptTitle}
+              </h2>
+            </header>
+            {/* concept + living lead artifact */}
+            <div class="td-concept doc-reveal" id="td-concept" data-doc-sec="concept">
+              {doc.lead === "error-anatomy" && (
+                <div class="td-lead td-lead-err" aria-hidden="true">
+                  <div class="td-lead-head caption-mono">
+                    <span class="td-lead-dot" /> error · line 4, column 5
+                  </div>
+                  <div class="td-lead-code">
+                    <div class="td-ln">
+                      <span class="td-g">2</span>
+                      <span class="td-c"> "name": "Ada",</span>
+                    </div>
+                    <div class="td-ln">
+                      <span class="td-g">3</span>
+                      <span class="td-c"> "role": "engineer",</span>
+                    </div>
+                    <div class="td-ln td-ln-bad">
+                      <span class="td-g">4</span>
+                      <span class="td-c"> </span>
+                      <span class="td-bad">{`{ "id": 2 }`}</span>
+                    </div>
+                    <div class="td-ln td-ln-caret">
+                      <span class="td-g"> </span>
+                      <span class="td-caret-row">
+                        {" "}
+                        <span class="td-caret">^</span> missing ',' before this object
+                      </span>
+                    </div>
+                    <div class="td-ln">
+                      <span class="td-g">5</span>
+                      <span class="td-c">]</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {doc.lead === "before-after" && (
+                <div class="td-lead td-lead-ba" aria-hidden="true">
+                  <div class="td-ba-col">
+                    <span class="td-ba-tag caption-mono">before · 1 line</span>
+                    <pre class="td-ba-pre td-ba-cramped">
+                      {'{"name":"Ada","role":"engineer","tags":["pioneer","writer"],"active":true}'}
+                    </pre>
+                  </div>
+                  <span class="td-ba-arrow" aria-hidden="true">
+                    →
+                  </span>
+                  <div class="td-ba-col">
+                    <span class="td-ba-tag caption-mono">after · readable</span>
+                    <pre class="td-ba-pre td-ba-open">{`{
+"name": "Ada",
+"role": "engineer",
+"tags": ["pioneer", "writer"],
+"active": true
+}`}</pre>
+                  </div>
+                </div>
+              )}
+              <p class="td-concept-text body-md">{doc.concept}</p>
+            </div>
+            {/* common errors / things to know */}
+            <div class="td-block doc-reveal" id="td-items" data-doc-sec="items">
+              <h3 class="td-block-title display-sm">{doc.itemsLabel}</h3>
+              <div class="td-items">
+                {doc.items.map((it, i) => (
+                  <details
+                    class:list={["td-item", it.kind === "error" ? "td-item-err" : "td-item-note"]}
+                    open={i === 0}
+                  >
+                    <summary class="td-item-sum">
+                      <span class="td-item-mark" aria-hidden="true">
+                        {it.kind === "error" ? "!" : "i"}
+                      </span>
+                      <span class="td-item-title">{it.title}</span>
+                      <span class="td-item-chev" aria-hidden="true">
+                        ▾
+                      </span>
+                    </summary>
+                    <div class="td-item-body">
+                      <p class="body-sm td-item-text">{it.body}</p>
+                      {it.snippet && (
+                        <div class="td-item-snip">
+                          <pre class="td-pre">{it.snippet}</pre>
+                          <button
+                            type="button"
+                            class="td-btn td-btn-ghost"
+                            data-doc-id={"it-" + i}
+                            data-doc-act="load"
+                          >
+                            see it in the tool ↑
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </div>
+            {/* runnable examples */}
+            <div class="td-block doc-reveal" id="td-examples" data-doc-sec="examples">
+              <h3 class="td-block-title display-sm">{doc.examplesLabel}</h3>
+              <div class="td-examples">
+                {doc.examples.map((ex, i) => (
+                  <div class="td-ex">
+                    <div class="td-ex-head">
+                      <span class="td-ex-title body-sm-strong">{ex.title}</span>
+                      <span class="td-ex-acts">
+                        <button
+                          type="button"
+                          class="td-btn td-btn-ghost"
+                          data-doc-id={"ex-" + i}
+                          data-doc-act="copy"
+                        >
+                          copy
+                        </button>
+                        <button
+                          type="button"
+                          class="td-btn td-btn-solid"
+                          data-doc-id={"ex-" + i}
+                          data-doc-act="load"
+                        >
+                          try it ↑
+                        </button>
+                      </span>
+                    </div>
+                    <pre class="td-pre">{ex.snippet}</pre>
+                    <p class="caption td-ex-note">{ex.note}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* closing line — reuses the relationship graph */}
+            {pairs.length > 0 && (
+              <p class="td-pairs body-sm doc-reveal">
+                <span class="caption-mono td-pairs-k">pair this with</span>
+                {pairs.map((p, i) => (
+                  <>
+                    {i > 0 && <span class="td-pairs-sep">·</span>}
+                    <a class="td-pairs-link" href={p.tool.href}>
+                      {p.label} → {p.tool.name}
+                    </a>
+                  </>
+                ))}
+              </p>
+            )}
+          </div>
+        </div>
+      </Container>
+    </section>
+  )
+}
+<script>
+  (function () {
+    const root = document.getElementById("tool-docs-root");
+    if (!root) return;
+    if ((root as HTMLElement & { __td?: boolean }).__td) return;
+    (root as HTMLElement & { __td?: boolean }).__td = true;
+    let SNIPS: Record<string, string> = {};
+    const island = root.querySelector("#docs-snips");
+    if (island) {
+      try {
+        SNIPS = JSON.parse(island.textContent || "{}");
+      } catch {
+        SNIPS = {};
+      }
+    }
+    // ── copy + "load into tool" (the one outward reach) ──
+    async function copy(text: string, btn: HTMLElement): Promise<void> {
+      try {
+        await navigator.clipboard.writeText(text);
+        const o = btn.textContent || "copy";
+        btn.textContent = "copied";
+        setTimeout(() => {
+          btn.textContent = o;
+        }, 1200);
+      } catch {
+        /* clipboard blocked — fail quietly */
+      }
+    }
+    function loadAndRun(text: string): void {
+      const ta = document.querySelector(".editor-textarea") as HTMLTextAreaElement | null;
+      if (!ta) return;
+      ta.scrollIntoView({ behavior: "smooth", block: "center" });
+      ta.value = text;
+      ta.dispatchEvent(new Event("input", { bubbles: true }));
+      // a brief accent flash so the user sees where it landed
+      const wrap = ta.closest(".editor-wrapper") as HTMLElement | null;
+      if (wrap) {
+        wrap.style.transition = "box-shadow .2s ease";
+        wrap.style.boxShadow = "0 0 0 3px var(--color-accent)";
+        setTimeout(() => {
+          wrap.style.boxShadow = "";
+        }, 750);
+      }
+      // let the debounced input handler settle the store, then fire the run
+      // shortcut every tool page already listens for on `document`
+      setTimeout(() => {
+        document.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, bubbles: true }),
+        );
+      }, 260);
+    }
+    root.addEventListener("click", (e) => {
+      const btn = (e.target as HTMLElement).closest?.("[data-doc-act]") as HTMLElement | null;
+      if (!btn) return;
+      const id = btn.getAttribute("data-doc-id") || "";
+      const act = btn.getAttribute("data-doc-act");
+      const text = SNIPS[id];
+      if (text == null) return;
+      if (act === "copy") copy(text, btn);
+      else if (act === "load") loadAndRun(text);
+    });
+    // ── sticky on-this-page rail: top-anchored spy + smooth clicks ──
+    // The active item is the section whose heading sits just under the sticky
+    // header (top-anchored), computed from scroll position so it is deterministic
+    // and matches a click exactly — the old middle-of-screen observer band lit the
+    // section in the *middle* of the viewport, which disagreed with where a click
+    // landed the heading. Rail clicks are intercepted: we smooth-scroll with a
+    // header offset and set the active item optimistically, so the highlight
+    // matches the press the instant it happens and the heading never tucks under
+    // the bar.
+    const navLinks = Array.from(root.querySelectorAll<HTMLElement>("[data-doc-nav]"));
+    const secs = Array.from(root.querySelectorAll<HTMLElement>("[data-doc-sec]"));
+    const HEADER = 96; // sticky header height + a little breathing room
+    function setActive(id: string | null): void {
+      navLinks.forEach((l) =>
+        l.classList.toggle("is-active", l.getAttribute("data-doc-nav") === id),
+      );
+    }
+    function activeByScroll(): string | null {
+      if (!secs.length) return null;
+      let id: string | null = secs[0].getAttribute("data-doc-sec");
+      for (const s of secs) {
+        // the last section whose top has reached the header line is "active"
+        if (s.getBoundingClientRect().top - HEADER <= 1) id = s.getAttribute("data-doc-sec");
+        else break;
+      }
+      // at the very bottom of the page, force the last section (it may never
+      // scroll high enough to cross the header line on its own)
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 2) {
+        id = secs[secs.length - 1].getAttribute("data-doc-sec");
+      }
+      return id;
+    }
+    let spyTicking = false;
+    function onScroll(): void {
+      if (spyTicking) return;
+      spyTicking = true;
+      requestAnimationFrame(() => {
+        setActive(activeByScroll());
+        spyTicking = false;
+      });
+    }
+    if (secs.length) {
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+      setActive(activeByScroll());
+    }
+    navLinks.forEach((l) => {
+      l.addEventListener("click", (e) => {
+        const id = l.getAttribute("data-doc-nav");
+        const target = id ? root.querySelector<HTMLElement>('[data-doc-sec="' + id + '"]') : null;
+        if (!target) return;
+        e.preventDefault();
+        setActive(id); // optimistic — feels instant and intentional
+        const y = target.getBoundingClientRect().top + window.scrollY - HEADER + 1;
+        window.scrollTo({ top: y, behavior: "smooth" });
+        // keep the URL honest without triggering a second (instant) jump
+        history.replaceState(null, "", "#" + (target.id || id));
+      });
+    });
+    // ── scroll reveal, scoped to this component's blocks ──
+    if ("IntersectionObserver" in window) {
+      const reveals = Array.from(root.querySelectorAll<HTMLElement>(".doc-reveal"));
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((en) => {
+            if (en.isIntersecting) {
+              en.target.classList.add("is-visible");
+              io.unobserve(en.target);
+            }
+          });
+        },
+        { threshold: 0.12 },
+      );
+      reveals.forEach((el, i) => {
+        el.style.transitionDelay = `${Math.min(i, 6) * 60}ms`;
+        io.observe(el);
+      });
+    }
+  })();
+</script>
+<style>
+  .tool-docs {
+    padding: var(--spacing-4xl) 0;
+    background-color: var(--color-canvas-soft);
+    background-image: radial-gradient(var(--color-hairline) 1px, transparent 1px);
+    background-size: 22px 22px;
+    border-top: 1px solid var(--color-hairline);
+  }
+  /* clear the sticky header when a rail link (or any anchor) targets a section,
+so a no-JS / fallback jump still lands the heading below the bar */
+  [data-doc-sec] {
+    scroll-margin-top: 96px;
+  }
+  .td-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xl);
+    align-items: start;
+  }
+  @media (min-width: 960px) {
+    .td-grid {
+      grid-template-columns: 184px minmax(0, 1fr);
+      gap: var(--spacing-3xl);
+    }
+  }
+  /* sticky rail */
+  .td-nav {
+    display: none;
+  }
+  @media (min-width: 960px) {
+    .td-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      position: sticky;
+      top: 88px;
+      border-left: 1px solid var(--color-hairline);
+      padding-left: var(--spacing-sm);
+    }
+  }
+  .td-nav-title {
+    color: var(--color-mute);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin: 0 0 var(--spacing-xs);
+  }
+  .td-nav-link {
+    color: var(--color-body);
+    text-decoration: none;
+    font-size: 13px;
+    padding: 6px 0 6px var(--spacing-sm);
+    margin-left: calc(-1 * var(--spacing-sm) - 1px);
+    border-left: 2px solid transparent;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease;
+  }
+  .td-nav-link:hover {
+    color: var(--color-ink);
+  }
+  .td-nav-link.is-active {
+    color: var(--color-accent-active);
+    border-left-color: var(--color-accent);
+    font-weight: 600;
+  }
+  /* head */
+  .td-head {
+    margin-bottom: var(--spacing-lg);
+  }
+  .td-eyebrow {
+    color: var(--color-accent-active);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: var(--spacing-xs);
+  }
+  .td-title {
+    color: var(--color-ink);
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+  /* concept */
+  .td-concept {
+    margin-bottom: var(--spacing-3xl);
+  }
+  .td-concept-text {
+    color: var(--color-body);
+    line-height: 1.7;
+    max-width: 70ch;
+    margin: var(--spacing-md) 0 0;
+  }
+  /* living lead — error anatomy */
+  .td-lead {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    background-color: var(--color-canvas);
+    overflow: hidden;
+    box-shadow: 0 12px 30px rgba(17, 17, 17, 0.05);
+  }
+  .td-lead-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px var(--spacing-md);
+    background-color: var(--color-primary);
+    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: 0.04em;
+  }
+  .td-lead-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--color-error);
+    animation: td-pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes td-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(238, 0, 0, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 4px rgba(238, 0, 0, 0);
+    }
+  }
+  .td-lead-code {
+    padding: var(--spacing-sm) 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .td-ln {
+    display: flex;
+    padding: 0 var(--spacing-md);
+  }
+  .td-g {
+    flex: none;
+    width: 22px;
+    text-align: right;
+    padding-right: 12px;
+    color: var(--color-hairline-strong);
+    user-select: none;
+  }
+  .td-c {
+    color: var(--color-ink);
+    white-space: pre;
+  }
+  .td-ln-bad {
+    background-color: rgba(238, 0, 0, 0.07);
+  }
+  .td-bad {
+    color: var(--color-error);
+    font-weight: 600;
+  }
+  .td-ln-caret {
+    color: var(--color-error);
+  }
+  .td-caret-row {
+    white-space: pre;
+  }
+  .td-caret {
+    animation: td-blink 1.05s step-end infinite;
+  }
+  @keyframes td-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  /* living lead — before / after */
+  .td-lead-ba {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: stretch;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+  }
+  .td-ba-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+  .td-ba-tag {
+    color: var(--color-mute);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .td-ba-pre {
+    margin: 0;
+    padding: var(--spacing-sm);
+    border-radius: var(--rounded-sm);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    border: 1px solid var(--color-hairline);
+  }
+  .td-ba-cramped {
+    background-color: var(--color-canvas-soft-2);
+    color: var(--color-body);
+  }
+  .td-ba-open {
+    background-color: rgba(33, 167, 138, 0.06);
+    color: var(--color-ink);
+    border-color: rgba(33, 167, 138, 0.25);
+  }
+  .td-ba-arrow {
+    align-self: center;
+    color: var(--color-accent);
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    animation: td-nudge 1.6s ease-in-out infinite;
+  }
+  @keyframes td-nudge {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(4px);
+    }
+  }
+  @media (max-width: 600px) {
+    .td-lead-ba {
+      grid-template-columns: 1fr;
+    }
+    .td-ba-arrow {
+      transform: rotate(90deg);
+      justify-self: center;
+    }
+  }
+  /* blocks */
+  .td-block {
+    margin-bottom: var(--spacing-3xl);
+  }
+  .td-block-title {
+    color: var(--color-ink);
+    margin: 0 0 var(--spacing-md);
+  }
+  /* items (accordion) */
+  .td-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  .td-item {
+    border: 1px solid var(--color-hairline);
+    border-left: 3px solid var(--color-hairline-strong);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    overflow: hidden;
+    transition: border-color 0.15s ease;
+  }
+  .td-item-err {
+    border-left-color: var(--color-error);
+  }
+  .td-item-note {
+    border-left-color: var(--color-accent);
+  }
+  .td-item[open] {
+    border-color: var(--color-hairline-strong);
+  }
+  .td-item-sum {
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  .td-item-sum::-webkit-details-marker {
+    display: none;
+  }
+  .td-item-mark {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    border-radius: var(--rounded-xs);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    background-color: var(--color-canvas-soft-2);
+    color: var(--color-mute);
+  }
+  .td-item-err .td-item-mark {
+    background-color: rgba(238, 0, 0, 0.1);
+    color: var(--color-error);
+  }
+  .td-item-note .td-item-mark {
+    background-color: rgba(33, 167, 138, 0.12);
+    color: var(--color-accent-active);
+  }
+  .td-item-title {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .td-item-chev {
+    color: var(--color-mute);
+    transition: transform 0.2s ease;
+  }
+  .td-item[open] .td-item-chev {
+    transform: rotate(180deg);
+  }
+  .td-item-body {
+    padding: 0 var(--spacing-md) var(--spacing-md) 52px;
+  }
+  .td-item-text {
+    color: var(--color-body);
+    margin: 0 0 var(--spacing-sm);
+    line-height: 1.6;
+  }
+  .td-item-snip {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  /* examples */
+  .td-examples {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-md);
+  }
+  .td-ex {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    background-color: var(--color-canvas);
+    transition:
+      border-color 0.15s ease,
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .td-ex:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(33, 167, 138, 0.1);
+  }
+  .td-ex-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+  }
+  .td-ex-title {
+    color: var(--color-ink);
+  }
+  .td-ex-acts {
+    display: inline-flex;
+    gap: 6px;
+  }
+  .td-ex-note {
+    color: var(--color-mute);
+    margin: 0;
+    line-height: 1.5;
+  }
+  /* shared code + buttons */
+  .td-pre {
+    margin: 0;
+    padding: var(--spacing-sm);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-primary);
+    color: rgba(255, 255, 255, 0.88);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-x: auto;
+  }
+  .td-btn {
+    border: 1px solid var(--color-hairline-strong);
+    background: var(--color-canvas);
+    color: var(--color-body);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: var(--rounded-sm);
+    cursor: pointer;
+    transition:
+      color 0.12s ease,
+      border-color 0.12s ease,
+      background-color 0.12s ease,
+      transform 0.1s ease;
+  }
+  .td-btn:hover {
+    color: var(--color-accent-active);
+    border-color: var(--color-accent);
+  }
+  .td-btn:active {
+    transform: translateY(1px);
+  }
+  .td-btn-solid {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    border-color: var(--color-primary);
+  }
+  .td-btn-solid:hover {
+    background-color: var(--color-accent-active);
+    border-color: var(--color-accent-active);
+    color: var(--color-on-primary);
+  }
+  /* pairs line */
+  .td-pairs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin: 0;
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-hairline);
+    color: var(--color-body);
+  }
+  .td-pairs-k {
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+  .td-pairs-sep {
+    color: var(--color-hairline-strong);
+  }
+  .td-pairs-link {
+    color: var(--color-accent-active);
+    text-decoration: none;
+  }
+  .td-pairs-link:hover {
+    text-decoration: underline;
+  }
+  /* reveal */
+  .doc-reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s ease;
+  }
+  .doc-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+</style>

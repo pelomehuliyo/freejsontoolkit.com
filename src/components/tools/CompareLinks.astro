@@ -1,0 +1,100 @@
+---
+/**
+ * CompareLinks — a compact "Compare: vs X · vs Y" chip row for tool pages.
+ * Drop <CompareLinks /> next to <RelatedTools />; it infers the tool from the
+ * URL, finds every comparison that involves it, and renders a chip per pair.
+ * Renders nothing on non-tool pages or tools with no comparison, so the tag is
+ * safe to include unconditionally. No client JS, no props.
+ *
+ * For tool-vs-tool comparisons the chip reads "vs {other tool}"; for the
+ * format-vs-format comparison (CSV vs JSON) it reads "{CSV} vs {JSON}".
+ */
+import { tools } from "../../lib/tools/registry";
+import { COMPARISONS } from "../../lib/tools/comparisons";
+const byId = Object.fromEntries(tools.map((t) => [t.id, t]));
+const path = Astro.url.pathname.replace(/\/+$/, "");
+const current = tools.find((t) => t.href === path);
+interface Chip {
+  slug: string;
+  label: string;
+}
+const chips: Chip[] = current
+  ? Object.values(COMPARISONS)
+      .filter((c) => c.aId === current.id || c.bId === current.id)
+      .map((c) => {
+        const isFormat = !!(c.aLabel && c.bLabel);
+        const label = isFormat
+          ? `${c.aLabel} vs ${c.bLabel}`
+          : `vs ${byId[c.aId === current.id ? c.bId : c.aId]?.name ?? ""}`;
+        return { slug: c.slug, label };
+      })
+  : [];
+---
+
+{
+  chips.length > 0 && (
+    <section class="cl-section" aria-label="Compare this tool">
+      <div class="cl-inner">
+        <span class="cl-k caption-mono">compare</span>
+        <div class="cl-chips">
+          {chips.map((c) => (
+            <a class="cl-chip body-sm" href={`/compare/${c.slug}`}>
+              <span class="cl-chip-vs" aria-hidden="true">
+                ⇄
+              </span>
+              {c.label}
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+<style>
+  .cl-section {
+    padding: var(--spacing-md) 0 0;
+  }
+  .cl-inner {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+  }
+  .cl-k {
+    color: var(--color-mute);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .cl-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .cl-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-pill-sm);
+    background-color: var(--color-canvas);
+    color: var(--color-body);
+    text-decoration: none;
+    transition:
+      color 0.12s ease,
+      border-color 0.12s ease,
+      transform 0.12s ease;
+  }
+  .cl-chip:hover {
+    color: var(--color-accent-active);
+    border-color: var(--color-accent);
+    transform: translateY(-1px);
+  }
+  .cl-chip-vs {
+    color: var(--color-accent-active);
+    font-size: 13px;
+  }
+</style>

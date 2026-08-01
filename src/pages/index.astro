@@ -2,494 +2,1321 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Container from "../components/Container.astro";
 import Button from "../components/Button.astro";
-import Card from "../components/Card.astro";
-import { availableTools, comingSoon } from "../lib/tools/registry";
+import { tools, categories, toolsByCategory, comingSoon, counts } from "../lib/tools/registry";
+import { COMPARISONS } from "../lib/tools/comparisons";
 
-// "What's next" teaser: the soonest upcoming tools (by roadmap version).
-function versionRank(v?: string): number {
-  if (!v) return 999;
-  const m = v.match(/(\d+)\.(\d+)/);
-  return m ? Number(m[1]) * 100 + Number(m[2]) : 999;
-}
-const pipeline = comingSoon
-  .filter((t) => t.status === "soon")
-  .sort((a, b) => versionRank(a.addedIn) - versionRank(b.addedIn))
-  .slice(0, 4);
+const MONO: Record<string, string> = {
+  convert: "CON",
+  format: "FOR",
+  validate: "VAL",
+  compare: "CMP",
+  generate: "GEN",
+  utilities: "UTL",
+  api: "API",
+};
+const byId = Object.fromEntries(tools.map((t) => [t.id, t]));
+
+// Directory = available tools, grouped by category (the coming-soon ones live
+// in the Pipeline ledger further down, so they're not duplicated here).
+const cats = categories
+  .map((c) => ({ ...c, items: toolsByCategory(c.id).filter((t) => t.status === "available") }))
+  .filter((c) => c.items.length > 0);
+
+// A curated "most-reached-for" strip — chips, not equal cards.
+const POPULAR = ["json-formatter", "json-validator", "json-to-csv", "base64", "uuid-generator"]
+  .map((id) => byId[id])
+  .filter((t) => t && t.status === "available");
+
+// Comparison network teaser — reads the same data the /compare hub renders.
+const cmpCards = Object.values(COMPARISONS).map((c) => ({
+  slug: c.slug,
+  title: c.title,
+  aName: c.aLabel ?? byId[c.aId]?.name ?? c.aId,
+  bName: c.bLabel ?? byId[c.bId]?.name ?? c.bId,
+  aBadge: c.aBadge ?? MONO[byId[c.aId]?.category ?? ""] ?? "·",
+  bBadge: c.bBadge ?? MONO[byId[c.bId]?.category ?? ""] ?? "·",
+}));
+
+const guarantees = [
+  "No uploads — your input is parsed in memory, never transmitted",
+  "No accounts, no sessions, nothing to leak",
+  "No telemetry on your content — analytics sees page views only",
+  "Open source — every byte that touches your data is public",
+  "Works offline once loaded — heavy work runs in a Web Worker",
+];
 ---
 
 <BaseLayout
-  title="Free JSON Toolkit - Web-based Offline JSON Utilities"
-  description="Fast, secure, and 100% offline JSON utilities for developers. Format, validate, and convert JSON without uploading your data, processed locally in your browser."
+  title="Free JSON Toolkit — Offline JSON, CSV & Developer Tools"
+  description="A growing suite of single-purpose tools to format, validate, convert and compare JSON, CSV and more. Everything runs 100% in your browser — no uploads, no accounts, no server."
   activePath="/"
 >
   <main>
-    {/* Hero */}
-    <section class="hero-section" aria-labelledby="hero-title">
-      <Container size="default" class="hero-container">
-        <div class="hero-content">
-          <h1 id="hero-title" class="display-xl hero-title">Free JSON Toolkit</h1>
+    {/* ── HERO: asymmetric console, not a centered trio ── */}
+    <section class="hp-hero">
+      <Container size="wide">
+        <div class="hp-hero-grid">
+          <div class="hp-hero-copy">
+            <p class="hp-kicker caption-mono">
+              <span class="hp-kicker-dot" aria-hidden="true"></span>
+              FREE JSON TOOLKIT · {counts.available} TOOLS · 100% LOCAL
+            </p>
+            <h1 class="hp-h1 display-xl">
+              Format, validate, convert —<br />
+              <span class="hp-accent">without uploading a byte.</span>
+            </h1>
+            <p class="hp-lede body-lg">
+              A growing suite of single‑purpose tools for JSON, CSV and more. Everything runs in
+              your browser, in a worker when it's heavy, with nothing sent anywhere.
+            </p>
 
-          <p class="body-lg hero-subtitle">
-            Fast, free JSON utilities that run entirely in your browser.
-          </p>
+            {
+              /* the search bar IS the command palette — one intelligent search, no duplicate logic */
+            }
+            <button
+              type="button"
+              class="hp-searchbar"
+              id="hp-searchbar"
+              aria-label="Search tools and jump anywhere — opens the command palette"
+            >
+              <span class="hp-sb-prompt" aria-hidden="true">›</span>
+              <span class="hp-sb-text">Search {counts.available} tools, jump anywhere…</span>
+              <span class="hp-sb-caret" aria-hidden="true">_</span>
+              <span class="hp-sb-keys" aria-hidden="true">
+                <kbd class="kbd">⌘</kbd><kbd class="kbd">K</kbd>
+                <span class="hp-sb-slash">/</span>
+              </span>
+            </button>
 
-          <p class="body-lg hero-description">
-            Convert, format, validate, and transform JSON without uploading your data. Everything is
-            processed locally for speed, privacy, and reliability.
-          </p>
+            <div class="hp-quickstats" aria-label="Toolkit at a glance">
+              <span class="hp-qs"><strong>{counts.available}</strong> live</span>
+              <span class="hp-qs"
+                ><strong class="hp-accent">★</strong> <span id="hp-stat-fav">0</span> saved</span
+              >
+              <span class="hp-qs"><strong>↩</strong> <span id="hp-stat-rec">0</span> recent</span>
+              <span class="hp-qs"><strong>0&nbsp;B</strong> uploaded</span>
+            </div>
 
-          <div class="hero-actions" role="group" aria-label="Primary actions">
-            <Button variant="primary" size="lg" shape="square" href="/tools/json-to-csv">
-              JSON &rarr; CSV Converter
-            </Button>
+            <div class="hp-cta">
+              <Button href="#hp-directory" variant="primary" size="lg" shape="square"
+                >Browse the toolkit</Button
+              >
+              <Button href="/why-local" variant="secondary" size="lg" shape="square"
+                >Why local?</Button
+              >
+            </div>
+          </div>
 
-            <Button variant="secondary" size="lg" shape="square" href="#featured-tools">
-              Browse Tools
-            </Button>
+          {/* live console panel — the "alive" centerpiece */}
+          <div class="hp-console" aria-hidden="true">
+            <span class="hp-scan"></span>
+            <div class="hp-con-bar">
+              <span class="hp-con-dot"></span><span class="hp-con-dot"></span><span
+                class="hp-con-dot"></span>
+              <span class="hp-con-title caption-mono">local · sandbox · no telemetry</span>
+            </div>
+            <div class="hp-con-body caption-mono">
+              <p class="hp-con-line" style="--i:0">
+                <span class="hp-prompt">$</span> toolkit --status
+              </p>
+              <p class="hp-con-line" style="--i:1">
+                <span class="hp-ok">✓</span>
+                <span id="hp-con-tools">{counts.available}</span> tools indexed
+              </p>
+              <p class="hp-con-line" style="--i:2"><span class="hp-ok">✓</span> 0 bytes uploaded</p>
+              <p class="hp-con-line" style="--i:3">
+                <span class="hp-ok">✓</span> processed in your browser
+              </p>
+              <p class="hp-con-line" style="--i:4">
+                <span class="hp-star">★</span>
+                <span id="hp-con-fav">0</span> favorites · <span class="hp-rec">↩</span>
+                <span id="hp-con-rec">0</span> recent
+              </p>
+              <p class="hp-con-line" style="--i:5">
+                <span class="hp-live">●</span> session <span id="hp-clock">--:--:--</span>
+              </p>
+              <p class="hp-con-line" style="--i:6">
+                <span class="hp-prompt">$</span>
+                <span class="hp-con-caret">▍</span>
+              </p>
+            </div>
           </div>
         </div>
       </Container>
     </section>
 
+    {/* ── PERSONALIZED: favorites + recents, filled by the global script ── */}
+    <section class="hp-personal hp-reveal">
+      <Container size="wide">
+        <div class="hp-personal-grid">
+          <div class="hp-col hp-col-fav hp-yourtools">
+            <header class="hp-sec-head">
+              <span class="hp-sec-eyebrow caption-mono">Your space</span>
+              <h2 class="hp-sec-title display-sm">Starred &amp; waiting</h2>
+            </header>
+            {/* global buildRow() fills this with favoritable cards (or the onboarding hint) */}
+            <div data-your-tools></div>
+          </div>
+          <div class="hp-col hp-col-rec" data-jump-back>
+            <header class="hp-sec-head">
+              <span class="hp-sec-eyebrow caption-mono">Pick up where you left off</span>
+              <h2 class="hp-sec-title display-sm">Recently used</h2>
+            </header>
+            {
+              /* global buildEcho() fills this with recent-tool chips; hides the column when empty */
+            }
+            <div data-jump-inner></div>
+          </div>
+        </div>
+      </Container>
+    </section>
+
+    {/* ── POPULAR strip: chips, not equal cards ── */}
     {
-      /* bite 2: "Jump back in" — recent tools for returning visitors. Hidden until
-        the global script finds recents; first-timers never see an empty bar. */
-    }
-    <section class="jump-back-section" data-jump-back hidden>
-      <Container size="default">
-        <div data-jump-inner></div>
-      </Container>
-    </section>
-
-    {/* Trust */}
-    <section id="trust" class="trust-section" aria-labelledby="trust-title">
-      <Container size="default">
-        <div class="section-header trust-header">
-          <span class="caption-mono section-eyebrow">TRUST</span>
-          <h2 id="trust-title" class="display-lg section-title">
-            Developer-first privacy and reliability
-          </h2>
-          <a class="trust-link body-sm-strong" href="/why-local">
-            See the proof — how we keep it that way <span aria-hidden="true">→</span>
-          </a>
-        </div>
-
-        <div class="trust-grid" role="list" aria-label="Trust information">
-          <Card variant="default" class="trust-card" hoverable={false}>
-            <div class="trust-card-content" role="listitem">
-              <h3 class="display-sm tool-title">100% Local Processing</h3>
-              <p class="body-sm tool-description">Your data never leaves your browser.</p>
+      POPULAR.length > 0 && (
+        <section class="hp-popular hp-reveal">
+          <Container size="wide">
+            <div class="hp-pop-head">
+              <span class="hp-pop-k caption-mono">Most‑reached‑for</span>
+              <a class="hp-pop-all body-sm-strong" href="/tools">
+                See all tools →
+              </a>
             </div>
-          </Card>
-
-          <Card variant="default" class="trust-card" hoverable={false}>
-            <div class="trust-card-content" role="listitem">
-              <h3 class="display-sm tool-title">Fast</h3>
-              <p class="body-sm tool-description">No uploads. Instant browser-based processing.</p>
-            </div>
-          </Card>
-
-          <Card variant="default" class="trust-card" hoverable={false}>
-            <div class="trust-card-content" role="listitem">
-              <h3 class="display-sm tool-title">Free Forever</h3>
-              <p class="body-sm tool-description">No accounts, subscriptions, or hidden limits.</p>
-            </div>
-          </Card>
-        </div>
-      </Container>
-    </section>
-
-    {/* Featured Tools — registry-driven */}
-    <section id="featured-tools" class="catalog-section" aria-labelledby="featured-tools-title">
-      <Container size="default">
-        <div class="section-header">
-          <span class="caption-mono section-eyebrow">FEATURED TOOLS</span>
-          <h2 id="featured-tools-title" class="display-lg section-title">
-            Tools that never upload your data
-          </h2>
-          <p class="body-sm section-sub">
-            Every tool runs 100% in your browser — pick one and start.
-          </p>
-        </div>
-
-        <div class="live-tools">
-          {
-            availableTools.map((t) => (
-              <a class="live-tool-card" href={t.href}>
-                <span class="pill pill-live">
-                  <span class="pill-dot" aria-hidden="true" />
-                  Available
-                </span>
-                <h3 class="display-sm live-tool-name">{t.name}</h3>
-                <p class="body-sm live-tool-tag">{t.tagline}</p>
-                <span class="live-tool-cta body-sm-strong">
-                  Open tool{" "}
-                  <span class="cta-arrow" aria-hidden="true">
+            <div class="hp-pop-row">
+              {POPULAR.map((t) => (
+                <a class="hp-pop-chip" href={t.href}>
+                  <span class="mono-badge" aria-hidden="true">
+                    {MONO[t.category]}
+                  </span>
+                  <span class="hp-pop-name">{t.name}</span>
+                  <span class="hp-pop-go" aria-hidden="true">
                     →
                   </span>
-                </span>
-              </a>
+                </a>
+              ))}
+            </div>
+          </Container>
+        </section>
+      )
+    }
+
+    {/* ── DIRECTORY: browse by category (the homepage becomes a directory) ── */}
+    <section class="hp-directory hp-reveal" id="hp-directory">
+      <Container size="wide">
+        <div class="hp-dir-head">
+          <span class="hp-sec-eyebrow caption-mono">The catalog</span>
+          <h2 class="hp-sec-title display-lg">Browse by category</h2>
+          <p class="hp-dir-sub body-sm">
+            Every tool shares one editor, one engine pattern and one design language — and runs
+            entirely on your machine. Star the ones you reach for; they pin to your space above.
+          </p>
+        </div>
+        <div class="hp-cat-grid">
+          {
+            cats.map((cat) => (
+              <div class="hp-cat">
+                <div class="hp-cat-head">
+                  <span class="hp-cat-mono caption-mono">{cat.id.slice(0, 3).toUpperCase()}</span>
+                  <h3 class="hp-cat-name">{cat.label}</h3>
+                  <span class="hp-cat-count caption-mono">{cat.items.length}</span>
+                </div>
+                <p class="hp-cat-blurb caption">{cat.blurb}</p>
+                <ul class="hp-cat-list">
+                  {cat.items.map((t) => (
+                    <li class="hp-tool">
+                      <a class="hp-tool-link" href={t.href}>
+                        <span class="mono-badge" aria-hidden="true">
+                          {MONO[t.category]}
+                        </span>
+                        <span class="hp-tool-mid">
+                          <span class="hp-tool-name">{t.name}</span>
+                          <span class="hp-tool-tag caption">{t.tagline}</span>
+                        </span>
+                        <span class="hp-tool-go" aria-hidden="true">
+                          →
+                        </span>
+                      </a>
+                      <button
+                        type="button"
+                        class="fav-star"
+                        data-tool={t.id}
+                        aria-pressed="false"
+                        aria-label={`Add ${t.name} to favorites`}
+                        title="Add to favorites"
+                      >
+                        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                          <path d="M12 3.5l2.6 5.27 5.82.85-4.21 4.1.99 5.78L12 16.77l-5.2 2.73.99-5.78-4.21-4.1 5.82-.85L12 3.5z" />
+                        </svg>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))
           }
         </div>
-
-        {
-          pipeline.length > 0 && (
-            <div class="pipeline">
-              <div class="pipeline-head">
-                <h3 class="body-sm-strong pipeline-title">In the pipeline</h3>
-                <a class="pipeline-all body-sm-strong" href="/tools">
-                  View all tools &amp; roadmap →
-                </a>
-              </div>
-              <ul class="pipeline-list">
-                {pipeline.map((t) => (
-                  <li class="pipeline-chip">
-                    <span class="pipeline-name">{t.name}</span>
-                    <span class="pipeline-ver caption-mono">{t.addedIn}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )
-        }
-
-        {/* Internal anchor target for the hero "Browse Tools" scroll */}
-        <span id="tools" class="sr-only" aria-hidden="true"></span>
       </Container>
     </section>
 
-    {/* FAQ */}
-    <section id="faq" class="faq-section" aria-labelledby="faq-title">
-      <Container size="narrow">
-        <div class="faq-header">
-          <span class="caption-mono section-eyebrow">FAQ</span>
-          <h2 id="faq-title" class="display-lg section-title">Quick answers</h2>
+    {/* ── COMPARISONS teaser: surface the bite-4 network ── */}
+    {
+      cmpCards.length > 0 && (
+        <section class="hp-compare hp-reveal">
+          <Container size="wide">
+            <div class="hp-cmp-head">
+              <div>
+                <span class="hp-sec-eyebrow caption-mono">Not sure which one?</span>
+                <h2 class="hp-sec-title display-lg">Compare, side by side</h2>
+              </div>
+              <a class="hp-cmp-all body-sm-strong" href="/compare">
+                All comparisons →
+              </a>
+            </div>
+            <div class="hp-cmp-grid">
+              {cmpCards.map((c) => (
+                <a class="hp-cmp-card" href={`/compare/${c.slug}`}>
+                  <div class="hp-cmp-versus">
+                    <span class="hp-cmp-side">
+                      <span class="mono-badge" aria-hidden="true">
+                        {c.aBadge}
+                      </span>
+                      <span class="hp-cmp-name">{c.aName}</span>
+                    </span>
+                    <span class="hp-cmp-vs" aria-hidden="true">
+                      vs
+                    </span>
+                    <span class="hp-cmp-side">
+                      <span class="mono-badge" aria-hidden="true">
+                        {c.bBadge}
+                      </span>
+                      <span class="hp-cmp-name">{c.bName}</span>
+                    </span>
+                  </div>
+                  <span class="hp-cmp-go body-sm-strong">
+                    Read comparison <span aria-hidden="true">→</span>
+                  </span>
+                </a>
+              ))}
+            </div>
+          </Container>
+        </section>
+      )
+    }
+
+    {/* ── TRUST: one bold band + a guarantees ledger, not three equal cards ── */}
+    <section class="hp-trust hp-reveal">
+      <Container size="wide">
+        <div class="hp-trust-grid">
+          <div class="hp-trust-copy">
+            <span class="hp-sec-eyebrow caption-mono">The promise</span>
+            <h2 class="hp-trust-title display-lg">Nothing you paste ever leaves this tab.</h2>
+            <p class="hp-trust-text body-md">
+              There is no backend endpoint for your content to be sent to, because none was ever
+              built. Conversion, formatting and validation happen on your own machine — the trust
+              you place here is trust in your browser, not in our infrastructure.
+            </p>
+            <a class="hp-trust-link body-sm-strong" href="/why-local">
+              See the live proof &amp; architecture →
+            </a>
+          </div>
+          <div class="hp-trust-ledger" aria-label="What we guarantee">
+            <div class="hp-ledger-bar caption-mono">
+              <span class="hp-ledger-dot" aria-hidden="true"></span> guarantees.txt
+            </div>
+            <ul class="hp-ledger-list">
+              {
+                guarantees.map((g) => (
+                  <li class="hp-ledger-row">
+                    <span class="hp-ledger-check" aria-hidden="true">
+                      ✓
+                    </span>
+                    <span class="hp-ledger-text">{g}</span>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
         </div>
+      </Container>
+    </section>
 
-        <div class="faq-list">
-          <details class="faq-item">
-            <summary class="faq-summary">Is my data uploaded?</summary>
-            <p class="body-md faq-answer">No. Everything is processed locally in your browser.</p>
-          </details>
+    {/* ── PIPELINE: momentum, as a ledger ── */}
+    {
+      comingSoon.length > 0 && (
+        <section class="hp-pipeline hp-reveal">
+          <Container size="wide">
+            <div class="hp-pipe-head">
+              <span class="hp-sec-eyebrow caption-mono">In the pipeline</span>
+              <h2 class="hp-sec-title display-lg">Shipped in the open</h2>
+              <p class="hp-pipe-sub body-sm">
+                The roadmap follows demand. Nothing here is filler — a tool appears the moment it
+                works.
+              </p>
+            </div>
+            <div class="hp-pipe-grid">
+              {comingSoon.map((t) => (
+                <div class="hp-pipe-row">
+                  <span class="mono-badge" aria-hidden="true">
+                    {MONO[t.category]}
+                  </span>
+                  <span class="hp-pipe-mid">
+                    <span class="hp-pipe-name">{t.name}</span>
+                    <span class="hp-pipe-tag caption">{t.tagline}</span>
+                  </span>
+                  <span class="hp-pipe-ver caption-mono">{t.addedIn ?? "—"}</span>
+                </div>
+              ))}
+            </div>
+          </Container>
+        </section>
+      )
+    }
 
-          <details class="faq-item">
-            <summary class="faq-summary">Is it free?</summary>
-            <p class="body-md faq-answer">Yes. All tools are free to use.</p>
-          </details>
-
-          <details class="faq-item">
-            <summary class="faq-summary">Does it work offline?</summary>
-            <p class="body-md faq-answer">
-              Most tools continue to work after the page has loaded because processing happens
-              locally.
+    {/* ── FAQ ── */}
+    <section class="hp-faq hp-reveal" aria-labelledby="hp-faq-title">
+      <Container size="narrow">
+        <div class="hp-faq-header">
+          <span class="hp-sec-eyebrow caption-mono">Quick answers</span>
+          <h2 id="hp-faq-title" class="hp-sec-title display-lg">Before you ask</h2>
+        </div>
+        <div class="hp-faq-list">
+          <details class="hp-faq-item">
+            <summary class="hp-faq-summary">Is my data uploaded anywhere?</summary>
+            <p class="body-md hp-faq-answer">
+              No. Every tool processes your input locally in your browser — in a Web Worker when a
+              file is large. Nothing you paste or drop leaves your machine.
             </p>
           </details>
-
-          <details class="faq-item">
-            <summary class="faq-summary">Which browsers are supported?</summary>
-            <p class="body-md faq-answer">Latest versions of Chrome, Edge, Firefox, and Safari.</p>
+          <details class="hp-faq-item">
+            <summary class="hp-faq-summary">Do I need an account?</summary>
+            <p class="body-md hp-faq-answer">
+              No. There is no sign‑up, no session and no server‑side record of anything you process.
+              Your starred tools and recents live only in your own browser.
+            </p>
+          </details>
+          <details class="hp-faq-item">
+            <summary class="hp-faq-summary">Does it work offline?</summary>
+            <p class="body-md hp-faq-answer">
+              Once a page has loaded, the tools keep working without a connection — the logic ships
+              with the page, not a server.
+            </p>
+          </details>
+          <details class="hp-faq-item">
+            <summary class="hp-faq-summary">How do I find the right tool fast?</summary>
+            <p class="body-md hp-faq-answer">
+              Press <strong>⌘K</strong> (or <strong>/</strong>) anywhere to open the command palette
+              — fuzzy search over every tool, with your recent ones on top. Or browse the catalog by
+              category above.
+            </p>
           </details>
         </div>
       </Container>
     </section>
   </main>
 
+  <script>
+    (function () {
+      var reduce =
+        window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      // read-only display sugar — never writes favorites/recents (the global
+      // handler owns all writes, so there is no second path to conflict with).
+      function readIds(k) {
+        try {
+          var r = localStorage.getItem(k);
+          return r ? JSON.parse(r) : [];
+        } catch (e) {
+          return [];
+        }
+      }
+      function setText(id, v) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = v;
+      }
+      function refreshCounts() {
+        var f = readIds("fjt:favorites").length;
+        var r = readIds("fjt:recents").length;
+        setText("hp-stat-fav", String(f));
+        setText("hp-stat-rec", String(r));
+        setText("hp-con-fav", String(f));
+        setText("hp-con-rec", String(r));
+      }
+      var regN = 0;
+      try {
+        var isl = document.getElementById("fjt-registry");
+        regN = isl ? (JSON.parse(isl.textContent || "[]") || []).length : 0;
+      } catch (e) {}
+      setText("hp-con-tools", String(regN));
+      refreshCounts();
+
+      // live session clock in the console (the "alive" pulse)
+      var clock = document.getElementById("hp-clock");
+      if (clock) {
+        var pad = function (n) {
+          return String(n).padStart(2, "0");
+        };
+        var tick = function () {
+          var d = new Date();
+          clock.textContent =
+            pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+        };
+        tick();
+        setInterval(tick, 1000);
+      }
+
+      // the hero search bar opens the global command palette via a synthetic ⌘K —
+      // one intelligent search everywhere, no duplicate filter logic on this page.
+      var sb = document.getElementById("hp-searchbar");
+      if (sb) {
+        sb.addEventListener("click", function (e) {
+          e.preventDefault();
+          document.dispatchEvent(
+            new KeyboardEvent("keydown", {
+              key: "k",
+              ctrlKey: true,
+              bubbles: true,
+              cancelable: true,
+            }),
+          );
+        });
+      }
+
+      // keep the hero's saved-count honest after a star toggle anywhere on the page
+      document.addEventListener("click", function (e) {
+        if (e.target && e.target.closest && e.target.closest(".fav-star")) {
+          setTimeout(refreshCounts, 0);
+        }
+      });
+
+      // scroll reveal (reduced-motion flattens it via the global rule)
+      if ("IntersectionObserver" in window) {
+        var els = Array.prototype.slice.call(document.querySelectorAll(".hp-reveal"));
+        var io = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (en) {
+              if (en.isIntersecting) {
+                en.target.classList.add("is-in");
+                io.unobserve(en.target);
+              }
+            });
+          },
+          { threshold: 0.12 },
+        );
+        els.forEach(function (el, i) {
+          el.style.transitionDelay = Math.min(i, 8) * 60 + "ms";
+          io.observe(el);
+        });
+      }
+    })();
+  </script>
+
   <style>
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border-width: 0;
-    }
-
-    /* Hero */
-    .hero-container {
-      padding-top: 0;
-    }
-
-    .hero-section {
-      padding-top: var(--spacing-4xl);
-      padding-bottom: var(--spacing-3xl);
+    /* ── HERO ── */
+    .hp-hero {
+      position: relative;
+      padding: var(--spacing-4xl) 0 var(--spacing-3xl);
       background-color: var(--color-canvas);
+      background-image: radial-gradient(var(--color-hairline) 1px, transparent 1px);
+      background-size: 22px 22px;
       border-bottom: 1px solid var(--color-hairline);
+      overflow: hidden;
     }
-
-    .hero-content {
-      max-width: 800px;
-      margin: 0 auto;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
+    .hp-hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(120% 80% at 85% 0%, rgba(33, 167, 138, 0.06), transparent 60%);
+    }
+    .hp-hero-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: var(--spacing-3xl);
       align-items: center;
-      gap: var(--spacing-md);
     }
-
-    .hero-title {
-      margin-top: 0;
+    .hp-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-mute);
+      letter-spacing: 0.12em;
+      margin: 0 0 var(--spacing-md);
     }
-
-    .hero-subtitle,
-    .hero-description {
+    .hp-kicker-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--color-accent);
+      animation: hp-pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes hp-pulse {
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(33, 167, 138, 0.45);
+      }
+      50% {
+        box-shadow: 0 0 0 5px rgba(33, 167, 138, 0);
+      }
+    }
+    .hp-h1 {
+      letter-spacing: -0.035em;
+      line-height: 1.02;
+      margin: 0 0 var(--spacing-md);
+    }
+    .hp-accent {
+      color: var(--color-accent-active);
+    }
+    .hp-lede {
       color: var(--color-body);
-      max-width: 720px;
-      margin: 0;
+      margin: 0 0 var(--spacing-lg);
+      max-width: 52ch;
       line-height: 1.6;
     }
 
-    .hero-actions {
+    /* search bar = palette trigger */
+    .hp-searchbar {
       display: flex;
-      gap: var(--spacing-md);
-      margin-top: var(--spacing-md);
-      justify-content: center;
-    }
-
-    @media (max-width: 600px) {
-      .hero-section {
-        padding-top: var(--spacing-3xl);
-        padding-bottom: var(--spacing-3xl);
-      }
-
-      .hero-actions {
-        flex-direction: column;
-        width: 100%;
-        gap: var(--spacing-sm);
-      }
-
-      .hero-actions > :global(a),
-      .hero-actions > :global(button) {
-        width: 100%;
-      }
-    }
-
-    /* Section headers */
-    .section-header {
-      text-align: center;
-      max-width: 700px;
-      margin: 0 auto var(--spacing-xl);
-      display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: var(--spacing-xs);
-    }
-
-    .section-eyebrow {
-      color: var(--color-mute);
-      letter-spacing: 0.1em;
-    }
-
-    .section-title {
-      color: var(--color-ink);
-    }
-
-    .section-sub {
-      color: var(--color-body);
-      margin: 0;
-    }
-
-    /* Featured Tools */
-    .catalog-section {
-      padding: var(--spacing-4xl) 0;
-      background-color: var(--color-canvas-soft);
-      border-bottom: 1px solid var(--color-hairline);
-    }
-
-    .live-tools {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: var(--spacing-md);
-    }
-
-    .live-tool-card {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-xs);
-      padding: var(--spacing-lg) var(--spacing-md) var(--spacing-md);
+      gap: var(--spacing-sm);
+      width: 100%;
+      max-width: 520px;
+      padding: 13px var(--spacing-md);
       background-color: var(--color-canvas);
-      border: 1px solid var(--color-hairline);
+      border: 1px solid var(--color-hairline-strong);
       border-radius: var(--rounded-md);
-      text-decoration: none;
-      color: inherit;
-      overflow: hidden;
+      cursor: text;
+      text-align: left;
       transition:
         border-color 0.15s ease,
         box-shadow 0.15s ease,
-        transform 0.15s ease;
+        transform 0.1s ease;
+    }
+    .hp-searchbar:hover {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px rgba(33, 167, 138, 0.1);
+    }
+    .hp-searchbar:focus-visible {
+      outline: none;
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px rgba(33, 167, 138, 0.16);
+    }
+    .hp-sb-prompt {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-accent);
+      line-height: 1;
+    }
+    .hp-sb-text {
+      flex: 1;
+      min-width: 0;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--color-hairline-strong);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .hp-sb-caret {
+      color: var(--color-accent);
+      font-family: var(--font-mono);
+      animation: hp-blink 1.05s step-end infinite;
+    }
+    @keyframes hp-blink {
+      50% {
+        opacity: 0;
+      }
+    }
+    .hp-sb-keys {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .hp-sb-slash {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--color-mute);
+      margin-left: 2px;
     }
 
-    .live-tool-card::before {
+    .hp-quickstats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-md);
+      margin: var(--spacing-md) 0 0;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--color-mute);
+    }
+    .hp-qs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hp-qs strong {
+      color: var(--color-ink);
+      font-weight: 600;
+    }
+    .hp-cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-sm);
+      margin-top: var(--spacing-lg);
+    }
+
+    /* live console panel */
+    .hp-console {
+      position: relative;
+      border: 1px solid var(--color-hairline);
+      border-radius: var(--rounded-lg);
+      background-color: var(--color-primary);
+      overflow: hidden;
+      box-shadow: 0 30px 70px rgba(17, 17, 17, 0.22);
+    }
+    /* HUD corner brackets */
+    .hp-console::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      border-radius: inherit;
+      opacity: 0.55;
+      background:
+        linear-gradient(var(--color-accent), var(--color-accent)) left 8px top 8px / 12px 1.5px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) left 8px top 8px / 1.5px 12px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) right 8px top 8px / 12px 1.5px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) right 8px top 8px / 1.5px 12px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) left 8px bottom 8px / 12px 1.5px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) left 8px bottom 8px / 1.5px 12px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) right 8px bottom 8px / 12px 1.5px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) right 8px bottom 8px / 1.5px 12px
+          no-repeat;
+    }
+    .hp-scan {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 2px;
+      z-index: 3;
+      background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+      transform: translateX(-100%);
+      animation: hp-scan 3.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+    @keyframes hp-scan {
+      0% {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+      12% {
+        opacity: 0.9;
+      }
+      60% {
+        opacity: 0.9;
+      }
+      100% {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+    .hp-con-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px var(--spacing-md);
+      background-color: rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .hp-con-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.18);
+    }
+    .hp-con-title {
+      margin-left: auto;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 10px;
+      letter-spacing: 0.05em;
+    }
+    .hp-con-body {
+      padding: var(--spacing-md);
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 13px;
+      line-height: 1.85;
+    }
+    .hp-con-line {
+      margin: 0;
+      animation: hp-line-in 0.4s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+      animation-delay: calc(var(--i) * 0.11s + 0.1s);
+    }
+    @keyframes hp-line-in {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+    .hp-prompt {
+      color: var(--color-accent);
+    }
+    .hp-ok {
+      color: var(--color-accent);
+    }
+    .hp-star {
+      color: var(--color-accent);
+    }
+    .hp-rec {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    .hp-live {
+      color: var(--color-accent);
+      animation: hp-pulse 1.8s ease-in-out infinite;
+      border-radius: 50%;
+    }
+    .hp-con-caret {
+      color: var(--color-accent);
+      animation: hp-blink 1.05s step-end infinite;
+    }
+
+    /* ── shared section heads ── */
+    .hp-sec-eyebrow {
+      display: block;
+      color: var(--color-accent-active);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .hp-sec-title {
+      color: var(--color-ink);
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+
+    /* ── PERSONALIZED ── */
+    .hp-personal {
+      padding: var(--spacing-3xl) 0;
+      background-color: var(--color-canvas-soft);
+      border-bottom: 1px solid var(--color-hairline);
+    }
+    .hp-personal-grid {
+      display: flex;
+      gap: var(--spacing-xl);
+      align-items: start;
+    }
+    .hp-col {
+      flex: 1;
+      min-width: 0;
+    }
+    .hp-sec-head {
+      margin-bottom: var(--spacing-md);
+    }
+    /* the global script injects its own headings into these containers — we use ours */
+    .hp-yourtools :global(.your-tools-head),
+    .hp-col-rec :global(.jump-head) {
+      display: none;
+    }
+    .hp-yourtools :global(.your-tools) {
+      margin-bottom: 0;
+    }
+    /* recents chips: tidy the global markup into our column */
+    .hp-col-rec :global(.jump-row) {
+      gap: var(--spacing-xs);
+    }
+
+    /* ── POPULAR ── */
+    .hp-popular {
+      padding: var(--spacing-2xl) 0;
+      border-bottom: 1px solid var(--color-hairline);
+    }
+    .hp-pop-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-sm);
+    }
+    .hp-pop-k {
+      color: var(--color-mute);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .hp-pop-all {
+      color: var(--color-accent-active);
+      text-decoration: none;
+    }
+    .hp-pop-all:hover {
+      text-decoration: underline;
+    }
+    .hp-pop-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-xs);
+    }
+    .hp-pop-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px 8px 8px;
+      border: 1px solid var(--color-hairline);
+      border-radius: var(--rounded-pill-sm);
+      background-color: var(--color-canvas);
+      text-decoration: none;
+      color: inherit;
+      transition:
+        border-color 0.15s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+    }
+    .hp-pop-chip:hover {
+      border-color: var(--color-accent);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(33, 167, 138, 0.12);
+    }
+    .hp-pop-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-ink);
+    }
+    .hp-pop-go {
+      color: var(--color-accent-active);
+      transition: transform 0.15s ease;
+    }
+    .hp-pop-chip:hover .hp-pop-go {
+      transform: translateX(3px);
+    }
+
+    /* ── DIRECTORY ── */
+    .hp-directory {
+      padding: var(--spacing-4xl) 0;
+    }
+    .hp-dir-head {
+      max-width: 720px;
+      margin: 0 0 var(--spacing-xl);
+    }
+    .hp-dir-head .hp-sec-title {
+      margin: 0 0 var(--spacing-xs);
+    }
+    .hp-dir-sub {
+      color: var(--color-body);
+      margin: 0;
+      line-height: 1.6;
+    }
+    .hp-cat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-md);
+    }
+    .hp-cat {
+      padding: var(--spacing-lg);
+      border: 1px solid var(--color-hairline);
+      border-radius: var(--rounded-md);
+      background-color: var(--color-canvas);
+    }
+    .hp-cat-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .hp-cat-mono {
+      color: var(--color-accent-active);
+      border: 1px solid var(--color-hairline-strong);
+      border-radius: var(--rounded-xs);
+      padding: 2px 6px;
+    }
+    .hp-cat-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-ink);
+      margin: 0;
+      flex: 1;
+    }
+    .hp-cat-count {
+      color: var(--color-mute);
+      border: 1px solid var(--color-hairline);
+      border-radius: var(--rounded-pill-sm);
+      padding: 1px 8px;
+    }
+    .hp-cat-blurb {
+      color: var(--color-mute);
+      margin: 6px 0 var(--spacing-sm);
+      line-height: 1.45;
+    }
+    .hp-cat-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .hp-tool {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 9px 0;
+      border-top: 1px solid var(--color-hairline);
+    }
+    .hp-tool-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+      text-decoration: none;
+      color: inherit;
+      border-radius: var(--rounded-sm);
+      transition: transform 0.12s ease;
+    }
+    .hp-tool-link:hover {
+      transform: translateX(3px);
+    }
+    .hp-tool-mid {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
+    }
+    .hp-tool-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-ink);
+    }
+    .hp-tool-tag {
+      color: var(--color-mute);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .hp-tool-go {
+      color: var(--color-accent-active);
+      opacity: 0;
+      transition: opacity 0.12s ease;
+    }
+    .hp-tool:hover .hp-tool-go {
+      opacity: 1;
+    }
+    /* make the global star sit inline as a row sibling, not absolute over a card */
+    .hp-tool :global(.fav-star) {
+      position: static;
+      width: 28px;
+      height: 28px;
+      flex: none;
+    }
+
+    /* ── COMPARISONS ── */
+    .hp-compare {
+      padding: var(--spacing-4xl) 0;
+      background-color: var(--color-canvas-soft);
+      border-top: 1px solid var(--color-hairline);
+      border-bottom: 1px solid var(--color-hairline);
+    }
+    .hp-cmp-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-lg);
+    }
+    .hp-cmp-all {
+      color: var(--color-accent-active);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .hp-cmp-all:hover {
+      text-decoration: underline;
+    }
+    .hp-cmp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: var(--spacing-md);
+    }
+    .hp-cmp-card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-lg);
+      border: 1px solid var(--color-hairline);
+      border-radius: var(--rounded-md);
+      background-color: var(--color-canvas);
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+      transition:
+        border-color 0.15s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+    }
+    .hp-cmp-card::before {
       content: "";
       position: absolute;
       inset: 0 0 auto 0;
       height: 2px;
       background-color: var(--color-accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.2s ease;
     }
-
-    .live-tool-card:hover {
+    .hp-cmp-card:hover {
       border-color: var(--color-accent);
       transform: translateY(-2px);
-      box-shadow: 0 10px 26px rgba(33, 167, 138, 0.12);
+      box-shadow: 0 14px 34px rgba(33, 167, 138, 0.12);
     }
-
-    .live-tool-card:focus-visible {
-      outline: 3px solid var(--color-accent);
-      outline-offset: 2px;
+    .hp-cmp-card:hover::before {
+      transform: scaleX(1);
     }
-
-    .live-tool-name {
-      color: var(--color-ink);
-      margin: var(--spacing-xxs) 0 0;
+    .hp-cmp-versus {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-
-    .live-tool-tag {
-      color: var(--color-body);
-      margin: 0;
-      line-height: 1.5;
-    }
-
-    .live-tool-cta {
-      margin-top: auto;
-      padding-top: var(--spacing-sm);
+    .hp-cmp-side {
       display: inline-flex;
       align-items: center;
       gap: 8px;
+    }
+    .hp-cmp-name {
+      font-size: 14px;
+      font-weight: 600;
       color: var(--color-ink);
     }
-
-    .cta-arrow {
-      color: var(--color-accent-active);
-      transition: transform 0.15s ease;
+    .hp-cmp-vs {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-mute);
     }
-
-    .live-tool-card:hover .cta-arrow {
-      transform: translateX(4px);
-    }
-
-    /* Status pills (homepage cards) */
-    .pill {
+    .hp-cmp-go {
+      margin-top: auto;
+      color: var(--color-ink);
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      width: max-content;
-      font-family: var(--font-mono);
-      font-size: 10px;
-      padding: 2px 8px;
-      border-radius: var(--rounded-sm);
-      border: 1px solid var(--color-hairline);
     }
-
-    .pill-live {
+    .hp-cmp-go span {
       color: var(--color-accent-active);
-      background-color: rgba(33, 167, 138, 0.1);
-      border-color: rgba(33, 167, 138, 0.25);
+      transition: transform 0.15s ease;
+    }
+    .hp-cmp-card:hover .hp-cmp-go span {
+      transform: translateX(3px);
     }
 
-    .pill-dot {
-      width: 6px;
-      height: 6px;
+    /* ── TRUST ── */
+    .hp-trust {
+      padding: var(--spacing-4xl) 0;
+      border-bottom: 1px solid var(--color-hairline);
+    }
+    .hp-trust-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-3xl);
+      align-items: center;
+    }
+    .hp-trust-title {
+      margin: 0 0 var(--spacing-md);
+      letter-spacing: -0.02em;
+    }
+    .hp-trust-text {
+      color: var(--color-body);
+      margin: 0 0 var(--spacing-md);
+      line-height: 1.7;
+      max-width: 48ch;
+    }
+    .hp-trust-link {
+      color: var(--color-accent-active);
+      text-decoration: none;
+    }
+    .hp-trust-link:hover {
+      text-decoration: underline;
+    }
+    .hp-trust-ledger {
+      border: 1px solid var(--color-hairline);
+      border-radius: var(--rounded-md);
+      background-color: var(--color-primary);
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(17, 17, 17, 0.18);
+    }
+    .hp-ledger-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px var(--spacing-md);
+      background-color: rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.55);
+    }
+    .hp-ledger-dot {
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background-color: var(--color-accent);
     }
-
-    /* Pipeline preview */
-    .pipeline {
-      margin-top: var(--spacing-xl);
-      padding-top: var(--spacing-lg);
-      border-top: 1px solid var(--color-hairline);
-    }
-
-    .pipeline-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--spacing-md);
-      margin-bottom: var(--spacing-sm);
-    }
-
-    .pipeline-title {
-      color: var(--color-ink);
-      margin: 0;
-    }
-
-    .pipeline-all {
-      color: var(--color-accent-active);
-      text-decoration: none;
-    }
-
-    .pipeline-all:hover {
-      text-decoration: underline;
-    }
-
-    .pipeline-list {
+    .hp-ledger-list {
       list-style: none;
       margin: 0;
-      padding: 0;
+      padding: var(--spacing-sm) 0;
+    }
+    .hp-ledger-row {
       display: flex;
-      flex-wrap: wrap;
-      gap: var(--spacing-xs);
-    }
-
-    .pipeline-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 12px;
-      border: 1px solid var(--color-hairline);
-      border-radius: var(--rounded-pill-sm);
-      background-color: var(--color-canvas);
-    }
-
-    .pipeline-name {
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px var(--spacing-md);
+      color: rgba(255, 255, 255, 0.82);
       font-size: 13px;
-      color: var(--color-body);
-    }
-
-    .pipeline-ver {
-      color: var(--color-mute);
-      font-size: 10px;
-    }
-
-    /* Trust */
-    .trust-section {
-      padding: var(--spacing-4xl) 0;
-    }
-
-    .trust-link {
-      color: var(--color-accent-active);
-      text-decoration: none;
-      margin-top: var(--spacing-xxs);
-    }
-
-    .trust-link:hover {
-      text-decoration: underline;
-    }
-
-    .trust-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--spacing-xl);
-    }
-
-    .tool-title {
-      color: var(--color-ink);
-      margin: 0;
-    }
-
-    .tool-description {
-      color: var(--color-body);
-      margin: 0;
       line-height: 1.5;
     }
+    .hp-ledger-check {
+      color: var(--color-accent);
+      font-family: var(--font-mono);
+      font-weight: 700;
+      flex: none;
+    }
 
+    /* ── PIPELINE ── */
+    .hp-pipeline {
+      padding: var(--spacing-4xl) 0;
+      background-color: var(--color-canvas-soft);
+      border-bottom: 1px solid var(--color-hairline);
+    }
+    .hp-pipe-head {
+      max-width: 720px;
+      margin: 0 0 var(--spacing-lg);
+    }
+    .hp-pipe-head .hp-sec-title {
+      margin: 0 0 var(--spacing-xs);
+    }
+    .hp-pipe-sub {
+      color: var(--color-body);
+      margin: 0;
+      line-height: 1.6;
+    }
+    .hp-pipe-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-xs);
+    }
+    .hp-pipe-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px var(--spacing-md);
+      border: 1px dashed var(--color-hairline-strong);
+      border-radius: var(--rounded-sm);
+      background-color: var(--color-canvas);
+      transition:
+        border-color 0.15s ease,
+        transform 0.12s ease;
+    }
+    .hp-pipe-row:hover {
+      border-color: var(--color-accent);
+      transform: translateY(-1px);
+    }
+    .hp-pipe-mid {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      flex: 1;
+      min-width: 0;
+    }
+    .hp-pipe-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-ink);
+    }
+    .hp-pipe-tag {
+      color: var(--color-mute);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .hp-pipe-ver {
+      color: var(--color-accent-active);
+      flex: none;
+    }
+
+    /* ── FAQ ─ */
+    .hp-faq {
+      padding: var(--spacing-4xl) 0 var(--spacing-5xl);
+    }
+    .hp-faq-header {
+      text-align: left;
+      margin: 0 0 var(--spacing-lg);
+    }
+    .hp-faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+    }
+    .hp-faq-item {
+      border: 1px solid var(--color-hairline);
+      border-radius: var(--rounded-sm);
+      background-color: var(--color-canvas-soft);
+      padding: var(--spacing-md) var(--spacing-lg);
+    }
+    .hp-faq-summary {
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-ink);
+      padding: var(--spacing-xs) 0;
+      user-select: none;
+    }
+    .hp-faq-summary:hover {
+      color: var(--color-accent);
+    }
+    .hp-faq-answer {
+      margin-top: var(--spacing-sm);
+      color: var(--color-body);
+      line-height: 1.65;
+    }
+
+    /* ── scroll reveal ── */
+    .hp-reveal {
+      opacity: 0;
+      transform: translateY(14px);
+      transition:
+        opacity 0.5s ease,
+        transform 0.5s ease;
+    }
+    .hp-reveal.is-in {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ── responsive ── */
     @media (max-width: 959px) {
-      .trust-grid {
+      .hp-hero-grid {
         grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+      }
+      .hp-cat-grid {
+        grid-template-columns: 1fr;
+      }
+      .hp-trust-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+      }
+      .hp-pipe-grid {
+        grid-template-columns: 1fr;
+      }
+      .hp-personal-grid {
+        flex-direction: column;
+        gap: var(--spacing-xl);
       }
     }
   </style>

@@ -186,7 +186,6 @@
 }
 
 @keyframes fjt-pulse {
-
   0%,
   100% {
     box-shadow: 0 0 0 0 rgba(33, 167, 138, 0.4);
@@ -294,7 +293,7 @@
   line-height: 1.5;
 }
 
-.your-tools-empty>span:first-child {
+.your-tools-empty > span:first-child {
   color: var(--color-accent);
   font-size: 16px;
   line-height: 1;
@@ -823,7 +822,7 @@
   padding: var(--spacing-sm) 0;
 }
 
-.kbd-group+.kbd-group {
+.kbd-group + .kbd-group {
   border-top: 1px solid var(--color-hairline);
 }
 
@@ -959,7 +958,7 @@
     min-height: 0 !important;
   }
 
-  .ws-fill>.workspace-card {
+  .ws-fill > .workspace-card {
     flex: 1 1 auto !important;
     height: auto !important;
     min-height: 0 !important;
@@ -1357,7 +1356,6 @@
 }
 
 @keyframes cmdk-badge-pulse {
-
   0%,
   100% {
     box-shadow: 0 0 0 0 rgba(33, 167, 138, 0);

@@ -15,53 +15,51 @@ import { validateJson } from "../json-validator/engine.ts";
 import type { MinifyOptions, MinifyResult } from "./types.ts";
 
 function countLines(s: string): number {
-    let n = 1;
-    for (let i = 0; i < s.length; i++) {
-        if (s.charCodeAt(i) === 10) n++;
-    }
-    return n;
+  let n = 1;
+  for (let i = 0; i < s.length; i++) {
+    if (s.charCodeAt(i) === 10) n++;
+  }
+  return n;
 }
 
 /** Recursively sort object keys so the minified output is deterministic.
  *  Arrays keep their order. Done as a transform (not a replacer) so there are
  *  no unused-parameter lint traps. */
 function sortKeysDeep(value: unknown): unknown {
-    if (Array.isArray(value)) return value.map(sortKeysDeep);
-    if (value !== null && typeof value === "object") {
-        const out: Record<string, unknown> = {};
-        for (const k of Object.keys(value as Record<string, unknown>).sort()) {
-            out[k] = sortKeysDeep((value as Record<string, unknown>)[k]);
-        }
-        return out;
+  if (Array.isArray(value)) return value.map(sortKeysDeep);
+  if (value !== null && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const k of Object.keys(value as Record<string, unknown>).sort()) {
+      out[k] = sortKeysDeep((value as Record<string, unknown>)[k]);
     }
-    return value;
+    return out;
+  }
+  return value;
 }
 
 export function minifyJson(input: string, opts: MinifyOptions): MinifyResult {
-    const originalChars = input.length;
-    const originalLines = countLines(input);
+  const originalChars = input.length;
+  const originalLines = countLines(input);
 
-    let parsed: unknown;
-    try {
-        parsed = JSON.parse(input);
-    } catch {
-        // Reuse the validator's exact coordinates for a useful error message.
-        const v = validateJson(input, {
-            flagDuplicateKeys: false,
-            indent: "2",
-            includeNormalized: false,
-        });
-        const e = v.error;
-        throw new Error(
-            e ? `${e.message} (line ${e.line}, column ${e.column})` : "Invalid JSON",
-        );
-    }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(input);
+  } catch {
+    // Reuse the validator's exact coordinates for a useful error message.
+    const v = validateJson(input, {
+      flagDuplicateKeys: false,
+      indent: "2",
+      includeNormalized: false,
+    });
+    const e = v.error;
+    throw new Error(e ? `${e.message} (line ${e.line}, column ${e.column})` : "Invalid JSON");
+  }
 
-    const value = opts.sortKeys ? sortKeysDeep(parsed) : parsed;
-    const output = JSON.stringify(value);
-    const minifiedChars = output.length;
-    const saved = Math.max(0, originalChars - minifiedChars);
-    const reduction = originalChars > 0 ? Math.round((saved / originalChars) * 100) : 0;
+  const value = opts.sortKeys ? sortKeysDeep(parsed) : parsed;
+  const output = JSON.stringify(value);
+  const minifiedChars = output.length;
+  const saved = Math.max(0, originalChars - minifiedChars);
+  const reduction = originalChars > 0 ? Math.round((saved / originalChars) * 100) : 0;
 
-    return { output, originalChars, minifiedChars, saved, reduction, originalLines };
+  return { output, originalChars, minifiedChars, saved, reduction, originalLines };
 }

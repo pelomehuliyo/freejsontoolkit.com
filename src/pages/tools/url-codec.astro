@@ -10,6 +10,9 @@ import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
 import { ENCODINGS, MODES } from "../../lib/tools/url-codec/constants";
 import RelatedTools from "../../components/tools/RelatedTools.astro";
+import ToolDocs from "../../components/tools/ToolDocs.astro";
+import CompareLinks from "../../components/tools/CompareLinks.astro";
+import ToolNudge from "../../components/tools/ToolNudge.astro";
 ---
 
 <ToolShell
@@ -222,9 +225,13 @@ import RelatedTools from "../../components/tools/RelatedTools.astro";
       </p>
     </Container>
   </section>
+  <ToolDocs />
+
+  <CompareLinks />
+  <RelatedTools />
+  <ToolNudge />
 
   <section class="faq-section url-reveal" aria-labelledby="faq-title">
-    <RelatedTools />
     <Container size="narrow">
       <div class="faq-header">
         <span class="caption-mono section-eyebrow">FAQ</span>

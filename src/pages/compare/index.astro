@@ -1,0 +1,278 @@
+---
+/**
+ * Comparison hub — the front door for the /compare/* network. Lists every
+ * published comparison as a card, reading tool/format names from the registry
+ * (with the same optional overrides the slug page uses) so it never drifts.
+ * This is the landing target for the footer's "Compare tools" link.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Container from "../../components/Container.astro";
+import { tools } from "../../lib/tools/registry";
+import { COMPARISONS } from "../../lib/tools/comparisons";
+
+const byId = Object.fromEntries(tools.map((t) => [t.id, t]));
+const MONO: Record<string, string> = {
+  convert: "CON",
+  format: "FOR",
+  validate: "VAL",
+  compare: "CMP",
+  generate: "GEN",
+  utilities: "UTL",
+  api: "API",
+};
+const clip = (s: string, n: number): string =>
+  s.length > n ? s.slice(0, n - 1).trimEnd() + "…" : s;
+
+const cards = Object.values(COMPARISONS).map((c) => ({
+  slug: c.slug,
+  title: c.title,
+  intro: clip(c.intro, 150),
+  aName: c.aLabel ?? byId[c.aId]?.name ?? c.aId,
+  bName: c.bLabel ?? byId[c.bId]?.name ?? c.bId,
+  aBadge: c.aBadge ?? MONO[byId[c.aId]?.category ?? ""] ?? "·",
+  bBadge: c.bBadge ?? MONO[byId[c.bId]?.category ?? ""] ?? "·",
+}));
+---
+
+<BaseLayout
+  title="Compare JSON, CSV & Tools — Free JSON Toolkit"
+  description="Side-by-side comparisons to help you pick the right tool or format: Formatter vs Validator, Minifier vs Formatter, Diff vs Formatter, and CSV vs JSON. All local, all free."
+  activePath="/compare"
+>
+  <main>
+    <section class="cx-hero">
+      <Container size="default">
+        <nav class="cx-crumb caption-mono" aria-label="Breadcrumb">
+          <a href="/">Home</a>
+          <span class="cx-sep">/</span>
+          <span class="cx-here">Compare</span>
+        </nav>
+        <span class="cx-eyebrow caption-mono">Compare</span>
+        <h1 class="cx-title display-xl">Which one do you need?</h1>
+        <p class="cx-lede body-lg">
+          Side-by-side answers to the "vs" questions — tool against tool, format against format — so
+          you pick the right one in seconds. Every comparison runs 100% in your browser.
+        </p>
+      </Container>
+    </section>
+
+    <section class="cx-section">
+      <Container size="default">
+        <div class="cx-grid" role="list">
+          {
+            cards.map((c) => (
+              <a class="cx-card doc-reveal" href={`/compare/${c.slug}`} role="listitem">
+                <div class="cx-versus">
+                  <span class="cx-side">
+                    <span class="cx-badge" aria-hidden="true">
+                      {c.aBadge}
+                    </span>
+                    <span class="cx-side-name">{c.aName}</span>
+                  </span>
+                  <span class="cx-vs" aria-hidden="true">
+                    vs
+                  </span>
+                  <span class="cx-side">
+                    <span class="cx-badge" aria-hidden="true">
+                      {c.bBadge}
+                    </span>
+                    <span class="cx-side-name">{c.bName}</span>
+                  </span>
+                </div>
+                <p class="cx-intro body-sm">{c.intro}</p>
+                <span class="cx-go body-sm-strong">
+                  Read comparison <span aria-hidden="true">→</span>
+                </span>
+              </a>
+            ))
+          }
+        </div>
+      </Container>
+    </section>
+  </main>
+</BaseLayout>
+
+<script>
+  if ("IntersectionObserver" in window) {
+    const els = Array.from(document.querySelectorAll<HTMLElement>(".doc-reveal"));
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((en) => {
+          if (en.isIntersecting) {
+            en.target.classList.add("is-visible");
+            io.unobserve(en.target);
+          }
+        });
+      },
+      { threshold: 0.12 },
+    );
+    els.forEach((el, i) => {
+      el.style.transitionDelay = `${Math.min(i, 8) * 50}ms`;
+      io.observe(el);
+    });
+  }
+</script>
+
+<style>
+  .cx-hero {
+    padding: var(--spacing-4xl) 0 var(--spacing-3xl);
+    background-color: var(--color-canvas-soft);
+    background-image: radial-gradient(var(--color-hairline) 1px, transparent 1px);
+    background-size: 22px 22px;
+    border-bottom: 1px solid var(--color-hairline);
+  }
+  .cx-crumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-mute);
+    margin-bottom: var(--spacing-lg);
+  }
+  .cx-crumb a {
+    color: var(--color-mute);
+    text-decoration: none;
+  }
+  .cx-crumb a:hover {
+    color: var(--color-accent-active);
+  }
+  .cx-sep {
+    color: var(--color-hairline-strong);
+  }
+  .cx-here {
+    color: var(--color-ink);
+  }
+  .cx-eyebrow {
+    color: var(--color-accent-active);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: var(--spacing-xs);
+  }
+  .cx-title {
+    color: var(--color-ink);
+    margin: 0 0 var(--spacing-sm);
+    letter-spacing: -0.03em;
+  }
+  .cx-lede {
+    color: var(--color-body);
+    margin: 0;
+    max-width: 64ch;
+    line-height: 1.6;
+  }
+
+  .cx-section {
+    padding: var(--spacing-3xl) 0 var(--spacing-5xl);
+  }
+  .cx-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-md);
+  }
+  .cx-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-md);
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+    transition:
+      border-color 0.15s ease,
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .cx-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background-color: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s ease;
+  }
+  .cx-card:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 34px rgba(33, 167, 138, 0.12);
+  }
+  .cx-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .cx-versus {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+  }
+  .cx-side {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cx-badge {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-hairline-strong);
+    border-radius: var(--rounded-sm);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-accent-active);
+    background-color: var(--color-canvas-soft);
+  }
+  .cx-side-name {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .cx-vs {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-mute);
+    padding: 0 2px;
+  }
+  .cx-intro {
+    color: var(--color-body);
+    margin: 0;
+    line-height: 1.55;
+    flex: 1;
+  }
+  .cx-go {
+    margin-top: auto;
+    padding-top: var(--spacing-xs);
+    color: var(--color-ink);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .cx-go span {
+    color: var(--color-accent-active);
+    transition: transform 0.15s ease;
+  }
+  .cx-card:hover .cx-go span {
+    transform: translateX(3px);
+  }
+
+  .doc-reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s ease;
+  }
+  .doc-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+</style>
