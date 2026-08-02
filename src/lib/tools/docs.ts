@@ -97,6 +97,126 @@ export const DOCS: Record<string, ToolDoc> = {
       },
     ],
   },
+  "json-to-xml": {
+    eyebrow: "Docs · JSON → XML",
+    conceptTitle: "Generating XML from JSON",
+    concept:
+      "JSON → XML takes a JSON object or array and builds a well-formed XML document from it. " +
+      "Every property becomes an element; nested objects become nested elements; arrays become repeated elements. " +
+      "You can control how attributes are handled (prefixing keys with `@`), how empty elements are treated, and whether to pretty‑print the output. " +
+      "The conversion runs locally, with no external dependencies.",
+    lead: "before-after", // we'll reuse the before/after pattern
+    itemsLabel: "Things to know",
+    items: [
+      {
+        kind: "note",
+        title: "Root element",
+        body:
+          "The root of your JSON must be an object with a single key that becomes the root element name. " +
+          "If your JSON is an array, the root element name must be specified via the 'rootName' option (we can add that later).",
+      },
+      {
+        kind: "note",
+        title: "Attributes",
+        body:
+          "Keys starting with `@` are treated as attributes. For example, `{ \"@id\": \"123\" }` becomes `<element id=\"123\"/>`. " +
+          "Enable or disable this with the 'Include attributes' option.",
+      },
+      {
+        kind: "note",
+        title: "Empty elements",
+        body:
+          "An empty object or a null value becomes an empty element (e.g., `<tag></tag>`). " +
+          "The 'Include empty elements' option can suppress them.",
+      },
+      {
+        kind: "note",
+        title: "Arrays",
+        body:
+          "An array of objects becomes repeated elements with the same name. " +
+          "If you want a single element to contain multiple children, use an array.",
+      },
+    ],
+    examplesLabel: "Try these",
+    examples: [
+      {
+        title: "Simple object",
+        note: "A basic JSON object with a root element.",
+        snippet: `{ "book": { "title": "The Hobbit", "author": "J.R.R. Tolkien" } }`,
+      },
+      {
+        title: "With attributes",
+        note: "Attributes are marked with @ prefix.",
+        snippet: `{ "book": { "@id": "978-0-547-92522-8", "title": "The Hobbit" } }`,
+      },
+      {
+        title: "Arrays and nesting",
+        note: "Arrays become repeated elements.",
+        snippet: `{ "books": [ { "title": "The Hobbit" }, { "title": "The Lord of the Rings" } ] }`,
+      },
+    ],
+  },
+  "xml-to-json": {
+    eyebrow: "Docs · XML → JSON",
+    conceptTitle: "Parsing XML into JSON",
+    concept:
+      "XML → JSON parses an XML document and converts it to a JSON representation. " +
+      "Attributes become properties prefixed with `@`; text content becomes a `#text` property (or is merged when possible). " +
+      "Repeated elements are preserved as arrays. " +
+      "The parser handles comments, CDATA, and basic namespaces, but keeps the output clean and readable. " +
+      "All processing happens locally.",
+    lead: "before-after", // show a before/after of XML to JSON
+    itemsLabel: "Common issues & tips",
+    items: [
+      {
+        kind: "error",
+        title: "Missing closing tag",
+        body:
+          "If your XML is missing a closing tag, the parser will throw an error. " +
+          "Check the line and column of the error message to fix it.",
+        snippet: `<root><name>Ada</root>`,
+      },
+      {
+        kind: "note",
+        title: "Attributes as @",
+        body:
+          "Attributes are stored as `@attributeName`. For example, `<item id=\"1\"/>` becomes `{ \"@id\": \"1\" }`. " +
+          "Turn off attribute inclusion if you only need the element content.",
+      },
+      {
+        kind: "note",
+        title: "Text content",
+        body:
+          "Text content becomes `#text` when there are attributes or child elements; otherwise, it becomes a direct string value. " +
+          "This keeps the JSON clean and type‑friendly.",
+      },
+      {
+        kind: "note",
+        title: "CDATA",
+        body:
+          "CDATA sections are treated as normal text content and are included. " +
+          "They are not wrapped in a special property.",
+      },
+    ],
+    examplesLabel: "Try these",
+    examples: [
+      {
+        title: "Simple XML",
+        note: "A basic XML document with a single root and element.",
+        snippet: `<root><name>Ada Lovelace</name></root>`,
+      },
+      {
+        title: "With attributes",
+        note: "Attributes are preserved with @ prefix.",
+        snippet: `<root><item id="1">First</item></root>`,
+      },
+      {
+        title: "Nested and repeated",
+        note: "Repeated elements become arrays.",
+        snippet: `<root><user><name>Ada</name></user><user><name>Alan</name></user></root>`,
+      },
+    ],
+  },
 
   "json-formatter": {
     eyebrow: "Docs · Format",

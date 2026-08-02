@@ -24,6 +24,7 @@
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@openai-oauth/ai-sdk": "^2.0.0",
     "@openai-oauth/local": "^2.0.0",
+    "@xmldom/xmldom": "^0.9.10",
     "ai": "^6.0.235",
     "astro": "^7.0.9"
   },

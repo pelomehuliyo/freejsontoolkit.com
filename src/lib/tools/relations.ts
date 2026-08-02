@@ -68,4 +68,16 @@ export const RELATIONS: Record<string, Relation[]> = {
     { id: "json-validator", label: "Validate the source", kind: "pair" },
     { id: "json-to-csv", label: "Or flatten to CSV", kind: "pair" },
   ],
+  // Add near the other convert tools
+  "json-to-xml": [
+    { id: "xml-to-json", label: "Reverse it", kind: "pair" },
+    { id: "json-formatter", label: "Format the JSON", kind: "next" },
+    { id: "json-validator", label: "Validate the JSON", kind: "next" },
+  ],
+  "xml-to-json": [
+    { id: "json-to-xml", label: "Reverse it", kind: "pair" },
+    { id: "json-formatter", label: "Format the result", kind: "next" },
+    { id: "json-validator", label: "Validate the result", kind: "next" },
+    { id: "csv-to-json", label: "Convert CSV instead", kind: "pair" },
+  ],
 };

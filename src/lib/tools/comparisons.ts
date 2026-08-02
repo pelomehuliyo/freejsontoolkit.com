@@ -270,4 +270,48 @@ export const COMPARISONS: Record<string, Comparison> = {
       "CSV → JSON when you want to add structure; convert JSON → CSV when you want a flat table you can " +
       "open anywhere.",
   },
+  "json-xml-vs-xml-json": {
+    slug: "json-xml-vs-xml-json",
+    aId: "json-to-xml",
+    bId: "xml-to-json",
+    aLabel: "JSON → XML",
+    bLabel: "XML → JSON",
+    aBadge: "{ }",
+    bBadge: "<>",
+    aTag: "JSON to XML converter",
+    bTag: "XML to JSON converter",
+    title: "JSON → XML vs XML → JSON",
+    intro:
+      "Two sides of the same conversion. JSON → XML takes a JSON object and builds an XML document from it; " +
+      "XML → JSON does the reverse, parsing an XML document into a JSON object. Together they let you move " +
+      "data between the two most common structured formats on the web — both run 100% locally.",
+    useA: {
+      heading: "Use JSON → XML when",
+      points: [
+        "You have JSON data that needs to become an XML feed, an SVG, or a SOAP payload.",
+        "You're working with an API that expects XML instead of JSON.",
+        "You want to generate structured documents programmatically.",
+      ],
+    },
+    useB: {
+      heading: "Use XML → JSON when",
+      points: [
+        "You have an XML response (RSS, sitemap, SOAP) and want to work with it as JSON.",
+        "You need to extract data from an XML document quickly.",
+        "You're migrating from XML to JSON and need a parse step.",
+      ],
+    },
+    attributes: [
+      { label: "Direction", a: "JSON → XML", b: "XML → JSON" },
+      { label: "Input", a: "JSON", b: "XML" },
+      { label: "Output", a: "XML", b: "JSON" },
+      { label: "Handles attributes?", a: "Yes (configurable)", b: "Yes – prefixed with @" },
+      { label: "Preserves order?", a: "Yes (arrays maintain order)", b: "Yes (child order preserved)" },
+      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+    ],
+    verdict:
+      "Use JSON → XML when you're generating data for a legacy system; use XML → JSON when you're receiving data from one. They're perfect mirrors, and you'll often use them together in a pipeline.",
+    note:
+      "Both conversions are lossless in their own direction. JSON → XML will respect your array order and typed values; XML → JSON will preserve attributes and element order. The reverse of a round‑trip may not be identical if you toggle options (like attributes or array preservation), but the core data remains intact.",
+  },
 };
