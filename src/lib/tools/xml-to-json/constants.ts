@@ -20,9 +20,9 @@ export const SAMPLE_XML = `<?xml version="1.0" encoding="UTF-8"?>
 </root>`;
 
 export const INDENT_OPTIONS: { value: IndentOption; label: string }[] = [
-    { value: "2", label: "2 spaces" },
-    { value: "4", label: "4 spaces" },
-    { value: "tab", label: "Tab" },
+  { value: "2", label: "2 spaces" },
+  { value: "4", label: "4 spaces" },
+  { value: "tab", label: "Tab" },
 ];
 
 export const MAX_INPUT_CHARS = 5_000_000;

@@ -78,3 +78,27 @@ registry substrate (the "new tool = mostly wiring" thesis, proven).
   reproducible PRNG and a live "shape" strip.
 - **URL Encode / Decode** — component / whole-URL / form modes with a live
   percent-encoding footprint and byte-accurate readouts.
+
+## [v1.4] — 2026-08-02
+
+### Added
+
+- **YAML → JSON converter** (`/tools/yaml-to-json`) — parses YAML 1.2, outputs
+  pretty-printed JSON with exact line/col error reporting; large files convert
+  in a background worker. Duplicate keys are rejected (not silently dropped);
+  comments, anchors, and timestamps handled explicitly.
+- Docs entry for YAML → JSON (error examples + runnable snippets).
+- Relations edges for `json-to-yaml` and `yaml-to-json` (related rail, nudge,
+  compare chips now fire for the full YAML pair).
+
+### Fixed
+
+- `relations.ts`: removed duplicate `"json-to-xml"` key (the second entry was
+  silently discarding the "Or flatten to CSV" edge).
+- `relations.ts`: replaced the `"json-to-csv" in {} ? "" : "json-to-csv"`
+  expression with a plain string id.
+
+### Registry
+
+- `yaml-to-json` flipped to `status: "available"` — catalog, footer, palette,
+  homepage directory, and sitemap all derive from this one entry.

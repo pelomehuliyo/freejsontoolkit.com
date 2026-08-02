@@ -26,7 +26,7 @@ function bytes(s: string): number {
 }
 function codePoints(s: string): number {
   let n = 0;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   for (const _ of s) n++;
   return n;
 }

@@ -204,7 +204,10 @@ export function decodeText(input: string, opts: Base64Options): Base64Result {
       }
     } else if (/^<\?xml/i.test(trimmed) || /^<svg[\s>]/i.test(trimmed)) {
       looksLike = "SVG / XML";
-    } else if (/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(decodedText as string)) {
+    } else if (
+      // eslint-disable-next-line no-control-regex
+      /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(decodedText as string)
+    ) {
       binary = true;
       looksLike = looksLike ?? "binary";
     } else {

@@ -306,12 +306,15 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Input", a: "JSON", b: "XML" },
       { label: "Output", a: "XML", b: "JSON" },
       { label: "Handles attributes?", a: "Yes (configurable)", b: "Yes – prefixed with @" },
-      { label: "Preserves order?", a: "Yes (arrays maintain order)", b: "Yes (child order preserved)" },
+      {
+        label: "Preserves order?",
+        a: "Yes (arrays maintain order)",
+        b: "Yes (child order preserved)",
+      },
       { label: "Runs 100% locally", a: "Yes", b: "Yes" },
     ],
     verdict:
       "Use JSON → XML when you're generating data for a legacy system; use XML → JSON when you're receiving data from one. They're perfect mirrors, and you'll often use them together in a pipeline.",
-    note:
-      "Both conversions are lossless in their own direction. JSON → XML will respect your array order and typed values; XML → JSON will preserve attributes and element order. The reverse of a round‑trip may not be identical if you toggle options (like attributes or array preservation), but the core data remains intact.",
+    note: "Both conversions are lossless in their own direction. JSON → XML will respect your array order and typed values; XML → JSON will preserve attributes and element order. The reverse of a round‑trip may not be identical if you toggle options (like attributes or array preservation), but the core data remains intact.",
   },
 };

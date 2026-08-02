@@ -119,7 +119,7 @@ export const DOCS: Record<string, ToolDoc> = {
         kind: "note",
         title: "Attributes",
         body:
-          "Keys starting with `@` are treated as attributes. For example, `{ \"@id\": \"123\" }` becomes `<element id=\"123\"/>`. " +
+          'Keys starting with `@` are treated as attributes. For example, `{ "@id": "123" }` becomes `<element id="123"/>`. ' +
           "Enable or disable this with the 'Include attributes' option.",
       },
       {
@@ -274,7 +274,7 @@ production:
         kind: "note",
         title: "Attributes as @",
         body:
-          "Attributes are stored as `@attributeName`. For example, `<item id=\"1\"/>` becomes `{ \"@id\": \"1\" }`. " +
+          'Attributes are stored as `@attributeName`. For example, `<item id="1"/>` becomes `{ "@id": "1" }`. ' +
           "Turn off attribute inclusion if you only need the element content.",
       },
       {

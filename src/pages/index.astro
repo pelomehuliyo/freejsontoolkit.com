@@ -154,7 +154,7 @@ const guarantees = [
               <span class="hp-sec-eyebrow caption-mono">Your space</span>
               <h2 class="hp-sec-title display-sm">Starred &amp; waiting</h2>
             </header>
-            {/* global buildRow() fills this with favoritable cards (or the onboarding hint) */}
+            <!-- buildRow() populates the container with favoritable cards -->
             <div data-your-tools></div>
           </div>
           <div class="hp-col hp-col-rec" data-jump-back>
@@ -162,9 +162,7 @@ const guarantees = [
               <span class="hp-sec-eyebrow caption-mono">Pick up where you left off</span>
               <h2 class="hp-sec-title display-sm">Recently used</h2>
             </header>
-            {
-              /* global buildEcho() fills this with recent-tool chips; hides the column when empty */
-            }
+            <!-- buildEcho() populates the container with recent-tool chips -->
             <div data-jump-inner></div>
           </div>
         </div>
@@ -416,47 +414,49 @@ const guarantees = [
 
   <script>
     (function () {
-      var reduce =
+      const reduce =
         window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
       // read-only display sugar — never writes favorites/recents (the global
       // handler owns all writes, so there is no second path to conflict with).
       function readIds(k) {
         try {
-          var r = localStorage.getItem(k);
+          const r = localStorage.getItem(k);
           return r ? JSON.parse(r) : [];
         } catch (e) {
           return [];
         }
       }
       function setText(id, v) {
-        var el = document.getElementById(id);
+        const el = document.getElementById(id);
         if (el) el.textContent = v;
       }
       function refreshCounts() {
-        var f = readIds("fjt:favorites").length;
-        var r = readIds("fjt:recents").length;
+        const f = readIds("fjt:favorites").length;
+        const r = readIds("fjt:recents").length;
         setText("hp-stat-fav", String(f));
         setText("hp-stat-rec", String(r));
         setText("hp-con-fav", String(f));
         setText("hp-con-rec", String(r));
       }
-      var regN = 0;
+      let regN = 0;
       try {
-        var isl = document.getElementById("fjt-registry");
+        const isl = document.getElementById("fjt-registry");
         regN = isl ? (JSON.parse(isl.textContent || "[]") || []).length : 0;
-      } catch (e) {}
+      } catch {
+        /* registry island absent */
+      }
       setText("hp-con-tools", String(regN));
       refreshCounts();
 
       // live session clock in the console (the "alive" pulse)
-      var clock = document.getElementById("hp-clock");
+      const clock = document.getElementById("hp-clock");
       if (clock) {
-        var pad = function (n) {
+        const pad = function (n) {
           return String(n).padStart(2, "0");
         };
-        var tick = function () {
-          var d = new Date();
+        const tick = function () {
+          const d = new Date();
           clock.textContent =
             pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
         };
@@ -466,7 +466,7 @@ const guarantees = [
 
       // the hero search bar opens the global command palette via a synthetic ⌘K —
       // one intelligent search everywhere, no duplicate filter logic on this page.
-      var sb = document.getElementById("hp-searchbar");
+      const sb = document.getElementById("hp-searchbar");
       if (sb) {
         sb.addEventListener("click", function (e) {
           e.preventDefault();
@@ -490,8 +490,8 @@ const guarantees = [
 
       // scroll reveal (reduced-motion flattens it via the global rule)
       if ("IntersectionObserver" in window) {
-        var els = Array.prototype.slice.call(document.querySelectorAll(".hp-reveal"));
-        var io = new IntersectionObserver(
+        const els = Array.prototype.slice.call(document.querySelectorAll(".hp-reveal"));
+        const io = new IntersectionObserver(
           function (entries) {
             entries.forEach(function (en) {
               if (en.isIntersecting) {
