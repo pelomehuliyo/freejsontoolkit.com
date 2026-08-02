@@ -48,6 +48,7 @@ export const RELATIONS: Record<string, Relation[]> = {
   base64: [
     { id: "url-encode", label: "Percent-encode instead", kind: "pair" },
     { id: "json-validator", label: "Validate decoded JSON", kind: "pair" },
+    { id: "jwt-decoder", label: "Decode a JWT", kind: "next" },
   ],
   "uuid-generator": [
     { id: "fake-json", label: "Use them in mock data", kind: "next" },
@@ -89,5 +90,10 @@ export const RELATIONS: Record<string, Relation[]> = {
     { id: "json-to-yaml", label: "Reverse it", kind: "pair" },
     { id: "json-formatter", label: "Format the result", kind: "next" },
     { id: "json-validator", label: "Validate the result", kind: "next" },
+  ],
+  "jwt-decoder": [
+    { id: "base64", label: "Decode raw Base64", kind: "pair" },
+    { id: "json-formatter", label: "Format the payload", kind: "next" },
+    { id: "json-validator", label: "Validate the payload", kind: "pair" },
   ],
 };

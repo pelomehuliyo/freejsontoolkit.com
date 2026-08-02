@@ -250,6 +250,63 @@ production:
       },
     ],
   },
+  "jwt-decoder": {
+    eyebrow: "Docs · JWT",
+    conceptTitle: "What decoding is (and what it is not)",
+    concept:
+      "A JWT is three base64url segments joined by dots: a header, a payload, and a signature. The " +
+      "first two are encoded, not encrypted — anyone holding the token can decode and read them, " +
+      "which is exactly what this tool does, entirely in your browser. The signature is what a " +
+      "verifier checks against a key; this page has no key, so it decodes and stops, and says so " +
+      "loudly. Reading the payload tells you what the token claims; it never tells you whether " +
+      "those claims are true.",
+    lead: "before-after",
+    itemsLabel: "Things to know",
+    items: [
+      {
+        kind: "note",
+        title: "Decoded ≠ verified",
+        body:
+          "Anyone can base64-encode a payload that says admin: true. Only the holder of the signing " +
+          "key can produce a signature that verifies. This tool shows you the claims; it cannot and " +
+          "does not vouch for them.",
+      },
+      {
+        kind: "note",
+        title: "exp / iat / nbf are time facts",
+        body:
+          "Numeric date claims are rendered as human dates with an expired / valid-so-far indicator. " +
+          "That's a statement about the clock, not about authenticity — an expired token can still be " +
+          "a genuine one, and a valid-looking one can still be forged.",
+      },
+      {
+        kind: "error",
+        title: "Wrong number of segments",
+        body:
+          "A JWS (the common JWT) has exactly three dot-separated parts. Load this and the decoder " +
+          "tells you the count it found.",
+        snippet: `eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0`,
+      },
+      {
+        kind: "error",
+        title: "alg: none",
+        body:
+          "A token declaring alg none with an empty signature is unsigned — anyone could have made " +
+          "it. The decoder flags this loudly; servers that accept such tokens are vulnerable.",
+      },
+    ],
+    examplesLabel: "Try these",
+    examples: [
+      {
+        title: "The classic sample",
+        note: "The canonical example token — HS256, with an iat claim to interpret.",
+        snippet:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
+          "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ." +
+          "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+      },
+    ],
+  },
   "xml-to-json": {
     eyebrow: "Docs · XML → JSON",
     conceptTitle: "Parsing XML into JSON",
