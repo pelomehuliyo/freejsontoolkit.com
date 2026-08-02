@@ -156,6 +156,100 @@ export const DOCS: Record<string, ToolDoc> = {
       },
     ],
   },
+  "yaml-to-json": {
+    eyebrow: "Docs · YAML → JSON",
+    conceptTitle: "What the conversion does (and gives up)",
+    concept:
+      "YAML is a superset of JSON — every JSON document is already (nearly) valid YAML, so the " +
+      "conversion is one-directional by nature. The engine parses your YAML 1.2 and re-serializes " +
+      "the result as pretty-printed JSON. Three things change in the crossing: comments are " +
+      "dropped because JSON has nowhere to keep them; anchors and aliases are resolved to their " +
+      "expanded values; and YAML timestamps become ISO-8601 strings, since JSON has no date type. " +
+      "One thing deliberately does not happen: duplicate keys are rejected with an exact line and " +
+      "column instead of being silently collapsed — JSON output would keep only the last value, " +
+      "and we'd rather point at the problem than drop your data. Large files convert in a " +
+      "background worker so the editor never locks up.",
+    lead: "before-after",
+    itemsLabel: "Things to know",
+    items: [
+      {
+        kind: "error",
+        title: "Bad indentation",
+        body:
+          "YAML structure lives in its whitespace. A line that sits one space too deep (or too " +
+          "shallow) breaks the parse — and tabs are forbidden for indentation entirely. Load this " +
+          "and the caret lands on the offending line.",
+        snippet: `user:
+  name: Ada
+   role: engineer`,
+      },
+      {
+        kind: "error",
+        title: "Unclosed flow mapping",
+        body:
+          "Inline { } and [ ] collections must be closed. When one isn't, the parser runs out of " +
+          "input mid-collection and reports it at the end of the text.",
+        snippet: `user: { name: Ada`,
+      },
+      {
+        kind: "error",
+        title: "Duplicate keys",
+        body:
+          "The converter refuses to silently keep only the last value. Fix the duplicate (or " +
+          "decide which one is real) and convert again.",
+        snippet: `name: Ada
+name: Alan`,
+      },
+      {
+        kind: "note",
+        title: "Comments disappear",
+        body:
+          "JSON has no comment syntax, so every # comment is dropped on conversion. If a comment " +
+          "carries real information, move it into a data field before converting.",
+      },
+      {
+        kind: "note",
+        title: "Dates become ISO strings",
+        body:
+          "A bare YAML date converts to an ISO-8601 string in JSON. Load this and convert — the " +
+          "output carries the full timestamp as text.",
+        snippet: `shipped: 2026-08-02`,
+      },
+    ],
+    examplesLabel: "Try these",
+    examples: [
+      {
+        title: "Simple config",
+        note: "Scalars of every type — string, number, boolean, null.",
+        snippet: `name: Ada
+role: engineer
+level: 7
+active: true
+alias: null`,
+      },
+      {
+        title: "Nested with a list",
+        note: "Block sequences become JSON arrays; nesting becomes objects.",
+        snippet: `toolkit:
+  name: Free JSON Toolkit
+  tools:
+    - yaml-to-json
+    - json-formatter
+  limits:
+    uploads: 0`,
+      },
+      {
+        title: "Anchors and aliases",
+        note: "&base defines an anchor; *base expands it — the JSON contains the full value.",
+        snippet: `base: &base
+  retries: 3
+  timeout: 30
+production:
+  settings: *base
+  host: api.example.com`,
+      },
+    ],
+  },
   "xml-to-json": {
     eyebrow: "Docs · XML → JSON",
     conceptTitle: "Parsing XML into JSON",

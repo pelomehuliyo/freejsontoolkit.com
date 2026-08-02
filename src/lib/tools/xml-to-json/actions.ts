@@ -12,13 +12,36 @@ function getWorker(): Worker {
     return worker;
 }
 
-function isValidXml(xml: string): boolean {
+/**
+ * Validate XML using DOMParser (main thread only).
+ * Strips BOM and returns a detailed error message with line/column if available.
+ */
+function validateXml(xml: string): { valid: boolean; error?: string; line?: number; column?: number } {
+    // Strip UTF-8 BOM if present
+    const cleanXml = xml.replace(/^\uFEFF/, "");
     try {
         const parser = new DOMParser();
-        const doc = parser.parseFromString(xml, "text/xml");
-        return !doc.querySelector("parsererror");
-    } catch {
-        return false;
+        const doc = parser.parseFromString(cleanXml, "text/xml");
+        const errorNode = doc.querySelector("parsererror");
+        if (errorNode) {
+            const msg = errorNode.textContent || "Invalid XML";
+            const match = msg.match(/line\s+(\d+)\s*,\s*column\s+(\d+)/i);
+            if (match) {
+                return {
+                    valid: false,
+                    error: msg,
+                    line: parseInt(match[1], 10),
+                    column: parseInt(match[2], 10),
+                };
+            }
+            return { valid: false, error: msg };
+        }
+        return { valid: true };
+    } catch (e) {
+        return {
+            valid: false,
+            error: e instanceof Error ? e.message : "Invalid XML",
+        };
     }
 }
 
@@ -37,24 +60,43 @@ export function handleInput(store: Store<XmlToJsonState>, text: string): void {
         });
         return;
     }
-    const valid = isValidXml(text);
+
+    const result = validateXml(text);
+    if (!result.valid) {
+        let errMsg = result.error || "Invalid XML";
+        if (result.line && result.column) {
+            errMsg = `Invalid XML at line ${result.line}, column ${result.column}`;
+        } else if (!errMsg.includes("line")) {
+            errMsg = `Invalid XML: ${errMsg}`;
+        }
+        store.set({
+            ...state,
+            xmlInput: text,
+            inputStatus: "invalid",
+            error: errMsg,
+        });
+        return;
+    }
+
     store.set({
         ...state,
         xmlInput: text,
-        inputStatus: valid ? "ready" : "invalid",
-        error: valid ? null : "Invalid XML – check syntax",
+        inputStatus: "ready",
+        error: null,
     });
 }
 
 export function convert(store: Store<XmlToJsonState>): void {
     const state = store.get();
     if (state.isConverting) return;
+
     if (!state.xmlInput.trim()) {
         store.update((s) => ({ ...s, error: "Paste or load XML first." }));
         return;
     }
+
     if (state.inputStatus === "invalid") {
-        store.update((s) => ({ ...s, error: "Fix the XML syntax before converting." }));
+        // error already set – just announce it
         return;
     }
 
@@ -97,9 +139,10 @@ export function convert(store: Store<XmlToJsonState>): void {
     });
 }
 
+/** Load sample – does NOT auto‑convert. User must click Convert. */
 export function loadSample(store: Store<XmlToJsonState>): void {
     handleInput(store, SAMPLE_XML);
-    convert(store);
+    // intentionally no convert() – wait for user click
 }
 
 export function clearAll(store: Store<XmlToJsonState>): void {
@@ -115,15 +158,13 @@ export function clearAll(store: Store<XmlToJsonState>): void {
     }));
 }
 
+/** Option changes – only update state, do NOT auto‑convert */
 export function setIncludeAttributes(store: Store<XmlToJsonState>, value: boolean): void {
     store.update((s) => ({ ...s, includeAttributes: value }));
-    if (store.get().inputStatus === "ready") convert(store);
 }
 export function setPreserveArrays(store: Store<XmlToJsonState>, value: boolean): void {
     store.update((s) => ({ ...s, preserveArrays: value }));
-    if (store.get().inputStatus === "ready") convert(store);
 }
 export function setIndent(store: Store<XmlToJsonState>, indent: string | number): void {
     store.update((s) => ({ ...s, indent }));
-    if (store.get().inputStatus === "ready") convert(store);
 }

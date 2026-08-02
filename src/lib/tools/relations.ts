@@ -41,7 +41,7 @@ export const RELATIONS: Record<string, Relation[]> = {
     { id: "json-formatter", label: "Format the source", kind: "next" },
   ],
   "csv-to-json": [
-    { id: "json-to-csv" in {} ? "" : "json-to-csv", label: "Reverse it", kind: "pair" },
+    { id: "json-to-csv", label: "Reverse it", kind: "pair" },
     { id: "json-formatter", label: "Format the result", kind: "next" },
     { id: "json-validator", label: "Validate the result", kind: "next" },
   ],
@@ -79,5 +79,15 @@ export const RELATIONS: Record<string, Relation[]> = {
     { id: "json-formatter", label: "Format the result", kind: "next" },
     { id: "json-validator", label: "Validate the result", kind: "next" },
     { id: "csv-to-json", label: "Convert CSV instead", kind: "pair" },
+  ],
+  "json-to-yaml": [
+    { id: "yaml-to-json", label: "Reverse it", kind: "pair" },
+    { id: "json-formatter", label: "Format the source", kind: "next" },
+    { id: "json-validator", label: "Validate the source", kind: "pair" },
+  ],
+  "yaml-to-json": [
+    { id: "json-to-yaml", label: "Reverse it", kind: "pair" },
+    { id: "json-formatter", label: "Format the result", kind: "next" },
+    { id: "json-validator", label: "Validate the result", kind: "next" },
   ],
 };

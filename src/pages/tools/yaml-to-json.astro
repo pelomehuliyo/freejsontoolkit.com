@@ -9,85 +9,65 @@ import ErrorBanner from "../../components/tools/ErrorBanner.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
-import { INDENT_OPTIONS } from "../../lib/tools/xml-to-json/constants";
+import { INDENT_OPTIONS } from "../../lib/tools/yaml-to-json/constants";
 import RelatedTools from "../../components/tools/RelatedTools.astro";
+import ToolDocs from "../../components/tools/ToolDocs.astro";
 import CompareLinks from "../../components/tools/CompareLinks.astro";
+import ToolNudge from "../../components/tools/ToolNudge.astro";
 ---
 
 <ToolShell
-  title="XML to JSON Converter — Free Online, Local"
-  description="Free online XML to JSON converter. Parse XML documents into clean JSON objects with attribute handling and array preservation — 100% local, no upload, no server."
-  activePath="/tools/xml-to-json"
+  title="YAML → JSON Converter — Convert YAML to JSON Online (Free, Local)"
+  description="Free online YAML to JSON converter. Paste or drop a YAML config and get clean, pretty-printed JSON with exact error line numbers — 100% local, no upload, no server."
+  activePath="/tools/yaml-to-json"
 >
   <ToolHeader
     slot="header"
-    breadcrumbs={[{ label: "Home", href: "/" }, { label: "XML to JSON" }]}
-    title="XML → JSON Converter"
-    subtitle="Turn XML documents into structured JSON — offline."
+    breadcrumbs={[{ label: "Home", href: "/" }, { label: "YAML → JSON" }]}
+    title="YAML → JSON"
+    subtitle="Turn YAML configs into clean JSON — without leaving your browser."
   />
-
   <ToolWorkspace slot="workspace" layout="3-col">
     <div slot="input" class="ws-fill">
       <Card variant="flat" class="workspace-card">
         <div class="card-header">
-          <span class="caption-mono column-title">INPUT XML</span>
+          <span class="caption-mono column-title">INPUT YAML</span>
           <ToolActions id="input-actions" variant="inset" actions={["sample", "clear"]} />
         </div>
-        <DragDropZone id="xml-input" accept=".xml,.svg,.rss" label="Upload XML file" />
+        <DragDropZone id="yaml-input" accept=".yaml,.yml" label="Upload YAML file" />
         <CodeEditor
-          id="xml-input"
-          label="XML input"
-          placeholder='<root><item id="1">Hello</item></root>'
+          id="yaml-input"
+          label="YAML input"
+          placeholder={`Paste YAML to convert it
+name: Ada
+role: engineer
+tags:
+  - pioneer`}
         >
           <div class="editor-info-bar" slot>
-            <span class="info-status" id="xml-validation-status">XML Status: Empty</span>
-            <span class="info-meta" id="xml-char-count">0 chars</span>
+            <span class="info-status" id="yaml-status">YAML Status: Empty</span>
+            <span class="info-meta" id="yaml-char-count">0 chars</span>
           </div>
         </CodeEditor>
       </Card>
     </div>
-
     <div slot="controls">
       <Card variant="flat" class="workspace-card settings-card">
         <h2 class="display-sm settings-title">Options</h2>
         <div class="settings-divider"></div>
-
-        <div class="settings-group checkbox-group">
-          <label class="checkbox-container body-sm">
-            <input type="checkbox" id="include-attrs" checked />
-            <span class="checkbox-checkmark"></span>
-            Include attributes <span class="caption-mono">(@id)</span>
-          </label>
-        </div>
-
-        <div class="settings-group checkbox-group">
-          <label class="checkbox-container body-sm">
-            <input type="checkbox" id="preserve-arrays" checked />
-            <span class="checkbox-checkmark"></span>
-            Preserve arrays
-          </label>
-          <p class="caption settings-help">
-            Keeps repeated elements as arrays. Turn off to collapse to the last value.
-          </p>
-        </div>
-
         <div class="settings-group">
-          <label class="settings-label caption-mono" for="indent-select">Output indentation</label>
+          <label class="settings-label caption-mono" for="indent-select">JSON indent</label>
           <div class="select-wrapper">
             <select id="indent-select" class="settings-select">
               {INDENT_OPTIONS.map((opt) => <option value={opt.value}>{opt.label}</option>)}
             </select>
           </div>
         </div>
-
         <div class="settings-divider"></div>
-
         <Button id="convert-btn" variant="primary" size="lg" shape="square" class="action-btn">
           Convert to JSON
         </Button>
-
         <ErrorBanner id="convert-error" />
-
         <div class="status-banner caption">
           <span class="status-indicator"><span class="dot idle" id="status-dot"></span></span>
           <span class="sr-only" id="convert-status-announce" aria-live="polite"></span>
@@ -95,7 +75,6 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
         </div>
       </Card>
     </div>
-
     <div slot="output" class="ws-fill ws-output">
       <Card variant="flat" class="workspace-card">
         <div class="card-header">
@@ -104,8 +83,8 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
         </div>
         <CodeEditor
           id="json-output"
-          label="JSON output"
-          placeholder="JSON will appear here..."
+          label="Converted JSON output"
+          placeholder="Converted JSON will appear here..."
           readonly
         >
           <div class="editor-info-bar" slot>
@@ -116,39 +95,41 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
       </Card>
     </div>
   </ToolWorkspace>
-
   <section class="tool-content-section" aria-labelledby="how-title">
     <Container size="narrow">
       <div class="content-section-header">
         <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
-        <h2 id="how-title" class="display-md section-title">Convert XML to JSON in three steps</h2>
+        <h2 id="how-title" class="display-md section-title">Convert YAML in three steps</h2>
       </div>
       <div class="steps-grid">
         <div class="step-card">
           <span class="step-number" aria-hidden="true">1</span>
-          <h3 class="body-sm-strong step-title">Paste or upload</h3>
-          <p class="caption step-desc">Drop in any XML — RSS, SVG, configs, or API responses.</p>
+          <h3 class="body-sm-strong step-title">Paste or drop</h3>
+          <p class="caption step-desc">
+            Any .yaml / .yml config — validity reads as you type, up to 15M characters.
+          </p>
         </div>
         <div class="step-card">
           <span class="step-number" aria-hidden="true">2</span>
-          <h3 class="body-sm-strong step-title">Configure output</h3>
+          <h3 class="body-sm-strong step-title">Convert</h3>
           <p class="caption step-desc">
-            Choose whether to include attributes, preserve arrays, and set indentation.
+            Press Convert (or Ctrl/⌘ + Enter). Big files run in a background worker.
           </p>
         </div>
         <div class="step-card">
           <span class="step-number" aria-hidden="true">3</span>
-          <h3 class="body-sm-strong step-title">Convert &amp; export</h3>
+          <h3 class="body-sm-strong step-title">Take the JSON</h3>
           <p class="caption step-desc">
-            Click Convert, then copy or download the resulting JSON — all offline.
+            Copy or download pretty-printed JSON — 2-space, 4-space, or tabs.
           </p>
         </div>
       </div>
     </Container>
   </section>
-
+  <ToolDocs />
   <CompareLinks />
   <RelatedTools />
+  <ToolNudge />
   <section class="faq-section" aria-labelledby="faq-title">
     <Container size="narrow">
       <div class="faq-header">
@@ -157,64 +138,68 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
       </div>
       <div class="faq-list">
         <details class="faq-item">
-          <summary class="faq-summary">Is my XML uploaded anywhere?</summary>
+          <summary class="faq-summary">Is my YAML uploaded anywhere?</summary>
           <p class="body-md faq-answer">
-            No. Conversion runs entirely in your browser (in a background worker). Your data never
-            leaves your machine.
+            No. Parsing runs entirely in your browser (in a background worker for large files). Your
+            config never leaves your machine.
           </p>
         </details>
         <details class="faq-item">
-          <summary class="faq-summary">How are XML attributes handled?</summary>
+          <summary class="faq-summary">Why does my file fail on tabs?</summary>
           <p class="body-md faq-answer">
-            Attributes are prefixed with <code>@</code> in the JSON output (e.g., <code
-              >"@id": "1"</code
-            >). You can toggle them on/off.
+            YAML forbids tab characters for indentation — spaces only. The error points to the exact
+            line; replace the tabs with spaces and convert again.
           </p>
         </details>
         <details class="faq-item">
-          <summary class="faq-summary">What about CDATA and comments?</summary>
+          <summary class="faq-summary">What happens to duplicate keys?</summary>
           <p class="body-md faq-answer">
-            CDATA is treated as text. Comments, processing instructions, and DOCTYPE declarations
-            are skipped for clean output.
+            They fail the conversion with an exact line and column, on purpose. JSON output would
+            have to silently keep only the last value — we'd rather point at the problem than drop
+            your data without telling you.
           </p>
         </details>
         <details class="faq-item">
-          <summary class="faq-summary">Why are arrays sometimes single objects?</summary>
+          <summary class="faq-summary">What about comments, dates, and anchors?</summary>
           <p class="body-md faq-answer">
-            If "Preserve arrays" is off, a single child becomes an object. Turn it on to always get
-            arrays for repeated tags.
+            Comments are dropped (JSON has nowhere to keep them), YAML timestamps become ISO-8601
+            strings (JSON has no date type), and anchors / aliases (<code>&amp;id</code> /
+            <code>*id</code>) are resolved to their expanded values.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Which YAML version is supported?</summary>
+          <p class="body-md faq-answer">
+            YAML 1.2 with the core schema — the modern spec, and the same parser the JSON → YAML
+            tool uses, so a round trip stays consistent in both directions.
           </p>
         </details>
       </div>
     </Container>
   </section>
 </ToolShell>
-
 <script>
-  import { xmlToJsonStore } from "../../lib/tools/xml-to-json/store";
+  import { yamlToJsonStore } from "../../lib/tools/yaml-to-json/store";
   import {
     handleInput,
     convert,
     loadSample,
     clearAll,
-    setIncludeAttributes,
-    setPreserveArrays,
     setIndent,
-  } from "../../lib/tools/xml-to-json/actions";
-  import type { IndentOption } from "../../lib/tools/xml-to-json/types";
+  } from "../../lib/tools/yaml-to-json/actions";
+  import { buildOutput } from "../../lib/tools/yaml-to-json/engine";
+  import type { IndentOption } from "../../lib/tools/yaml-to-json/types";
   import { debounce } from "../../shared/debounce";
   import { announce, initAnnounce } from "../../shared/announce";
   import { copyToClipboard } from "../../shared/clipboard";
   import { downloadFile } from "../../shared/download";
 
-  const xmlTextarea = document.getElementById("xml-input-textarea") as HTMLTextAreaElement | null;
+  const yamlTextarea = document.getElementById("yaml-input-textarea") as HTMLTextAreaElement | null;
   const outTextarea = document.getElementById("json-output-textarea") as HTMLTextAreaElement | null;
-  const inputStatus = document.getElementById("xml-validation-status") as HTMLElement | null;
-  const inputCharCount = document.getElementById("xml-char-count") as HTMLElement | null;
+  const inputStatus = document.getElementById("yaml-status") as HTMLElement | null;
+  const inputCharCount = document.getElementById("yaml-char-count") as HTMLElement | null;
   const outputStatus = document.getElementById("json-output-status") as HTMLElement | null;
   const outputCharCount = document.getElementById("json-output-count") as HTMLElement | null;
-  const includeAttrsCb = document.getElementById("include-attrs") as HTMLInputElement | null;
-  const preserveArraysCb = document.getElementById("preserve-arrays") as HTMLInputElement | null;
   const indentSelect = document.getElementById("indent-select") as HTMLSelectElement | null;
   const convertBtn = document.getElementById("convert-btn") as HTMLButtonElement | null;
   const errorBanner = document.getElementById("convert-error") as HTMLElement | null;
@@ -223,60 +208,101 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
   initAnnounce("convert-status-announce");
 
   const debouncedInput = debounce((value: string) => {
-    handleInput(xmlToJsonStore, value);
-  }, 200);
+    handleInput(yamlToJsonStore, value);
+  }, 150);
 
-  xmlToJsonStore.subscribe((state) => {
-    const inputFocused = xmlTextarea && document.activeElement === xmlTextarea;
-    if (xmlTextarea && xmlTextarea.value !== state.xmlInput && !inputFocused) {
-      xmlTextarea.value = state.xmlInput;
-      xmlTextarea.dispatchEvent(new Event("editor-refresh"));
+  let lastScrolledLine = -1;
+  let lastOut = "";
+
+  yamlToJsonStore.subscribe((state) => {
+    const inputFocused = yamlTextarea && document.activeElement === yamlTextarea;
+    if (yamlTextarea && yamlTextarea.value !== state.yamlInput && !inputFocused) {
+      yamlTextarea.value = state.yamlInput;
+      yamlTextarea.dispatchEvent(new Event("editor-refresh"));
     }
-    if (outTextarea && outTextarea.value !== state.jsonOutput) {
-      outTextarea.value = state.jsonOutput;
-      outTextarea.dispatchEvent(new Event("editor-refresh"));
+
+    // The output box only changes on an authoritative Convert — live results
+    // update the status bar alone, so Load Sample stays load-only and typing
+    // never churns the JSON.
+    if (state.result && state.result.authoritative) {
+      const out = buildOutput(state.result, state.yamlInput);
+      if (out !== lastOut) {
+        lastOut = out;
+        if (outTextarea && outTextarea.value !== out) {
+          outTextarea.value = out;
+          outTextarea.dispatchEvent(new Event("editor-refresh"));
+        }
+      }
     }
 
     if (inputStatus) {
-      switch (state.inputStatus) {
-        case "empty":
-          inputStatus.textContent = "XML Status: Empty";
-          inputStatus.style.color = "";
-          break;
-        case "ready":
-          inputStatus.textContent = "XML Status: Valid";
-          inputStatus.style.color = "var(--color-success)";
-          break;
-        case "invalid":
-          // Show the actual error from the store
-          inputStatus.textContent = state.error
-            ? `XML Status: ${state.error}`
-            : "XML Status: Invalid";
-          inputStatus.style.color = "var(--color-error)";
-          break;
+      if (state.inputStatus === "empty") {
+        inputStatus.textContent = "YAML Status: Empty";
+        inputStatus.style.color = "";
+      } else if (state.result && !state.result.ok && state.result.error?.line != null) {
+        const e = state.result.error;
+        inputStatus.textContent = `YAML Status: Invalid · line ${e.line}, col ${e.column ?? "?"}`;
+        inputStatus.style.color = "var(--color-error)";
+      } else if (state.result && !state.result.ok && state.result.error) {
+        inputStatus.textContent = "YAML Status: Invalid";
+        inputStatus.style.color = "var(--color-error)";
+      } else if (state.result && state.result.ok) {
+        inputStatus.textContent = "YAML Status: Valid";
+        inputStatus.style.color = "var(--color-success)";
+      } else {
+        inputStatus.textContent = "YAML Status: Ready";
+        inputStatus.style.color = "";
       }
     }
     if (inputCharCount)
-      inputCharCount.textContent = state.xmlInput.length.toLocaleString() + " chars";
+      inputCharCount.textContent = state.yamlInput.length.toLocaleString() + " chars";
 
     if (outputStatus) {
       outputStatus.textContent =
-        state.outputStatus === "converted" ? "Output: Ready" : "Output: Empty";
-      outputStatus.style.color = state.outputStatus === "converted" ? "var(--color-success)" : "";
+        state.outputStatus === "valid"
+          ? "Output: JSON"
+          : state.outputStatus === "invalid"
+            ? "Output: Error"
+            : "Output: Empty";
+      outputStatus.style.color =
+        state.outputStatus === "valid"
+          ? "var(--color-success)"
+          : state.outputStatus === "invalid"
+            ? "var(--color-error)"
+            : "";
     }
-    if (outputCharCount)
-      outputCharCount.textContent = state.jsonOutput.length.toLocaleString() + " chars";
+    if (outputCharCount) {
+      const st = state.result && state.result.authoritative ? state.result.stats : null;
+      outputCharCount.textContent =
+        lastOut.length.toLocaleString() +
+        " chars" +
+        (st ? ` · depth ${st.maxDepth} · ${st.keys.toLocaleString()} keys` : "");
+    }
 
     if (statusDot) {
       statusDot.classList.remove("idle", "active", "error");
       statusDot.classList.add(
-        state.isConverting ? "active" : state.inputStatus === "invalid" ? "error" : "idle",
+        state.isConverting ? "active" : state.outputStatus === "invalid" ? "error" : "idle",
       );
     }
-
     if (convertBtn) {
       convertBtn.textContent = state.isConverting ? "Converting…" : "Convert to JSON";
       convertBtn.disabled = state.isConverting;
+    }
+
+    // Scroll the input to the error line ONLY on an authoritative invalid
+    // result, so as-you-type diagnostics never yank the caret while typing.
+    if (
+      yamlTextarea &&
+      state.result &&
+      state.result.authoritative &&
+      !state.result.ok &&
+      state.result.error?.line != null &&
+      state.result.error.line !== lastScrolledLine
+    ) {
+      lastScrolledLine = state.result.error.line;
+      const lh = parseFloat(getComputedStyle(yamlTextarea).lineHeight) || 19.5;
+      yamlTextarea.scrollTop = Math.max(0, (state.result.error.line - 3) * lh);
     }
 
     if (errorBanner) {
@@ -284,23 +310,18 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
       else (errorBanner as any).hide?.();
     }
     if (state.error) announce("Error: " + state.error);
+    if (state.result && state.result.authoritative && state.result.ok)
+      announce("Converted to JSON");
+    if (state.result && state.result.authoritative && !state.result.ok) announce("YAML is invalid");
   });
 
-  if (xmlTextarea) {
-    xmlTextarea.addEventListener("input", () => debouncedInput(xmlTextarea.value));
+  if (yamlTextarea) {
+    yamlTextarea.addEventListener("input", () => debouncedInput(yamlTextarea.value));
   }
-  if (convertBtn) convertBtn.addEventListener("click", () => convert(xmlToJsonStore));
-  if (includeAttrsCb)
-    includeAttrsCb.addEventListener("change", () =>
-      setIncludeAttributes(xmlToJsonStore, includeAttrsCb.checked),
-    );
-  if (preserveArraysCb)
-    preserveArraysCb.addEventListener("change", () =>
-      setPreserveArrays(xmlToJsonStore, preserveArraysCb.checked),
-    );
+  if (convertBtn) convertBtn.addEventListener("click", () => convert(yamlToJsonStore));
   if (indentSelect)
     indentSelect.addEventListener("change", () =>
-      setIndent(xmlToJsonStore, indentSelect.value as IndentOption),
+      setIndent(yamlToJsonStore, indentSelect.value as IndentOption),
     );
 
   const inputActions = document.getElementById("input-actions");
@@ -308,11 +329,11 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
     inputActions.addEventListener("tool-action", (e: Event) => {
       const action = (e as CustomEvent).detail?.action;
       if (action === "sample") {
-        loadSample(xmlToJsonStore);
-        announce("Sample XML loaded");
+        loadSample(yamlToJsonStore);
+        announce("Sample YAML loaded");
       }
       if (action === "clear") {
-        clearAll(xmlToJsonStore);
+        clearAll(yamlToJsonStore);
         announce("Input cleared");
       }
     });
@@ -322,9 +343,8 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
   if (outputActions) {
     outputActions.addEventListener("tool-action", async (e: Event) => {
       const action = (e as CustomEvent).detail?.action;
-      const out = xmlToJsonStore.get().jsonOutput;
       if (action === "copy") {
-        const ok = out ? await copyToClipboard(out) : false;
+        const ok = lastOut ? await copyToClipboard(lastOut) : false;
         const btn = outputActions.querySelector("[data-action='copy']");
         if (ok && btn) {
           const orig = btn.textContent || "Copy";
@@ -336,21 +356,24 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
         }
       }
       if (action === "download") {
-        if (out) {
-          downloadFile(out, "converted.json", "application/json;charset=utf-8;");
+        const st = yamlToJsonStore.get();
+        if (st.result && st.result.ok) {
+          downloadFile(st.result.output, "converted.json", "application/json;charset=utf-8;");
           announce("Download started");
+        } else {
+          announce("Nothing to download yet");
         }
       }
     });
   }
 
-  const dropZone = document.getElementById("xml-input-dropzone");
+  const dropZone = document.getElementById("yaml-input-dropzone");
   if (dropZone) {
     dropZone.addEventListener("file-dropped", (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail?.text) {
-        handleInput(xmlToJsonStore, detail.text);
-        // Remove auto‑convert – user must click the button
+        handleInput(yamlToJsonStore, detail.text);
+        convert(yamlToJsonStore);
         announce("File loaded: " + (detail.name || "file"));
       }
     });
@@ -361,11 +384,10 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "SELECT") return;
       e.preventDefault();
-      convert(xmlToJsonStore);
+      convert(yamlToJsonStore);
     }
   });
 </script>
-
 <style>
   .workspace-card {
     display: flex;
@@ -404,7 +426,6 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
   .info-status {
     font-weight: 500;
   }
-
   .settings-card {
     padding: var(--spacing-lg);
   }
@@ -459,74 +480,10 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
     transform: translateY(-50%);
     pointer-events: none;
   }
-
-  .checkbox-group {
-    margin-bottom: var(--spacing-sm);
-  }
-  .checkbox-container {
-    display: flex;
-    align-items: center;
-    position: relative;
-    padding-left: 24px;
-    cursor: pointer;
-    user-select: none;
-    color: var(--color-ink);
-  }
-  .checkbox-container input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-  }
-  .checkbox-checkmark {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    left: 0;
-    height: 16px;
-    width: 16px;
-    border: 1px solid var(--color-hairline-strong);
-    border-radius: 4px;
-    background-color: var(--color-canvas);
-    transition:
-      background-color 0.1s ease,
-      border-color 0.1s ease;
-  }
-  .checkbox-container:hover input ~ .checkbox-checkmark {
-    border-color: var(--color-ink);
-  }
-  .checkbox-container input:checked ~ .checkbox-checkmark {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-  }
-  .checkbox-checkmark::after {
-    content: "";
-    position: absolute;
-    display: none;
-  }
-  .checkbox-container input:checked ~ .checkbox-checkmark::after {
-    display: block;
-  }
-  .checkbox-container .checkbox-checkmark::after {
-    left: 5px;
-    top: 2px;
-    width: 4px;
-    height: 8px;
-    border: solid white;
-    border-width: 0 1.5px 1.5px 0;
-    transform: rotate(45deg);
-  }
-  .settings-help {
-    color: var(--color-mute);
-    margin: 4px 0 0 24px;
-    line-height: 1.4;
-  }
   .action-btn {
     width: 100%;
     margin-top: var(--spacing-sm);
   }
-
   .status-banner {
     display: flex;
     align-items: center;
@@ -559,7 +516,6 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
     white-space: nowrap;
     border-width: 0;
   }
-
   .tool-content-section {
     padding: var(--spacing-5xl) 0;
     background-color: var(--color-canvas-soft);
@@ -621,7 +577,6 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
     margin: 0;
     line-height: 1.5;
   }
-
   .faq-section {
     padding: var(--spacing-5xl) 0;
     background-color: var(--color-canvas);
@@ -671,7 +626,6 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
     padding: 1px 4px;
     border-radius: var(--rounded-xs);
   }
-
   @media (min-width: 960px) {
     .workspace-card :global(.editor-outer) {
       flex: none;
