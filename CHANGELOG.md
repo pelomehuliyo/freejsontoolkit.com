@@ -102,3 +102,29 @@ registry substrate (the "new tool = mostly wiring" thesis, proven).
 
 - `yaml-to-json` flipped to `status: "available"` — catalog, footer, palette,
   homepage directory, and sitemap all derive from this one entry.
+
+
+## [v1.5.0] — Collections: browse by what you're doing
+
+### Added
+- **Collections** — a mental-model layer over the catalog. Every tool now declares a
+  `family` (the user's "I need to work with JSON" grouping), distinct from its
+  operational `category`.
+- `/collections` hub plus one permanent page per family (`/collections/[family]`),
+  each with a crafted empty state for shelves still filling up — no dead routes.
+- Homepage "Browse by collection" strip above the category directory.
+- Command-palette **Collections** group: shelves surface at idle and match on search,
+  each with its own badge.
+- Registry island now carries `family` + `familyLabel`, so any client-built surface
+  can group by family.
+
+### Changed
+- Registry: added `ToolFamily` type, `families` meta array, and the
+  `familyLabel` / `toolsByFamily` / `familiesWithAvailableTools` selectors.
+- Footer: Resources column gains a "Collections" link.
+- Sitemap: `/collections` + one entry per family.
+
+### Families seeded
+- **JSON**, **Encoding**, and **Developer Utilities** render as live shelves;
+  **Data Formats** and **Networking** are reserved and light up as their tools ship
+  (Data Formats fills when CSV ⇄ TSV lands).

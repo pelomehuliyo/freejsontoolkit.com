@@ -15,6 +15,12 @@ interface SitemapEntry {
 const STATIC_ROUTES: SitemapEntry[] = [
   { loc: "", priority: "1.0", changefreq: "weekly" },
   { loc: "/tools", priority: "0.9", changefreq: "weekly" },
+  { loc: "/collections", priority: "0.7", changefreq: "weekly" },
+  { loc: "/collections/json", priority: "0.6", changefreq: "monthly" },
+  { loc: "/collections/encoding", priority: "0.6", changefreq: "monthly" },
+  { loc: "/collections/data-formats", priority: "0.6", changefreq: "monthly" },
+  { loc: "/collections/developer-utilities", priority: "0.6", changefreq: "monthly" },
+  { loc: "/collections/networking", priority: "0.6", changefreq: "monthly" },
   { loc: "/compare", priority: "0.7", changefreq: "monthly" },
   { loc: "/why-local", priority: "0.6", changefreq: "monthly" },
   { loc: "/about", priority: "0.4", changefreq: "yearly" },

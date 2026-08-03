@@ -22,6 +22,17 @@ const cats = categories
   .map((c) => ({ ...c, items: toolsByCategory(c.id).filter((t) => t.status === "available") }))
   .filter((c) => c.items.length > 0);
 
+import { familiesWithAvailableTools } from "../lib/tools/registry";
+
+// Collections strip — the user's mental-model groupings (JSON / Encoding / …),
+// one chip per family with a live count. Server-rendered, additive.
+const COLS = familiesWithAvailableTools().map((g) => ({
+  id: g.meta.id,
+  label: g.meta.label,
+  blurb: g.meta.blurb,
+  n: g.tools.length,
+}));
+
 // A curated "most-reached-for" strip — chips, not equal cards.
 const POPULAR = ["json-formatter", "json-validator", "json-to-csv", "base64", "uuid-generator"]
   .map((id) => byId[id])
@@ -197,6 +208,33 @@ const guarantees = [
         </section>
       )
     }
+
+    {/* ── COLLECTIONS strip: the mental-model layer (family field, Sprint-0) ── */}
+    <section class="hp-collections hp-reveal">
+      <Container size="wide">
+        <div class="hp-col-head">
+          <div>
+            <span class="hp-sec-eyebrow caption-mono">Browse by collection</span>
+            <h2 class="hp-sec-title display-lg">What are you working on?</h2>
+          </div>
+          <a class="hp-col-all body-sm-strong" href="/collections">All collections →</a>
+        </div>
+        <div class="hp-col-row">
+          {
+            COLS.map((c) => (
+              <a class="hp-col-chip" href={`/collections/${c.id}`}>
+                <span class="hp-col-dot" aria-hidden="true" />
+                <span class="hp-col-name">{c.label}</span>
+                <span class="hp-col-n caption-mono">{c.n}</span>
+                <span class="hp-col-go" aria-hidden="true">
+                  →
+                </span>
+              </a>
+            ))
+          }
+        </div>
+      </Container>
+    </section>
 
     {/* ── DIRECTORY: browse by category (the homepage becomes a directory) ── */}
     <section class="hp-directory hp-reveal" id="hp-directory">
@@ -896,6 +934,85 @@ const guarantees = [
       transition: transform 0.15s ease;
     }
     .hp-pop-chip:hover .hp-pop-go {
+      transform: translateX(3px);
+    }
+
+    /* ── COLLECTIONS ── */
+    .hp-collections {
+      padding: var(--spacing-3xl) 0;
+      border-bottom: 1px solid var(--color-hairline);
+    }
+    .hp-col-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-lg);
+    }
+    .hp-col-all {
+      color: var(--color-accent-active);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .hp-col-all:hover {
+      text-decoration: underline;
+    }
+    .hp-col-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: var(--spacing-sm);
+    }
+    .hp-col-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px var(--spacing-md);
+      border: 1px solid var(--color-hairline);
+      border-radius: var(--rounded-md);
+      background-color: var(--color-canvas);
+      text-decoration: none;
+      color: inherit;
+      transition:
+        border-color 0.15s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+    }
+    .hp-col-chip:hover {
+      border-color: var(--color-accent);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(33, 167, 138, 0.12);
+    }
+    .hp-col-dot {
+      flex: none;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--color-accent);
+    }
+    .hp-col-name {
+      flex: 1;
+      min-width: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-ink);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .hp-col-n {
+      flex: none;
+      color: var(--color-mute);
+      border: 1px solid var(--color-hairline);
+      border-radius: var(--rounded-pill-sm);
+      padding: 1px 8px;
+      font-size: 11px;
+    }
+    .hp-col-go {
+      flex: none;
+      color: var(--color-accent-active);
+      transition: transform 0.15s ease;
+    }
+    .hp-col-chip:hover .hp-col-go {
       transform: translateX(3px);
     }
 

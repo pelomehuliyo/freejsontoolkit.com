@@ -3,13 +3,11 @@
  * CommandPalette — the toolkit's shell. ⌘K / Ctrl+K everywhere, "/" off the
  * catalog (where the page's own inline filter owns "/").
  *
- * Instant fuzzy search over tools + categories, keyboard navigation, curated
- * aliases, and the user's recent tools surfaced as shell history. It reads the
- * registry from the #fjt-registry data island the layout already emits and
- * recents from localStorage, so it takes no props and renders identically on
- * every page. It is included as a sibling of .app-layout (after it) so it sits
- * above everything and is never caught by an `inert` set on the app shell; it
- * traps focus itself and exposes aria-modal + aria-activedescendant.
+ * Instant fuzzy search over tools + categories + collections, keyboard
+ * navigation, curated aliases, and the user's recent tools surfaced as shell
+ * history. It reads the registry from the #fjt-registry data island the layout
+ * already emits (now including each tool's `family`) and recents from
+ * localStorage, so it takes no props and renders identically on every page.
  */
 ---
 
@@ -32,7 +30,7 @@
         placeholder="search tools · jump to a category"
         autocomplete="off"
         spellcheck="false"
-        aria-label="Search tools and categories"
+        aria-label="Search tools, collections and categories"
         aria-controls="cmdk-list"
         aria-activedescendant=""
       />
@@ -79,6 +77,15 @@
       api: "API",
     };
 
+    // collections weld — distinctive shelf badges per family (fallback = abbr).
+    const FAM_BADGE: Record<string, string> = {
+      json: "{ }",
+      encoding: "b64",
+      "data-formats": "▤",
+      "developer-utilities": ".*",
+      networking: "⇄",
+    };
+
     // Curated colloquial terms folded into the search haystack so the palette
     // answers the way people actually think ("prettify", "guid", "escape").
     const ALIASES: Record<string, string[]> = {
@@ -100,6 +107,8 @@
       tagline: string;
       category: string;
       catLabel: string;
+      family: string; // collections weld
+      familyLabel: string; // collections weld
       status: string;
       href: string | null;
     };
@@ -117,6 +126,23 @@
       tools = [];
     }
     const categories = Object.keys(catLabel).map((id) => ({ id, label: catLabel[id] }));
+
+    // collections weld — group LIVE tools by family (the mental-model lens).
+    // Only families with ≥1 available tool surface; empty shelves stay quiet,
+    // mirroring the /collections hub.
+    const famLabel: Record<string, string> = {};
+    const famLive: Record<string, number> = {};
+    tools.forEach((t) => {
+      if (t.family && t.status === "available") {
+        famLabel[t.family] = t.familyLabel || t.family;
+        famLive[t.family] = (famLive[t.family] || 0) + 1;
+      }
+    });
+    const collections = Object.keys(famLabel).map((id) => ({
+      id,
+      label: famLabel[id],
+      count: famLive[id],
+    }));
 
     function recents(): T[] {
       try {
@@ -176,7 +202,7 @@
     }
 
     type Row = {
-      kind: "tool" | "cat";
+      kind: "tool" | "cat" | "fam"; // collections weld: + "fam"
       id: string;
       href: string;
       name: string;
@@ -212,6 +238,14 @@
       }
       if (open) out += "</mark>";
       return out;
+    }
+
+    // collections weld — one place builds a collection row.
+    function famBadge(id: string, label: string): string {
+      return FAM_BADGE[id] || (label.slice(0, 3) || "COL").toUpperCase();
+    }
+    function famTag(count: number): string {
+      return `${count} tool${count === 1 ? "" : "s"} · collection`;
     }
 
     function rowHtml(r: Row, i: number): string {
@@ -258,6 +292,29 @@
             group("history", rc.map((_, k) => rowHtml(rows[start + k], start + k)).join("")),
           );
         }
+
+        // collections weld — idle palette surfaces the shelves.
+        if (collections.length) {
+          const fstart = rows.length;
+          collections.forEach((f) =>
+            rows.push({
+              kind: "fam",
+              id: f.id,
+              href: `/collections/${f.id}`,
+              name: f.label,
+              tag: famTag(f.count),
+              badge: famBadge(f.id, f.label),
+              hl: [],
+            }),
+          );
+          blocks.push(
+            group(
+              "collections",
+              collections.map((_, k) => rowHtml(rows[fstart + k], fstart + k)).join(""),
+            ),
+          );
+        }
+
         const cstart = rows.length;
         categories.forEach((c) =>
           rows.push({
@@ -306,6 +363,33 @@
             group("tools", matched.map((_, k) => rowHtml(rows[start + k], start + k)).join("")),
           );
         }
+
+        // collections weld — match family labels (plus the word "collection").
+        const fm = collections
+          .map((f) => ({ f, s: scoreCat(q, `${f.label} collection`) }))
+          .filter(
+            (x): x is { f: { id: string; label: string; count: number }; s: number } =>
+              x.s !== null,
+          )
+          .sort((a, b) => b.s - a.s);
+        if (fm.length) {
+          const start = rows.length;
+          fm.forEach((m) =>
+            rows.push({
+              kind: "fam",
+              id: m.f.id,
+              href: `/collections/${m.f.id}`,
+              name: m.f.label,
+              tag: famTag(m.f.count),
+              badge: famBadge(m.f.id, m.f.label),
+              hl: [],
+            }),
+          );
+          blocks.push(
+            group("collections", fm.map((_, k) => rowHtml(rows[start + k], start + k)).join("")),
+          );
+        }
+
         const cm = categories
           .map((c) => ({ c, s: scoreCat(q, c.label) }))
           .filter((x): x is { c: { id: string; label: string }; s: number } => x.s !== null)

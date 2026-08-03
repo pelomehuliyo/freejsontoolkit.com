@@ -4,7 +4,7 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import "../styles/global.css";
 import "../styles/tool-cards.css";
-import { tools, categoryLabel } from "../lib/tools/registry";
+import { tools, categoryLabel, familyLabel } from "../lib/tools/registry";
 
 interface Props {
   title?: string;
@@ -69,6 +69,8 @@ const registryPayload = tools.map((t) => ({
   tagline: t.tagline,
   category: t.category,
   catLabel: categoryLabel(t.category),
+  family: t.family,
+  familyLabel: familyLabel(t.family),
   status: t.status,
   href: t.href ?? null,
 }));
