@@ -1,0 +1,859 @@
+---
+import ToolShell from "../../components/tools/ToolShell.astro";
+import ToolHeader from "../../components/tools/ToolHeader.astro";
+import ToolWorkspace from "../../components/tools/ToolWorkspace.astro";
+import CodeEditor from "../../components/tools/CodeEditor.astro";
+import DragDropZone from "../../components/tools/DragDropZone.astro";
+import ToolActions from "../../components/tools/ToolActions.astro";
+import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import Card from "../../components/Card.astro";
+import Container from "../../components/Container.astro";
+import { FLAG_ORDER, FLAG_LABELS } from "../../lib/tools/regex-tester/constants";
+import RelatedTools from "../../components/tools/RelatedTools.astro";
+import ToolDocs from "../../components/tools/ToolDocs.astro";
+import CompareLinks from "../../components/tools/CompareLinks.astro";
+import ToolNudge from "../../components/tools/ToolNudge.astro";
+---
+
+<ToolShell
+  title="Regex Tester — Test Regular Expressions Online (Free, Local)"
+  description="Free online regex tester. Live match highlighting, capture groups, named groups, flags, and replace preview — 100% local, no upload, no server."
+  activePath="/tools/regex-tester"
+>
+  <ToolHeader
+    slot="header"
+    breadcrumbs={[{ label: "Home", href: "/" }, { label: "Regex Tester" }]}
+    title="Regex Tester"
+    subtitle="Live matches, capture groups, and replace — as you type."
+  />
+  <ToolWorkspace slot="workspace" layout="3-col">
+    <div slot="input" class="ws-fill">
+      <Card variant="flat" class="workspace-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">TEST STRING</span>
+          <ToolActions id="input-actions" variant="inset" actions={["sample", "clear"]} />
+        </div>
+        <DragDropZone id="regex-test" label="Upload a text file to test against" />
+        <CodeEditor
+          id="regex-test"
+          label="Test string"
+          placeholder={`Paste text to test your pattern against
+Matches highlight as you type`}
+        >
+          <div class="editor-info-bar" slot>
+            <span class="info-status" id="regex-status">No pattern yet</span>
+            <span class="info-meta" id="regex-char-count">0 chars</span>
+          </div>
+        </CodeEditor>
+      </Card>
+    </div>
+    <div slot="controls">
+      <Card variant="flat" class="workspace-card settings-card">
+        <h2 class="display-sm settings-title">Pattern</h2>
+        <div class="settings-divider"></div>
+        <div class="settings-group">
+          <label class="settings-label caption-mono" for="pattern-input">Expression</label>
+          <div class="pattern-shell">
+            <span class="pattern-delim" aria-hidden="true">/</span>
+            <input
+              id="pattern-input"
+              class="pattern-input"
+              type="text"
+              spellcheck="false"
+              autocomplete="off"
+              placeholder="\d+"
+              aria-label="Regular expression pattern"
+            />
+            <span class="pattern-delim" aria-hidden="true">/</span>
+            <span class="pattern-flags caption-mono" id="pattern-flag-echo" aria-hidden="true"
+              >g</span
+            >
+          </div>
+        </div>
+        <div class="settings-group">
+          <span class="settings-label caption-mono" id="flags-label">Flags</span>
+          <div class="flag-row" role="group" aria-labelledby="flags-label">
+            {
+              FLAG_ORDER.map((f) => (
+                <button
+                  type="button"
+                  class="flag-chip"
+                  data-flag={f}
+                  class:list={[{ "is-on": f === "g" }]}
+                  aria-pressed={f === "g" ? "true" : "false"}
+                  title={FLAG_LABELS[f]}
+                >
+                  {f}
+                </button>
+              ))
+            }
+          </div>
+        </div>
+        <div class="settings-divider"></div>
+        <div class="settings-group">
+          <span class="settings-label caption-mono">Replace</span>
+          <input
+            id="replace-toggle"
+            type="checkbox"
+            class="replace-toggle"
+            aria-label="Show replace preview"
+          />
+          <input
+            id="replace-input"
+            class="pattern-input replace-input"
+            type="text"
+            spellcheck="false"
+            placeholder="Replacement ($1, $&…)"
+            aria-label="Replacement string"
+            disabled
+          />
+        </div>
+        <div class="settings-divider"></div>
+        <div class="match-count body-sm-strong" id="match-count">0 matches</div>
+        <ErrorBanner id="regex-error" />
+        <div class="status-banner caption">
+          <span class="status-indicator"><span class="dot idle" id="status-dot"></span></span>
+          <span class="sr-only" id="regex-announce" aria-live="polite"></span>
+          Local sandbox active
+        </div>
+      </Card>
+    </div>
+    <div slot="output" class="ws-fill ws-output">
+      <Card variant="flat" class="workspace-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">MATCHES</span>
+          <ToolActions id="output-actions" variant="inset" actions={["copy"]} />
+        </div>
+        <div class="regex-view-wrap">
+          <pre
+            class="regex-view caption-mono"
+            id="regex-view"
+            aria-label="Test string with matches highlighted">
+          </pre>
+        </div>
+        <div class="regex-matchlist" id="regex-matchlist" aria-label="Match list"></div>
+        <div class="regex-replaced-wrap" id="regex-replaced-wrap" hidden>
+          <span class="caption-mono regex-replaced-label">REPLACED</span>
+          <pre class="regex-view caption-mono" id="regex-replaced"></pre>
+        </div>
+      </Card>
+    </div>
+  </ToolWorkspace>
+  <section class="tool-content-section" aria-labelledby="how-title">
+    <Container size="narrow">
+      <div class="content-section-header">
+        <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
+        <h2 id="how-title" class="display-md section-title">Test a regex in three steps</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">1</span>
+          <h3 class="body-sm-strong step-title">Write the pattern</h3>
+          <p class="caption step-desc">
+            Type your expression between the slashes and toggle the flags you need.
+          </p>
+        </div>
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">2</span>
+          <h3 class="body-sm-strong step-title">Paste the text</h3>
+          <p class="caption step-desc">
+            Matches highlight live, with capture groups and named groups listed per match.
+          </p>
+        </div>
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">3</span>
+          <h3 class="body-sm-strong step-title">Replace or copy</h3>
+          <p class="caption step-desc">
+            Preview a replacement with $1 / $& support, then copy the result.
+          </p>
+        </div>
+      </div>
+    </Container>
+  </section>
+  <ToolDocs />
+  <CompareLinks />
+  <RelatedTools />
+  <ToolNudge />
+  <section class="faq-section" aria-labelledby="faq-title">
+    <Container size="narrow">
+      <div class="faq-header">
+        <span class="caption-mono section-eyebrow">FAQ</span>
+        <h2 id="faq-title" class="display-md section-title">Frequently asked questions</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary class="faq-summary">Is my text uploaded anywhere?</summary>
+          <p class="body-md faq-answer">
+            No. Matching runs entirely in your browser using the native <code>RegExp</code> engine. Your
+            pattern and text never leave your machine.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Which regex flavor is this?</summary>
+          <p class="body-md faq-answer">
+            JavaScript (ECMAScript) regular expressions — the same engine your browser runs.
+            Lookbehind, named groups, and the <code>u</code>/<code>s</code> flags are all supported.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Can a pattern freeze the tab?</summary>
+          <p class="body-md faq-answer">
+            A pathological pattern with nested quantifiers can backtrack heavily (this is true of
+            any regex engine). The test string is capped at 500k characters to bound the work; if a
+            match seems to hang, simplify the pattern.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">What do the replace tokens mean?</summary>
+          <p class="body-md faq-answer">
+            <code>$1</code>…<code>$9</code> insert capture groups, <code>$&amp;</code> inserts the whole
+            match, and <code>$$</code> inserts a literal dollar sign — standard JavaScript replace syntax.
+          </p>
+        </details>
+      </div>
+    </Container>
+  </section>
+</ToolShell>
+<script>
+  import { regexStore } from "../../lib/tools/regex-tester/store";
+  import {
+    setPattern,
+    toggleFlag,
+    setTestInput,
+    setReplaceValue,
+    setShowReplace,
+    loadSample,
+    clearAll,
+  } from "../../lib/tools/regex-tester/actions";
+  import type { RegexFlags } from "../../lib/tools/regex-tester/types";
+  import { debounce } from "../../shared/debounce";
+  import { announce, initAnnounce } from "../../shared/announce";
+  import { copyToClipboard } from "../../shared/clipboard";
+
+  const testTextarea = document.getElementById("regex-test-textarea") as HTMLTextAreaElement | null;
+  const patternInput = document.getElementById("pattern-input") as HTMLInputElement | null;
+  const flagEcho = document.getElementById("pattern-flag-echo") as HTMLElement | null;
+  const replaceToggle = document.getElementById("replace-toggle") as HTMLInputElement | null;
+  const replaceInput = document.getElementById("replace-input") as HTMLInputElement | null;
+  const statusEl = document.getElementById("regex-status") as HTMLElement | null;
+  const charCount = document.getElementById("regex-char-count") as HTMLElement | null;
+  const matchCount = document.getElementById("match-count") as HTMLElement | null;
+  const view = document.getElementById("regex-view") as HTMLPreElement | null;
+  const matchlist = document.getElementById("regex-matchlist") as HTMLElement | null;
+  const replacedWrap = document.getElementById("regex-replaced-wrap") as HTMLElement | null;
+  const replacedPre = document.getElementById("regex-replaced") as HTMLPreElement | null;
+  const errorBanner = document.getElementById("regex-error") as HTMLElement | null;
+  const statusDot = document.getElementById("status-dot") as HTMLElement | null;
+
+  initAnnounce("regex-announce");
+
+  const RENDER_CAP = 200_000; // chars of highlighted output we'll paint
+  const LIST_CAP = 200; // match cards we'll render
+
+  const debouncedPattern = debounce((v: string) => setPattern(regexStore, v), 120);
+  const debouncedTest = debounce((v: string) => setTestInput(regexStore, v), 150);
+  const debouncedReplace = debounce((v: string) => setReplaceValue(regexStore, v), 150);
+
+  function flagString(f: RegexFlags): string {
+    let s = "";
+    if (f.g) s += "g";
+    if (f.i) s += "i";
+    if (f.m) s += "m";
+    if (f.s) s += "s";
+    if (f.u) s += "u";
+    if (f.y) s += "y";
+    return s;
+  }
+
+  // DOM-built (never innerHTML) so user text can't inject markup.
+  function renderView(): void {
+    if (!view) return;
+    const st = regexStore.get();
+    view.textContent = "";
+    const segs = st.result?.segments ?? [];
+    let painted = 0;
+    const frag = document.createDocumentFragment();
+    for (const seg of segs) {
+      if (painted >= RENDER_CAP) break;
+      const text = seg.text.slice(0, RENDER_CAP - painted);
+      painted += text.length;
+      if (seg.isMatch) {
+        const mk = document.createElement("mark");
+        mk.textContent = text;
+        frag.appendChild(mk);
+      } else {
+        frag.appendChild(document.createTextNode(text));
+      }
+    }
+    view.appendChild(frag);
+  }
+
+  function renderMatchList(): void {
+    if (!matchlist) return;
+    const st = regexStore.get();
+    matchlist.textContent = "";
+    const matches = st.result?.matches ?? [];
+    if (matches.length === 0) return;
+    const frag = document.createDocumentFragment();
+    const shown = matches.slice(0, LIST_CAP);
+    shown.forEach((m, i) => {
+      const card = document.createElement("div");
+      card.className = "match-card";
+      const head = document.createElement("div");
+      head.className = "match-head";
+      const num = document.createElement("span");
+      num.className = "match-num caption-mono";
+      num.textContent = "#" + (i + 1) + " · idx " + m.index;
+      const txt = document.createElement("code");
+      txt.className = "match-text";
+      txt.textContent = m.text.length > 120 ? m.text.slice(0, 120) + "…" : m.text;
+      head.appendChild(num);
+      head.appendChild(txt);
+      card.appendChild(head);
+      const hasGroups = m.groups.length > 0 || Object.keys(m.namedGroups).length > 0;
+      if (hasGroups) {
+        const gwrap = document.createElement("div");
+        gwrap.className = "match-groups";
+        m.groups.forEach((g) => {
+          const chip = document.createElement("span");
+          chip.className = "group-chip caption-mono";
+          chip.textContent =
+            "$" + g.index + " = " + (g.value === undefined ? "undefined" : g.value);
+          gwrap.appendChild(chip);
+        });
+        Object.entries(m.namedGroups).forEach(([name, val]) => {
+          const chip = document.createElement("span");
+          chip.className = "group-chip caption-mono";
+          chip.textContent = name + " = " + val;
+          gwrap.appendChild(chip);
+        });
+        card.appendChild(gwrap);
+      }
+      frag.appendChild(card);
+    });
+    if (matches.length > LIST_CAP) {
+      const more = document.createElement("div");
+      more.className = "match-more caption";
+      more.textContent = "… and " + (matches.length - LIST_CAP) + " more matches";
+      frag.appendChild(more);
+    }
+    matchlist.appendChild(frag);
+  }
+
+  regexStore.subscribe((state) => {
+    // sync test textarea when it isn't focused
+    const focused = testTextarea && document.activeElement === testTextarea;
+    if (testTextarea && testTextarea.value !== state.testInput && !focused) {
+      testTextarea.value = state.testInput;
+      testTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+    if (
+      patternInput &&
+      patternInput.value !== state.pattern &&
+      document.activeElement !== patternInput
+    ) {
+      patternInput.value = state.pattern;
+    }
+    if (flagEcho) flagEcho.textContent = flagString(state.flags);
+    document.querySelectorAll(".flag-chip").forEach((chip) => {
+      const f = chip.getAttribute("data-flag") as keyof RegexFlags | null;
+      if (!f) return;
+      const on = state.flags[f];
+      chip.classList.toggle("is-on", on);
+      chip.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    if (replaceToggle) replaceToggle.checked = state.showReplace;
+    if (replaceInput) {
+      replaceInput.disabled = !state.showReplace;
+      if (replaceInput.value !== state.replaceValue && document.activeElement !== replaceInput)
+        replaceInput.value = state.replaceValue;
+    }
+
+    renderView();
+    renderMatchList();
+
+    if (replacedWrap && replacedPre) {
+      const show = state.showReplace && state.result?.replaced !== undefined;
+      replacedWrap.hidden = !show;
+      if (show) replacedPre.textContent = (state.result!.replaced ?? "").slice(0, RENDER_CAP);
+    }
+
+    const n = state.result?.matches.length ?? 0;
+    if (matchCount)
+      matchCount.textContent =
+        n + (n === 1 ? " match" : " matches") + (state.result?.truncated ? " (capped)" : "");
+    if (statusEl) {
+      if (!state.pattern && !state.testInput) statusEl.textContent = "No pattern yet";
+      else if (!state.result?.ok) statusEl.textContent = "Invalid pattern";
+      else statusEl.textContent = n + (n === 1 ? " match" : " matches");
+      statusEl.style.color =
+        state.result && !state.result.ok
+          ? "var(--color-error)"
+          : n > 0
+            ? "var(--color-success)"
+            : "";
+    }
+    if (charCount) charCount.textContent = state.testInput.length.toLocaleString() + " chars";
+    if (statusDot) {
+      statusDot.classList.remove("idle", "active", "error");
+      statusDot.classList.add(
+        state.result && !state.result.ok ? "error" : n > 0 ? "active" : "idle",
+      );
+    }
+    if (errorBanner) {
+      if (state.error) (errorBanner as any).show?.(state.error);
+      else (errorBanner as any).hide?.();
+    }
+  });
+
+  if (patternInput)
+    patternInput.addEventListener("input", () => debouncedPattern(patternInput.value));
+  if (testTextarea) testTextarea.addEventListener("input", () => debouncedTest(testTextarea.value));
+  if (replaceInput)
+    replaceInput.addEventListener("input", () => debouncedReplace(replaceInput.value));
+  if (replaceToggle)
+    replaceToggle.addEventListener("change", () =>
+      setShowReplace(regexStore, replaceToggle.checked),
+    );
+  document.querySelectorAll(".flag-chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const f = chip.getAttribute("data-flag") as keyof RegexFlags | null;
+      if (f) toggleFlag(regexStore, f);
+    });
+  });
+
+  const inputActions = document.getElementById("input-actions");
+  if (inputActions) {
+    inputActions.addEventListener("tool-action", (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      if (action === "sample") {
+        loadSample(regexStore);
+        announce("Sample loaded");
+      }
+      if (action === "clear") {
+        clearAll(regexStore);
+        announce("Cleared");
+      }
+    });
+  }
+
+  const outputActions = document.getElementById("output-actions");
+  if (outputActions) {
+    outputActions.addEventListener("tool-action", async (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      if (action === "copy") {
+        const st = regexStore.get();
+        const payload =
+          st.showReplace && st.result?.replaced !== undefined ? st.result.replaced : st.testInput;
+        const ok = payload ? await copyToClipboard(payload) : false;
+        if (ok) announce(st.showReplace ? "Replaced text copied" : "Test string copied");
+      }
+    });
+  }
+
+  const dropZone = document.getElementById("regex-test-dropzone");
+  if (dropZone) {
+    dropZone.addEventListener("file-dropped", (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.text) {
+        setTestInput(regexStore, detail.text);
+        announce("File loaded: " + (detail.name || "file"));
+      }
+    });
+  }
+</script>
+<style>
+  .workspace-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    gap: var(--spacing-md);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-hairline);
+    padding-bottom: var(--spacing-sm);
+  }
+  .column-title {
+    color: var(--color-mute);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+  .editor-info-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--color-hairline);
+    border-top: none;
+    border-bottom-left-radius: var(--rounded-sm);
+    border-bottom-right-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    padding: 6px var(--spacing-sm);
+    font-size: 11px;
+    color: var(--color-mute);
+    font-family: var(--font-sans);
+  }
+  .info-status {
+    font-weight: 500;
+  }
+  .settings-card {
+    padding: var(--spacing-lg);
+  }
+  .settings-title {
+    margin: 0;
+  }
+  .settings-divider {
+    height: 1px;
+    background-color: var(--color-hairline);
+    margin: var(--spacing-xs) 0;
+  }
+  .settings-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-md);
+  }
+  .settings-label {
+    color: var(--color-mute);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .pattern-shell {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    padding: 0 var(--spacing-sm);
+    transition: border-color 0.15s ease;
+  }
+  .pattern-shell:focus-within {
+    border-color: var(--color-accent);
+  }
+  .pattern-delim {
+    font-family: var(--font-mono);
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+  .pattern-input {
+    flex: 1;
+    min-width: 0;
+    height: 38px;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--color-ink);
+  }
+  .pattern-input::placeholder {
+    color: var(--color-hairline-strong);
+  }
+  .pattern-input:disabled {
+    opacity: 0.5;
+  }
+  .pattern-flags {
+    color: var(--color-accent-active);
+    font-weight: 600;
+  }
+  .flag-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .flag-chip {
+    width: 30px;
+    height: 30px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-mute);
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    cursor: pointer;
+    transition:
+      color 0.12s ease,
+      border-color 0.12s ease,
+      background-color 0.12s ease;
+  }
+  .flag-chip:hover {
+    border-color: var(--color-hairline-strong);
+    color: var(--color-ink);
+  }
+  .flag-chip.is-on {
+    color: var(--color-on-primary);
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+  .replace-toggle {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--color-accent);
+    cursor: pointer;
+  }
+  .replace-input {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    padding: 0 var(--spacing-sm);
+    background-color: var(--color-canvas);
+  }
+  .match-count {
+    color: var(--color-ink);
+  }
+  .status-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-mute);
+    margin-top: auto;
+    padding-top: var(--spacing-md);
+  }
+  .status-indicator .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-hairline-strong);
+  }
+  .status-indicator .dot.active {
+    background-color: var(--color-accent);
+  }
+  .status-indicator .dot.error {
+    background-color: var(--color-error);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+  /* highlighted output */
+  .regex-view-wrap {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft-2);
+    padding: var(--spacing-md);
+    max-height: 340px;
+    overflow: auto;
+  }
+  .regex-view {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--color-ink);
+  }
+  .regex-view mark {
+    background-color: rgba(33, 167, 138, 0.22);
+    color: var(--color-accent-active);
+    border-radius: 2px;
+    padding: 0 1px;
+    font-weight: 600;
+  }
+  .regex-matchlist {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    overflow: auto;
+    max-height: 260px;
+  }
+  .match-card {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .match-head {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    min-width: 0;
+  }
+  .match-num {
+    color: var(--color-mute);
+    flex: none;
+  }
+  .match-text {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .match-groups {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .group-chip {
+    background-color: var(--color-canvas-soft-2);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-xs);
+    padding: 2px 6px;
+    color: var(--color-body);
+    font-size: 11px;
+  }
+  .match-more {
+    color: var(--color-mute);
+    text-align: center;
+    padding: var(--spacing-xs);
+  }
+  .regex-replaced-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  .regex-replaced-label {
+    color: var(--color-mute);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+  }
+  .tool-content-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas-soft);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .content-section-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .section-eyebrow {
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+  }
+  .section-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xl);
+  }
+  .step-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-lg);
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    text-align: center;
+    align-items: center;
+  }
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-accent);
+    color: var(--color-on-primary);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+  }
+  .step-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+  .step-desc {
+    color: var(--color-body);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .faq-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .faq-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .faq-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft);
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  .faq-summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink);
+    padding: var(--spacing-xs) 0;
+    user-select: none;
+  }
+  .faq-summary:hover {
+    color: var(--color-accent);
+  }
+  .faq-answer {
+    margin-top: var(--spacing-sm);
+    font-size: 13px;
+    color: var(--color-body);
+    line-height: 1.6;
+  }
+  .faq-answer code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background-color: var(--color-canvas-soft-2);
+    padding: 1px 4px;
+    border-radius: var(--rounded-xs);
+  }
+  @media (min-width: 960px) {
+    .workspace-card :global(.editor-outer) {
+      flex: none;
+      height: 650px;
+      min-height: 650px;
+    }
+    .workspace-card :global(.editor-wrapper) {
+      height: 100%;
+    }
+  }
+  @media (max-width: 959px) {
+    .workspace-card :global(.editor-outer) {
+      height: 350px;
+      flex: 0 0 350px;
+      min-height: 0;
+    }
+    .workspace-card :global(.editor-wrapper) {
+      height: 100%;
+    }
+    .steps-grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-md);
+    }
+  }
+</style>

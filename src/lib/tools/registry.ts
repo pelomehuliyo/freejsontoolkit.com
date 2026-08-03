@@ -18,6 +18,15 @@ export type ToolCategory =
 
 export type ToolStatus = "available" | "soon" | "planned";
 
+/**
+ * A family is the USER's mental-model grouping ("I need to work with JSON"),
+ * distinct from `category` (the operational type: convert / validate / …).
+ * Each tool gets exactly one family home; the Collections layer derives from
+ * this field, so a new tool declares its home here and appears everywhere.
+ */
+export type ToolFamily =
+  "json" | "encoding" | "data-formats" | "developer-utilities" | "networking";
+
 export interface ToolManifest {
   /** Stable id, matches the URL slug: /tools/<id> */
   id: string;
@@ -26,6 +35,8 @@ export interface ToolManifest {
   /** One-line description used in cards, footer, meta description */
   tagline: string;
   category: ToolCategory;
+  /** The user-facing collection this tool calls home. */
+  family: ToolFamily;
   status: ToolStatus;
   /** Present only when status === "available" */
   href?: string;
@@ -39,6 +50,12 @@ export interface ToolManifest {
 
 export interface CategoryMeta {
   id: ToolCategory;
+  label: string;
+  blurb: string;
+}
+
+export interface FamilyMeta {
+  id: ToolFamily;
   label: string;
   blurb: string;
 }
@@ -58,6 +75,23 @@ export const categories: CategoryMeta[] = [
   { id: "api", label: "API", blurb: "Build and inspect requests — coming later." },
 ];
 
+/** Family order = the order Collections will render in. */
+export const families: FamilyMeta[] = [
+  { id: "json", label: "JSON Tools", blurb: "Format, validate, convert and generate JSON." },
+  { id: "encoding", label: "Encoding", blurb: "Encode, decode and generate everyday values." },
+  {
+    id: "data-formats",
+    label: "Data Formats",
+    blurb: "Work with CSV, TSV and other tabular formats.",
+  },
+  {
+    id: "developer-utilities",
+    label: "Developer Utilities",
+    blurb: "Regex, diffs and other daily drivers.",
+  },
+  { id: "networking", label: "Networking", blurb: "Build and inspect HTTP requests." },
+];
+
 /**
  * The catalog. This is a seed that mirrors the roadmap — extend it as tools
  * ship. NOTE: "JSON Beautifier" and "JSON Pretty Print" are folded into
@@ -72,6 +106,7 @@ export const tools: ToolManifest[] = [
     name: "JSON → CSV",
     tagline: "Flatten nested JSON arrays into clean CSV tables.",
     category: "convert",
+    family: "json",
     status: "available",
     href: "/tools/json-to-csv",
     keywords: ["json to csv", "convert json to csv", "json to csv online"],
@@ -83,6 +118,7 @@ export const tools: ToolManifest[] = [
     name: "CSV → JSON",
     tagline: "Convert CSV files into structured JSON.",
     category: "convert",
+    family: "json",
     status: "available",
     href: "/tools/csv-to-json",
     keywords: ["csv to json", "convert csv to json"],
@@ -93,6 +129,7 @@ export const tools: ToolManifest[] = [
     name: "JSON → XML",
     tagline: "Transform JSON into well-formed XML.",
     category: "convert",
+    family: "json",
     status: "available",
     href: "/tools/json-to-xml",
     keywords: ["json to xml", "convert json to xml"],
@@ -103,6 +140,7 @@ export const tools: ToolManifest[] = [
     name: "XML → JSON",
     tagline: "Parse XML documents into JSON objects.",
     category: "convert",
+    family: "json",
     status: "available",
     href: "/tools/xml-to-json",
     keywords: ["xml to json", "convert xml to json"],
@@ -113,6 +151,7 @@ export const tools: ToolManifest[] = [
     name: "YAML → JSON",
     tagline: "Convert YAML configs into JSON.",
     category: "convert",
+    family: "json",
     status: "available",
     href: "/tools/yaml-to-json",
     keywords: ["yaml to json", "convert yaml to json"],
@@ -123,6 +162,7 @@ export const tools: ToolManifest[] = [
     name: "JSON → YAML",
     tagline: "Turn JSON into readable YAML.",
     category: "convert",
+    family: "json",
     status: "available",
     href: "/tools/json-to-yaml",
     keywords: ["json to yaml", "convert json to yaml"],
@@ -135,6 +175,7 @@ export const tools: ToolManifest[] = [
     name: "JSON Formatter",
     tagline: "Beautify and pretty-print JSON with consistent indentation.",
     category: "format",
+    family: "json",
     status: "available",
     href: "/tools/json-formatter",
     // captures formatter / beautifier / pretty-print intent in one tool
@@ -146,6 +187,7 @@ export const tools: ToolManifest[] = [
     name: "JSON Minifier",
     tagline: "Strip whitespace to shrink JSON while preserving correctness.",
     category: "format",
+    family: "json",
     status: "available",
     href: "/tools/json-minifier",
     keywords: ["json minifier", "minify json", "compress json"],
@@ -158,6 +200,7 @@ export const tools: ToolManifest[] = [
     name: "JSON Validator",
     tagline: "Check JSON syntax and pinpoint the exact error line.",
     category: "validate",
+    family: "json",
     status: "available",
     href: "/tools/json-validator",
     keywords: ["json validator", "validate json", "json syntax checker"],
@@ -168,6 +211,7 @@ export const tools: ToolManifest[] = [
     name: "JSON Schema Validator",
     tagline: "Validate JSON against a schema, fully offline.",
     category: "validate",
+    family: "json",
     status: "planned",
     keywords: ["json schema validator", "validate json against schema"],
     addedIn: "v2.0",
@@ -179,6 +223,7 @@ export const tools: ToolManifest[] = [
     name: "JSON Diff",
     tagline: "Compare two JSON documents and highlight the differences.",
     category: "compare",
+    family: "json",
     status: "available",
     href: "/tools/json-diff",
     keywords: ["json diff", "compare json", "json compare tool"],
@@ -189,6 +234,7 @@ export const tools: ToolManifest[] = [
     name: "Text Diff",
     tagline: "Line-by-line diff for any two text inputs.",
     category: "compare",
+    family: "developer-utilities",
     status: "planned",
     keywords: ["text diff", "compare text online"],
     addedIn: "v1.5",
@@ -200,6 +246,7 @@ export const tools: ToolManifest[] = [
     name: "Fake JSON Generator",
     tagline: "Generate realistic mock JSON from a simple shape.",
     category: "generate",
+    family: "json",
     status: "available",
     href: "/tools/fake-json",
     keywords: ["fake json", "mock json generator", "random json"],
@@ -210,9 +257,9 @@ export const tools: ToolManifest[] = [
     name: "UUID Generator",
     tagline: "Generate v4 UUIDs in bulk, instantly.",
     category: "generate",
+    family: "encoding",
     status: "available",
     href: "/tools/uuid",
-
     keywords: ["uuid generator", "generate uuid v4"],
     addedIn: "v1.3",
   },
@@ -223,6 +270,7 @@ export const tools: ToolManifest[] = [
     name: "Base64 Encode / Decode",
     tagline: "Encode and decode Base64 in the browser.",
     category: "utilities",
+    family: "encoding",
     status: "available",
     href: "/tools/base64",
     keywords: ["base64 decode", "base64 encode", "base64 converter"],
@@ -233,6 +281,7 @@ export const tools: ToolManifest[] = [
     name: "URL Encode / Decode",
     tagline: "Percent-encode and decode URL components.",
     category: "utilities",
+    family: "encoding",
     status: "available",
     href: "/tools/url-codec",
     keywords: ["url encode", "url decode", "url encoder"],
@@ -243,6 +292,7 @@ export const tools: ToolManifest[] = [
     name: "JWT Decoder",
     tagline: "Decode JWT header, payload, and signature — no verification server.",
     category: "utilities",
+    family: "json",
     status: "available",
     href: "/tools/jwt-decoder",
     keywords: ["jwt decoder", "decode jwt", "jwt parser"],
@@ -253,6 +303,7 @@ export const tools: ToolManifest[] = [
     name: "Timestamp Converter",
     tagline: "Convert Unix timestamps to human dates and back.",
     category: "utilities",
+    family: "developer-utilities",
     status: "planned",
     keywords: ["unix timestamp converter", "epoch converter"],
     addedIn: "v1.5",
@@ -264,9 +315,21 @@ export const tools: ToolManifest[] = [
     name: "REST Request Builder",
     tagline: "Compose and inspect HTTP requests locally.",
     category: "api",
+    family: "networking",
     status: "planned",
     keywords: ["rest client online", "http request builder"],
     addedIn: "v2.0",
+  },
+  {
+    id: "regex-tester",
+    name: "Regex Tester",
+    tagline: "Test regular expressions with live matches and capture groups.",
+    category: "utilities",
+    family: "developer-utilities",
+    status: "available",
+    href: "/tools/regex-tester",
+    keywords: ["regex tester", "regular expression tester", "test regex online", "regex match"],
+    addedIn: "v1.5",
   },
 ];
 
@@ -298,6 +361,24 @@ export function comingSoonByCategory(): { meta: CategoryMeta; tools: ToolManifes
     .map((meta) => ({
       meta,
       tools: tools.filter((t) => t.category === meta.id && t.status !== "available"),
+    }))
+    .filter((g) => g.tools.length > 0);
+}
+
+export function familyLabel(id: ToolFamily): string {
+  return families.find((f) => f.id === id)?.label ?? id;
+}
+
+export function toolsByFamily(id: ToolFamily): ToolManifest[] {
+  return tools.filter((t) => t.family === id);
+}
+
+/** Families with their available tools, in family order, empty families dropped. */
+export function familiesWithAvailableTools(): { meta: FamilyMeta; tools: ToolManifest[] }[] {
+  return families
+    .map((meta) => ({
+      meta,
+      tools: tools.filter((t) => t.family === meta.id && t.status === "available"),
     }))
     .filter((g) => g.tools.length > 0);
 }

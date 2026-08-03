@@ -1,0 +1,225 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Container from "../../components/Container.astro";
+import { familiesWithAvailableTools } from "../../lib/tools/registry";
+
+// Collections hub — one block per family, reading the same `family` field the
+// registry owns. Server-rendered cards (not the client-built shell): the hub
+// is browse-first, so stars come later; nothing here breaks without JS.
+const MONO: Record<string, string> = {
+  convert: "CON",
+  format: "FOR",
+  validate: "VAL",
+  compare: "CMP",
+  generate: "GEN",
+  utilities: "UTL",
+  api: "API",
+};
+const groups = familiesWithAvailableTools();
+const totalLive = groups.reduce((n, g) => n + g.tools.length, 0);
+---
+
+<BaseLayout
+  title="Tool Collections — Browse by what you're doing (Free, Local)"
+  description="Browse the Free JSON Toolkit by collection — JSON Tools, Encoding, Data Formats and Developer Utilities. Every tool runs 100% in your browser."
+  activePath="/collections"
+>
+  <main>
+    <section class="col-hero">
+      <Container size="wide">
+        <p class="col-kicker caption-mono">
+          <span class="col-kicker-dot" aria-hidden="true"></span>
+          COLLECTIONS · {groups.length} FAMILIES · {totalLive} LIVE TOOLS
+        </p>
+        <h1 class="col-h1 display-xl">Browse by what you're doing.</h1>
+        <p class="col-lede body-lg">
+          Categories say what a tool <em>is</em>. Collections say what <em>you</em> need — "I'm working
+          with JSON", "I'm encoding something". One family per job, zero dead ends.
+        </p>
+      </Container>
+    </section>
+    <section class="col-groups">
+      <Container size="wide">
+        <div class="col-stack">
+          {
+            groups.map(({ meta, tools }) => (
+              <div class="col-group" id={`col-${meta.id}`}>
+                <a class="col-group-head" href={`/collections/${meta.id}`}>
+                  <div class="col-head-left">
+                    <span class="col-group-eyebrow caption-mono">Family · {meta.id}</span>
+                    <h2 class="col-group-name display-md">{meta.label}</h2>
+                    <p class="col-group-blurb body-sm">{meta.blurb}</p>
+                  </div>
+                  <div class="col-head-right">
+                    <span class="col-group-count caption-mono">{tools.length} live</span>
+                    <span class="col-group-open body-sm-strong">Open collection →</span>
+                  </div>
+                </a>
+                <div class="tool-grid" role="list">
+                  {tools.map((t) => (
+                    <article class="tool-card is-live" role="listitem">
+                      <a class="tool-card-link" href={t.href}>
+                        <div class="card-top">
+                          <span class="mono-badge" aria-hidden="true">
+                            {MONO[t.category] ?? "·"}
+                          </span>
+                          <span class="cat-chip caption-mono" aria-hidden="true">
+                            {t.category}
+                          </span>
+                        </div>
+                        <h3 class="display-sm card-name">{t.name}</h3>
+                        <p class="body-sm card-tag">{t.tagline}</p>
+                        <div class="card-foot">
+                          <span class="pill pill-live" aria-hidden="true">
+                            <span class="pill-dot" />
+                            Available
+                          </span>
+                          <span class="card-cta body-sm-strong" aria-hidden="true">
+                            Open <span class="cta-arrow">→</span>
+                          </span>
+                        </div>
+                      </a>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </Container>
+    </section>
+  </main>
+</BaseLayout>
+<style>
+  .col-hero {
+    padding: var(--spacing-4xl) 0 var(--spacing-3xl);
+    background-color: var(--color-canvas);
+    background-image: radial-gradient(var(--color-hairline) 1px, transparent 1px);
+    background-size: 22px 22px;
+    border-bottom: 1px solid var(--color-hairline);
+  }
+  .col-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-mute);
+    letter-spacing: 0.12em;
+    margin: 0 0 var(--spacing-md);
+  }
+  .col-kicker-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    animation: col-pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes col-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(33, 167, 138, 0.45);
+    }
+    50% {
+      box-shadow: 0 0 0 5px rgba(33, 167, 138, 0);
+    }
+  }
+  .col-h1 {
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+    margin: 0 0 var(--spacing-md);
+    max-width: 18ch;
+  }
+  .col-lede {
+    color: var(--color-body);
+    margin: 0;
+    max-width: 62ch;
+    line-height: 1.6;
+  }
+  .col-lede em {
+    color: var(--color-ink);
+    font-style: normal;
+    font-weight: 600;
+  }
+  .col-groups {
+    padding: var(--spacing-4xl) 0 var(--spacing-5xl);
+  }
+  .col-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3xl);
+  }
+  .col-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+  .col-group-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--spacing-lg);
+    text-decoration: none;
+    color: inherit;
+    padding: var(--spacing-md);
+    margin: calc(-1 * var(--spacing-md));
+    border: 1px solid transparent;
+    border-radius: var(--rounded-md);
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease;
+  }
+  .col-group-head:hover {
+    border-color: var(--color-hairline);
+    background-color: var(--color-canvas);
+  }
+  .col-head-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+  .col-group-eyebrow {
+    color: var(--color-accent-active);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .col-group-name {
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+  .col-group-blurb {
+    color: var(--color-mute);
+    margin: 0;
+    line-height: 1.5;
+    max-width: 58ch;
+  }
+  .col-head-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex: none;
+  }
+  .col-group-count {
+    color: var(--color-mute);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-pill-sm);
+    padding: 2px 10px;
+  }
+  .col-group-open {
+    color: var(--color-accent-active);
+    white-space: nowrap;
+    transition: transform 0.15s ease;
+  }
+  .col-group-head:hover .col-group-open {
+    transform: translateX(3px);
+  }
+  @media (max-width: 640px) {
+    .col-group-head {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .col-head-right {
+      align-items: flex-start;
+    }
+  }
+</style>

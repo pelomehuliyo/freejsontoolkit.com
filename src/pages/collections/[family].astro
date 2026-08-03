@@ -1,0 +1,263 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Container from "../../components/Container.astro";
+import { families, toolsByFamily, familyLabel } from "../../lib/tools/registry";
+import type { ToolFamily } from "../../lib/tools/registry";
+
+export function getStaticPaths() {
+  // Every family gets a page — even empty ones today (data-formats pre-CSV⇄TSV)
+  // — so the route is permanent and starts indexing from day one.
+  return families.map((meta) => ({ params: { family: meta.id } }));
+}
+
+const family = Astro.params.family as ToolFamily;
+const meta = families.find((f) => f.id === family);
+if (!meta) return Astro.redirect("/collections");
+
+const live = toolsByFamily(family).filter((t) => t.status === "available");
+const pipeline = toolsByFamily(family).filter((t) => t.status !== "available");
+
+const MONO: Record<string, string> = {
+  convert: "CON",
+  format: "FOR",
+  validate: "VAL",
+  compare: "CMP",
+  generate: "GEN",
+  utilities: "UTL",
+  api: "API",
+};
+---
+
+<BaseLayout
+  title={`${meta.label} — Tool Collection · Free JSON Toolkit`}
+  description={`${meta.blurb} ${live.length} free, local tools that run 100% in your browser.`}
+  activePath="/collections"
+>
+  <main>
+    <section class="fam-hero">
+      <Container size="wide">
+        <p class="fam-kicker caption-mono">
+          <span class="fam-kicker-dot" aria-hidden="true"></span>
+          FAMILY · {meta.id.toUpperCase()} · {live.length} LIVE
+        </p>
+        <h1 class="fam-h1 display-xl">{meta.label}</h1>
+        <p class="fam-blurb body-lg">{meta.blurb}</p>
+        <a class="fam-back body-sm-strong" href="/collections">← All collections</a>
+      </Container>
+    </section>
+    <section class="fam-body">
+      <Container size="wide">
+        {
+          live.length > 0 ? (
+            <div class="tool-grid" role="list">
+              {live.map((t) => (
+                <article class="tool-card is-live" role="listitem">
+                  <a class="tool-card-link" href={t.href}>
+                    <div class="card-top">
+                      <span class="mono-badge" aria-hidden="true">
+                        {MONO[t.category] ?? "·"}
+                      </span>
+                      <span class="cat-chip caption-mono" aria-hidden="true">
+                        {t.category}
+                      </span>
+                    </div>
+                    <h2 class="display-sm card-name">{t.name}</h2>
+                    <p class="body-sm card-tag">{t.tagline}</p>
+                    <div class="card-foot">
+                      <span class="pill pill-live" aria-hidden="true">
+                        <span class="pill-dot" />
+                        Available
+                      </span>
+                      <span class="card-cta body-sm-strong" aria-hidden="true">
+                        Open <span class="cta-arrow">→</span>
+                      </span>
+                    </div>
+                  </a>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div class="fam-empty">
+              <span class="fam-empty-star" aria-hidden="true">
+                ◇
+              </span>
+              <p class="body-md-strong fam-empty-title">This family is taking shape.</p>
+              <p class="body-sm fam-empty-text">
+                The first {meta.label} tool is in the pipeline — check back soon, or browse the full
+                catalog meanwhile.
+              </p>
+              <a class="fam-empty-link body-sm-strong" href="/tools">
+                Browse all tools →
+              </a>
+            </div>
+          )
+        }
+        {
+          pipeline.length > 0 && (
+            <div class="fam-pipe">
+              <span class="fam-pipe-label caption-mono">In the pipeline</span>
+              <div class="fam-pipe-grid">
+                {pipeline.map((t) => (
+                  <div class="fam-pipe-row">
+                    <span class="mono-badge" aria-hidden="true">
+                      {MONO[t.category] ?? "·"}
+                    </span>
+                    <span class="fam-pipe-mid">
+                      <span class="fam-pipe-name">{t.name}</span>
+                      <span class="fam-pipe-tag caption">{t.tagline}</span>
+                    </span>
+                    <span class="fam-pipe-ver caption-mono">{t.addedIn ?? "—"}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        }
+      </Container>
+    </section>
+  </main>
+</BaseLayout>
+<style>
+  .fam-hero {
+    padding: var(--spacing-4xl) 0 var(--spacing-3xl);
+    background-color: var(--color-canvas);
+    background-image: radial-gradient(var(--color-hairline) 1px, transparent 1px);
+    background-size: 22px 22px;
+    border-bottom: 1px solid var(--color-hairline);
+  }
+  .fam-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-mute);
+    letter-spacing: 0.12em;
+    margin: 0 0 var(--spacing-md);
+  }
+  .fam-kicker-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    animation: fam-pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes fam-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(33, 167, 138, 0.45);
+    }
+    50% {
+      box-shadow: 0 0 0 5px rgba(33, 167, 138, 0);
+    }
+  }
+  .fam-h1 {
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+    margin: 0 0 var(--spacing-sm);
+  }
+  .fam-blurb {
+    color: var(--color-body);
+    margin: 0 0 var(--spacing-lg);
+    max-width: 58ch;
+    line-height: 1.6;
+  }
+  .fam-back {
+    color: var(--color-accent-active);
+    text-decoration: none;
+  }
+  .fam-back:hover {
+    text-decoration: underline;
+  }
+  .fam-body {
+    padding: var(--spacing-4xl) 0 var(--spacing-5xl);
+  }
+  .fam-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+    max-width: 560px;
+    margin: 0 auto;
+    padding: var(--spacing-4xl) var(--spacing-lg);
+    border: 1px dashed var(--color-hairline-strong);
+    border-radius: var(--rounded-md);
+    text-align: center;
+  }
+  .fam-empty-star {
+    color: var(--color-accent);
+    font-size: 24px;
+    line-height: 1;
+  }
+  .fam-empty-title {
+    color: var(--color-ink);
+  }
+  .fam-empty-text {
+    color: var(--color-body);
+    line-height: 1.6;
+  }
+  .fam-empty-link {
+    color: var(--color-accent-active);
+    text-decoration: none;
+    margin-top: var(--spacing-xs);
+  }
+  .fam-empty-link:hover {
+    text-decoration: underline;
+  }
+  .fam-pipe {
+    margin-top: var(--spacing-4xl);
+  }
+  .fam-pipe-label {
+    display: block;
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: var(--spacing-sm);
+  }
+  .fam-pipe-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-xs);
+  }
+  .fam-pipe-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px var(--spacing-md);
+    border: 1px dashed var(--color-hairline-strong);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    transition:
+      border-color 0.15s ease,
+      transform 0.12s ease;
+  }
+  .fam-pipe-row:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-1px);
+  }
+  .fam-pipe-mid {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex: 1;
+    min-width: 0;
+  }
+  .fam-pipe-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .fam-pipe-tag {
+    color: var(--color-mute);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .fam-pipe-ver {
+    color: var(--color-accent-active);
+    flex: none;
+  }
+  @media (max-width: 640px) {
+    .fam-pipe-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -69,6 +69,11 @@ export const RELATIONS: Record<string, Relation[]> = {
     { id: "json-validator", label: "Validate the source", kind: "pair" },
     { id: "json-to-csv", label: "Or flatten to CSV", kind: "pair" },
   ],
+  "regex-tester": [
+    { id: "json-validator", label: "Validate structured data", kind: "pair" },
+    { id: "base64", label: "Encode the result", kind: "next" },
+    { id: "url-encode", label: "Percent-encode it", kind: "pair" },
+  ],
   // Add near the other convert tools
   "json-to-xml": [
     { id: "xml-to-json", label: "Reverse it", kind: "pair" },
