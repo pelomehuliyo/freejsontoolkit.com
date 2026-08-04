@@ -114,6 +114,17 @@ export const tools: ToolManifest[] = [
     featured: true,
   },
   {
+    id: "toml-to-json",
+    name: "TOML → JSON",
+    tagline: "Convert TOML configs into JSON.",
+    category: "convert",
+    status: "available",
+    href: "/tools/toml-to-json",
+    keywords: ["toml to json", "convert toml to json", "toml parser online"],
+    addedIn: "v1.5",
+    family: "data-formats",
+  },
+  {
     id: "csv-to-json",
     name: "CSV → JSON",
     tagline: "Convert CSV files into structured JSON.",

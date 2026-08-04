@@ -146,3 +146,19 @@ registry substrate (the "new tool = mostly wiring" thesis, proven).
 ### Deferred
 - Docs for both converters — the two-behavior "load into tool" mechanic needs a decision before
   shipping a load button (component renders nothing until then; safe).
+
+
+
+  ## [v1.5.3] — TOML → JSON
+
+### Added
+- **TOML → JSON converter** (`/tools/toml-to-json`) — parses TOML configs into clean JSON,
+  powered by `smol-toml` (the first deliberate external dependency: tiny, fast, TS-native,
+  worker-safe).
+- Registry entry (data-formats family), relations edges, and sitemap line.
+
+### Notes
+- Heavy parses run in the worker; Load Sample stays load-only per the house rule.
+- Docs deferred to a fast-follow (same load-snippet decision as CSV ⇄ TSV).
+
+
