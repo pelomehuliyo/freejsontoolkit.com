@@ -110,6 +110,11 @@ export const RELATIONS: Record<string, Relation[]> = {
     { id: "json-validator", label: "Validate the result", kind: "next" },
     { id: "yaml-to-json", label: "Convert YAML instead", kind: "pair" },
   ],
+  "json-to-toml": [
+    { id: "toml-to-json", label: "Reverse it", kind: "pair" },
+    { id: "json-validator", label: "Validate the source", kind: "next" },
+    { id: "json-to-yaml", label: "Or convert to YAML", kind: "pair" },
+  ],
   "jwt-decoder": [
     { id: "base64", label: "Decode raw Base64", kind: "pair" },
     { id: "json-formatter", label: "Format the payload", kind: "next" },

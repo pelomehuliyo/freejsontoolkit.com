@@ -1,0 +1,629 @@
+---
+import ToolShell from "../../components/tools/ToolShell.astro";
+import ToolHeader from "../../components/tools/ToolHeader.astro";
+import ToolWorkspace from "../../components/tools/ToolWorkspace.astro";
+import CodeEditor from "../../components/tools/CodeEditor.astro";
+import DragDropZone from "../../components/tools/DragDropZone.astro";
+import ToolActions from "../../components/tools/ToolActions.astro";
+import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import Card from "../../components/Card.astro";
+import Button from "../../components/Button.astro";
+import Container from "../../components/Container.astro";
+import { NULL_STRATEGIES } from "../../lib/tools/json-to-toml/constants";
+import RelatedTools from "../../components/tools/RelatedTools.astro";
+import ToolDocs from "../../components/tools/ToolDocs.astro";
+import CompareLinks from "../../components/tools/CompareLinks.astro";
+import ToolNudge from "../../components/tools/ToolNudge.astro";
+---
+
+<ToolShell
+  title="JSON to TOML Converter — Convert JSON to TOML Online (Free, Local)"
+  description="Free online JSON to TOML converter. Paste or drop JSON and get clean TOML with tables and arrays-of-tables — nulls flagged honestly — 100% local, no upload."
+  activePath="/tools/json-to-toml"
+>
+  <ToolHeader
+    slot="header"
+    breadcrumbs={[{ label: "Home", href: "/" }, { label: "JSON → TOML" }]}
+    title="JSON → TOML"
+    subtitle="Turn JSON into readable TOML — tables, arrays-of-tables, and all."
+  />
+  <ToolWorkspace slot="workspace" layout="3-col">
+    <div slot="input" class="ws-fill">
+      <Card variant="flat" class="workspace-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">INPUT JSON</span>
+          <ToolActions id="input-actions" variant="inset" actions={["sample", "clear"]} />
+        </div>
+        <DragDropZone id="json-input" accept=".json" label="Upload JSON file" />
+        <CodeEditor
+          id="json-input"
+          label="JSON input"
+          placeholder={`Paste JSON to convert it
+{"name":"Ada","role":"engineer"}`}
+        >
+          <div class="editor-info-bar" slot>
+            <span class="info-status" id="json-status">JSON Status: Empty</span>
+            <span class="info-meta" id="json-char-count">0 chars</span>
+          </div>
+        </CodeEditor>
+      </Card>
+    </div>
+    <div slot="controls">
+      <Card variant="flat" class="workspace-card settings-card">
+        <h2 class="display-sm settings-title">Options</h2>
+        <div class="settings-divider"></div>
+        <div class="settings-group">
+          <label class="settings-label caption-mono" for="null-strategy-select">Null values</label>
+          <div class="select-wrapper">
+            <select id="null-strategy-select" class="settings-select">
+              {NULL_STRATEGIES.map((opt) => <option value={opt.value}>{opt.label}</option>)}
+            </select>
+          </div>
+          <p class="caption settings-help">
+            TOML has no null. Refuse is the honest default; strip removes them.
+          </p>
+        </div>
+        <div class="settings-divider"></div>
+        <Button id="convert-btn" variant="primary" size="lg" shape="square" class="action-btn">
+          Convert to TOML
+        </Button>
+        <ErrorBanner id="convert-error" />
+        <div class="status-banner caption">
+          <span class="status-indicator"><span class="dot idle" id="status-dot"></span></span>
+          <span class="sr-only" id="convert-status-announce" aria-live="polite"></span>
+          Local sandbox active
+        </div>
+      </Card>
+    </div>
+    <div slot="output" class="ws-fill ws-output">
+      <Card variant="flat" class="workspace-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">OUTPUT TOML</span>
+          <ToolActions id="output-actions" variant="inset" actions={["copy", "download"]} />
+        </div>
+        <CodeEditor
+          id="toml-output"
+          label="Converted TOML output"
+          placeholder="Converted TOML will appear here..."
+          readonly
+        >
+          <div class="editor-info-bar" slot>
+            <span class="info-status" id="toml-output-status">Output: Empty</span>
+            <span class="info-meta" id="toml-output-count">0 chars</span>
+          </div>
+        </CodeEditor>
+      </Card>
+    </div>
+  </ToolWorkspace>
+  <section class="tool-content-section" aria-labelledby="how-title">
+    <Container size="narrow">
+      <div class="content-section-header">
+        <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
+        <h2 id="how-title" class="display-md section-title">Convert JSON in three steps</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">1</span>
+          <h3 class="body-sm-strong step-title">Paste or drop</h3>
+          <p class="caption step-desc">
+            Any JSON object — validity reads as you type, up to 15M characters.
+          </p>
+        </div>
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">2</span>
+          <h3 class="body-sm-strong step-title">Convert</h3>
+          <p class="caption step-desc">
+            Press Convert (or Ctrl/⌘ + Enter). Big files run in a background worker.
+          </p>
+        </div>
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">3</span>
+          <h3 class="body-sm-strong step-title">Take the TOML</h3>
+          <p class="caption step-desc">
+            Copy or download the result — objects become [tables], arrays of objects become
+            [[arrays.of.tables]].
+          </p>
+        </div>
+      </div>
+    </Container>
+  </section>
+  <ToolDocs />
+  <CompareLinks />
+  <RelatedTools />
+  <ToolNudge />
+  <section class="faq-section" aria-labelledby="faq-title">
+    <Container size="narrow">
+      <div class="faq-header">
+        <span class="caption-mono section-eyebrow">FAQ</span>
+        <h2 id="faq-title" class="display-md section-title">Frequently asked questions</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary class="faq-summary">Is my JSON uploaded anywhere?</summary>
+          <p class="body-md faq-answer">
+            No. Conversion runs entirely in your browser (in a background worker for large files).
+            Your data never leaves your machine.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Why does a top-level array fail?</summary>
+          <p class="body-md faq-answer">
+            TOML's root must be a table (an object). A top-level JSON array — or a bare string,
+            number, or boolean — has nowhere to live, so we explain that instead of silently
+            wrapping it in a made-up key.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">What happens to null?</summary>
+          <p class="body-md faq-answer">
+            TOML has no null value. By default we refuse and point at the exact path (like
+            <code>limits.timeout</code> or <code>tools[2]</code>); switch to "Strip nulls" to drop
+            those keys/elements and convert anyway.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Do numbers stay exact?</summary>
+          <p class="body-md faq-answer">
+            JSON's single number type maps to TOML integers and floats. Very large integers (beyond
+            2<sup>53</sup>) can lose precision — that's a JSON limit, not a bug here.
+          </p>
+        </details>
+      </div>
+    </Container>
+  </section>
+</ToolShell>
+<script>
+  import { jsonToTomlStore } from "../../lib/tools/json-to-toml/store";
+  import {
+    handleInput,
+    convert,
+    loadSample,
+    clearAll,
+    setNullStrategy,
+  } from "../../lib/tools/json-to-toml/actions";
+  import type { ConvertOptions } from "../../lib/tools/json-to-toml/types";
+  import { debounce } from "../../shared/debounce";
+  import { announce, initAnnounce } from "../../shared/announce";
+  import { copyToClipboard } from "../../shared/clipboard";
+  import { downloadFile } from "../../shared/download";
+
+  const jsonTextarea = document.getElementById("json-input-textarea") as HTMLTextAreaElement | null;
+  const outTextarea = document.getElementById("toml-output-textarea") as HTMLTextAreaElement | null;
+  const inputStatus = document.getElementById("json-status") as HTMLElement | null;
+  const inputCharCount = document.getElementById("json-char-count") as HTMLElement | null;
+  const outputStatus = document.getElementById("toml-output-status") as HTMLElement | null;
+  const outputCharCount = document.getElementById("toml-output-count") as HTMLElement | null;
+  const nullSelect = document.getElementById("null-strategy-select") as HTMLSelectElement | null;
+  const convertBtn = document.getElementById("convert-btn") as HTMLButtonElement | null;
+  const errorBanner = document.getElementById("convert-error") as HTMLElement | null;
+  const statusDot = document.getElementById("status-dot") as HTMLElement | null;
+
+  initAnnounce("convert-status-announce");
+
+  const debouncedInput = debounce((value: string) => {
+    handleInput(jsonToTomlStore, value);
+  }, 150);
+
+  let lastOut = "";
+
+  jsonToTomlStore.subscribe((state) => {
+    const inputFocused = jsonTextarea && document.activeElement === jsonTextarea;
+    if (jsonTextarea && jsonTextarea.value !== state.jsonInput && !inputFocused) {
+      jsonTextarea.value = state.jsonInput;
+      jsonTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+
+    // The output box only changes on an authoritative Convert. Errors carry no
+    // source coordinates (JSON.parse gives none), so on failure the output stays
+    // empty and the reason lives in the error banner.
+    if (state.result && state.result.authoritative) {
+      const out = state.result.ok ? state.result.output : "";
+      if (out !== lastOut) {
+        lastOut = out;
+        if (outTextarea && outTextarea.value !== out) {
+          outTextarea.value = out;
+          outTextarea.dispatchEvent(new Event("editor-refresh"));
+        }
+      }
+    }
+
+    if (inputStatus) {
+      if (state.inputStatus === "empty") {
+        inputStatus.textContent = "JSON Status: Empty";
+        inputStatus.style.color = "";
+      } else if (state.result && !state.result.ok) {
+        inputStatus.textContent = "JSON Status: Invalid";
+        inputStatus.style.color = "var(--color-error)";
+      } else if (state.result && state.result.ok) {
+        inputStatus.textContent = "JSON Status: Valid";
+        inputStatus.style.color = "var(--color-success)";
+      } else {
+        inputStatus.textContent = "JSON Status: Ready";
+        inputStatus.style.color = "";
+      }
+    }
+    if (inputCharCount)
+      inputCharCount.textContent = state.jsonInput.length.toLocaleString() + " chars";
+
+    if (outputStatus) {
+      outputStatus.textContent =
+        state.outputStatus === "converted"
+          ? "Output: TOML"
+          : state.outputStatus === "invalid"
+            ? "Output: Error"
+            : "Output: Empty";
+      outputStatus.style.color =
+        state.outputStatus === "converted"
+          ? "var(--color-success)"
+          : state.outputStatus === "invalid"
+            ? "var(--color-error)"
+            : "";
+    }
+    if (outputCharCount) {
+      const st = state.result && state.result.authoritative ? state.result.stats : null;
+      outputCharCount.textContent =
+        lastOut.length.toLocaleString() +
+        " chars" +
+        (st ? ` · depth ${st.maxDepth} · ${st.keys.toLocaleString()} keys` : "");
+    }
+
+    if (statusDot) {
+      statusDot.classList.remove("idle", "active", "error");
+      statusDot.classList.add(
+        state.isConverting ? "active" : state.outputStatus === "invalid" ? "error" : "idle",
+      );
+    }
+    if (convertBtn) {
+      convertBtn.textContent = state.isConverting ? "Converting…" : "Convert to TOML";
+      convertBtn.disabled = state.isConverting;
+    }
+    if (errorBanner) {
+      if (state.error) (errorBanner as any).show?.(state.error);
+      else (errorBanner as any).hide?.();
+    }
+    if (state.error) announce("Error: " + state.error);
+    if (state.result && state.result.authoritative && state.result.ok)
+      announce("Converted to TOML");
+    if (state.result && state.result.authoritative && !state.result.ok)
+      announce("JSON can't be converted to TOML as-is");
+  });
+
+  if (jsonTextarea) {
+    jsonTextarea.addEventListener("input", () => debouncedInput(jsonTextarea.value));
+  }
+  if (convertBtn) convertBtn.addEventListener("click", () => convert(jsonToTomlStore));
+  if (nullSelect)
+    nullSelect.addEventListener("change", () =>
+      setNullStrategy(jsonToTomlStore, nullSelect.value as ConvertOptions["nullStrategy"]),
+    );
+
+  const inputActions = document.getElementById("input-actions");
+  if (inputActions) {
+    inputActions.addEventListener("tool-action", (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      if (action === "sample") {
+        loadSample(jsonToTomlStore);
+        announce("Sample JSON loaded");
+      }
+      if (action === "clear") {
+        clearAll(jsonToTomlStore);
+        announce("Input cleared");
+      }
+    });
+  }
+
+  const outputActions = document.getElementById("output-actions");
+  if (outputActions) {
+    outputActions.addEventListener("tool-action", async (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      if (action === "copy") {
+        const ok = lastOut ? await copyToClipboard(lastOut) : false;
+        const btn = outputActions.querySelector("[data-action='copy']");
+        if (ok && btn) {
+          const orig = btn.textContent || "Copy";
+          btn.textContent = "Copied!";
+          announce("TOML copied");
+          setTimeout(() => {
+            btn.textContent = orig;
+          }, 1500);
+        }
+      }
+      if (action === "download") {
+        if (lastOut) {
+          downloadFile(lastOut, "converted.toml", "application/toml;charset=utf-8;");
+          announce("Download started");
+        } else {
+          announce("Nothing to download yet");
+        }
+      }
+    });
+  }
+
+  const dropZone = document.getElementById("json-input-dropzone");
+  if (dropZone) {
+    dropZone.addEventListener("file-dropped", (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.text) {
+        handleInput(jsonToTomlStore, detail.text);
+        convert(jsonToTomlStore);
+        announce("File loaded: " + (detail.name || "file"));
+      }
+    });
+  }
+
+  document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "SELECT") return;
+      e.preventDefault();
+      convert(jsonToTomlStore);
+    }
+  });
+</script>
+<style>
+  .workspace-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    gap: var(--spacing-md);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-hairline);
+    padding-bottom: var(--spacing-sm);
+  }
+  .column-title {
+    color: var(--color-mute);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+  .editor-info-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--color-hairline);
+    border-top: none;
+    border-bottom-left-radius: var(--rounded-sm);
+    border-bottom-right-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    padding: 6px var(--spacing-sm);
+    font-size: 11px;
+    color: var(--color-mute);
+    font-family: var(--font-sans);
+  }
+  .info-status {
+    font-weight: 500;
+  }
+  .settings-card {
+    padding: var(--spacing-lg);
+  }
+  .settings-title {
+    margin: 0;
+  }
+  .settings-divider {
+    height: 1px;
+    background-color: var(--color-hairline);
+    margin: var(--spacing-xs) 0;
+  }
+  .settings-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-md);
+  }
+  .settings-label {
+    color: var(--color-mute);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .select-wrapper {
+    position: relative;
+    width: 100%;
+  }
+  .settings-select {
+    width: 100%;
+    height: 38px;
+    padding: 0 var(--spacing-md);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    appearance: none;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }
+  .settings-select:focus {
+    border-color: var(--color-hairline-strong);
+  }
+  .select-wrapper::after {
+    content: "▼";
+    font-size: 9px;
+    color: var(--color-body);
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+  .settings-help {
+    color: var(--color-mute);
+    line-height: 1.4;
+  }
+  .action-btn {
+    width: 100%;
+    margin-top: var(--spacing-sm);
+  }
+  .status-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-mute);
+    margin-top: auto;
+    padding-top: var(--spacing-md);
+  }
+  .status-indicator .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-hairline-strong);
+  }
+  .status-indicator .dot.active {
+    background-color: var(--color-accent);
+  }
+  .status-indicator .dot.error {
+    background-color: var(--color-error);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+  .tool-content-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas-soft);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .content-section-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .section-eyebrow {
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+  }
+  .section-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xl);
+  }
+  .step-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-lg);
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    text-align: center;
+    align-items: center;
+  }
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-accent);
+    color: var(--color-on-primary);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+  }
+  .step-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+  .step-desc {
+    color: var(--color-body);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .faq-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .faq-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .faq-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft);
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  .faq-summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink);
+    padding: var(--spacing-xs) 0;
+    user-select: none;
+  }
+  .faq-summary:hover {
+    color: var(--color-accent);
+  }
+  .faq-answer {
+    margin-top: var(--spacing-sm);
+    font-size: 13px;
+    color: var(--color-body);
+    line-height: 1.6;
+  }
+  .faq-answer code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background-color: var(--color-canvas-soft-2);
+    padding: 1px 4px;
+    border-radius: var(--rounded-xs);
+  }
+  @media (min-width: 960px) {
+    .workspace-card :global(.editor-outer) {
+      flex: none;
+      height: 650px;
+      min-height: 650px;
+    }
+    .workspace-card :global(.editor-wrapper) {
+      height: 100%;
+    }
+  }
+  @media (max-width: 959px) {
+    .workspace-card :global(.editor-outer) {
+      height: 350px;
+      flex: 0 0 350px;
+      min-height: 0;
+    }
+    .workspace-card :global(.editor-wrapper) {
+      height: 100%;
+    }
+    .steps-grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-md);
+    }
+  }
+</style>

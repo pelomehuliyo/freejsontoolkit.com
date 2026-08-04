@@ -162,3 +162,14 @@ registry substrate (the "new tool = mostly wiring" thesis, proven).
 - Docs deferred to a fast-follow (same load-snippet decision as CSV ⇄ TSV).
 
 
+## [v1.5.4] — JSON → TOML
+
+### Added
+- **JSON → TOML converter** (`/tools/json-to-toml`) — serialize JSON into clean TOML,
+  powered by `smol-toml` (the toolkit's external TOML dep: tiny, fast, TS-native,
+  worker-safe).
+- Registry entry (data-formats family), relations edges, and sitemap line.
+
+### Notes
+- Heavy serializations run in the worker; Load Sample stays load-only per the house rule.
+- Docs deferred to a fast-follow (same load-snippet decision as the other converters).

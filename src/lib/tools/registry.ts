@@ -201,6 +201,17 @@ export const tools: ToolManifest[] = [
     addedIn: "v1.5",
     family: "data-formats",
   },
+  {
+    id: "json-to-toml",
+    name: "JSON → TOML",
+    tagline: "Turn JSON into readable TOML.",
+    category: "convert",
+    status: "available",
+    href: "/tools/json-to-toml",
+    keywords: ["json to toml", "convert json to toml", "json to toml online"],
+    addedIn: "v1.5",
+    family: "data-formats",
+  },
   // ── Format ───────────────────────────────────────────────────────────
   {
     id: "json-formatter",
