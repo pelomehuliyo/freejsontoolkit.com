@@ -369,6 +369,82 @@ production:
     ],
   },
 
+  "regex-tester": {
+    eyebrow: "Docs · Regex",
+    conceptTitle: "How the tester matches",
+    concept:
+      "The tester compiles your pattern with the browser's native RegExp engine and runs it against " +
+      "the test string as you type — no server, no upload. Every match highlights in the view, and " +
+      "each match lists its capture groups, numbered ($1, $2…) and named. Flags reshape how the same " +
+      "pattern behaves: g returns every match instead of stopping at the first, i ignores case, m " +
+      "makes ^ and $ match line boundaries, s lets . cross newlines, u switches on full Unicode, and " +
+      "y pins the match to the current position. Load any snippet below with \"try it\" — the pattern " +
+      "and the test text both fill in, and the matches light up.",
+    lead: "before-after",
+    itemsLabel: "Things to know",
+    items: [
+      {
+        kind: "error",
+        title: "Unescaped specials match too much",
+        body:
+          "Characters like . * + ? ( ) [ ] { } ^ $ | carry meaning. A bare . matches ANY character, " +
+          "not a period. Load this, then delete the backslash before the dot and watch file-txt start " +
+          "matching too — backslash a special to match it literally.",
+        snippet: `\\.
+file.txt
+file-txt`,
+      },
+      {
+        kind: "note",
+        title: "Groups capture pieces",
+        body:
+          "( ) captures a numbered group — $1, $2…; (?<name> ) captures a named one. Load this and " +
+          "open a match card to see both the numbered groups and name / role appear by name.",
+        snippet: `(?<name>[A-Za-z]+), ([a-z]+)
+Ada, engineer
+Grace, admiral`,
+      },
+      {
+        kind: "note",
+        title: "Flags reshape the match",
+        body:
+          "The same pattern matches different text under different flags. Load this, then toggle i " +
+          "and watch ADA match; toggle g off and only the first match is returned.",
+        snippet: `ada
+Ada and ada and ADA`,
+      },
+      {
+        kind: "note",
+        title: "A pattern can hang the tab",
+        body:
+          "Nested quantifiers like (a+)+b can backtrack explosively on near-matching text — " +
+          "catastrophic backtracking. The test string is capped at 500k characters to bound the blast " +
+          "radius, but if a match seems to freeze, simplify the pattern. No runnable snippet here on " +
+          "purpose: we won't ship a hang.",
+      },
+    ],
+    examplesLabel: "Try these",
+    examples: [
+      {
+        title: "Email addresses",
+        note: "Word boundaries stop it matching inside longer tokens; [A-Za-z]{2,} requires a real TLD — @missing.com stays unmatched.",
+        snippet: `\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b
+Reach us at support@freejsontoolkit.com or sales@example.org — @missing.com stays unmatched.`,
+      },
+      {
+        title: "Dates into named groups",
+        note: "Named groups land in each match card by name — year, month, day.",
+        snippet: `(?<year>\\d{4})-(?<month>\\d{2})-(?<day>\\d{2})
+Shipped 2026-08-03, patched 2025-12-31.`,
+      },
+      {
+        title: "Every number",
+        note: "With g on, all of them light up; toggle it off to keep just the first.",
+        snippet: `\\d+(\\.\\d+)?
+3 items at 4.99 each, 1 at 12, tax 1.05`,
+      },
+    ],
+  },
   "json-formatter": {
     eyebrow: "Docs · Format",
     conceptTitle: "What formatting does (and cannot do)",

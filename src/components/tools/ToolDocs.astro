@@ -250,6 +250,17 @@ const snipJson = JSON.stringify(snippets).replace(/</g, "\\u003c");
       }
     }
     function loadAndRun(text: string): void {
+      // Cooperative contract: pages with more than one input (e.g. Regex:
+      // pattern + test string) listen for this event, distribute the snippet
+      // themselves, and call preventDefault(). Single-input pages don't
+      // listen, so the default behavior below is unchanged for them.
+      const ev = new CustomEvent("fjt:docs-load", {
+        detail: { text },
+        bubbles: true,
+        cancelable: true,
+      });
+      document.dispatchEvent(ev);
+      if (ev.defaultPrevented) return;
       const ta = document.querySelector(".editor-textarea") as HTMLTextAreaElement | null;
       if (!ta) return;
       ta.scrollIntoView({ behavior: "smooth", block: "center" });

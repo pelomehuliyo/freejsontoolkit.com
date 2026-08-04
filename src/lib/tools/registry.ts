@@ -168,7 +168,28 @@ export const tools: ToolManifest[] = [
     keywords: ["json to yaml", "convert json to yaml"],
     addedIn: "v1.4",
   },
-
+  {
+    id: "csv-to-tsv",
+    name: "CSV → TSV",
+    tagline: "Convert comma-separated tables into tab-separated values.",
+    category: "convert",
+    status: "available",
+    href: "/tools/csv-to-tsv",
+    keywords: ["csv to tsv", "convert csv to tsv", "csv to tab separated"],
+    addedIn: "v1.5",
+    family: "data-formats",
+  },
+  {
+    id: "tsv-to-csv",
+    name: "TSV → CSV",
+    tagline: "Turn tab-separated tables into clean, quoted CSV.",
+    category: "convert",
+    status: "available",
+    href: "/tools/tsv-to-csv",
+    keywords: ["tsv to csv", "convert tsv to csv", "tab separated to csv"],
+    addedIn: "v1.5",
+    family: "data-formats",
+  },
   // ── Format ───────────────────────────────────────────────────────────
   {
     id: "json-formatter",

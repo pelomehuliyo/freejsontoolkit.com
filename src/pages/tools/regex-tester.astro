@@ -247,6 +247,42 @@ Matches highlight as you type`}
 
   initAnnounce("regex-announce");
 
+  // ToolDocs "try it" — Regex has two inputs (pattern + test string), so it
+  // intercepts the docs-load contract and distributes the snippet itself:
+  // line 1 = pattern, the rest = test text. Matching is live, so there is no
+  // run verb to fire — the recompute handles it.
+  document.addEventListener("fjt:docs-load", (e: Event) => {
+    const ce = e as CustomEvent<{ text?: string }>;
+    const raw = ce.detail?.text;
+    if (raw == null) return;
+    ce.preventDefault();
+    const nl = raw.indexOf("\n");
+    const pattern = nl === -1 ? raw : raw.slice(0, nl);
+    const test = nl === -1 ? "" : raw.slice(nl + 1);
+    setPattern(regexStore, pattern);
+    setTestInput(regexStore, test);
+    if (patternInput) {
+      patternInput.value = pattern;
+      patternInput.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    if (testTextarea && testTextarea.value !== test) {
+      testTextarea.value = test;
+      testTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+    // a brief accent flash so the user sees where it landed
+    const flash = (el: HTMLElement | null): void => {
+      if (!el) return;
+      el.style.transition = "box-shadow .2s ease";
+      el.style.boxShadow = "0 0 0 3px var(--color-accent)";
+      setTimeout(() => {
+        el.style.boxShadow = "";
+        el.style.transition = ""; // restore stylesheet transitions
+      }, 750);
+    };
+    flash(patternInput ? (patternInput.closest(".pattern-shell") as HTMLElement | null) : null);
+    flash(testTextarea ? (testTextarea.closest(".editor-wrapper") as HTMLElement | null) : null);
+  });
+
   const RENDER_CAP = 200_000; // chars of highlighted output we'll paint
   const LIST_CAP = 200; // match cards we'll render
 

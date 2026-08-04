@@ -128,3 +128,21 @@ registry substrate (the "new tool = mostly wiring" thesis, proven).
 - **JSON**, **Encoding**, and **Developer Utilities** render as live shelves;
   **Data Formats** and **Networking** are reserved and light up as their tools ship
   (Data Formats fills when CSV ⇄ TSV lands).
+
+
+
+  ## [v1.5.2] — CSV ⇄ TSV
+
+### Added
+- **CSV → TSV converter** (`/tools/csv-to-tsv`) — quoted fields handled by the shared RFC 4180
+  parser; the lossy direction is honest: cells with an embedded newline are refused by default
+  with line/col, with an explicit "escape to \n" option to force.
+- **TSV → CSV converter** (`/tools/tsv-to-csv`) — lossless; output gets proper RFC 4180 quoting
+  (fields with comma/quote/newline are quoted, quotes doubled).
+- **`src/lib/csv/csvSerializer.ts`** — the write-side twin of the existing CSV parser, so all
+  CSV/TSV output quotes from a single source of truth (compounds for any future delimiter tool).
+- Registry entries (data-formats family), relations edges, and sitemap lines for both tools.
+
+### Deferred
+- Docs for both converters — the two-behavior "load into tool" mechanic needs a decision before
+  shipping a load button (component renders nothing until then; safe).

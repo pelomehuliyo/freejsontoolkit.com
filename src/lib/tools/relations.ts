@@ -96,6 +96,15 @@ export const RELATIONS: Record<string, Relation[]> = {
     { id: "json-formatter", label: "Format the result", kind: "next" },
     { id: "json-validator", label: "Validate the result", kind: "next" },
   ],
+  "csv-to-tsv": [
+    { id: "tsv-to-csv", label: "Reverse it", kind: "pair" },
+    { id: "csv-to-json", label: "Or go to JSON", kind: "pair" },
+    { id: "json-to-csv", label: "Flatten JSON instead", kind: "pair" },
+  ],
+  "tsv-to-csv": [
+    { id: "csv-to-tsv", label: "Reverse it", kind: "pair" },
+    { id: "csv-to-json", label: "Or go to JSON", kind: "pair" },
+  ],
   "jwt-decoder": [
     { id: "base64", label: "Decode raw Base64", kind: "pair" },
     { id: "json-formatter", label: "Format the payload", kind: "next" },
