@@ -1,0 +1,643 @@
+---
+import ToolShell from "../../components/tools/ToolShell.astro";
+import ToolHeader from "../../components/tools/ToolHeader.astro";
+import CodeEditor from "../../components/tools/CodeEditor.astro";
+import ToolActions from "../../components/tools/ToolActions.astro";
+import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import Card from "../../components/Card.astro";
+import Button from "../../components/Button.astro";
+import Container from "../../components/Container.astro";
+import RelatedTools from "../../components/tools/RelatedTools.astro";
+import ToolDocs from "../../components/tools/ToolDocs.astro";
+import CompareLinks from "../../components/tools/CompareLinks.astro";
+import ToolNudge from "../../components/tools/ToolNudge.astro";
+import { LITE_SUPPORTED, LITE_UNSUPPORTED } from "../../lib/tools/json-schema-lite/engine";
+---
+
+<ToolShell
+  title="JSON Schema Lite — Validate JSON Against a Schema Online (Free, Local)"
+  description="Free online JSON Schema validator (lite). Check JSON against a schema with exact violation paths — type, required, enum, ranges, lengths — 100% local, no upload, no server."
+  activePath="/tools/json-schema-lite"
+>
+  <ToolHeader
+    slot="header"
+    breadcrumbs={[{ label: "Home", href: "/" }, { label: "JSON Schema Lite" }]}
+    title="JSON Schema Lite"
+    subtitle="Validate JSON against a schema — violations point at the exact value."
+  />
+
+  <section class="dj-stage">
+    <Container size="wide">
+      {/* ── Two inputs: instance + schema ── */}
+      <div class="dj-inputs">
+        <Card variant="flat" class="workspace-card diff-input-card">
+          <div class="card-header">
+            <span class="caption-mono column-title">INSTANCE · JSON</span>
+            <ToolActions id="a-actions" variant="inset" actions={["clear"]} />
+          </div>
+          <CodeEditor
+            id="schema-json"
+            label="JSON instance"
+            placeholder={`Paste the JSON to validate
+{"name":"Ada","role":"engineer"}`}
+          />
+        </Card>
+
+        <Card variant="flat" class="workspace-card diff-input-card">
+          <div class="card-header">
+            <span class="caption-mono column-title">SCHEMA</span>
+            <ToolActions id="b-actions" variant="inset" actions={["clear"]} />
+          </div>
+          <CodeEditor
+            id="schema-schema"
+            label="JSON Schema"
+            placeholder={`Paste the JSON Schema
+{"type":"object","required":["name"]}`}
+          />
+        </Card>
+      </div>
+
+      {/* ── Controls + live verdict ── */}
+      <Card variant="flat" class="workspace-card dj-controls-card">
+        <div class="dj-controls">
+          <div class="dj-opts">
+            <span class="dj-coverage caption-mono">
+              covers {LITE_SUPPORTED.length} keywords · $ref &amp; combinators land in v2.0
+            </span>
+          </div>
+          <div class="dj-actions">
+            <Button id="validate-btn" variant="primary" size="md" shape="square">Validate</Button>
+            <Button id="sample-btn" variant="secondary" size="md" shape="square">Load sample</Button
+            >
+          </div>
+        </div>
+
+        <div class="dj-stats" id="dj-stats" hidden>
+          <div class="dj-stat">
+            <span class="dj-stat-num dj-c-remove" id="dj-n-viol">0</span>
+            <span class="dj-stat-label caption-mono">violations</span>
+          </div>
+          <div class="dj-stat">
+            <span class="dj-stat-num" id="dj-n-size">0</span>
+            <span class="dj-stat-label caption-mono">chars checked</span>
+          </div>
+          <div class="dj-verdict" id="dj-verdict">—</div>
+        </div>
+
+        <p class="dj-hint caption-mono" id="dj-hint">
+          Live validation is on — the verdict updates as you type.
+        </p>
+        <span class="sr-only" id="schema-lite-announce" aria-live="polite"></span>
+        <ErrorBanner id="schema-lite-error" />
+      </Card>
+
+      {/* ── Verdict ledger ── */}
+      <Card variant="flat" class="workspace-card diff-out-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">VIOLATIONS</span>
+          <ToolActions id="out-actions" variant="inset" actions={["copy", "download"]} />
+        </div>
+
+        <div class="dj-idle" id="dj-idle">
+          <p class="dj-idle-cmd caption-mono">$ schema --check instance.json</p>
+          <p class="body-sm dj-idle-msg">
+            Paste JSON and a schema above — or load the sample — and every violation lands here with
+            its exact path, the instant it changes.
+          </p>
+        </div>
+
+        <pre class="ledger caption-mono" id="ledger" hidden></pre>
+        <p class="dj-trunc caption-mono" id="dj-trunc" hidden>
+          Capped at 100 violations — fix these first, then re-validate.
+        </p>
+      </Card>
+    </Container>
+  </section>
+
+  <section class="tool-content-section" aria-labelledby="how-title">
+    <Container size="narrow">
+      <div class="content-section-header">
+        <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
+        <h2 id="how-title" class="display-md section-title">
+          Validate against a schema in three steps
+        </h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">1</span>
+          <h3 class="body-sm-strong step-title">Paste both sides</h3>
+          <p class="caption step-desc">
+            Your JSON in the left editor, the schema it must satisfy on the right. The verdict runs
+            as you type.
+          </p>
+        </div>
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">2</span>
+          <h3 class="body-sm-strong step-title">Read the violations</h3>
+          <p class="caption step-desc">
+            Every problem carries its exact path — <code>/users/2/email</code> — so you can jump straight
+            to the offending value.
+          </p>
+        </div>
+        <div class="step-card">
+          <span class="step-number" aria-hidden="true">3</span>
+          <h3 class="body-sm-strong step-title">Fix &amp; re-run</h3>
+          <p class="caption step-desc">
+            Correct the JSON (or the schema) and watch the ledger shrink to zero. Copy or download
+            the report.
+          </p>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <ToolDocs />
+  <CompareLinks />
+  <RelatedTools />
+  <ToolNudge />
+
+  <section class="faq-section" aria-labelledby="faq-title">
+    <Container size="narrow">
+      <div class="faq-header">
+        <span class="caption-mono section-eyebrow">FAQ</span>
+        <h2 id="faq-title" class="display-md section-title">Frequently asked questions</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary class="faq-summary">Is my JSON uploaded anywhere?</summary>
+          <p class="body-md faq-answer">
+            No. Validation runs entirely in your browser (in a background worker for large inputs).
+            Neither your data nor your schema ever leaves your machine.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">What does "lite" mean?</summary>
+          <p class="body-md faq-answer">
+            A clearly-scoped subset of JSON Schema: types, required keys, additionalProperties,
+            enum/const, numeric ranges, string lengths, and array/object size limits. Keywords we
+            don't support yet are listed openly in the panel — we'd rather tell you what's out than
+            pretend otherwise. The full validator (with <code>$ref</code> and combinators) is a planned
+            v2.0 tool.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">What happens to keywords you don't support?</summary>
+          <p class="body-md faq-answer">
+            They're ignored, per the JSON Schema spec — unknown keywords never fail validation. So a
+            schema using <code>$ref</code> or <code>anyOf</code> won't error; it just won't enforce those
+            parts. The coverage line above the button states exactly what's active.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Why don't you just use Ajv?</summary>
+          <p class="body-md faq-answer">
+            Ajv is excellent but ~150KB gzipped — heavier than this entire site's philosophy allows
+            for one tool. So the engine is hand-rolled on the same JSON grammar walker that powers
+            the JSON Validator: zero dependencies, identical coordinates everywhere.
+          </p>
+        </details>
+      </div>
+    </Container>
+  </section>
+</ToolShell>
+
+<script>
+  import { schemaLiteStore } from "../../lib/tools/json-schema-lite/store";
+  import {
+    setJsonInput,
+    setSchemaInput,
+    recompute,
+    loadSample,
+    clearAll,
+  } from "../../lib/tools/json-schema-lite/actions";
+  import { buildReport } from "../../lib/tools/json-schema-lite/engine";
+  import { debounce } from "../../shared/debounce";
+  import { announce, initAnnounce } from "../../shared/announce";
+  import { copyToClipboard } from "../../shared/clipboard";
+  import { downloadFile } from "../../shared/download";
+
+  const jsonTextarea = document.getElementById(
+    "schema-json-textarea",
+  ) as HTMLTextAreaElement | null;
+  const schemaTextarea = document.getElementById(
+    "schema-schema-textarea",
+  ) as HTMLTextAreaElement | null;
+  const ledgerEl = document.getElementById("ledger") as HTMLPreElement | null;
+  const idleEl = document.getElementById("dj-idle") as HTMLElement | null;
+  const statsEl = document.getElementById("dj-stats") as HTMLElement | null;
+  const hintEl = document.getElementById("dj-hint") as HTMLElement | null;
+  const truncEl = document.getElementById("dj-trunc") as HTMLElement | null;
+  const validateBtn = document.getElementById("validate-btn") as HTMLButtonElement | null;
+  const sampleBtn = document.getElementById("sample-btn") as HTMLButtonElement | null;
+  const nViol = document.getElementById("dj-n-viol") as HTMLElement | null;
+  const nSize = document.getElementById("dj-n-size") as HTMLElement | null;
+  const verdictEl = document.getElementById("dj-verdict") as HTMLElement | null;
+  const errorBanner = document.getElementById("schema-lite-error") as HTMLElement | null;
+
+  initAnnounce("schema-lite-announce");
+
+  let lastReport = "";
+
+  schemaLiteStore.subscribe((state) => {
+    const jsonFocused = jsonTextarea && document.activeElement === jsonTextarea;
+    const schemaFocused = schemaTextarea && document.activeElement === schemaTextarea;
+    if (jsonTextarea && jsonTextarea.value !== state.jsonInput && !jsonFocused) {
+      jsonTextarea.value = state.jsonInput;
+      jsonTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+    if (schemaTextarea && schemaTextarea.value !== state.schemaInput && !schemaFocused) {
+      schemaTextarea.value = state.schemaInput;
+      schemaTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+
+    const hasResult = !!state.result;
+    if (ledgerEl) {
+      const report = state.result ? buildReport(state.result) : "";
+      if (report !== lastReport) {
+        lastReport = report;
+        ledgerEl.textContent = report;
+      }
+      ledgerEl.hidden = !hasResult;
+    }
+    if (idleEl) idleEl.hidden = hasResult;
+    if (statsEl) statsEl.hidden = !hasResult;
+    if (truncEl) truncEl.hidden = !(hasResult && state.result!.truncated);
+
+    if (nViol && state.result) nViol.textContent = String(state.result.errors.length);
+    if (nSize && state.result) nSize.textContent = state.result.instanceSize.toLocaleString();
+    if (verdictEl && state.result) {
+      verdictEl.textContent = state.result.ok ? "✓ VALID" : "✗ INVALID";
+      verdictEl.style.color = state.result.ok ? "var(--color-accent-active)" : "#b3261e";
+    }
+
+    if (validateBtn) {
+      validateBtn.textContent = state.isValidating ? "Validating…" : "Validate";
+      validateBtn.disabled = state.isValidating;
+    }
+    if (hintEl) {
+      hintEl.textContent = state.isValidating
+        ? "Validating…"
+        : state.result
+          ? state.result.ok
+            ? "Live validation on · valid against schema"
+            : "Live validation on · " + state.result.errors.length + " violation(s)"
+          : "Live validation is on — the verdict updates as you type.";
+    }
+
+    if (errorBanner) {
+      if (state.error) (errorBanner as any).show?.(state.error);
+      else (errorBanner as any).hide?.();
+    }
+    if (state.error) announce("Error: " + state.error);
+    if (state.result && state.result.authoritative && state.result.ok)
+      announce("Valid against schema");
+    if (state.result && state.result.authoritative && !state.result.ok)
+      announce(state.result.errors.length + " violations");
+  });
+
+  const recomputeDebounced = debounce(() => {
+    recompute(schemaLiteStore, false);
+  }, 250);
+  if (jsonTextarea)
+    jsonTextarea.addEventListener("input", () => {
+      setJsonInput(schemaLiteStore, jsonTextarea.value);
+      recomputeDebounced();
+    });
+  if (schemaTextarea)
+    schemaTextarea.addEventListener("input", () => {
+      setSchemaInput(schemaLiteStore, schemaTextarea.value);
+      recomputeDebounced();
+    });
+
+  if (validateBtn) validateBtn.addEventListener("click", () => recompute(schemaLiteStore, true));
+  if (sampleBtn)
+    sampleBtn.addEventListener("click", () => {
+      loadSample(schemaLiteStore);
+      announce("Sample loaded");
+    });
+
+  const aActions = document.getElementById("a-actions");
+  if (aActions)
+    aActions.addEventListener("tool-action", (e: Event) => {
+      if ((e as CustomEvent).detail?.action === "clear") {
+        setJsonInput(schemaLiteStore, "");
+        if (jsonTextarea) {
+          jsonTextarea.value = "";
+          jsonTextarea.dispatchEvent(new Event("editor-refresh"));
+        }
+        recompute(schemaLiteStore, false);
+      }
+    });
+  const bActions = document.getElementById("b-actions");
+  if (bActions)
+    bActions.addEventListener("tool-action", (e: Event) => {
+      if ((e as CustomEvent).detail?.action === "clear") {
+        setSchemaInput(schemaLiteStore, "");
+        if (schemaTextarea) {
+          schemaTextarea.value = "";
+          schemaTextarea.dispatchEvent(new Event("editor-refresh"));
+        }
+        recompute(schemaLiteStore, false);
+      }
+    });
+
+  const outActions = document.getElementById("out-actions");
+  if (outActions)
+    outActions.addEventListener("tool-action", async (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      const text = lastReport;
+      if (!text) return;
+      if (action === "copy") {
+        const ok = await copyToClipboard(text);
+        const btn = outActions.querySelector("[data-action='copy']");
+        if (ok && btn) {
+          const orig = btn.textContent || "Copy";
+          btn.textContent = "Copied!";
+          announce("Report copied");
+          setTimeout(() => {
+            btn.textContent = orig;
+          }, 1500);
+        }
+      }
+      if (action === "download") {
+        downloadFile(text, "schema-report.txt", "text/plain;charset=utf-8;");
+        announce("Download started");
+      }
+    });
+
+  document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "SELECT") return;
+      e.preventDefault();
+      recompute(schemaLiteStore, true);
+    }
+  });
+</script>
+
+<style>
+  .dj-stage {
+    padding: var(--spacing-3xl) 0 var(--spacing-5xl);
+    background-color: var(--color-canvas-soft);
+    background-image: radial-gradient(var(--color-hairline) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .dj-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+  .diff-input-card :global(.editor-outer) {
+    height: 300px;
+    min-height: 300px;
+    flex: 0 0 300px;
+  }
+  .diff-input-card :global(.editor-wrapper) {
+    height: 100%;
+  }
+  .dj-controls-card {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+  .dj-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+  }
+  .dj-opts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+  .dj-coverage {
+    color: var(--color-mute);
+  }
+  .dj-actions {
+    display: flex;
+    gap: var(--spacing-xs);
+  }
+  .dj-stats {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .dj-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .dj-stat-num {
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--color-ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .dj-c-remove {
+    color: #b3261e;
+  }
+  .dj-stat-label {
+    color: var(--color-mute);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .dj-verdict {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 700;
+    margin-left: auto;
+  }
+  .dj-hint {
+    margin: var(--spacing-sm) 0 0;
+    color: var(--color-mute);
+  }
+  .diff-out-card {
+    padding: var(--spacing-md);
+  }
+  .dj-idle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+    text-align: center;
+    padding: var(--spacing-4xl) var(--spacing-md);
+    color: var(--color-body);
+  }
+  .dj-idle-cmd {
+    color: var(--color-accent-active);
+  }
+  .dj-idle-msg {
+    max-width: 46ch;
+    margin: 0;
+    line-height: 1.6;
+  }
+  .ledger {
+    margin: 0;
+    max-height: 480px;
+    overflow: auto;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    padding: var(--spacing-md);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    color: var(--color-ink);
+  }
+  .dj-trunc {
+    margin: var(--spacing-xs) 0 0;
+    color: var(--color-mute);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-hairline);
+    padding-bottom: var(--spacing-sm);
+  }
+  .column-title {
+    color: var(--color-mute);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+  .tool-content-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas-soft);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .content-section-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .section-eyebrow {
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+  }
+  .section-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xl);
+  }
+  .step-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-lg);
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    text-align: center;
+    align-items: center;
+  }
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-accent);
+    color: var(--color-on-primary);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+  }
+  .step-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+  .step-desc {
+    color: var(--color-body);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .faq-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .faq-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .faq-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft);
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  .faq-summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink);
+    padding: var(--spacing-xs) 0;
+    user-select: none;
+  }
+  .faq-summary:hover {
+    color: var(--color-accent);
+  }
+  .faq-answer {
+    margin-top: var(--spacing-sm);
+    font-size: 13px;
+    color: var(--color-body);
+    line-height: 1.6;
+  }
+  .faq-answer code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background-color: var(--color-canvas-soft-2);
+    padding: 1px 4px;
+    border-radius: var(--rounded-xs);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+  @media (max-width: 959px) {
+    .dj-inputs {
+      grid-template-columns: 1fr;
+    }
+    .steps-grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-md);
+    }
+  }
+</style>

@@ -251,15 +251,14 @@ export const tools: ToolManifest[] = [
   },
   {
     id: "json-schema-validator",
-    name: "JSON Schema Validator",
+    name: "JSON Schema Lite",
     tagline: "Validate JSON against a schema, fully offline.",
     category: "validate",
-    family: "json",
-    status: "planned",
-    keywords: ["json schema validator", "validate json against schema"],
-    addedIn: "v2.0",
+    status: "available",
+    href: "/tools/json-schema-lite",
+    keywords: ["json schema validator", "validate json against schema", "json schema checker"],
+    addedIn: "v1.5",
   },
-
   // ── Compare ──────────────────────────────────────────────────────────
   {
     id: "json-diff",

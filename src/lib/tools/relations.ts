@@ -118,6 +118,11 @@ export const RELATIONS: Record<string, Relation[]> = {
   "text-diff": [
     { id: "json-diff", label: "Diff structured JSON", kind: "pair" },
   ],
+  "json-schema-validator": [
+    { id: "json-validator", label: "Check the syntax first", kind: "next" },
+    { id: "json-formatter", label: "Format either side", kind: "pair" },
+    { id: "fake-json", label: "Generate data for a schema", kind: "pair" },
+  ],
   "jwt-decoder": [
     { id: "base64", label: "Decode raw Base64", kind: "pair" },
     { id: "json-formatter", label: "Format the payload", kind: "next" },
