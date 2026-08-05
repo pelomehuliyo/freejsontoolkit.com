@@ -122,7 +122,7 @@ export const RELATIONS: Record<string, Relation[]> = {
     { id: "json-validator", label: "Check the syntax first", kind: "next" },
     { id: "json-formatter", label: "Format either side", kind: "pair" },
     { id: "fake-json", label: "Generate data for a schema", kind: "pair" },
-  ],
+  ], np
   "jwt-decoder": [
     { id: "base64", label: "Decode raw Base64", kind: "pair" },
     { id: "json-formatter", label: "Format the payload", kind: "next" },
