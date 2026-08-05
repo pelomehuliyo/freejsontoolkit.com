@@ -320,7 +320,7 @@ export const COMPARISONS: Record<string, Comparison> = {
   "json-validator-vs-json-schema-lite": {
     slug: "json-validator-vs-json-schema-lite",
     aId: "json-validator",
-    bId: "json-schema-lite",
+    bId: "json-schema-validator",
     title: "JSON Validator vs JSON Schema Lite",
     intro:
       "Both look at JSON and tell you if something's wrong — but they're answering different questions. " +
