@@ -74,12 +74,6 @@ export const RELATIONS: Record<string, Relation[]> = {
     { id: "base64", label: "Encode the result", kind: "next" },
     { id: "url-encode", label: "Percent-encode it", kind: "pair" },
   ],
-  // Add near the other convert tools
-  "json-to-xml": [
-    { id: "xml-to-json", label: "Reverse it", kind: "pair" },
-    { id: "json-formatter", label: "Format the JSON", kind: "next" },
-    { id: "json-validator", label: "Validate the JSON", kind: "next" },
-  ],
   "xml-to-json": [
     { id: "json-to-xml", label: "Reverse it", kind: "pair" },
     { id: "json-formatter", label: "Format the result", kind: "next" },
@@ -122,7 +116,7 @@ export const RELATIONS: Record<string, Relation[]> = {
     { id: "json-validator", label: "Check the syntax first", kind: "next" },
     { id: "json-formatter", label: "Format either side", kind: "pair" },
     { id: "fake-json", label: "Generate data for a schema", kind: "pair" },
-  ], np
+  ],
   "jwt-decoder": [
     { id: "base64", label: "Decode raw Base64", kind: "pair" },
     { id: "json-formatter", label: "Format the payload", kind: "next" },
