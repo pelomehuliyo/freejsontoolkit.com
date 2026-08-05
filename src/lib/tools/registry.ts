@@ -277,12 +277,11 @@ export const tools: ToolManifest[] = [
     name: "Text Diff",
     tagline: "Line-by-line diff for any two text inputs.",
     category: "compare",
-    family: "developer-utilities",
-    status: "planned",
-    keywords: ["text diff", "compare text online"],
+    status: "available",
+    href: "/tools/text-diff",
+    keywords: ["text diff", "compare text online", "diff text", "compare two texts"],
     addedIn: "v1.5",
   },
-
   // ── Generate ─────────────────────────────────────────────────────────
   {
     id: "fake-json",
