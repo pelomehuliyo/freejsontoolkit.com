@@ -1,3 +1,18 @@
+## [v1.5.7] — Timestamp Converter
+
+### Added
+- **Timestamp Converter** (`/tools/timestamp-converter`) — convert Unix timestamps to human
+  dates and back, in seconds, milliseconds, microseconds, and nanoseconds. Timestamp → Date
+  shows the instant in your local time and UTC (plus day-of-year, ISO week, and relative time);
+  Date → Timestamp accepts local ISO, UTC (Z), RFC/HTTP, and bare dates and reports the value in
+  every unit at once. A live clock and a one-click "use current time" fill the input with now.
+- Registry entry (utilities category, developer-utilities family), relations edges, and sitemap line.
+- Full docs entry with runnable snippets and examples.
+
+### Notes
+- Runs entirely on the browser's native Date engine — no worker needed, fully offline.
+
+
 ## [1.3.1] - 2026-08-01
 
 Discoverability & Product Polish — the sprint that turned ten live tools from
@@ -130,6 +145,21 @@ registry substrate (the "new tool = mostly wiring" thesis, proven).
   (Data Formats fills when CSV ⇄ TSV lands).
 
 
+## [v1.5.1] — Regex Tester
+
+### Added
+- **Regex Tester** (`/tools/regex-tester`) — live match highlighting (a DOM-built
+  `<mark>` render, never `innerHTML`), a match list with numbered and named capture
+  groups, live flag toggles (g i m s u y), and a replace preview with `$1` / `$&`.
+  Runs on the browser's native `RegExp` — no worker (bounded + live-by-nature).
+- Registry entry (developer-utilities family), relations edges, and sitemap line.
+- **Two-input docs loader** — a cooperative contract so Regex doc snippets fire into
+  both inputs: `ToolDocs` announces the load via a cancellable `fjt:docs-load` event
+  (single-input tools don't listen, so they're untouched); the Regex page intercepts,
+  splits line 1 = pattern / rest = test text, fills both inputs, and flashes them.
+
+
+
 
   ## [v1.5.2] — CSV ⇄ TSV
 
@@ -173,3 +203,32 @@ registry substrate (the "new tool = mostly wiring" thesis, proven).
 ### Notes
 - Heavy serializations run in the worker; Load Sample stays load-only per the house rule.
 - Docs deferred to a fast-follow (same load-snippet decision as the other converters).
+
+
+## [v1.5.5] — Text Diff
+
+### Added
+- **Text Diff** (`/tools/text-diff`) — line-by-line diff for any two text inputs
+  (logs, configs, code, markdown, env files, SQL); added / removed / changed lines
+  highlighted, with a similarity readout. Heavy diffs run in a worker.
+- Registry entry flipped to `available` (compare family), relations edges (pairs
+  with JSON Diff), and sitemap line.
+
+### Deferred
+- Docs to a fast-follow (same load-snippet decision as the other new converters).
+
+
+
+## [v1.5.6] — JSON Schema Lite
+
+### Added
+- **JSON Schema Lite** (`/tools/json-schema-lite`) — validate a JSON document against a
+  lightweight schema (type checks, required keys, nested structure), fully offline, with
+  errors reported by path. Deliberately *lite* and honest about it: it covers the fast,
+  readable core of schema validation and says so, leaving the full JSON Schema spec to the
+  v2.0 validator rather than half-implementing it.
+- Registry entry (validate category, JSON family), relations edges, and sitemap line.
+
+### Notes
+- Heavy validations run in a worker; Load Sample stays load-only per the house rule.
+- Docs deferred to a fast-follow (same load-snippet decision as the other new tools).

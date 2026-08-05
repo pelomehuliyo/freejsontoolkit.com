@@ -128,4 +128,10 @@ export const RELATIONS: Record<string, Relation[]> = {
     { id: "json-formatter", label: "Format the payload", kind: "next" },
     { id: "json-validator", label: "Validate the payload", kind: "pair" },
   ],
+  "timestamp-converter": [
+    { id: "uuid-generator", label: "Generate a fresh id", kind: "pair" },
+    { id: "jwt-decoder", label: "Decode a token's time claims", kind: "pair" },
+    { id: "base64", label: "Encode / decode values", kind: "pair" },
+    { id: "regex-tester", label: "Extract timestamps with regex", kind: "pair" },
+  ],
 };

@@ -445,6 +445,81 @@ Shipped 2026-08-03, patched 2025-12-31.`,
       },
     ],
   },
+  "timestamp-converter": {
+    eyebrow: "Docs · Timestamp",
+    conceptTitle: "Two directions across one instant",
+    concept:
+      "A Unix timestamp counts the elapsed time since the epoch — January 1st, 1970, 00:00:00 UTC — " +
+      "in a chosen unit: seconds (classic Unix), milliseconds (what JavaScript's Date.now() returns), " +
+      "microseconds (Go, Postgres), or nanoseconds (Go, Rust). In the Timestamp → Date direction the " +
+      "engine rescales your number to milliseconds, builds a Date, and shows the same instant in your " +
+      "local time and UTC, plus a richer breakdown (day of year, ISO week, relative time). In the " +
+      "reverse direction it parses a human-readable date — local ISO, UTC (Z), RFC/HTTP, or a bare " +
+      "date — and reports the equivalent value in every unit at once. All of it runs locally on the " +
+      "browser's native Date engine.",
+    lead: "before-after",
+    itemsLabel: "Things to know",
+    items: [
+      {
+        kind: "error",
+        title: "Magnitude betrays the unit",
+        body:
+          "A timestamp's digit count usually tells you its unit: 10 digits is seconds, 13 is " +
+          "milliseconds, 16 is microseconds, 19 is nanoseconds. Load this — it's a seconds value — " +
+          "then try switching the unit to milliseconds and watch the date jump to 1970-Jan-01.",
+        snippet: `1753862400`,
+      },
+      {
+        kind: "error",
+        title: "Fractional seconds",
+        body:
+          "A timestamp can carry a decimal part (e.g. 1753862400.5). Because the engine always " +
+          "rescales through milliseconds, the fractional second survives the round-trip instead of " +
+          "being silently dropped.",
+        snippet: `1753862400.5`,
+      },
+      {
+        kind: "note",
+        title: "Local vs UTC is not a bug",
+        body:
+          "A timestamp is an absolute instant, but the same instant is displayed differently in your " +
+          "local timezone versus UTC. The readout shows both side by side, so an 'off by an hour' " +
+          "is your zone's offset — not an error in the conversion.",
+      },
+      {
+        kind: "note",
+        title: "What the reverse accepts",
+        body:
+          "Date → Timestamp parses local ISO strings (2026-08-05T12:00:00, treated as your local " +
+          "time), UTC ISO strings ending in Z, RFC/HTTP dates like Wed, 05 Aug 2026 12:00:00 GMT, " +
+          "and bare dates like 2026-08-05 (local midnight). Anything else reports the exact error.",
+        snippet: `2026-08-05T12:00:00`,
+      },
+    ],
+    examplesLabel: "Try these",
+    examples: [
+      {
+        title: "The classic epoch",
+        note: "10-digit seconds — the number every Unix reference starts from.",
+        snippet: `0`,
+      },
+      {
+        title: "A modern second",
+        note: "A typical 2020s timestamp in seconds.",
+        snippet: `1753862400`,
+      },
+      {
+        title: "Milliseconds",
+        note: "13 digits — what new Date().getTime() returns in JavaScript.",
+        snippet: `1753862400000`,
+      },
+      {
+        title: "Date to timestamp",
+        note: "Switch to Date → Timestamp and watch every unit appear at once.",
+        snippet: `2026-08-05T12:00:00`,
+      },
+    ],
+  },
   "json-formatter": {
     eyebrow: "Docs · Format",
     conceptTitle: "What formatting does (and cannot do)",

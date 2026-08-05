@@ -1,0 +1,1000 @@
+---
+import ToolShell from "../../components/tools/ToolShell.astro";
+import ToolHeader from "../../components/tools/ToolHeader.astro";
+import ToolWorkspace from "../../components/tools/ToolWorkspace.astro";
+import CodeEditor from "../../components/tools/CodeEditor.astro";
+import ToolActions from "../../components/tools/ToolActions.astro";
+import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import Card from "../../components/Card.astro";
+import Button from "../../components/Button.astro";
+import Container from "../../components/Container.astro";
+import { MODES, UNITS } from "../../lib/tools/timestamp-converter/constants";
+import RelatedTools from "../../components/tools/RelatedTools.astro";
+import ToolDocs from "../../components/tools/ToolDocs.astro";
+import CompareLinks from "../../components/tools/CompareLinks.astro";
+import ToolNudge from "../../components/tools/ToolNudge.astro";
+---
+
+<ToolShell
+  title="Timestamp Converter — Unix Timestamp to Date & Back (Free, Local)"
+  description="Free online Unix timestamp converter. Convert epoch seconds, milliseconds, microseconds and nanoseconds to human-readable dates, and any date back to Unix time — 100% local, no upload."
+  activePath="/tools/timestamp-converter"
+>
+  <ToolHeader
+    slot="header"
+    breadcrumbs={[{ label: "Home", href: "/" }, { label: "Timestamp Converter" }]}
+    title="Timestamp Converter"
+    subtitle="Unix time to a human date, and any date back to Unix time — in seconds, ms, µs or ns."
+  />
+
+  <ToolWorkspace slot="workspace" layout="3-col">
+    <div slot="input" class="ws-fill">
+      <Card variant="flat" class="workspace-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">INPUT</span>
+          <ToolActions id="input-actions" variant="inset" actions={["sample", "clear"]} />
+        </div>
+        <CodeEditor
+          id="ts-input"
+          label="Timestamp or date input"
+          placeholder={"Paste a Unix timestamp to convert to a date\n…or a date like 2026-08-05T12:00:00 to get Unix time"}
+        >
+          <div class="editor-info-bar" slot>
+            <span class="info-status" id="ts-input-status">Status: Empty</span>
+            <span class="info-meta" id="ts-input-count">0 chars</span>
+          </div>
+        </CodeEditor>
+      </Card>
+    </div>
+
+    <div slot="controls">
+      <Card variant="flat" class="workspace-card settings-card">
+        <h2 class="display-sm settings-title">Options</h2>
+        <div class="settings-divider"></div>
+
+        <div class="settings-group">
+          <span class="settings-label caption-mono">direction</span>
+          <div class="seg seg-2" role="group" aria-label="Direction">
+            {
+              MODES.map((m, i) => (
+                <button
+                  type="button"
+                  class:list={["seg-btn", { "is-active": i === 0 }]}
+                  data-ts-mode={m.id}
+                  aria-pressed={i === 0 ? "true" : "false"}
+                >
+                  {m.label}
+                </button>
+              ))
+            }
+          </div>
+        </div>
+
+        <div class="settings-group" id="ts-unit-group">
+          <span class="settings-label caption-mono">unit</span>
+          <div class="seg seg-4" role="group" aria-label="Unit">
+            {
+              UNITS.map((u, i) => (
+                <button
+                  type="button"
+                  class:list={["seg-btn ts-unit-btn", { "is-active": i === 0 }]}
+                  data-ts-unit={u.id}
+                  aria-pressed={i === 0 ? "true" : "false"}
+                >
+                  {u.label}
+                </button>
+              ))
+            }
+          </div>
+          <p class="caption settings-help" id="ts-unit-help">
+            The unit your input timestamp is expressed in.
+          </p>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <button id="ts-now" type="button" class="now-btn">
+          <span class="now-dot" aria-hidden="true"></span>
+          Use current time
+        </button>
+
+        <Button id="ts-run" variant="primary" size="lg" shape="square" class="action-btn"
+          >Convert</Button
+        >
+
+        <div class="ts-readout" id="ts-readout" hidden>
+          <div class="ts-now-line caption-mono" id="ts-live-clock">—</div>
+          <div class="ts-row" id="ts-row-valid">
+            <span class="ts-label caption-mono">valid</span>
+            <span class="ts-val ts-ok" id="ts-valid-text">yes</span>
+          </div>
+          <div class="ts-row">
+            <span class="ts-label caption-mono">local</span>
+            <span class="ts-val" id="ts-local">—</span>
+          </div>
+          <div class="ts-row">
+            <span class="ts-label caption-mono">UTC</span>
+            <span class="ts-val" id="ts-utc">—</span>
+          </div>
+          <div class="ts-row">
+            <span class="ts-label caption-mono">epoch ms</span>
+            <span class="ts-val" id="ts-epoch-ms">—</span>
+          </div>
+        </div>
+
+        <ErrorBanner id="ts-error" />
+
+        <div class="status-banner caption">
+          <span class="status-indicator"><span class="dot idle" id="ts-status-dot"></span></span>
+          <span class="sr-only" id="ts-announce" aria-live="polite"></span>
+          Local sandbox active
+        </div>
+      </Card>
+    </div>
+
+    <div slot="output" class="ws-fill ws-output">
+      <Card variant="flat" class="workspace-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">OUTPUT</span>
+          <ToolActions id="output-actions" variant="inset" actions={["copy", "download"]} />
+        </div>
+        <div class="ts-out-wrap" id="ts-out-wrap" hidden>
+          <div class="ts-out-grid" id="ts-out-grid"></div>
+        </div>
+        <CodeEditor
+          id="ts-output"
+          label="Timestamp converter output"
+          placeholder="The converted value appears here…"
+          readonly
+        >
+          <div class="editor-info-bar" slot>
+            <span class="info-status" id="ts-output-status">Output: Empty</span>
+            <span class="info-meta" id="ts-output-count">0 chars</span>
+          </div>
+        </CodeEditor>
+      </Card>
+    </div>
+  </ToolWorkspace>
+
+  <section class="ts-how ts-reveal" aria-labelledby="how-title">
+    <Container size="narrow">
+      <div class="ts-how-head">
+        <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
+        <h2 id="how-title" class="display-md ts-how-title">Two directions, one moment in time</h2>
+        <p class="body-sm ts-how-sub">
+          A Unix timestamp counts seconds (or milliseconds, microseconds, nanoseconds) since January
+          1st, 1970 UTC. This tool reads that number and shows you the instant it names — then it
+          can go the other way and turn any date you type back into the numbers.
+        </p>
+      </div>
+      <div class="ts-steps">
+        <div class="ts-step">
+          <span class="ts-step-num" aria-hidden="true">1</span>
+          <h3 class="body-sm-strong ts-step-title">Pick a direction</h3>
+          <p class="caption ts-step-desc">
+            Timestamp → Date to read a number; Date → Timestamp to get the numbers for a date.
+          </p>
+        </div>
+        <div class="ts-step">
+          <span class="ts-step-num" aria-hidden="true">2</span>
+          <h3 class="body-sm-strong ts-step-title">Choose the unit</h3>
+          <p class="caption ts-step-desc">
+            Seconds is classic Unix, milliseconds is what JS Date.now() returns, µs matches Go and
+            Postgres, ns matches Go and Rust.
+          </p>
+        </div>
+        <div class="ts-step">
+          <span class="ts-step-num" aria-hidden="true">3</span>
+          <h3 class="body-sm-strong ts-step-title">Paste or use "now"</h3>
+          <p class="caption ts-step-desc">
+            Type or paste a value and it converts live — or grab the exact current time with one
+            click.
+          </p>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <ToolDocs />
+  <CompareLinks />
+  <RelatedTools />
+  <ToolNudge />
+
+  <section class="faq-section" aria-labelledby="faq-title">
+    <Container size="narrow">
+      <div class="faq-header">
+        <span class="caption-mono section-eyebrow">FAQ</span>
+        <h2 id="faq-title" class="display-lg section-title">Quick answers</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary class="faq-summary">Is my timestamp sent anywhere?</summary>
+          <p class="body-md faq-answer">
+            No. All conversion runs entirely in your browser with the native Date engine. Nothing
+            you paste leaves your machine.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Which unit should I pick?</summary>
+          <p class="body-md faq-answer">
+            If the number is 10 digits long, it's seconds. 13 digits → milliseconds. 16 digits →
+            microseconds. 19 digits → nanoseconds. When in doubt, try seconds first — the readout
+            makes it obvious if the value looks wrong.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Why does the date look off by an hour?</summary>
+          <p class="body-md faq-answer">
+            A timestamp is an absolute instant; the same instant reads differently in UTC and in
+            your local timezone. The readout shows both, side by side, so the "off by an hour" is
+            just your zone's offset — not a bug.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">What date formats can I paste?</summary>
+          <p class="body-md faq-answer">
+            Local ISO like <code>2026-08-05T12:00:00</code> (treated as your local time), UTC ISO ending
+            in <code>Z</code>, RFC/HTTP dates like <code>Wed, 05 Aug 2026 12:00:00 GMT</code>, and
+            bare dates like <code>2026-08-05</code> (local midnight).
+          </p>
+        </details>
+      </div>
+    </Container>
+  </section>
+</ToolShell>
+
+<script>
+  import { timestampStore } from "../../lib/tools/timestamp-converter/store";
+  import {
+    setInput,
+    setMode,
+    setUnit,
+    useNow,
+    clearAll,
+    convert,
+    loadSample,
+  } from "../../lib/tools/timestamp-converter/actions";
+  import { UNIT_ORDER } from "../../lib/tools/timestamp-converter/engine";
+  import type { TsMode, TsUnit } from "../../lib/tools/timestamp-converter/types";
+  import { debounce } from "../../shared/debounce";
+  import { announce, initAnnounce } from "../../shared/announce";
+  import { copyToClipboard } from "../../shared/clipboard";
+  import { downloadFile } from "../../shared/download";
+
+  const inTextarea = document.getElementById("ts-input-textarea") as HTMLTextAreaElement | null;
+  const outTextarea = document.getElementById("ts-output-textarea") as HTMLTextAreaElement | null;
+  const inStatus = document.getElementById("ts-input-status") as HTMLElement | null;
+  const inCount = document.getElementById("ts-input-count") as HTMLElement | null;
+  const outStatus = document.getElementById("ts-output-status") as HTMLElement | null;
+  const outCount = document.getElementById("ts-output-count") as HTMLElement | null;
+  const runBtn = document.getElementById("ts-run") as HTMLButtonElement | null;
+  const nowBtn = document.getElementById("ts-now") as HTMLButtonElement | null;
+  const unitGroup = document.getElementById("ts-unit-group") as HTMLElement | null;
+  const unitHelp = document.getElementById("ts-unit-help") as HTMLElement | null;
+  const modeBtns = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-ts-mode]"));
+  const unitBtns = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-ts-unit]"));
+  const errorBanner = document.getElementById("ts-error") as HTMLElement | null;
+  const statusDot = document.getElementById("ts-status-dot") as HTMLElement | null;
+
+  const readout = document.getElementById("ts-readout") as HTMLElement | null;
+  const liveClock = document.getElementById("ts-live-clock") as HTMLElement | null;
+  const validText = document.getElementById("ts-valid-text") as HTMLElement | null;
+  const localEl = document.getElementById("ts-local") as HTMLElement | null;
+  const utcEl = document.getElementById("ts-utc") as HTMLElement | null;
+  const epochMs = document.getElementById("ts-epoch-ms") as HTMLElement | null;
+
+  const outWrap = document.getElementById("ts-out-wrap") as HTMLElement | null;
+  const outGrid = document.getElementById("ts-out-grid") as HTMLElement | null;
+
+  initAnnounce("ts-announce");
+
+  const debouncedInput = debounce((value: string) => {
+    setInput(timestampStore, value);
+    convert(timestampStore, false);
+  }, 180);
+
+  /* Live clock — updates the "now" line every second so the readout always
+     has a reference point. */
+  function tickClock(): void {
+    if (liveClock) {
+      const d = new Date();
+      liveClock.textContent =
+        "now · " +
+        Math.floor(d.getTime() / 1000) +
+        "s · " +
+        d.getTime() +
+        "ms · " +
+        d.toLocaleTimeString();
+    }
+  }
+  tickClock();
+  window.setInterval(tickClock, 1000);
+
+  /** Render the to-date breakdown into the readout. */
+  function renderDate(result: any): void {
+    const date = result.date;
+    if (!readout || !date) return;
+    tickClock();
+    if (validText) validText.textContent = "yes";
+    if (localEl) localEl.textContent = date.humanLocal;
+    if (utcEl) utcEl.textContent = date.humanUtc;
+    if (epochMs) epochMs.textContent = date.epochMs.toLocaleString("en-US") + " ms";
+  }
+
+  /** Render the to-timestamp unit table into the output grid. */
+  function renderValues(result: any): void {
+    if (!outGrid || !result.values) return;
+    outGrid.innerHTML = "";
+    UNIT_ORDER.forEach((unit) => {
+      const vs = result.values.find((v: any) => v.unit === unit);
+      if (!vs) return;
+      const card = document.createElement("div");
+      card.className = "ts-unit-card";
+      const u = document.createElement("span");
+      u.className = "ts-unit-name caption-mono";
+      u.textContent = unit;
+      const v = document.createElement("span");
+      v.className = "ts-unit-value";
+      v.textContent = vs.value;
+      card.appendChild(u);
+      card.appendChild(v);
+      outGrid.appendChild(card);
+    });
+  }
+
+  timestampStore.subscribe((state) => {
+    const focused = inTextarea && document.activeElement === inTextarea;
+    if (inTextarea && inTextarea.value !== state.input && !focused) {
+      inTextarea.value = state.input;
+      inTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+
+    // segmented reflection
+    modeBtns.forEach((b) => {
+      const on = b.getAttribute("data-ts-mode") === state.mode;
+      b.classList.toggle("is-active", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    unitBtns.forEach((b) => {
+      const on = b.getAttribute("data-ts-unit") === state.unit;
+      b.classList.toggle("is-active", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+
+    // unit control only meaningful for timestamp→date
+    if (unitGroup) unitGroup.classList.toggle("is-disabled", state.mode !== "to-date");
+    unitBtns.forEach((b) => {
+      b.classList.toggle("is-dim", state.mode !== "to-date");
+    });
+    if (unitHelp) {
+      unitHelp.textContent =
+        state.mode === "to-date"
+          ? "The unit your input timestamp is expressed in."
+          : "Only used for Timestamp → Date. Date → Timestamp shows every unit.";
+    }
+
+    // button label
+    if (runBtn) {
+      if (state.isRunning) {
+        runBtn.disabled = true;
+        runBtn.textContent = "Converting…";
+      } else {
+        runBtn.disabled = false;
+        runBtn.textContent = "Convert";
+      }
+    }
+
+    // input status bar
+    if (inStatus) {
+      if (state.input.trim() === "") {
+        inStatus.textContent = "Status: Empty";
+        inStatus.style.color = "";
+      } else if (state.result && !state.result.valid) {
+        inStatus.textContent = "Status: Invalid";
+        inStatus.style.color = "var(--color-error)";
+      } else {
+        inStatus.textContent = "Status: Ready";
+        inStatus.style.color = "var(--color-success)";
+      }
+    }
+    if (inCount) inCount.textContent = state.input.length.toLocaleString() + " chars";
+
+    // output area
+    const hasResult = !!state.result && state.result.valid;
+    if (outWrap) outWrap.hidden = !hasResult;
+    const outText = hasResult ? serializeOutput(state) : "";
+    if (outTextarea && outTextarea.value !== outText) {
+      outTextarea.value = outText;
+      outTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+    if (outStatus) {
+      if (!hasResult) {
+        outStatus.textContent = "Output: Empty";
+        outStatus.style.color = "";
+      } else {
+        outStatus.textContent = state.mode === "to-date" ? "Output: Date" : "Output: Timestamp";
+        outStatus.style.color = "var(--color-success)";
+      }
+    }
+    if (outCount) outCount.textContent = outText.length.toLocaleString() + " chars";
+
+    if (state.result && state.result.valid) {
+      if (state.mode === "to-date") renderDate(state.result);
+      else renderValues(state.result);
+    }
+    if (readout) readout.hidden = state.mode !== "to-date" || !state.result || !state.result.valid;
+
+    if (statusDot) {
+      statusDot.classList.remove("idle", "active", "error");
+      statusDot.classList.add(
+        state.isRunning
+          ? "active"
+          : hasResult
+            ? "active"
+            : state.result && !state.result.valid
+              ? "error"
+              : "idle",
+      );
+    }
+
+    if (errorBanner) {
+      if (state.error) (errorBanner as any).show?.(state.error);
+      else (errorBanner as any).hide?.();
+    }
+    if (state.error) announce("Error: " + state.error);
+  });
+
+  function serializeOutput(state: any): string {
+    if (!state.result || !state.result.valid) return "";
+    if (state.mode === "to-date") {
+      const d = state.result.date;
+      return [
+        "Local: " + d.humanLocal,
+        "UTC:   " + d.humanUtc,
+        "ISO (UTC): " + d.utcIso,
+        "ISO (local): " + d.localIso,
+        "Day of year: " + d.dayOfYear,
+        "ISO week: " + d.isoWeekText,
+        "Relative: " + d.relative,
+        "Epoch ms: " + d.epochMs,
+      ].join("\n");
+    }
+    const lines = ["Date: " + state.result.inputDate, ""];
+    UNIT_ORDER.forEach((unit: TsUnit) => {
+      const vs = state.result.values.find((v: any) => v.unit === unit);
+      if (vs) lines.push(padUnit(unit) + ": " + vs.number);
+    });
+    return lines.join("\n");
+  }
+
+  function padUnit(u: TsUnit): string {
+    const map: Record<TsUnit, string> = {
+      seconds: "Seconds",
+      milliseconds: "Milliseconds",
+      microseconds: "Microseconds",
+      nanoseconds: "Nanoseconds",
+    };
+    return map[u];
+  }
+
+  if (inTextarea) inTextarea.addEventListener("input", () => debouncedInput(inTextarea.value));
+
+  if (runBtn) runBtn.addEventListener("click", () => convert(timestampStore, true));
+  if (nowBtn)
+    nowBtn.addEventListener("click", () => {
+      useNow(timestampStore);
+      convert(timestampStore, true);
+      announce("Current time set");
+    });
+  modeBtns.forEach((b) =>
+    b.addEventListener("click", () => {
+      setMode(timestampStore, b.getAttribute("data-ts-mode") as TsMode);
+      convert(timestampStore, true);
+    }),
+  );
+  unitBtns.forEach((b) =>
+    b.addEventListener("click", () => {
+      if (timestampStore.get().mode !== "to-date") return;
+      setUnit(timestampStore, b.getAttribute("data-ts-unit") as TsUnit);
+      convert(timestampStore, true);
+    }),
+  );
+
+  const inputActions = document.getElementById("input-actions");
+  if (inputActions)
+    inputActions.addEventListener("tool-action", (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      if (action === "sample") {
+        loadSample(timestampStore);
+        convert(timestampStore, true);
+        announce("Sample loaded");
+      }
+      if (action === "clear") {
+        clearAll(timestampStore);
+        announce("Cleared");
+      }
+    });
+
+  const outputActions = document.getElementById("output-actions");
+  if (outputActions)
+    outputActions.addEventListener("tool-action", async (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      const st = timestampStore.get();
+      const out = st.result && st.result.valid ? serializeOutput(st) : "";
+      if (action === "copy") {
+        const ok = out ? await copyToClipboard(out) : false;
+        const btn = outputActions.querySelector("[data-action='copy']");
+        if (ok && btn) {
+          const orig = btn.textContent || "Copy";
+          btn.textContent = "Copied!";
+          announce("Output copied");
+          setTimeout(() => {
+            btn.textContent = orig;
+          }, 1500);
+        }
+      }
+      if (action === "download") {
+        if (out) {
+          downloadFile(out, "timestamp-converted.txt", "text/plain;charset=utf-8;");
+          announce("Download started");
+        }
+      }
+    });
+
+  document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "SELECT") return;
+      e.preventDefault();
+      convert(timestampStore, true);
+    }
+  });
+
+  // subtle scroll-reveal on the lower section
+  if ("IntersectionObserver" in window) {
+    const revs = Array.from(document.querySelectorAll<HTMLElement>(".ts-reveal"));
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((en) => {
+          if (en.isIntersecting) {
+            en.target.classList.add("is-visible");
+            io.unobserve(en.target);
+          }
+        });
+      },
+      { threshold: 0.12 },
+    );
+    revs.forEach((el) => io.observe(el));
+  }
+</script>
+
+<style>
+  .workspace-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    gap: var(--spacing-md);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-hairline);
+    padding-bottom: var(--spacing-sm);
+  }
+  .column-title {
+    color: var(--color-mute);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+  .editor-info-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--color-hairline);
+    border-top: none;
+    border-bottom-left-radius: var(--rounded-sm);
+    border-bottom-right-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    padding: 6px var(--spacing-sm);
+    font-size: 11px;
+    color: var(--color-mute);
+    font-family: var(--font-sans);
+  }
+  .info-status {
+    font-weight: 500;
+  }
+  .settings-card {
+    padding: var(--spacing-lg);
+  }
+  .settings-title {
+    margin: 0;
+  }
+  .settings-divider {
+    height: 1px;
+    background-color: var(--color-hairline);
+    margin: var(--spacing-xs) 0;
+  }
+  .settings-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-md);
+  }
+  .settings-label {
+    color: var(--color-mute);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .settings-help {
+    color: var(--color-mute);
+    margin: 2px 0 0;
+    line-height: 1.4;
+  }
+  .settings-group.is-disabled .settings-help {
+    opacity: 0.6;
+  }
+
+  /* segmented control */
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    overflow: hidden;
+    width: 100%;
+  }
+  .seg-btn {
+    flex: 1;
+    border: none;
+    background: var(--color-canvas);
+    color: var(--color-body);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 8px 6px;
+    cursor: pointer;
+    white-space: normal;
+    line-height: 1.25;
+    transition:
+      background-color 0.18s ease,
+      color 0.18s ease,
+      opacity 0.18s ease;
+  }
+  .seg-btn + .seg-btn {
+    border-left: 1px solid var(--color-hairline);
+  }
+  .seg-btn.is-active {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+  }
+  .seg-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+  }
+  .seg-btn.is-dim {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  /* now button */
+  .now-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    color: var(--color-body);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      color 0.15s ease,
+      background-color 0.15s ease;
+  }
+  .now-btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent-active);
+  }
+  .now-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    animation: ts-pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes ts-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(33, 167, 138, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 4px rgba(33, 167, 138, 0);
+    }
+  }
+
+  .action-btn {
+    width: 100%;
+    margin-top: var(--spacing-sm);
+  }
+
+  /* live readout */
+  .ts-readout {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .ts-now-line {
+    color: var(--color-mute);
+    font-size: 11px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--color-hairline);
+    margin-bottom: 1px;
+  }
+  .ts-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+  }
+  .ts-label {
+    color: var(--color-mute);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    flex: none;
+  }
+  .ts-val {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-ink);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ts-ok {
+    color: var(--color-accent-active);
+  }
+
+  .status-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-mute);
+    margin-top: auto;
+    padding-top: var(--spacing-md);
+  }
+  .status-indicator .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-hairline-strong);
+  }
+  .status-indicator .dot.active {
+    background-color: var(--color-accent);
+  }
+  .status-indicator .dot.error {
+    background-color: var(--color-error);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* output unit grid */
+  .ts-out-wrap {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft-2);
+    padding: var(--spacing-sm);
+  }
+  .ts-out-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xs);
+  }
+  .ts-unit-card {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+  }
+  .ts-unit-name {
+    color: var(--color-mute);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .ts-unit-value {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-accent-active);
+    word-break: break-all;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* how it works */
+  .ts-how {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas-soft);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .ts-how-head {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .section-eyebrow {
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+  }
+  .ts-how-title {
+    color: var(--color-ink);
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+  .ts-how-sub {
+    color: var(--color-body);
+    margin: 0;
+    line-height: 1.6;
+  }
+  .ts-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xl);
+  }
+  .ts-step {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-lg);
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    text-align: center;
+    align-items: center;
+  }
+  .ts-step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-accent);
+    color: var(--color-on-primary);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+  }
+  .ts-step-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+  .ts-step-desc {
+    color: var(--color-body);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .faq-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .faq-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .faq-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft);
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  .faq-summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink);
+    padding: var(--spacing-xs) 0;
+    user-select: none;
+  }
+  .faq-summary:hover {
+    color: var(--color-accent);
+  }
+  .faq-answer {
+    margin-top: var(--spacing-sm);
+    font-size: 13px;
+    color: var(--color-body);
+    line-height: 1.6;
+  }
+  .faq-answer code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background-color: var(--color-canvas-soft-2);
+    padding: 1px 4px;
+    border-radius: var(--rounded-xs);
+  }
+
+  .ts-reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s ease;
+  }
+  .ts-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (min-width: 960px) {
+    .workspace-card :global(.editor-outer) {
+      flex: none;
+      height: 650px;
+      min-height: 650px;
+    }
+    .workspace-card :global(.editor-wrapper) {
+      height: 100%;
+    }
+  }
+  @media (max-width: 959px) {
+    .workspace-card :global(.editor-outer) {
+      height: 320px;
+      flex: 0 0 320px;
+      min-height: 0;
+    }
+    .workspace-card :global(.editor-wrapper) {
+      height: 100%;
+    }
+    .ts-steps {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-md);
+    }
+    .ts-out-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
