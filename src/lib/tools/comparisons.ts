@@ -317,4 +317,280 @@ export const COMPARISONS: Record<string, Comparison> = {
       "Use JSON → XML when you're generating data for a legacy system; use XML → JSON when you're receiving data from one. They're perfect mirrors, and you'll often use them together in a pipeline.",
     note: "Both conversions are lossless in their own direction. JSON → XML will respect your array order and typed values; XML → JSON will preserve attributes and element order. The reverse of a round‑trip may not be identical if you toggle options (like attributes or array preservation), but the core data remains intact.",
   },
+  "json-validator-vs-json-schema-lite": {
+    slug: "json-validator-vs-json-schema-lite",
+    aId: "json-validator",
+    bId: "json-schema-lite",
+    title: "JSON Validator vs JSON Schema Lite",
+    intro:
+      "Both look at JSON and tell you if something's wrong — but they're answering different questions. " +
+      "The Validator checks the grammar: is this even valid JSON? Schema Lite checks the shape: does this " +
+      "valid JSON match the structure I expect? You validate syntax first, then validate against a schema. " +
+      "Both run 100% in your browser.",
+    useA: {
+      heading: "Use the Validator when",
+      points: [
+        "You're not sure the JSON is syntactically valid and want a definitive yes or no.",
+        "Something threw a parse error and you need the exact line and column.",
+        "You want to catch trailing commas, unquoted keys, and single quotes before they bite.",
+        "You just need to know 'does this parse?' before anything else.",
+      ],
+    },
+    useB: {
+      heading: "Use Schema Lite when",
+      points: [
+        "The JSON parses fine, but you need to confirm it has the fields and types you expect.",
+        "You're checking an API response or config against a known shape.",
+        "You want to require certain keys and validate their types (string, number, object…).",
+        "You're catching 'valid JSON, wrong structure' bugs — the kind a syntax check can't see.",
+      ],
+    },
+    attributes: [
+      { label: "Primary job", a: "Confirm JSON is syntactically valid", b: "Confirm JSON matches an expected shape" },
+      { label: "Question it answers", a: "'Does this parse?'", b: "'Does this have what I expect?'" },
+      { label: "Needs a schema?", a: "No — one input", b: "Yes — JSON + schema" },
+      { label: "Catches syntax errors", a: "Yes — exact line + column", b: "No — assumes valid JSON" },
+      { label: "Catches missing / wrong-typed fields", a: "No", b: "Yes" },
+      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+    ],
+    verdict:
+      "Validate syntax first, then validate shape. The Validator tells you the JSON parses; Schema Lite " +
+      "tells you it's the JSON you were expecting. A payload can pass one and fail the other — valid syntax " +
+      "with a missing required field, or the right shape that's one brace short.",
+    note:
+      "Schema Lite is deliberately a lightweight subset — type checks, required keys, and nested structure — " +
+      "not the full JSON Schema spec. It assumes its input is already valid JSON; run the Validator first if " +
+      "you're unsure. A full JSON Schema Validator is on the roadmap.",
+  },
+
+  "json-diff-vs-text-diff": {
+    slug: "json-diff-vs-text-diff",
+    aId: "json-diff",
+    bId: "text-diff",
+    title: "JSON Diff vs Text Diff",
+    intro:
+      "Both show you what changed between two documents, but they 'see' differently. JSON Diff understands " +
+      "structure — it compares keys and values, so a reformatted or re-keyed object doesn't read as a change. " +
+      "Text Diff compares line by line, format-agnostic, for any text at all. Pick by what you're comparing: " +
+      "structured data or raw text.",
+    useA: {
+      heading: "Use JSON Diff when",
+      points: [
+        "You're comparing two JSON documents — configs, payloads, API responses.",
+        "You want a semantic diff: key/value changes, not whitespace or key-order noise.",
+        "The two versions might be formatted differently but you only care about the data.",
+        "You need to spot an added, removed, or changed field in a nested structure.",
+      ],
+    },
+    useB: {
+      heading: "Use Text Diff when",
+      points: [
+        "You're comparing non-JSON text — logs, markdown, code, env files, SQL.",
+        "You want a line-by-line diff with additions and removals highlighted.",
+        "The format isn't JSON, or you care about the exact lines as written.",
+        "You want to ignore case or whitespace differences with a toggle.",
+      ],
+    },
+    attributes: [
+      { label: "Primary job", a: "Semantic diff of two JSON documents", b: "Line-by-line diff of any two texts" },
+      { label: "Understands", a: "JSON structure — keys, values, nesting", b: "Plain lines, any format" },
+      { label: "Whitespace / key-order changes", a: "Ignored — data only", b: "Shown (unless toggled off)" },
+      { label: "Works on non-JSON", a: "No — JSON only", b: "Yes — anything textual" },
+      { label: "Typical input", a: "Configs, payloads, API responses", b: "Logs, code, markdown, env, SQL" },
+      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+    ],
+    verdict:
+      "If both sides are JSON and you care about the data, use JSON Diff — it won't shout about re-indenting " +
+      "or re-ordering keys. For everything else, or when the exact lines matter, use Text Diff.",
+    note:
+      "A useful habit: if two JSON files diff 'noisy' as text, run them through the Formatter first, or just " +
+      "use JSON Diff and let it compare meaning instead of characters.",
+  },
+
+  "toml-to-json-vs-json-to-toml": {
+    slug: "toml-to-json-vs-json-to-toml",
+    aId: "toml-to-json",
+    bId: "json-to-toml",
+    aLabel: "TOML → JSON",
+    bLabel: "JSON → TOML",
+    aBadge: "TOML",
+    bBadge: "{ }",
+    aTag: "TOML to JSON converter",
+    bTag: "JSON to TOML converter",
+    title: "TOML → JSON vs JSON → TOML",
+    intro:
+      "Two sides of the same conversion. TOML → JSON parses a TOML config into a JSON object; JSON → TOML " +
+      "does the reverse, serializing JSON into clean TOML. Together they let you move data between the " +
+      "human-friendly config format and the API-native one — both run 100% locally.",
+    useA: {
+      heading: "Use TOML → JSON when",
+      points: [
+        "You have a TOML config (Cargo.toml, pyproject.toml) and need it as JSON.",
+        "An API or tool expects JSON but your source is TOML.",
+        "You're migrating or bridging a TOML-based project into a JSON pipeline.",
+      ],
+    },
+    useB: {
+      heading: "Use JSON → TOML when",
+      points: [
+        "You have JSON data that needs to become a readable TOML config.",
+        "You're generating a config file for a TOML-based toolchain.",
+        "You want hand-editable output — TOML is friendlier for humans to tweak.",
+      ],
+    },
+    attributes: [
+      { label: "Direction", a: "TOML → JSON", b: "JSON → TOML" },
+      { label: "Input", a: "TOML", b: "JSON" },
+      { label: "Output", a: "JSON", b: "TOML" },
+      { label: "Handles nested tables?", a: "Yes", b: "Yes" },
+      { label: "Preserves types?", a: "Yes — dates, numbers, booleans", b: "Yes — within TOML's types" },
+      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+    ],
+    verdict:
+      "Use TOML → JSON when you're consuming a config; use JSON → TOML when you're producing one. They're " +
+      "mirrors, and you'll often use both when bridging a TOML project and a JSON API.",
+    note:
+      "Powered by the same TOML engine (smol-toml) in both directions, so a round trip preserves the core " +
+      "data. TOML's richer date/time types map to strings in JSON, so a round trip may normalize those.",
+  },
+
+  "yaml-to-json-vs-json-to-yaml": {
+    slug: "yaml-to-json-vs-json-to-yaml",
+    aId: "yaml-to-json",
+    bId: "json-to-yaml",
+    aLabel: "YAML → JSON",
+    bLabel: "JSON → YAML",
+    aBadge: "YAML",
+    bBadge: "{ }",
+    aTag: "YAML to JSON converter",
+    bTag: "JSON to YAML converter",
+    title: "YAML → JSON vs JSON → YAML",
+    intro:
+      "Two sides of the same conversion. YAML → JSON parses a YAML document into JSON; JSON → YAML does the " +
+      "reverse, serializing JSON into readable YAML. Since YAML is a superset of JSON, the two formats are " +
+      "close cousins — and these tools move you between them, both running 100% locally.",
+    useA: {
+      heading: "Use YAML → JSON when",
+      points: [
+        "You have a YAML config (CI pipelines, Kubernetes, docker-compose) and need it as JSON.",
+        "An API or tool expects JSON but your source is YAML.",
+        "You want to inspect or process a YAML document with JSON tooling.",
+      ],
+    },
+    useB: {
+      heading: "Use JSON → YAML when",
+      points: [
+        "You have JSON that should become a hand-editable YAML config.",
+        "You're writing or updating a YAML file and starting from JSON data.",
+        "You want cleaner, less-bracketed output for humans to read and tweak.",
+      ],
+    },
+    attributes: [
+      { label: "Direction", a: "YAML → JSON", b: "JSON → YAML" },
+      { label: "Input", a: "YAML", b: "JSON" },
+      { label: "Output", a: "JSON", b: "YAML" },
+      { label: "Handles nesting & lists?", a: "Yes", b: "Yes" },
+      { label: "Comments", a: "Dropped (JSON can't hold them)", b: "Not generated" },
+      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+    ],
+    verdict:
+      "Use YAML → JSON when you're consuming a config; use JSON → YAML when you're writing one. They're " +
+      "mirrors — and because YAML is a superset of JSON, the crossing is usually lossless for plain data.",
+    note:
+      "One honest caveat: YAML comments and some YAML-specific features (anchors, tags) don't survive into " +
+      "JSON, so a round trip may simplify those. Plain data — strings, numbers, booleans, lists, objects — " +
+      "round-trips cleanly.",
+  },
+
+  "csv-to-tsv-vs-tsv-to-csv": {
+    slug: "csv-to-tsv-vs-tsv-to-csv",
+    aId: "csv-to-tsv",
+    bId: "tsv-to-csv",
+    aLabel: "CSV → TSV",
+    bLabel: "TSV → CSV",
+    aBadge: "CSV",
+    bBadge: "TSV",
+    aTag: "Comma-separated values",
+    bTag: "Tab-separated values",
+    title: "CSV → TSV vs TSV → CSV",
+    intro:
+      "Same tabular data, different delimiter. CSV separates fields with commas; TSV separates them with " +
+      "tabs. These two tools swap one for the other — nothing more, nothing less. Pick by which delimiter " +
+      "your destination expects.",
+    useA: {
+      heading: "Use CSV → TSV when",
+      points: [
+        "A tool or pipeline expects tab-separated input but you have a CSV file.",
+        "Your fields contain commas, and tabs would avoid the quoting headaches.",
+        "You're moving a spreadsheet export into a TSV-based system.",
+      ],
+    },
+    useB: {
+      heading: "Use TSV → CSV when",
+      points: [
+        "A tool or spreadsheet expects comma-separated input but you have TSV.",
+        "You need the more universally recognized CSV format.",
+        "You're preparing tab-separated data for a CSV-based import.",
+      ],
+    },
+    attributes: [
+      { label: "Direction", a: "CSV → TSV", b: "TSV → CSV" },
+      { label: "Input delimiter", a: "Comma", b: "Tab" },
+      { label: "Output delimiter", a: "Tab", b: "Comma" },
+      { label: "Header row preserved?", a: "Yes", b: "Yes" },
+      { label: "Quoted fields handled?", a: "Yes — RFC 4180 parsing", b: "Yes — RFC 4180 output" },
+      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+    ],
+    verdict:
+      "They're the same operation pointed in opposite directions — use whichever matches the direction you're " +
+      "converting. If your data has commas in fields, TSV is often the calmer format; if you need broad " +
+      "compatibility, CSV is the safer destination.",
+    note:
+      "One honest caveat: CSV → TSV is the lossy direction if a field contains an embedded newline — TSV " +
+      "can't keep it in one cell, so the converter refuses by default (with an escape option). TSV → CSV is " +
+      "always lossless because CSV quoting can hold anything.",
+  },
+
+  "base64-vs-url-encode": {
+    slug: "base64-vs-url-encode",
+    aId: "base64",
+    bId: "url-encode",
+    title: "Base64 vs URL Encode",
+    intro:
+      "Both turn data into safe-to-transmit text, but they solve different problems. Base64 re-encodes binary " +
+      "or text into a compact ASCII alphabet so it survives transports that only carry text. URL encoding " +
+      "(percent-encoding) escapes the handful of characters that aren't allowed in a URL. One is for payloads; " +
+      "the other is for URLs.",
+    useA: {
+      heading: "Use Base64 when",
+      points: [
+        "You need to embed binary data (an image, a file) in text — a data URI, a JSON field, an email.",
+        "You're encoding a payload so it survives a text-only transport intact.",
+        "You're decoding a Base64 string back to its original bytes or text.",
+      ],
+    },
+    useB: {
+      heading: "Use URL Encode when",
+      points: [
+        "You're putting a value into a URL — a query string or path segment.",
+        "You need to escape spaces, &, ?, =, and other reserved characters.",
+        "You're building or reading query parameters and need them to round-trip safely.",
+      ],
+    },
+    attributes: [
+      { label: "Primary job", a: "Encode binary/text as ASCII text", b: "Escape characters for URLs" },
+      { label: "Typical use", a: "Embedding payloads, data URIs", b: "Query strings, URL segments" },
+      { label: "Output", a: "Base64 alphabet (A–Z, a–z, 0–9, +, /)", b: "Percent-escaped (%20, %26…)" },
+      { label: "Reversible?", a: "Yes — lossless decode", b: "Yes — lossless decode" },
+      { label: "Handles binary?", a: "Yes — that's the point", b: "Byte-level, but meant for text" },
+      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+    ],
+    verdict:
+      "If the data is going *into* a URL, URL-encode it. If the data needs to *be* text (a binary blob in a " +
+      "text field), Base64 it. They often appear together: a Base64 payload can still need URL-encoding if " +
+      "you then put it in a query string.",
+    note:
+      "Neither is encryption — both are trivially reversible encodings, not protection. If you're Base64-ing " +
+      "something sensitive, it's still readable to anyone who decodes it.",
+  },
 };
