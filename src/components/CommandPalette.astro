@@ -3,13 +3,33 @@
  * CommandPalette — the toolkit's shell. ⌘K / Ctrl+K everywhere, "/" off the
  * catalog (where the page's own inline filter owns "/").
  *
- * Instant fuzzy search over tools + categories + collections, keyboard
- * navigation, curated aliases, and the user's recent tools surfaced as shell
- * history. It reads the registry from the #fjt-registry data island the layout
- * already emits (now including each tool's `family`) and recents from
- * localStorage, so it takes no props and renders identically on every page.
+ * Instant fuzzy search over tools + categories + collections + comparisons,
+ * keyboard navigation, curated aliases, and the user's recent tools surfaced
+ * as shell history. It reads the registry from the #fjt-registry data island
+ * the layout already emits (including each tool's `family`), and emits its own
+ * #fjt-comparisons island from comparisons.ts so the comparison network is
+ * searchable too — all with no props, identical on every page.
  */
+import { COMPARISONS } from "../lib/tools/comparisons";
+import { getTool } from "../lib/tools/registry";
+
+// Comparison network index for the palette. Each side's display name resolves
+// from the registry so the palette never drifts from the catalog. Emitted as a
+// data island the client script below reads.
+const cmpIndex = Object.values(COMPARISONS).map((c) => {
+  const aTool = getTool(c.aId);
+  const bTool = getTool(c.bId);
+  return {
+    slug: c.slug,
+    title: c.title,
+    aName: c.aLabel ?? aTool?.name ?? c.aId,
+    bName: c.bLabel ?? bTool?.name ?? c.bId,
+  };
+});
+const cmpJson = JSON.stringify(cmpIndex).replace(/</g, "\\u003c");
 ---
+
+<script type="application/json" id="fjt-comparisons" set:html={cmpJson} />
 
 <div class="cmdk-overlay" id="cmdk-overlay" hidden>
   <div
@@ -30,7 +50,7 @@
         placeholder="search tools · jump to a category"
         autocomplete="off"
         spellcheck="false"
-        aria-label="Search tools, collections and categories"
+        aria-label="Search tools, collections, comparisons and categories"
         aria-controls="cmdk-list"
         aria-activedescendant=""
       />
@@ -127,6 +147,16 @@
     }
     const categories = Object.keys(catLabel).map((id) => ({ id, label: catLabel[id] }));
 
+    // comparison network weld — read the island this component emitted above.
+    type Cmp = { slug: string; title: string; aName: string; bName: string };
+    let comparisons: Cmp[] = [];
+    try {
+      const cmpIsland = document.getElementById("fjt-comparisons");
+      comparisons = cmpIsland ? (JSON.parse(cmpIsland.textContent || "[]") as Cmp[]) : [];
+    } catch {
+      comparisons = [];
+    }
+
     // collections weld — group LIVE tools by family (the mental-model lens).
     // Only families with ≥1 available tool surface; empty shelves stay quiet,
     // mirroring the /collections hub.
@@ -157,7 +187,8 @@
     // live readouts in the footer + empty state
     function syncCounts(): void {
       const rc = recents().length;
-      if (indexReadout) indexReadout.textContent = `${tools.length} tools indexed · ${rc} recent`;
+      if (indexReadout)
+        indexReadout.textContent = `${tools.length} tools · ${comparisons.length} comparisons indexed · ${rc} recent`;
     }
 
     // ── fuzzy: subsequence over a haystack, with prefix + word-boundary bonuses ──
@@ -200,9 +231,28 @@
       if (l.startsWith(q)) s += 10;
       return s;
     }
+    // comparison scoring — the haystack folds in both sides' names plus the
+    // comparison-intent vocabulary, and intent words get a strong boost so
+    // "vs" / "compare" / "which" reliably surface the network.
+    const CMP_INTENT =
+      /(^|\s)(vs|versus|compare|comparison|comparisons|which|difference|differences|better)(\s|$)/;
+    function scoreCmp(q: string, c: Cmp): number | null {
+      const hay =
+        `${c.title} ${c.aName} ${c.bName} vs versus compare comparison which difference`.toLowerCase();
+      if (subseq(q, hay) === null) return null;
+      let s = 1;
+      const titleL = c.title.toLowerCase();
+      if (titleL.includes(q)) s += 12;
+      if (titleL.startsWith(q)) s += 14;
+      if (CMP_INTENT.test(q)) s += 20;
+      const aL = c.aName.toLowerCase();
+      const bL = c.bName.toLowerCase();
+      if (aL.includes(q) || bL.includes(q)) s += 6;
+      return s;
+    }
 
     type Row = {
-      kind: "tool" | "cat" | "fam"; // collections weld: + "fam"
+      kind: "tool" | "cat" | "fam" | "cmp"; // + "cmp" for the comparison network
       id: string;
       href: string;
       name: string;
@@ -361,6 +411,31 @@
           );
           blocks.push(
             group("tools", matched.map((_, k) => rowHtml(rows[start + k], start + k)).join("")),
+          );
+        }
+
+        // comparison network weld — match comparison titles + the tools they
+        // compare; intent words ("vs", "compare", "which") boost hard.
+        const cmpm = comparisons
+          .map((c) => ({ c, s: scoreCmp(q, c) }))
+          .filter((x): x is { c: Cmp; s: number } => x.s !== null)
+          .sort((a, b) => b.s - a.s)
+          .slice(0, 5);
+        if (cmpm.length) {
+          const start = rows.length;
+          cmpm.forEach((m) =>
+            rows.push({
+              kind: "cmp",
+              id: m.c.slug,
+              href: `/compare/${m.c.slug}`,
+              name: m.c.title,
+              tag: "comparison · which to use",
+              badge: "VS",
+              hl: [],
+            }),
+          );
+          blocks.push(
+            group("comparisons", cmpm.map((_, k) => rowHtml(rows[start + k], start + k)).join("")),
           );
         }
 

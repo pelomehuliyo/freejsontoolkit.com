@@ -1,20 +1,26 @@
-# Timestamp Converter — Implementation Checklist
+# Task: Add DOCS entries for 14 tools
 
-- [x] 1. Create `src/lib/tools/timestamp-converter/types.ts`
-- [x] 2. Create `src/lib/tools/timestamp-converter/constants.ts`
-- [x] 3. Create `src/lib/tools/timestamp-converter/engine.ts`
-- [x] 4. Create `src/lib/tools/timestamp-converter/store.ts`
-- [x] 5. Create `src/lib/tools/timestamp-converter/actions.ts`
-- [x] 6. Create `src/pages/tools/timestamp-converter.astro`
-- [x] 7. Update `src/lib/tools/registry.ts` (flip to available + href)
-- [x] 8. Update `src/lib/tools/relations.ts` (add relations)
-- [x] 9. Update `src/lib/tools/docs.ts` (add doc entry)
-- [x] 10. Update `CHANGELOG.md`
-- [x] 11. Run typecheck / build to verify
+## Plan
+- Add 14 new `ToolDoc` entries to the `DOCS` map in `src/lib/tools/docs.ts`.
 
-## Verification
-`npx astro check` confirms the timestamp-converter tool is clean. The only findings attributable to the new tool are:
-- **1 warning** (`constants.ts:28`): the nanosecond sample literal exceeds 2^53 — inherent to ns values in JS (expected, documented).
-- **2 errors** (`timestamp-converter.astro:42,150`): the `aria-pressed={i === 0 ? "true" : "false"}` pattern flags `Type 'boolean' is not assignable to type 'string'` — this is a **pre-existing codebase-wide false positive** that appears identically in every tool page (url-codec, regex-tester, base64, etc.). The pattern matches the established convention exactly.
-
-The other ~125 errors reported by `astro check` are pre-existing issues in shared components (Button.astro, CodeEditor, DragDropZone, ErrorBanner, ToolActions — the `slot` boolean-type error appears in every `.astro` page) and other tools (csv-parser, json-validator, uuid, etc.), all present before this work.
+## Steps
+- [x] Understand task + identify the 14 tools and their registry keys
+- [x] Read ToolDocs component + relations + docs.ts to understand the schema
+- [x] Read all 14 tool pages to capture accurate behavior
+- [x] Confirm plan with user
+- [ ] Add 14 DOCS entries to docs.ts:
+  - json-schema-validator (JSON Schema Lite)
+  - json-minifier
+  - json-diff
+  - json-to-csv
+  - csv-to-json
+  - json-to-yaml
+  - json-to-toml
+  - toml-to-json
+  - csv-to-tsv
+  - tsv-to-csv
+  - fake-json
+  - uuid-generator
+  - base64
+  - url-encode
+- [ ] Run Astro check / build to verify compilation
