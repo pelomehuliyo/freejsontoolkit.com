@@ -9,6 +9,7 @@ import ErrorBanner from "../../components/tools/ErrorBanner.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
+import { LARGE_FILE_THRESHOLD_BYTES } from "../../lib/tools/tsv-to-csv/constants";
 import RelatedTools from "../../components/tools/RelatedTools.astro";
 import ToolDocs from "../../components/tools/ToolDocs.astro";
 import CompareLinks from "../../components/tools/CompareLinks.astro";
@@ -33,7 +34,12 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
           <span class="caption-mono column-title">INPUT TSV</span>
           <ToolActions id="input-actions" variant="inset" actions={["sample", "clear"]} />
         </div>
-        <DragDropZone id="tsv-input" accept=".tsv,.txt" label="Upload TSV file" />
+        <DragDropZone
+          id="tsv-input"
+          accept=".tsv,.txt"
+          label="Upload TSV file"
+          largeThresholdBytes={LARGE_FILE_THRESHOLD_BYTES}
+        />
         <CodeEditor
           id="tsv-input"
           label="TSV input"
@@ -66,8 +72,9 @@ Ada	Engineer	London`}
         <ErrorBanner id="convert-error" />
         <div class="status-banner caption">
           <span class="status-indicator"><span class="dot idle" id="status-dot"></span></span>
+          <span class="status-phase" id="convert-phase" aria-hidden="true"></span>
           <span class="sr-only" id="convert-status-announce" aria-live="polite"></span>
-          Local sandbox active
+          <span id="convert-status-text">Local sandbox active</span>
         </div>
       </Card>
     </div>
@@ -171,7 +178,15 @@ Ada	Engineer	London`}
 </ToolShell>
 <script>
   import { tsvToCsvStore } from "../../lib/tools/tsv-to-csv/store";
-  import { handleInput, convert, loadSample, clearAll } from "../../lib/tools/tsv-to-csv/actions";
+  import {
+    handleInput,
+    convert,
+    convertLargeFile,
+    clearAll,
+    clearLargeFile,
+    loadSample,
+  } from "../../lib/tools/tsv-to-csv/actions";
+  import { LARGE_FILE_PHASES } from "../../lib/tools/tsv-to-csv/constants";
   import { debounce } from "../../shared/debounce";
   import { announce, initAnnounce } from "../../shared/announce";
   import { copyToClipboard } from "../../shared/clipboard";
@@ -186,6 +201,8 @@ Ada	Engineer	London`}
   const convertBtn = document.getElementById("convert-btn") as HTMLButtonElement | null;
   const errorBanner = document.getElementById("convert-error") as HTMLElement | null;
   const statusDot = document.getElementById("status-dot") as HTMLElement | null;
+  const phaseEl = document.getElementById("convert-phase") as HTMLElement | null;
+  const statusText = document.getElementById("convert-status-text") as HTMLElement | null;
 
   initAnnounce("convert-status-announce");
 
@@ -195,11 +212,30 @@ Ada	Engineer	London`}
 
   let lastOut = "";
 
+  // Phase labels for the large-file readout (banner text is the honest minimum).
+  const phaseByKey: Record<string, string> = {};
+  LARGE_FILE_PHASES.forEach((p) => {
+    phaseByKey[p.key] = p.label;
+  });
+
   tsvToCsvStore.subscribe((state) => {
     const inputFocused = tsvTextarea && document.activeElement === tsvTextarea;
     if (tsvTextarea && tsvTextarea.value !== state.tsvInput && !inputFocused) {
       tsvTextarea.value = state.tsvInput;
       tsvTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+
+    // Large-file mode output: show the capped preview in the editor.
+    const large = state.largeFile;
+    if (large) {
+      const out = large.preview || "";
+      if (out !== lastOut) {
+        lastOut = out;
+        if (outTextarea && outTextarea.value !== out) {
+          outTextarea.value = out;
+          outTextarea.dispatchEvent(new Event("editor-refresh"));
+        }
+      }
     }
 
     // Output only changes on an authoritative Convert.
@@ -233,14 +269,15 @@ Ada	Engineer	London`}
       inputCharCount.textContent = state.tsvInput.length.toLocaleString() + " chars";
 
     if (outputStatus) {
-      outputStatus.textContent =
-        state.outputStatus === "converted"
+      outputStatus.textContent = large
+        ? "Output: Preview"
+        : state.outputStatus === "converted"
           ? "Output: CSV"
           : state.outputStatus === "invalid"
             ? "Output: Error"
             : "Output: Empty";
       outputStatus.style.color =
-        state.outputStatus === "converted"
+        large || state.outputStatus === "converted"
           ? "var(--color-success)"
           : state.outputStatus === "invalid"
             ? "var(--color-error)"
@@ -248,10 +285,16 @@ Ada	Engineer	London`}
     }
     if (outputCharCount) {
       const ok = state.result && state.result.authoritative && state.result.ok;
-      outputCharCount.textContent =
-        lastOut.length.toLocaleString() +
-        " chars" +
-        (ok ? ` · ${state.result!.rowCount} rows × ${state.result!.colCount} cols` : "");
+      outputCharCount.textContent = large
+        ? large.preview.length.toLocaleString() +
+          " chars preview · " +
+          large.rows +
+          " rows × " +
+          large.cols +
+          " cols · Download for full file"
+        : lastOut.length.toLocaleString() +
+          " chars" +
+          (ok ? ` · ${state.result!.rowCount} rows × ${state.result!.colCount} cols` : "");
     }
 
     if (statusDot) {
@@ -259,6 +302,20 @@ Ada	Engineer	London`}
       statusDot.classList.add(
         state.isConverting ? "active" : state.outputStatus === "invalid" ? "error" : "idle",
       );
+    }
+    if (phaseEl && statusText) {
+      if (large && large.phase !== "done") {
+        phaseEl.textContent = phaseByKey[large.phase] ?? large.phase + "…";
+        phaseEl.style.color = "var(--color-accent)";
+        statusText.textContent = "";
+      } else if (large && large.phase === "done") {
+        phaseEl.textContent = "Preview shown — use Download for the full file.";
+        phaseEl.style.color = "var(--color-success)";
+        statusText.textContent = "";
+      } else {
+        phaseEl.textContent = "";
+        statusText.textContent = "Local sandbox active";
+      }
     }
     if (convertBtn) {
       convertBtn.textContent = state.isConverting ? "Converting…" : "Convert to CSV";
@@ -289,6 +346,7 @@ Ada	Engineer	London`}
       }
       if (action === "clear") {
         clearAll(tsvToCsvStore);
+        clearLargeFile(tsvToCsvStore);
         announce("Input cleared");
       }
     });
@@ -299,6 +357,11 @@ Ada	Engineer	London`}
     outputActions.addEventListener("tool-action", async (e: Event) => {
       const action = (e as CustomEvent).detail?.action;
       if (action === "copy") {
+        const large = tsvToCsvStore.get().largeFile;
+        if (large) {
+          announce("Copy copies only the preview — use Download for the full file");
+          return;
+        }
         const ok = lastOut ? await copyToClipboard(lastOut) : false;
         const btn = outputActions.querySelector("[data-action='copy']");
         if (ok && btn) {
@@ -311,6 +374,18 @@ Ada	Engineer	London`}
         }
       }
       if (action === "download") {
+        // Large-file mode: download the full Blob, not just the preview.
+        const large = tsvToCsvStore.get().largeFile;
+        if (large && large.blobUrl) {
+          const a = document.createElement("a");
+          a.href = large.blobUrl;
+          a.download = "converted.csv";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          announce("Download started (full file)");
+          return;
+        }
         if (lastOut) {
           downloadFile(lastOut, "converted.csv", "text/csv;charset=utf-8;");
           announce("Download started");
@@ -326,10 +401,20 @@ Ada	Engineer	London`}
     dropZone.addEventListener("file-dropped", (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail?.text) {
+        clearLargeFile(tsvToCsvStore);
         handleInput(tsvToCsvStore, detail.text);
         convert(tsvToCsvStore);
         announce("File loaded: " + (detail.name || "file"));
       }
+    });
+
+    // Large-file mode: the worker owns the read + one-pass convert, and the
+    // result is a Blob download with a capped in-editor preview.
+    dropZone.addEventListener("file-large", (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      const file: File | undefined = detail?.file;
+      if (!file) return;
+      convertLargeFile(tsvToCsvStore, file, file.name, file.size);
     });
   }
 
