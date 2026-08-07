@@ -1,3 +1,5 @@
+export type IndentOption = "2" | "4" | "tab";
+
 export interface XmlToJsonOptions {
   includeAttributes: boolean;
   preserveArrays: boolean;

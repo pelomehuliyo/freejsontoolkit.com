@@ -1,6 +1,5 @@
 import type { Store } from "../../state/toolStore";
 import type { JsonToYamlState, IndentOption } from "./types";
-import { convertJsonToYaml } from "./engine";
 import { MAX_INPUT_CHARS, SAMPLE_JSON } from "./constants";
 
 let worker: Worker | null = null;
@@ -87,10 +86,11 @@ export function convert(store: Store<JsonToYamlState>): void {
     w.removeEventListener("message", onMessage);
     if (data.id !== reqId) return;
     if (data.ok && data.output) {
+      const yamlOutput = data.output;
       store.update((s) => ({
         ...s,
         isConverting: false,
-        yamlOutput: data.output,
+        yamlOutput,
         outputStatus: "converted",
         error: null,
       }));
