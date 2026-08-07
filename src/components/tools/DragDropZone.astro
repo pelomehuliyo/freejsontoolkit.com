@@ -23,9 +23,17 @@ interface Props {
   accept?: string;
   /** Accessible label for the drop zone */
   label?: string;
+  /**
+   * Optional large-file ceiling in bytes. When set and a dropped file exceeds
+   * it, the file is NOT decoded on the main thread; instead the raw `File` is
+   * dispatched as a "file-large" event so the tool's worker can read it off
+   * thread. When omitted (default = opt-out), every file takes the legacy
+   * readAsText path exactly as before — other tools stay byte-identical.
+   */
+  largeThresholdBytes?: number;
 }
 
-const { id, accept = ".json, .csv", label = "Upload file" } = Astro.props;
+const { id, accept = ".json, .csv", label = "Upload file", largeThresholdBytes } = Astro.props;
 
 const dropZoneId = id + "-dropzone";
 const fileInputId = id + "-file-input";
@@ -40,6 +48,7 @@ const statusId = id + "-status";
   aria-label={label}
   aria-describedby={statusId}
   data-drop-id={id}
+  data-large-threshold={largeThresholdBytes}
 >
   <svg
     width="20"
@@ -80,7 +89,9 @@ const statusId = id + "-status";
         if (!dropId) return;
 
         const dropZone = document.getElementById(dropId + "-dropzone") as HTMLDivElement | null;
-        const fileInput = document.getElementById(dropId + "-file-input") as HTMLInputElement | null;
+        const fileInput = document.getElementById(
+          dropId + "-file-input",
+        ) as HTMLInputElement | null;
         const statusEl = document.getElementById(dropId + "-status");
         if (!dropZone || !fileInput || !statusEl) return;
 
@@ -107,8 +118,27 @@ const statusId = id + "-status";
           });
         }
 
+        // Optional large-file ceiling from the <DragDropZone> prop. Absent
+        // (data-large-threshold empty) => legacy path for every file.
+        const largeThresholdRaw = container.getAttribute("data-large-threshold");
+        const largeThreshold = largeThresholdRaw ? Number(largeThresholdRaw) : Infinity;
+
         async function handleFile(file: File | null): Promise<void> {
           if (!file) return;
+
+          // Large-file mode: deliver the raw File (not decoded text) so the
+          // tool's worker can read it off the main thread.
+          if (file.size > largeThreshold) {
+            announce("Large file: " + file.name);
+            dropZone!.dispatchEvent(
+              new CustomEvent("file-large", {
+                bubbles: true,
+                detail: { file: file, name: file.name, size: file.size },
+              }),
+            );
+            return;
+          }
+
           announce("Reading file: " + file.name);
 
           try {
