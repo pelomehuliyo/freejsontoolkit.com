@@ -8,7 +8,7 @@
 - [x] Read ToolDocs component + relations + docs.ts to understand the schema
 - [x] Read all 14 tool pages to capture accurate behavior
 - [x] Confirm plan with user
-- [ ] Add 14 DOCS entries to docs.ts:
+- [x] Add 14 DOCS entries to docs.ts:
   - json-schema-validator (JSON Schema Lite)
   - json-minifier
   - json-diff
@@ -23,4 +23,4 @@
   - uuid-generator
   - base64
   - url-encode
-- [ ] Run Astro check / build to verify compilation
+- [x] Run Astro check / build to verify compilation (no docs.ts errors; 124 remaining errors are all pre-existing in other files)
