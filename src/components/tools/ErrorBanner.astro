@@ -82,9 +82,16 @@ const isHidden = !message;
 <script>
   (function () {
     const roots = document.querySelectorAll("[data-err-id]");
+
+    interface ErrBannerElement extends HTMLElement {
+      __errInitialized?: boolean;
+      show: (msg: string) => void;
+      hide: () => void;
+    }
+
     for (let ri = 0; ri < roots.length; ri++) {
       (function () {
-        const banner = roots[ri];
+        const banner = roots[ri] as ErrBannerElement;
         const errId = banner.getAttribute("data-err-id");
         if (!errId) return;
 
@@ -96,7 +103,7 @@ const isHidden = !message;
         if (banner.__errInitialized) return;
         banner.__errInitialized = true;
 
-        function syncAriaHidden(hidden) {
+        function syncAriaHidden(hidden: boolean) {
           if (hidden) {
             banner.setAttribute("aria-hidden", "true");
           } else {
@@ -121,7 +128,7 @@ const isHidden = !message;
           banner.hide();
         });
 
-        banner.addEventListener("keydown", function (e) {
+        banner.addEventListener("keydown", function (e: KeyboardEvent) {
           if (e.key === "Escape" && !banner.classList.contains("hidden")) {
             banner.hide();
           }

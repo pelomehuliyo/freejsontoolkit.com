@@ -103,15 +103,20 @@ const emptyValue = readonly
 <script>
   (function () {
     const roots = document.querySelectorAll("[data-editor-id]");
+
+    interface InitTextarea extends HTMLTextAreaElement {
+      __ceInitialized?: boolean;
+    }
+
     for (let ri = 0; ri < roots.length; ri++) {
       (function () {
         const container = roots[ri];
         const editorId = container.getAttribute("data-editor-id");
         if (!editorId) return;
 
-        const textarea = document.getElementById(editorId + "-textarea");
-        const gutter = document.getElementById(editorId + "-gutter");
-        const gutterContent = document.getElementById(editorId + "-gutter-content");
+        const textarea = document.getElementById(editorId + "-textarea") as InitTextarea | null;
+        const gutter = document.getElementById(editorId + "-gutter") as HTMLElement | null;
+        const gutterContent = document.getElementById(editorId + "-gutter-content") as HTMLElement | null;
         const wrapper = container.querySelector(".editor-wrapper");
         if (!textarea || !gutter || !gutterContent) return;
 
@@ -132,14 +137,14 @@ const emptyValue = readonly
          * Simple rendering — no virtualization for v1.0 stability.
          */
         function renderGutterLines() {
-          function countLines(str) {
+          function countLines(str: string) {
             let n = 1;
             for (let i = 0; i < str.length; i++) {
               if (str.charCodeAt(i) === 10) n++;
             }
             return n;
           }
-          let lineCount = countLines(textarea.value);
+          let lineCount = countLines(textarea!.value);
           if (lineCount < 1) lineCount = 1;
 
           // Skip DOM rebuild if line count hasn't changed
@@ -150,16 +155,16 @@ const emptyValue = readonly
           for (let i = 0; i < lineCount; i++) {
             parts[i] = String(i + 1);
           }
-          gutter.style.width = gutter.style.minWidth = String(lineCount).length + 2 + "ch";
+          gutter!.style.width = gutter!.style.minWidth = String(lineCount).length + 2 + "ch";
           // textContent (not innerHTML) — safe, fast, no per-line elements
-          gutterContent.textContent = parts.join("\n");
+          gutterContent!.textContent = parts.join("\n");
         }
 
         /**
          * Sync gutter scroll position with textarea scroll.
          */
         function syncGutterScroll() {
-          gutter.scrollTop = textarea.scrollTop;
+          gutter!.scrollTop = textarea!.scrollTop;
         }
 
         /**
@@ -171,7 +176,7 @@ const emptyValue = readonly
          */
         function syncEmpty() {
           if (!wrapper) return;
-          wrapper.classList.toggle("is-empty", textarea.value.length === 0);
+          wrapper.classList.toggle("is-empty", textarea!.value.length === 0);
         }
 
         // Scroll: sync gutter position to match textarea

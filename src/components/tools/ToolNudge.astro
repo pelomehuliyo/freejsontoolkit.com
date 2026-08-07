@@ -17,7 +17,7 @@
  * Dismissible; dismissal remembered per-tool for the session.
  */
 import { tools } from "../../lib/tools/registry";
-import { RELATIONS } from "../../lib/tools/relations";
+import { RELATIONS, type RelationKind } from "../../lib/tools/relations";
 
 type Tool = (typeof tools)[number];
 const byId: Record<string, Tool> = {};
@@ -46,7 +46,8 @@ const rels = current ? RELATIONS[current.id] || [] : [];
 const resolved = rels
   .map((r) => ({ id: r.id, label: r.label, kind: r.kind, tool: byId[r.id] }))
   .filter(
-    (x): x is { id: string; label: string; kind: string; tool: Tool } => !!x.tool && !!x.tool.href,
+    (x): x is { id: string; label: string; kind: RelationKind; tool: Tool } =>
+      !!x.tool && !!x.tool.href,
   );
 const leadRel = resolved.find((r) => r.kind === "next") ?? resolved[0];
 const altRels = resolved.filter((r) => r !== leadRel).slice(0, 2);

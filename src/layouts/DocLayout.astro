@@ -206,13 +206,13 @@ const docPath = "~/freejsontoolkit " + (Astro.url.pathname.replace(/\/+$/, "") |
       const THRESHOLD = 120; // px from top; > scroll-margin-top (92) so a clicked
       // section always qualifies at rest, while the next one (a real section's
       // height below) does not.
-      let current = null;
+      let current: string | null = null;
       let locked = false;
-      let lockTimer = null;
+      let lockTimer: ReturnType<typeof setTimeout> | null = null;
       const reduce =
         window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-      function setActive(id) {
+      function setActive(id: string) {
         if (id === current) return;
         current = id;
         tocLinks.forEach(function (l) {
@@ -220,7 +220,7 @@ const docPath = "~/freejsontoolkit " + (Astro.url.pathname.replace(/\/+$/, "") |
         });
       }
 
-      function idOfLink(el) {
+      function idOfLink(el: Element) {
         return el.getAttribute("data-toc") || (el.getAttribute("href") || "").replace(/^#/, "");
       }
 
@@ -261,7 +261,7 @@ const docPath = "~/freejsontoolkit " + (Astro.url.pathname.replace(/\/+$/, "") |
         compute();
       }
 
-      function goTo(id) {
+      function goTo(id: string) {
         const el = document.getElementById(id);
         if (!el) return;
         setActive(id); // optimistic — and, with the lock, authoritative until settle
@@ -271,13 +271,15 @@ const docPath = "~/freejsontoolkit " + (Astro.url.pathname.replace(/\/+$/, "") |
         lockTimer = setTimeout(releaseLock, 650); // covers the smooth scroll
       }
 
-      function onClick(e) {
-        const id = idOfLink(e.currentTarget);
+      function onClick(e: Event) {
+        const target = e.currentTarget as Element | null;
+        if (!target) return;
+        const id = idOfLink(target);
         if (!id) return;
         e.preventDefault();
         goTo(id);
         // mobile: collapse the disclosure after jumping so it doesn't linger
-        const det = e.currentTarget.closest("details");
+        const det = target.closest("details");
         if (det) det.open = false;
       }
       tocLinks.forEach(function (l) {

@@ -1,11 +1,14 @@
 ---
 import type { HTMLAttributes } from "astro/types";
 
-interface Props extends HTMLAttributes<"button">, HTMLAttributes<"a"> {
+interface Props extends HTMLAttributes<"button"> {
   variant?: "primary" | "secondary" | "ghost";
   size?: "sm" | "md" | "lg";
   shape?: "pill" | "square";
   href?: string;
+  id?: string;
+  class?: string;
+  disabled?: boolean;
 }
 
 const {
@@ -23,7 +26,7 @@ const Element = href ? "a" : "button";
 <Element
   href={href}
   class:list={["btn", `btn-${variant}`, `btn-${size}`, `btn-${shape}`, className]}
-  {...rest as any}
+  {...rest as Record<string, unknown>}
 >
   <slot />
 </Element>

@@ -79,24 +79,26 @@ const statusId = id + "-status";
         const dropId = container.getAttribute("data-drop-id");
         if (!dropId) return;
 
-        const dropZone = document.getElementById(dropId + "-dropzone");
-        const fileInput = document.getElementById(dropId + "-file-input");
+        const dropZone = document.getElementById(dropId + "-dropzone") as HTMLDivElement | null;
+        const fileInput = document.getElementById(dropId + "-file-input") as HTMLInputElement | null;
         const statusEl = document.getElementById(dropId + "-status");
         if (!dropZone || !fileInput || !statusEl) return;
 
         // Guard: already initialized
-        if (dropZone.__ddzInitialized) return;
-        dropZone.__ddzInitialized = true;
+        const initDropZone = dropZone as HTMLDivElement & { __ddzInitialized?: boolean };
+        if (initDropZone.__ddzInitialized) return;
+        initDropZone.__ddzInitialized = true;
 
-        function announce(msg) {
-          statusEl.textContent = msg;
+        function announce(msg: string): void {
+          statusEl!.textContent = msg;
         }
 
-        function readFileAsText(file) {
+        function readFileAsText(file: File): Promise<string> {
           return new Promise(function (resolve, reject) {
             const reader = new FileReader();
             reader.onload = function (e) {
-              resolve(e.target ? e.target.result || "" : "");
+              const text = typeof e.target?.result === "string" ? e.target.result : "";
+              resolve(text);
             };
             reader.onerror = function () {
               reject(new Error("Failed to read file"));
@@ -105,7 +107,7 @@ const statusId = id + "-status";
           });
         }
 
-        async function handleFile(file) {
+        async function handleFile(file: File | null): Promise<void> {
           if (!file) return;
           announce("Reading file: " + file.name);
 
@@ -115,7 +117,7 @@ const statusId = id + "-status";
               "File loaded: " + file.name + " (" + text.length.toLocaleString() + " characters)",
             );
 
-            dropZone.dispatchEvent(
+            dropZone!.dispatchEvent(
               new CustomEvent("file-dropped", {
                 bubbles: true,
                 detail: { file: file, text: text, name: file.name, size: file.size },

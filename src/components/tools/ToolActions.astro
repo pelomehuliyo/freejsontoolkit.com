@@ -83,6 +83,11 @@ for (var i = 0; i < actionIds.length; i++) {
 <script>
   (function () {
     const roots = document.querySelectorAll("[data-actions-id]");
+
+    interface ActionsElement extends HTMLElement {
+      __toolActionsInitialized?: boolean;
+    }
+
     for (let i = 0; i < roots.length; i++) {
       (function (el) {
         // Guard: already initialized
@@ -90,8 +95,8 @@ for (var i = 0; i < actionIds.length; i++) {
         el.__toolActionsInitialized = true;
 
         el.addEventListener("click", function (e) {
-          const target = e.target;
-          const btn = target.closest ? target.closest("[data-action]") : null;
+          const target = e.target as Element | null;
+          const btn = (target && target.closest ? target.closest("[data-action]") : null) as HTMLButtonElement | null;
           if (!btn) return;
           if (btn.disabled) return;
 
@@ -105,8 +110,8 @@ for (var i = 0; i < actionIds.length; i++) {
             }),
           );
         });
-      })(roots[i]);
-    }
+      })(roots[i] as ActionsElement);
+      }
   })();
 </script>
 

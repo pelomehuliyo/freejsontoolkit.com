@@ -10,7 +10,7 @@
  */
 import Container from "../Container.astro";
 import { tools } from "../../lib/tools/registry";
-import { RELATIONS } from "../../lib/tools/relations";
+import { RELATIONS, type RelationKind } from "../../lib/tools/relations";
 
 const MONO: Record<string, string> = {
   convert: "CON",
@@ -34,7 +34,7 @@ const current = tools.find((t) => t.href === path);
 interface Resolved {
   id: string;
   label: string;
-  kind: string;
+  kind: RelationKind;
   tool: Tool;
 }
 const rels: Resolved[] = current

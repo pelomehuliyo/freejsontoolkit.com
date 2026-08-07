@@ -128,6 +128,36 @@ const snipJson = JSON.stringify(snippets).replace(/</g, "\\u003c");
                   </div>
                 </div>
               )}
+              {doc.lead === "diff" && (
+                <div class="td-lead td-lead-diff" aria-hidden="true">
+                  <div class="td-diff-col td-diff-a">
+                    <span class="td-diff-tag caption-mono">original · A</span>
+                    <div class="td-diff-lines">
+                      <div class="td-dline td-dline-rm">
+                        <span class="td-dm">−</span>
+                        <span class="td-dc">region = us-east-1</span>
+                      </div>
+                      <div class="td-dline">
+                        <span class="td-dm"> </span>
+                        <span class="td-dc">env = staging</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="td-diff-col td-diff-b">
+                    <span class="td-diff-tag caption-mono">modified · B</span>
+                    <div class="td-diff-lines">
+                      <div class="td-dline td-dline-add">
+                        <span class="td-dm">+</span>
+                        <span class="td-dc">region = eu-west-1</span>
+                      </div>
+                      <div class="td-dline">
+                        <span class="td-dm"> </span>
+                        <span class="td-dc">env = staging</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
               <p class="td-concept-text body-md">{doc.concept}</p>
             </div>
             {/* common errors / things to know */}
@@ -603,6 +633,72 @@ so a no-JS / fallback jump still lands the heading below the bar */
     .td-ba-arrow {
       transform: rotate(90deg);
       justify-self: center;
+    }
+  }
+  /* living lead — line diff */
+  .td-lead-diff {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    font-family: var(--font-mono);
+  }
+  .td-diff-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+  .td-diff-tag {
+    color: var(--color-mute);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .td-diff-lines {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    overflow: hidden;
+  }
+  .td-dline {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 10px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .td-dline + .td-dline {
+    border-top: 1px solid var(--color-hairline);
+  }
+  .td-dm {
+    flex: none;
+    width: 12px;
+    text-align: center;
+    font-weight: 700;
+    color: var(--color-mute);
+    user-select: none;
+  }
+  .td-dc {
+    color: var(--color-ink);
+  }
+  .td-dline-rm {
+    background-color: rgba(179, 38, 30, 0.08);
+  }
+  .td-dline-rm .td-dm {
+    color: #b3261e;
+  }
+  .td-dline-add {
+    background-color: rgba(33, 167, 138, 0.1);
+  }
+  .td-dline-add .td-dm {
+    color: var(--color-accent-active);
+  }
+  @media (max-width: 600px) {
+    .td-lead-diff {
+      grid-template-columns: 1fr;
     }
   }
   /* blocks */

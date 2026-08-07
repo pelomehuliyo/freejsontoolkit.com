@@ -10,7 +10,7 @@
  * Snippets are kept free of backslashes / template markers so they survive as
  * plain template-literal strings and round-trip through the JSON island intact.
  */
-export type DocLead = "error-anatomy" | "before-after";
+export type DocLead = "error-anatomy" | "before-after" | "diff";
 export type DocItemKind = "error" | "note";
 
 export interface DocItem {
@@ -701,6 +701,101 @@ Shipped 2026-08-03, patched 2025-12-31.`,
       },
     ],
   },
+  "text-diff": {
+    eyebrow: "Docs · Compare",
+    conceptTitle: "A diff sees lines, not structure",
+    concept:
+      "Text Diff compares two texts line by line and reports which lines were added, removed, " +
+      "or changed. It has no idea what the text means — logs, configs, code, markdown, env " +
+      "files, SQL, CSV — so it is equally at home on all of them. The engine aligns the two " +
+      "sides to keep as many unchanged lines matched as possible, pairs a removed line with an " +
+      "added line that replaces it, and leaves the rest as pure additions or deletions. You can " +
+      "render the result side-by-side (additions teal, removals red) or as a single unified " +
+      "column you can copy or download as a patch, ignore whitespace or case to cut noise, and " +
+      "read a similarity score that tells you at a glance how much the two sides share. The diff " +
+      "runs live as you type, in a background worker for large inputs.",
+    lead: "diff",
+    itemsLabel: "Things to know",
+    items: [
+      {
+        kind: "note",
+        title: "Changed lines face each other",
+        body:
+          "When a line is removed and another added in the same place, the diff pairs them onto " +
+          "one row so you can read the before/after at a glance — instead of scrolling a delete " +
+          "block against an insert block.",
+      },
+      {
+        kind: "note",
+        title: "Reordering is remove + add, not a move",
+        body:
+          "The diff aligns identical lines, so it can't see that a line just moved elsewhere — it " +
+          "reports the old spot as removed and the new spot as added. Text is compared line by " +
+          "line; if you need structure-aware moves, JSON Diff compares parsed data instead.",
+      },
+      {
+        kind: "note",
+        title: "Ignore whitespace / case for reviews",
+        body:
+          "Toggling ignore-whitespace or ignore-case silences cosmetic noise so a review reads the " +
+          "real change — trailing spaces, a full file re-indented, or a headline retyped in a " +
+          "different case no longer flood the diff.",
+      },
+      {
+        kind: "note",
+        title: "Very large inputs switch to Compare",
+        body:
+          "Live diffing runs as you type up to a combined size, then the button becomes the " +
+          "explicit 'Compare' so a giant paste never hitches the page. Press it and the worker " +
+          "takes over; results cap at 20,000 rendered lines.",
+      },
+      {
+        kind: "note",
+        title: "What the similarity score means",
+        body:
+          "It's the share of identical lines on both sides, as a percentage of all lines involved. " +
+          "100% means identical; 0% means nothing in common. A small edit next to a big block " +
+          "lands somewhere high.",
+      },
+    ],
+    examplesLabel: "Try these",
+    examples: [
+      {
+        title: "A line changed",
+        note: "Two configs where one value differs — the changed line faces its pair.",
+        snippet: `env = staging
+replicas = 2
+region = us-east-1
+=====A|B=====
+env = production
+replicas = 2
+region = us-east-1`,
+      },
+      {
+        title: "Lines added",
+        note: "B gains a log_level line and a debug flag — both report as added.",
+        snippet: `# service config
+env = staging
+replicas = 2
+=====A|B=====
+# service config
+env = production
+replicas = 4
+log_level = info
+debug = true`,
+      },
+      {
+        title: "Line removed",
+        note: "A has a line B dropped — it shows as removed with an empty slot facing it.",
+        snippet: `name = Ada
+role = engineer
+level = 7
+=====A|B=====
+name = Ada
+role = engineer`,
+      },
+    ],
+  },
   "json-to-csv": {
     eyebrow: "Docs · Convert",
     conceptTitle: "Flattening a tree into a table",
@@ -1386,6 +1481,72 @@ Shipped 2026-08-03, patched 2025-12-31.`,
         title: "A form body",
         note: "Form uses + for spaces and encodes the reserved set.",
         snippet: `name=Ada Lovelace&role=engineer`,
+      },
+    ],
+  },
+  "json-schema-validator": {
+    eyebrow: "Docs · Validate",
+    conceptTitle: "Checking the shape, not just the grammar",
+    concept:
+      "Schema Lite tells you whether a valid JSON document matches the structure you expect. It " +
+      "covers a clearly-scoped subset of JSON Schema — types, required keys, additionalProperties, " +
+      "enum/const, numeric ranges, string lengths, and array/object size limits — and reports every " +
+      "violation with its exact path (like /users/2/email) so you can jump straight to the offending " +
+      "value. It is deliberately not the full spec: keywords it doesn't support are ignored per the " +
+      "JSON Schema rule, and the coverage line above the button states exactly what's active. It " +
+      "assumes its input is already valid JSON — run the Validator first if you're unsure — and " +
+      "everything runs locally, in a worker for large inputs.",
+    lead: "before-after",
+    itemsLabel: "Things to know",
+    items: [
+      {
+        kind: "error",
+        title: "A required key is missing",
+        body:
+          "The schema lists name as required, but the instance doesn't have it. The ledger names the " +
+          "exact path so you know which object is at fault.",
+        snippet: `{"role": "engineer"}`,
+      },
+      {
+        kind: "error",
+        title: "A value has the wrong type",
+        body:
+          "The schema expects a string but the value is a number. Type checks are the core of the " +
+          "lite subset — load this and the violation points at the value.",
+        snippet: `{"name": 42}`,
+      },
+      {
+        kind: "note",
+        title: "Unsupported keywords are ignored",
+        body:
+          "Per the JSON Schema spec, unknown keywords never fail validation. A schema using $ref or " +
+          "anyOf won't error — it just won't enforce those parts. The coverage line states exactly " +
+          "what's active; $ref and combinators land in a planned v2.0 tool.",
+      },
+      {
+        kind: "note",
+        title: "Assumes valid JSON",
+        body:
+          "Schema Lite checks shape, not grammar — it expects its input to already parse as JSON. " +
+          "If you're unsure, run the syntax Validator first.",
+      },
+    ],
+    examplesLabel: "Try these",
+    examples: [
+      {
+        title: "Valid record",
+        note: "A record that satisfies the schema — should report valid.",
+        snippet: `{"name": "Ada", "role": "engineer"}\n\n{"type": "object", "required": ["name"]}`,
+      },
+      {
+        title: "Missing required field",
+        note: "Set the instance to only role and the ledger flags the missing name.",
+        snippet: `{"role": "engineer"}\n\n{"type": "object", "required": ["name"]}`,
+      },
+      {
+        title: "Wrong type",
+        note: "The schema wants a string; the value is a number.",
+        snippet: `{"name": 42}\n\n{"type": "object", "properties": {"name": {"type": "string"}}}`,
       },
     ],
   },
