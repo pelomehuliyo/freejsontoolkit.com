@@ -15,13 +15,10 @@
  */
 
 import type {
-  CsvDelimiter,
   CsvError,
   CsvRecord,
-  DelimiterDetectionResult,
   ParseOptions,
   ParseResult,
-  ParsedCsv,
 } from "./types";
 import { detectDelimiter } from "./delimiterDetection";
 
@@ -67,7 +64,7 @@ interface RawParseResult {
  * // { success: true, csv: { records: [{ a: "1", b: "2", c: "3" }], headers: ["a","b","c"], delimiter: ",", warnings: [] } }
  * ```
  */
-export function parseCsv(csvStr: string, options: ParseOptions = {}): ParseResult<CsvRecord> {
+export function parseCsv(csvStr: string, options: ParseOptions = {}): ParseResult {
   const errors: CsvError[] = [];
   const warnings: CsvError[] = [];
 

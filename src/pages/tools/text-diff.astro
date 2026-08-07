@@ -482,6 +482,44 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
   if (aTextarea) aTextarea.addEventListener("input", recompute);
   if (bTextarea) bTextarea.addEventListener("input", recompute);
 
+  // ToolDocs "try it" — Text Diff has two inputs (A + B), so it intercepts the
+  // docs-load contract and distributes the snippet itself: the text before the
+  // "=====A|B=====" marker is the original, everything after it is the modified
+  // side. Both editors fill, the diff runs, and each lands with an accent flash.
+  document.addEventListener("fjt:docs-load", (e: Event) => {
+    const ce = e as CustomEvent<{ text?: string }>;
+    const raw = ce.detail?.text;
+    if (raw == null) return;
+    ce.preventDefault();
+    const MARKER = "=====A|B=====";
+    const idx = raw.indexOf(MARKER);
+    const a = idx === -1 ? raw.trim() : raw.slice(0, idx).trim();
+    const b = idx === -1 ? "" : raw.slice(idx + MARKER.length).trim();
+    setInputA(textDiffStore, a);
+    setInputB(textDiffStore, b);
+    const flash = (el: HTMLElement | null): void => {
+      if (!el) return;
+      el.style.transition = "box-shadow .2s ease";
+      el.style.boxShadow = "0 0 0 3px var(--color-accent)";
+      setTimeout(() => {
+        el.style.boxShadow = "";
+        el.style.transition = "";
+      }, 750);
+    };
+    if (aTextarea) {
+      aTextarea.value = a;
+      aTextarea.dispatchEvent(new Event("editor-refresh"));
+      aTextarea.scrollIntoView({ behavior: "smooth", block: "center" });
+      flash(aTextarea.closest(".editor-wrapper") as HTMLElement | null);
+    }
+    if (bTextarea) {
+      bTextarea.value = b;
+      bTextarea.dispatchEvent(new Event("editor-refresh"));
+      flash(bTextarea.closest(".editor-wrapper") as HTMLElement | null);
+    }
+    compare(textDiffStore, true);
+  });
+
   if (compareBtn) compareBtn.addEventListener("click", () => compare(textDiffStore, true));
   if (sampleBtn)
     sampleBtn.addEventListener("click", () => {

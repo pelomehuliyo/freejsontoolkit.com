@@ -71,7 +71,7 @@ const ALL_RULES: Record<string, boolean> = {
  * // { valid: true, issues: [DUPLICATE_HEADER warning], statistics: { ... } }
  */
 export function validateCsv(
-  parsedCsv: ParseResult<CsvRecord>,
+  parsedCsv: ParseResult,
   options: ValidationOptions = {},
 ): ValidationResult {
   const issues: ValidationIssue[] = [];

@@ -249,18 +249,19 @@ describe("7 Memory Estimates (10K rows)", () => {
   const data = getCsv(10_000);
   const parseResult = parseCsv(data);
   if (!parseResult.success || !parseResult.csv) throw new Error("Pre-parse failed");
+  const csv = parseResult.csv;
 
   bench("string-size estimate", () => {
     const inputSize = data.length;
     let fieldChars = 0;
     let fieldCount = 0;
-    for (const record of parseResult.csv.records) {
+    for (const record of csv.records) {
       for (const val of Object.values(record)) {
         fieldChars += val.length;
         fieldCount++;
       }
     }
-    const headerChars = parseResult.csv.headers.join(",").length;
+    const headerChars = csv.headers.join(",").length;
     const total = inputSize * 2 + fieldChars * 2 + headerChars * 2;
     if (total < 0) throw new Error("Unexpected");
   });

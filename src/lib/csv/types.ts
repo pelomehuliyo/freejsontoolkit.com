@@ -83,7 +83,7 @@ export interface ParsedCsv {
 // Parse Result (top-level wrapper)
 // ──────────────────────────────────────────────
 
-export interface ParseResult<T> {
+export interface ParseResult {
   success: boolean;
   /** Populated when parsing succeeds */
   csv?: ParsedCsv;

@@ -265,12 +265,14 @@ const toc = [
     const secEl = document.getElementById("netproof-seconds");
     const spark = document.getElementById("netproof-spark");
     if (!countEl || !spark) return;
+    const countNode: HTMLElement = countEl;
+    const sparkNode: HTMLElement = spark;
 
     const BARS = 40;
-    const bars = [];
+    const bars: HTMLElement[] = [];
     for (let i = 0; i < BARS; i++) {
       const s = document.createElement("span");
-      spark.appendChild(s);
+      sparkNode.appendChild(s);
       bars.push(s);
     }
 
@@ -280,7 +282,7 @@ const toc = [
 
     function bump() {
       count += 1;
-      countEl.textContent = String(count);
+      countNode.textContent = String(count);
       const b = bars[barIdx % BARS];
       if (b) b.classList.add("hit");
       barIdx += 1;
@@ -302,9 +304,9 @@ const toc = [
       const XHR = window.XMLHttpRequest;
       if (XHR && XHR.prototype && XHR.prototype.open) {
         const origOpen = XHR.prototype.open;
-        XHR.prototype.open = function (...args) {
+        XHR.prototype.open = function (method: string, url: string | URL, async?: boolean, username?: string | null, password?: string | null): void {
           bump();
-          return origOpen.apply(this, args);
+          return origOpen.apply(this, [method, url, async ?? true, username, password]);
         };
       }
     } catch {

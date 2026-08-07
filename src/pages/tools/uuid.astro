@@ -441,7 +441,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     if (thruEl) thruEl.textContent = `${r.items.length.toLocaleString()} in ${r.ms.toFixed(1)} ms`;
     if (orderBox) {
       orderBox.hidden = false;
-      let txt = r.orderTag;
+      let txt: string = r.orderTag;
       let cls = "neutral";
       if (r.orderTag === "sortable") {
         txt = r.orderOk ? "monotonic · sortable" : "not monotonic";

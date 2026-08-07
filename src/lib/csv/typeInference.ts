@@ -31,7 +31,6 @@
 
 import type {
   ColumnTypeProfile,
-  CsvRecord,
   InferredCellType,
   ParsedCsv,
   TypeAnalysis,

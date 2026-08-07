@@ -457,7 +457,7 @@ const guarantees = [
 
       // read-only display sugar — never writes favorites/recents (the global
       // handler owns all writes, so there is no second path to conflict with).
-      function readIds(k) {
+      function readIds(k: string) {
         try {
           const r = localStorage.getItem(k);
           return r ? JSON.parse(r) : [];
@@ -465,7 +465,7 @@ const guarantees = [
           return [];
         }
       }
-      function setText(id, v) {
+      function setText(id: string, v: string) {
         const el = document.getElementById(id);
         if (el) el.textContent = v;
       }
@@ -490,7 +490,7 @@ const guarantees = [
       // live session clock in the console (the "alive" pulse)
       const clock = document.getElementById("hp-clock");
       if (clock) {
-        const pad = function (n) {
+        const pad = function (n: number) {
           return String(n).padStart(2, "0");
         };
         const tick = function () {
@@ -521,7 +521,8 @@ const guarantees = [
 
       // keep the hero's saved-count honest after a star toggle anywhere on the page
       document.addEventListener("click", function (e) {
-        if (e.target && e.target.closest && e.target.closest(".fav-star")) {
+        const target = e.target as Element | null;
+        if (target && target.closest && target.closest(".fav-star")) {
           setTimeout(refreshCounts, 0);
         }
       });
