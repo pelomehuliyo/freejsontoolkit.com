@@ -1,6 +1,12 @@
 import type { TsMode, TsUnit } from "./types";
 
-/** Factors from the selected unit → milliseconds. */
+/**
+ * Factors from the selected unit → milliseconds.
+ *
+ * Kept for reference. The engine’s exact parser/formatter uses BigInt-based
+ * scaling instead of plain number math because microsecond and nanosecond
+ * values can exceed Number.MAX_SAFE_INTEGER.
+ */
 export const UNIT_TO_MS: Record<TsUnit, number> = {
     seconds: 1_000,
     milliseconds: 1,
@@ -21,14 +27,19 @@ export const MODES: { id: TsMode; label: string }[] = [
     { id: "to-timestamp", label: "Date → Timestamp" },
 ];
 
-/** A sample in each unit, all pointing at the same real moment (2026-08-05). */
-export const SAMPLE_SECONDS = 1783256400;
-export const SAMPLE_MILLISECONDS = 1783256400000;
-export const SAMPLE_MICROSECONDS = 1783256400000000;
-export const SAMPLE_NANOSECONDS = 1783256400000000000;
+/**
+ * Samples all point at the same instant:
+ * 2026-08-05T12:00:00Z.
+ *
+ * Kept as strings because nanosecond values exceed Number.MAX_SAFE_INTEGER.
+ */
+export const SAMPLE_SECONDS = "1785931200";
+export const SAMPLE_MILLISECONDS = "1785931200000";
+export const SAMPLE_MICROSECONDS = "1785931200000000";
+export const SAMPLE_NANOSECONDS = "1785931200000000000";
 
-/** Reversible sample date (local ISO) used for the reverse direction. */
-export const SAMPLE_DATE = "2026-08-05T12:00:00";
+/** Reversible sample date, UTC, used for the reverse direction. */
+export const SAMPLE_DATE = "2026-08-05T12:00:00Z";
 
 /** Live-as-you-type recompute stops above this pure-text length. */
 export const AUTO_THRESHOLD = 10_000;

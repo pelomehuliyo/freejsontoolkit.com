@@ -45,20 +45,25 @@ export interface TsDateBreakdown {
 export interface TsValueSet {
     /** Which unit this value set describes */
     unit: TsUnit;
-    /** The value in the currently selected unit, formatted for display */
+    /** Grouped display value, e.g. "1,785,931,200,000,000,000" */
     value: string;
-    /** The raw numeric value in the selected unit (may be fractional) */
-    number: number;
+    /**
+     * Exact raw value as a string.
+     *
+     * Microsecond and nanosecond values can exceed Number.MAX_SAFE_INTEGER,
+     * so we keep the exact value as text.
+     */
+    raw: string;
 }
 
 export interface TsResult {
     valid: boolean;
     error: string | null;
-    /** For to-date: the resolved moment; for to-timestamp: null */
+    /** For to-date: the resolved moment; for to-timestamp: the resolved moment too */
     date: TsDateBreakdown | null;
     /** For to-timestamp: the time values in every unit; for to-date: null */
     values: TsValueSet[] | null;
-    /** The timestamp that was parsed (to-date) — echo for the readout */
+    /** Not currently used after the BigInt precision patch. */
     inputNumber: number | null;
     /** The date string that was parsed (to-timestamp) — echo for the readout */
     inputDate: string | null;

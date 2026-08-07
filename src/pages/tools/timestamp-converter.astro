@@ -39,7 +39,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
           label="Timestamp or date input"
           placeholder={"Paste a Unix timestamp to convert to a date\n…or a date like 2026-08-05T12:00:00 to get Unix time"}
         >
-          <div class="editor-info-bar" slot>
+          <div class="editor-info-bar">
             <span class="info-status" id="ts-input-status">Status: Empty</span>
             <span class="info-meta" id="ts-input-count">0 chars</span>
           </div>
@@ -147,7 +147,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
           placeholder="The converted value appears here…"
           readonly
         >
-          <div class="editor-info-bar" slot>
+          <div class="editor-info-bar">
             <span class="info-status" id="ts-output-status">Output: Empty</span>
             <span class="info-meta" id="ts-output-count">0 chars</span>
           </div>
@@ -355,17 +355,19 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
       b.classList.toggle("is-active", on);
       b.setAttribute("aria-pressed", on ? "true" : "false");
     });
+    const unitDisabled = state.mode !== "to-date";
+
     unitBtns.forEach((b) => {
       const on = b.getAttribute("data-ts-unit") === state.unit;
       b.classList.toggle("is-active", on);
       b.setAttribute("aria-pressed", on ? "true" : "false");
+      b.disabled = unitDisabled;
+      b.setAttribute("aria-disabled", unitDisabled ? "true" : "false");
+      b.classList.toggle("is-dim", unitDisabled);
     });
 
     // unit control only meaningful for timestamp→date
-    if (unitGroup) unitGroup.classList.toggle("is-disabled", state.mode !== "to-date");
-    unitBtns.forEach((b) => {
-      b.classList.toggle("is-dim", state.mode !== "to-date");
-    });
+    if (unitGroup) unitGroup.classList.toggle("is-disabled", unitDisabled);
     if (unitHelp) {
       unitHelp.textContent =
         state.mode === "to-date"
@@ -401,7 +403,15 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
 
     // output area
     const hasResult = !!state.result && state.result.valid;
-    if (outWrap) outWrap.hidden = !hasResult;
+    const showUnitGrid = hasResult && state.mode === "to-timestamp";
+
+    if (outWrap) outWrap.hidden = !showUnitGrid;
+    if (showUnitGrid) {
+      renderValues(state.result);
+    } else if (outGrid) {
+      outGrid.innerHTML = "";
+    }
+
     const outText = hasResult ? serializeOutput(state) : "";
     if (outTextarea && outTextarea.value !== outText) {
       outTextarea.value = outText;
@@ -418,11 +428,10 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     }
     if (outCount) outCount.textContent = outText.length.toLocaleString() + " chars";
 
-    if (state.result && state.result.valid) {
-      if (state.mode === "to-date") renderDate(state.result);
-      else renderValues(state.result);
+    if (hasResult && state.mode === "to-date") {
+      renderDate(state.result);
     }
-    if (readout) readout.hidden = state.mode !== "to-date" || !state.result || !state.result.valid;
+    if (readout) readout.hidden = state.mode !== "to-date" || !hasResult;
 
     if (statusDot) {
       statusDot.classList.remove("idle", "active", "error");
@@ -462,7 +471,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     const lines = ["Date: " + state.result.inputDate, ""];
     UNIT_ORDER.forEach((unit: TsUnit) => {
       const vs = state.result.values.find((v: any) => v.unit === unit);
-      if (vs) lines.push(padUnit(unit) + ": " + vs.number);
+      if (vs) lines.push(padUnit(unit) + ": " + vs.raw);
     });
     return lines.join("\n");
   }
@@ -506,7 +515,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
       const action = (e as CustomEvent).detail?.action;
       if (action === "sample") {
         loadSample(timestampStore);
-        convert(timestampStore, true);
+        // House rule: Load Sample only loads. It never auto-runs.
         announce("Sample loaded");
       }
       if (action === "clear") {
@@ -569,12 +578,51 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
 </script>
 
 <style>
+  /* output unit grid */
+  .ts-out-wrap {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft-2);
+    padding: var(--spacing-sm);
+  }
+  .ts-out-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xs);
+  }
+  .ts-unit-card {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+  }
+  .ts-unit-name {
+    color: var(--color-mute);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .ts-unit-value {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-accent-active);
+    word-break: break-all;
+    font-variant-numeric: tabular-nums;
+  }
   .workspace-card {
     display: flex;
     flex-direction: column;
     height: 100%;
     min-height: 0;
     gap: var(--spacing-md);
+  }
+  .seg-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
   }
   .card-header {
     display: flex;
@@ -993,6 +1041,54 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
       grid-template-columns: 1fr;
       gap: var(--spacing-md);
     }
+  }
+</style>
+<style is:global>
+  /*
+   * These styles are global because the unit cards are created dynamically
+   * with document.createElement. Astro scoped styles cannot reliably reach
+   * client-injected DOM nodes.
+   */
+  .ts-out-wrap {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft-2);
+    padding: var(--spacing-sm);
+  }
+
+  .ts-out-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xs);
+  }
+
+  .ts-unit-card {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+  }
+
+  .ts-unit-name {
+    color: var(--color-mute);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .ts-unit-value {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-accent-active);
+    word-break: break-all;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 959px) {
     .ts-out-grid {
       grid-template-columns: 1fr;
     }

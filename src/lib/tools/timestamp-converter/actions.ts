@@ -1,20 +1,28 @@
 import type { Store } from "../../state/toolStore";
 import type { TsMode, TsState, TsUnit } from "./types";
-import { run } from "./engine";
-import { AUTO_THRESHOLD, SAMPLE_DATE, SAMPLE_MICROSECONDS, SAMPLE_MILLISECONDS, SAMPLE_NANOSECONDS, SAMPLE_SECONDS } from "./constants";
+import { run, nowLocalInput } from "./engine";
+import {
+    AUTO_THRESHOLD,
+    SAMPLE_DATE,
+    SAMPLE_MICROSECONDS,
+    SAMPLE_MILLISECONDS,
+    SAMPLE_NANOSECONDS,
+    SAMPLE_SECONDS,
+} from "./constants";
 
-/** Fill the input with "now" in the current unit. */
+/** Fill the input with "now" in the current unit, using exact BigInt math. */
 function nowInUnit(unit: TsUnit): string {
-    const ms = Date.now();
+    const ms = BigInt(Date.now());
+
     switch (unit) {
         case "seconds":
-            return String(Math.floor(ms / 1000));
+            return (ms / 1_000n).toString();
         case "milliseconds":
-            return String(ms);
+            return ms.toString();
         case "microseconds":
-            return String(ms * 1000);
+            return (ms * 1_000n).toString();
         case "nanoseconds":
-            return String(ms * 1_000_000);
+            return (ms * 1_000_000n).toString();
     }
 }
 
@@ -30,9 +38,21 @@ export function setUnit(store: Store<TsState>, unit: TsUnit): void {
     store.update((s) => ({ ...s, unit, error: null }));
 }
 
-/** Fill the input with the current Unix time in the selected unit. */
+/**
+ * Fill the input with the current time.
+ *
+ * Timestamp → Date:
+ *   inserts a numeric timestamp in the selected unit.
+ *
+ * Date → Timestamp:
+ *   inserts a current local ISO date string.
+ */
 export function useNow(store: Store<TsState>): void {
-    store.update((s) => ({ ...s, input: nowInUnit(s.unit), error: null }));
+    store.update((s) => ({
+        ...s,
+        input: s.mode === "to-date" ? nowInUnit(s.unit) : nowLocalInput(),
+        error: null,
+    }));
 }
 
 export function clearAll(store: Store<TsState>): void {
@@ -53,12 +73,14 @@ export function convert(store: Store<TsState>, forced = false): void {
         store.update((x) => ({ ...x, result: null, error: null }));
         return;
     }
+
     if (!forced && s.input.length > AUTO_THRESHOLD) {
         store.update((x) => ({ ...x, result: null, error: null }));
         return;
     }
 
     store.update((x) => ({ ...x, isRunning: true, error: null }));
+
     queueMicrotask(() => {
         try {
             const result = run(s.input.trim(), { mode: s.mode, unit: s.unit });
@@ -78,24 +100,23 @@ export function convert(store: Store<TsState>, forced = false): void {
     });
 }
 
-/** Load a sample appropriate to the current mode/unit. */
+/** Load a sample appropriate to the current mode/unit. LOAD ONLY. */
 export function loadSample(store: Store<TsState>): void {
     store.update((s) => {
         const input = s.mode === "to-date" ? sampleForUnit(s.unit) : SAMPLE_DATE;
-        const next = { ...s, input, error: null };
-        return next;
+        return { ...s, input, error: null };
     });
 }
 
 function sampleForUnit(unit: TsUnit): string {
     switch (unit) {
         case "seconds":
-            return String(SAMPLE_SECONDS);
+            return SAMPLE_SECONDS;
         case "milliseconds":
-            return String(SAMPLE_MILLISECONDS);
+            return SAMPLE_MILLISECONDS;
         case "microseconds":
-            return String(SAMPLE_MICROSECONDS);
+            return SAMPLE_MICROSECONDS;
         case "nanoseconds":
-            return String(SAMPLE_NANOSECONDS);
+            return SAMPLE_NANOSECONDS;
     }
 }

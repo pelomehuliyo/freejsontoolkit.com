@@ -5,16 +5,14 @@
  *   to-date       → number (in a unit) → Date → rich breakdown
  *   to-timestamp  → human date → ms → the value in every unit
  *
- * The interesting correctness bits:
- *   - unit scaling is applied to ms (seconds ×1e3, µs ÷1e3, ns ÷1e6) so the
- *     Date is always built from milliseconds, and the reverse derives each
- *     unit from the same ms value — so the two directions round-trip, even
- *     for fractional seconds.
- *   - to-timestamp accepts a *local* ISO string (no timezone suffix) and
- *     treats it as local time, plus a ****Z (UTC) and RFC-style strings, so
- *     whatever a user pastes is interpreted predictably.
- *   - the breakdown is computed from the resolved Date and is timezone-aware
- *     (local vs UTC) so both readouts are honest.
+ * Correctness notes:
+ *   - Date resolution is milliseconds.
+ *   - The engine parses timestamp input through a BigInt-backed decimal path
+ *     so large integer inputs do not suffer Number precision loss.
+ *   - Output values are formatted with BigInt where needed, because
+ *     microseconds and nanoseconds can exceed Number.MAX_SAFE_INTEGER.
+ *   - Date parsing accepts local ISO, UTC ISO with Z, RFC/HTTP dates, and
+ *     bare dates. Local ISO without timezone suffix is treated as local time.
  */
 
 import type {
@@ -24,7 +22,7 @@ import type {
     TsUnit,
     TsValueSet,
 } from "./types";
-import { MAX_ABS_MS_VALUE, UNIT_TO_MS } from "./constants";
+import { MAX_ABS_MS_VALUE } from "./constants";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = [
@@ -41,6 +39,9 @@ const MONTHS = [
     "Nov",
     "Dec",
 ];
+
+const TIMESTAMP_RE = /^[+-]?(\d*)(?:\.(\d*))?$/;
+const MAX_TIMESTAMP_INPUT_LENGTH = 64;
 
 /** ISO week number (1–53), computed from the date. */
 export function isoWeekOf(d: Date): { week: number; year: number } {
@@ -70,6 +71,11 @@ function localIso(d: Date): string {
         `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
         `T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
     );
+}
+
+/** Current local ISO input for Date → Timestamp mode. */
+export function nowLocalInput(): string {
+    return localIso(new Date());
 }
 
 /** Human local, e.g. "Wed, Aug 5, 2026, 2:34:56 PM" */
@@ -150,17 +156,149 @@ function breakdown(d: Date): TsDateBreakdown {
     };
 }
 
+function groupDigits(text: string): string {
+    const negative = text.startsWith("-");
+    const digits = negative ? text.slice(1) : text;
+    const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return (negative ? "-" : "") + grouped;
+}
+
+function groupBig(n: bigint): string {
+    return groupDigits(n.toString());
+}
+
+function secondsFromMs(msBig: bigint): { display: string; raw: string } {
+    const negative = msBig < 0n;
+    const abs = negative ? -msBig : msBig;
+    const sec = abs / 1000n;
+    const rem = abs % 1000n;
+    const sign = negative ? "-" : "";
+
+    if (rem === 0n) {
+        return {
+            display: sign + groupBig(sec),
+            raw: sign + sec.toString(),
+        };
+    }
+
+    const frac = rem.toString().padStart(3, "0");
+    return {
+        display: sign + groupBig(sec) + "." + frac,
+        raw: sign + sec.toString() + "." + frac,
+    };
+}
+
+/** Convert a resolved Date ms value into exact values in every unit. */
+function valueSetFromMs(ms: number): TsValueSet[] {
+    const msBig = BigInt(Math.round(ms));
+
+    const seconds = secondsFromMs(msBig);
+    const msRaw = msBig.toString();
+    const usBig = msBig * 1_000n;
+    const nsBig = msBig * 1_000_000n;
+
+    return [
+        {
+            unit: "seconds",
+            value: seconds.display,
+            raw: seconds.raw,
+        },
+        {
+            unit: "milliseconds",
+            value: groupBig(msBig),
+            raw: msRaw,
+        },
+        {
+            unit: "microseconds",
+            value: groupBig(usBig),
+            raw: usBig.toString(),
+        },
+        {
+            unit: "nanoseconds",
+            value: groupBig(nsBig),
+            raw: nsBig.toString(),
+        },
+    ];
+}
+
+/**
+ * Parse a timestamp string in the given unit into integer milliseconds.
+ *
+ * Uses BigInt-backed rational math so large integer inputs do not lose
+ * precision before being reduced to Date-compatible milliseconds.
+ */
+function parseTimestampToMs(input: string, unit: TsUnit): number | null {
+    const normalized = input.trim().replace(/,/g, "");
+    if (normalized.length === 0 || normalized.length > MAX_TIMESTAMP_INPUT_LENGTH) {
+        return null;
+    }
+
+    const match = TIMESTAMP_RE.exec(normalized);
+    if (!match) return null;
+
+    const negative = normalized.startsWith("-");
+    const intText = match[1] ?? "";
+    let fracText = match[2] ?? "";
+
+    if (intText.length === 0 && fracText.length === 0) return null;
+
+    // Anything beyond 12 fractional digits is far below Date resolution.
+    if (fracText.length > 12) fracText = fracText.slice(0, 12);
+
+    const scale = 10n ** BigInt(fracText.length);
+    const intBig = intText.length > 0 ? BigInt(intText) : 0n;
+    const fracBig = fracText.length > 0 ? BigInt(fracText) : 0n;
+    const valueScaled = intBig * scale + fracBig;
+
+    let numerator: bigint;
+    let denominator: bigint;
+
+    switch (unit) {
+        case "seconds":
+            numerator = valueScaled * 1_000n;
+            denominator = scale;
+            break;
+        case "milliseconds":
+            numerator = valueScaled;
+            denominator = scale;
+            break;
+        case "microseconds":
+            numerator = valueScaled;
+            denominator = scale * 1_000n;
+            break;
+        case "nanoseconds":
+            numerator = valueScaled;
+            denominator = scale * 1_000_000n;
+            break;
+    }
+
+    let msBig = numerator / denominator;
+    const rem = numerator % denominator;
+
+    // Round half away from zero at the millisecond boundary.
+    if (rem * 2n >= denominator) {
+        msBig += 1n;
+    }
+
+    if (negative) msBig = -msBig;
+
+    const max = BigInt(MAX_ABS_MS_VALUE);
+    if (msBig > max || msBig < -max) return null;
+
+    const msNumber = Number(msBig);
+    if (!Number.isFinite(msNumber)) return null;
+
+    return msNumber;
+}
+
 /**
  * Parse a Unix timestamp string in the given unit into a Date.
  * Returns null when the number is not finite or lands outside Date's range.
  */
 function parseTimestampToDate(input: string, unit: TsUnit): Date | null {
-    const trimmed = input.trim();
-    if (trimmed === "") return null;
-    const num = Number(trimmed);
-    if (!Number.isFinite(num)) return null;
-    const ms = num * UNIT_TO_MS[unit];
-    if (Math.abs(ms) > MAX_ABS_MS_VALUE) return null;
+    const ms = parseTimestampToMs(input, unit);
+    if (ms === null) return null;
+
     const d = new Date(ms);
     if (Number.isNaN(d.getTime())) return null;
     return d;
@@ -174,52 +312,22 @@ function parseTimestampToDate(input: string, unit: TsUnit): Date | null {
 function parseDateToTimestamp(input: string): Date | null {
     const trimmed = input.trim();
     if (trimmed === "") return null;
+
     // Bare date → local midnight is the least-surprise interpretation.
     if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
         const d = new Date(trimmed + "T00:00:00");
         return Number.isNaN(d.getTime()) ? null : d;
     }
+
     // Local ISO without a timezone suffix → treat as LOCAL time.
     if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(\.\d+)?$/.test(trimmed)) {
         const d = new Date(trimmed);
         return Number.isNaN(d.getTime()) ? null : d;
     }
-    // Everything else: hand to Date.parse (handles ★Z, RFC 2822, etc.)
+
+    // Everything else: hand to Date.parse (handles Z, offsets, RFC 2822, etc.)
     const d = new Date(Date.parse(trimmed));
     return Number.isNaN(d.getTime()) ? null : d;
-}
-
-function formatValue(n: number): string {
-    // Whole numbers print without trailing zeros; large ones get locale grouping.
-    if (Number.isInteger(n)) return n.toLocaleString("en-US");
-    // Tiny/fractional values (µs / ns can be fractional ms) — show enough digits.
-    return n.toLocaleString("en-US", { maximumFractionDigits: 6 });
-}
-
-/** Convert a resolved Date back into values in every unit. */
-function valueSetFromMs(ms: number): TsValueSet[] {
-    return [
-        {
-            unit: "seconds",
-            value: formatValue(ms / UNIT_TO_MS.seconds),
-            number: ms / UNIT_TO_MS.seconds,
-        },
-        {
-            unit: "milliseconds",
-            value: formatValue(ms / UNIT_TO_MS.milliseconds),
-            number: ms / UNIT_TO_MS.milliseconds,
-        },
-        {
-            unit: "microseconds",
-            value: formatValue(ms / UNIT_TO_MS.microseconds),
-            number: ms / UNIT_TO_MS.microseconds,
-        },
-        {
-            unit: "nanoseconds",
-            value: formatValue(ms / UNIT_TO_MS.nanoseconds),
-            number: ms / UNIT_TO_MS.nanoseconds,
-        },
-    ];
 }
 
 /** Unit order used for the to-timestamp output table. */
@@ -238,12 +346,13 @@ export function run(input: string, opts: TsOptions): TsResult {
                 inputDate: null,
             };
         }
+
         return {
             valid: true,
             error: null,
             date: breakdown(d),
             values: null,
-            inputNumber: d.getTime() / UNIT_TO_MS[opts.unit],
+            inputNumber: null,
             inputDate: null,
         };
     }
@@ -260,7 +369,9 @@ export function run(input: string, opts: TsOptions): TsResult {
             inputDate: null,
         };
     }
+
     const ms = d.getTime();
+
     return {
         valid: true,
         error: null,
