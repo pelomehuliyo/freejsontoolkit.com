@@ -68,7 +68,6 @@ export const LITE_UNSUPPORTED = [
     "pattern",
     "format",
 ];
-const METADATA = new Set(["$schema", "$id", "$comment", "title", "description", "default", "examples"]);
 
 interface Fail {
     position: number;
