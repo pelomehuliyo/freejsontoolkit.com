@@ -9,7 +9,11 @@ import ErrorBanner from "../../components/tools/ErrorBanner.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
-import { DELIMITER_OPTIONS, INDENT_OPTIONS } from "../../lib/tools/csv-to-json/constants";
+import {
+  DELIMITER_OPTIONS,
+  INDENT_OPTIONS,
+  LARGE_FILE_THRESHOLD_BYTES,
+} from "../../lib/tools/csv-to-json/constants";
 import RelatedTools from "../../components/tools/RelatedTools.astro";
 import ToolDocs from "../../components/tools/ToolDocs.astro";
 import CompareLinks from "../../components/tools/CompareLinks.astro";
@@ -35,7 +39,12 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
           <span class="caption-mono column-title">INPUT CSV</span>
           <ToolActions id="input-actions" variant="inset" actions={["sample", "clear"]} />
         </div>
-        <DragDropZone id="csv-input" accept=".csv,.txt" label="Upload CSV file" />
+        <DragDropZone
+          id="csv-input"
+          accept=".csv,.txt"
+          label="Upload CSV file"
+          largeThresholdBytes={LARGE_FILE_THRESHOLD_BYTES}
+        />
         <CodeEditor
           id="csv-input"
           label="CSV input"
@@ -101,9 +110,10 @@ id,name,email
         <ErrorBanner id="convert-error" />
 
         <div class="status-banner caption">
-          <span class="status-indicator"><span class="dot idle"></span></span>
+          <span class="status-indicator"><span class="dot idle" id="status-dot"></span></span>
+          <span class="status-phase" id="convert-phase" aria-hidden="true"></span>
           <span class="sr-only" id="convert-status-announce" aria-live="polite"></span>
-          Local sandbox active
+          <span id="convert-status-text">Local sandbox active</span>
         </div>
       </Card>
     </div>
@@ -203,15 +213,17 @@ id,name,email
   import {
     handleInput,
     convert,
-    loadSample,
+    convertLargeFile,
     clearAll,
+    clearLargeFile,
+    loadSample,
     getJsonContent,
     setDelimiter,
     setHasHeader,
     setSkipEmptyLines,
     setIndent,
   } from "../../lib/tools/csv-to-json/actions";
-  import { delimiterLabel } from "../../lib/tools/csv-to-json/constants";
+  import { delimiterLabel, LARGE_FILE_PHASES } from "../../lib/tools/csv-to-json/constants";
   import type { CsvDelimiterOption, IndentOption } from "../../lib/tools/csv-to-json/types";
   import { debounce } from "../../shared/debounce";
   import { announce, initAnnounce } from "../../shared/announce";
@@ -234,6 +246,9 @@ id,name,email
   ) as HTMLInputElement | null;
   const convertBtn = document.getElementById("convert-btn") as HTMLButtonElement | null;
   const errorBanner = document.getElementById("convert-error") as HTMLElement | null;
+  const statusDot = document.getElementById("status-dot") as HTMLElement | null;
+  const phaseEl = document.getElementById("convert-phase") as HTMLElement | null;
+  const statusText = document.getElementById("convert-status-text") as HTMLElement | null;
 
   initAnnounce("convert-status-announce");
 
@@ -241,13 +256,36 @@ id,name,email
     handleInput(csvToJsonStore, value);
   }, 150);
 
+  // The last content we pushed into the output editor. Large-file mode shows a
+  // capped preview; normal mode shows the authoritative JSON. Both must drive
+  // Copy/Download, so they share this "active output" ref.
+  let lastOut = "";
+
+  const phaseByKey: Record<string, string> = {};
+  LARGE_FILE_PHASES.forEach((p) => {
+    phaseByKey[p.key] = p.label;
+  });
+
   csvToJsonStore.subscribe((state) => {
     const inputFocused = csvTextarea && document.activeElement === csvTextarea;
     if (csvTextarea && csvTextarea.value !== state.csvInput && !inputFocused) {
       csvTextarea.value = state.csvInput;
       csvTextarea.dispatchEvent(new Event("editor-refresh"));
     }
-    if (outTextarea && outTextarea.value !== state.jsonOutput) {
+
+    // Large-file mode output: show the capped preview (whole records) in the editor.
+    const large = state.largeFile;
+    if (large) {
+      const out = large.preview || "";
+      if (out !== lastOut) {
+        lastOut = out;
+        if (outTextarea && outTextarea.value !== out) {
+          outTextarea.value = out;
+          outTextarea.dispatchEvent(new Event("editor-refresh"));
+        }
+      }
+    } else if (outTextarea && outTextarea.value !== state.jsonOutput) {
+      lastOut = state.jsonOutput;
       outTextarea.value = state.jsonOutput;
       outTextarea.dispatchEvent(new Event("editor-refresh"));
     }
@@ -262,13 +300,49 @@ id,name,email
 
     if (outputStatus) {
       outputStatus.textContent =
-        state.outputStatus === "converted"
-          ? `Output: ${state.recordCount.toLocaleString()} record${state.recordCount === 1 ? "" : "s"}`
-          : "Output: Empty";
+        large != null
+          ? "Output: Preview"
+          : state.outputStatus === "converted"
+            ? `Output: ${state.recordCount.toLocaleString()} record${
+                state.recordCount === 1 ? "" : "s"
+              }`
+            : "Output: Empty";
     }
     if (outputCharCount) {
-      const delim = state.delimiterUsed ? " · " + delimiterLabel(state.delimiterUsed) : "";
-      outputCharCount.textContent = state.jsonOutput.length.toLocaleString() + " chars" + delim;
+      if (large) {
+        outputCharCount.textContent =
+          large.preview.length.toLocaleString() +
+          " chars preview · first " +
+          large.rows.toLocaleString() +
+          " of " +
+          large.totalRows.toLocaleString() +
+          " records · Download for full file";
+      } else if (state.outputStatus === "converted") {
+        const delim = state.delimiterUsed ? " · " + delimiterLabel(state.delimiterUsed) : "";
+        outputCharCount.textContent = state.jsonOutput.length.toLocaleString() + " chars" + delim;
+      } else {
+        outputCharCount.textContent = "0 chars";
+      }
+    }
+
+    if (statusDot) {
+      statusDot.classList.remove("idle", "active", "error");
+      statusDot.classList.add(state.isConverting ? "active" : state.error ? "error" : "idle");
+    }
+    if (phaseEl && statusText) {
+      if (large && large.phase !== "done") {
+        phaseEl.textContent = phaseByKey[large.phase] ?? large.phase + "…";
+        phaseEl.style.color = "var(--color-accent)";
+        statusText.textContent = "";
+      } else if (large && large.phase === "done") {
+        phaseEl.textContent = "Preview shown — use Download for the full file.";
+        phaseEl.style.color = "var(--color-success)";
+        statusText.textContent = "";
+      } else {
+        phaseEl.textContent = "";
+        phaseEl.style.color = "";
+        statusText.textContent = "Local sandbox active";
+      }
     }
 
     if (convertBtn) {
@@ -319,6 +393,7 @@ id,name,email
       }
       if (action === "clear") {
         clearAll(csvToJsonStore);
+        clearLargeFile(csvToJsonStore);
         announce("Input cleared");
       }
     });
@@ -329,6 +404,11 @@ id,name,email
     outputActions.addEventListener("tool-action", async (e: Event) => {
       const action = (e as CustomEvent).detail?.action;
       if (action === "copy") {
+        const large = csvToJsonStore.get().largeFile;
+        if (large) {
+          announce("Copy copies only the preview — use Download for the full file");
+          return;
+        }
         const out = getJsonContent(csvToJsonStore);
         const ok = out ? await copyToClipboard(out) : false;
         const btn = outputActions.querySelector("[data-action='copy']");
@@ -342,6 +422,18 @@ id,name,email
         }
       }
       if (action === "download") {
+        // Large-file mode: download the full Blob, not just the preview.
+        const large = csvToJsonStore.get().largeFile;
+        if (large && large.blobUrl) {
+          const a = document.createElement("a");
+          a.href = large.blobUrl;
+          a.download = "converted.json";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          announce("Download started (full file)");
+          return;
+        }
         const out = getJsonContent(csvToJsonStore);
         if (out) {
           downloadFile(out, "converted.json", "application/json;charset=utf-8;");
@@ -356,9 +448,19 @@ id,name,email
     dropZone.addEventListener("file-dropped", (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail?.text) {
+        clearLargeFile(csvToJsonStore);
         handleInput(csvToJsonStore, detail.text);
         announce("File loaded: " + (detail.name || "file") + " — click Convert to JSON");
       }
+    });
+
+    // Large-file mode: the worker owns the read + one-pass convert, and the
+    // result is a Blob download with a capped in-editor preview.
+    dropZone.addEventListener("file-large", (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      const file: File | undefined = detail?.file;
+      if (!file) return;
+      convertLargeFile(csvToJsonStore, file, file.name, file.size);
     });
   }
 
@@ -547,6 +649,12 @@ id,name,email
     height: 6px;
     border-radius: var(--rounded-full);
     background-color: var(--color-hairline-strong);
+  }
+  .status-indicator .dot.active {
+    background-color: var(--color-accent);
+  }
+  .status-indicator .dot.error {
+    background-color: var(--color-error);
   }
   .sr-only {
     position: absolute;

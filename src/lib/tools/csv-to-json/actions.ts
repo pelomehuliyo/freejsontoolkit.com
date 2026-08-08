@@ -17,6 +17,7 @@ function getWorker(): Worker {
     stale output so the box never shows a previous result against new input. */
 export function handleInput(store: Store<CsvToJsonState>, text: string): void {
   reqId++; // invalidate any in-flight conversion
+  clearLargeFile(store); // typing supersedes a large-file preview
   const state = store.get();
 
   if (!text.trim()) {
@@ -161,4 +162,121 @@ export function setSkipEmptyLines(store: Store<CsvToJsonState>, value: boolean):
 }
 export function setIndent(store: Store<CsvToJsonState>, value: IndentOption): void {
   store.update((s) => ({ ...s, indent: value }));
+}
+
+// ── Large-file mode (interim): worker owns read + single-pass convert ──
+// The result is a Blob (full file, download-only) plus a capped preview for the
+// editor. Each dispatch gets its own reqId so a second dropped file supersedes
+// the first (staleness guard). Previous blob URLs are revoked before new ones.
+let largeReqId = 0;
+
+export function convertLargeFile(
+  store: Store<CsvToJsonState>,
+  file: File,
+  name: string,
+  size: number,
+): void {
+  const id = ++largeReqId;
+
+  // Revoke any previous blob URL before we create a new one.
+  const prev = store.get().largeFile;
+  if (prev && prev.blobUrl) {
+    try {
+      URL.revokeObjectURL(prev.blobUrl);
+    } catch {
+      /* no-op */
+    }
+  }
+
+  store.update((s) => ({
+    ...s,
+    isConverting: true,
+    error: null,
+    outputStatus: "empty",
+    jsonOutput: "",
+    largeFile: {
+      file: { name, size },
+      blobUrl: null,
+      preview: "",
+      phase: "reading",
+      rows: 0,
+      totalRows: 0,
+    },
+  }));
+
+  const w = getWorker();
+  const onMessage = (e: MessageEvent) => {
+    const data = e.data as {
+      id: number;
+      phase: string;
+      ok?: boolean;
+      blob?: Blob;
+      preview?: string;
+      rows?: number;
+      totalRows?: number;
+      previewExceeded?: boolean;
+      error?: string;
+    };
+    if (data.id !== id) return;
+
+    // Discrete phase readout — honest, single-pass, no fake percentage.
+    store.update((s) =>
+      s.largeFile ? { ...s, largeFile: { ...s.largeFile, phase: data.phase } } : s,
+    );
+
+    if (data.phase !== "done") return;
+    w.removeEventListener("message", onMessage);
+    if (data.id !== largeReqId) return; // superseded by a newer file
+
+    if (data.ok && data.blob) {
+      const blobUrl = URL.createObjectURL(data.blob);
+      store.update((s) => ({
+        ...s,
+        isConverting: false,
+        outputStatus: "converted",
+        largeFile: s.largeFile
+          ? {
+              ...s.largeFile,
+              blobUrl,
+              preview: data.preview ?? "",
+              rows: data.rows ?? 0,
+              totalRows: data.totalRows ?? 0,
+            }
+          : s.largeFile,
+      }));
+    } else {
+      store.update((s) => ({
+        ...s,
+        isConverting: false,
+        error: data.error ?? "Conversion failed.",
+      }));
+    }
+  };
+  w.addEventListener("message", onMessage);
+  w.postMessage({
+    id,
+    kind: "large",
+    file,
+    options: {
+      delimiter: store.get().delimiter,
+      hasHeader: store.get().hasHeader,
+      skipEmptyLines: store.get().skipEmptyLines,
+      indent: store.get().indent,
+    },
+  });
+}
+
+/** Release the active large-file blob URL and reset the mode. */
+export function clearLargeFile(store: Store<CsvToJsonState>): void {
+  largeReqId++;
+  const prev = store.get().largeFile;
+  // Revoke the active blob URL before clearing the mode.
+  if (prev && prev.blobUrl) {
+    try {
+      URL.revokeObjectURL(prev.blobUrl);
+    } catch {
+      /* no-op */
+    }
+  }
+  store.update((s) => ({ ...s, largeFile: null }));
 }
