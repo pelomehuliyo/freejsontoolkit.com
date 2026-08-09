@@ -1,0 +1,844 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Container from "../components/Container.astro";
+import Button from "../components/Button.astro";
+import { getTool } from "../lib/tools/registry";
+
+const MONO: Record<string, string> = {
+  convert: "CON",
+  format: "FOR",
+  validate: "VAL",
+  compare: "CMP",
+  generate: "GEN",
+  utilities: "UTL",
+  api: "API",
+};
+
+const LARGE_TOOLS = ["csv-to-tsv", "tsv-to-csv", "csv-to-json"]
+  .map((id) => getTool(id))
+  .filter((t): t is NonNullable<typeof t> => Boolean(t && t.status === "available"));
+
+const failures = [
+  {
+    tag: "upload wall",
+    text: "“Drop your file to begin” — your data leaves your machine before anything happens.",
+  },
+  {
+    tag: "size cap",
+    text: "A quiet 5 MB ceiling, discovered only after you've already handed the file over.",
+  },
+  {
+    tag: "server timeout",
+    text: "A spinner on someone else's hardware, then a 504. Your file was never the problem.",
+  },
+  {
+    tag: "the bill",
+    text: "“Upgrade to Pro to convert files this size.” The paywall is the size limit.",
+  },
+];
+
+const mechanics = [
+  {
+    step: "01",
+    title: "Read off-thread",
+    text: "The file is read in a background Web Worker, so a 40 MB table never freezes the page.",
+  },
+  {
+    step: "02",
+    title: "Convert in one pass",
+    text: "The RFC 4180 parser walks the table once, on your machine. No round-trip, no queue.",
+  },
+  {
+    step: "03",
+    title: "Preview + full download",
+    text: "A capped preview appears in the editor; the complete result ships as a one-click download.",
+  },
+  {
+    step: "04",
+    title: "Nothing transmitted",
+    text: "There is no endpoint to send it to — none was ever built. Zero bytes uploaded, provably.",
+  },
+];
+
+const limits = [
+  "The ceiling is your device's memory, not a quota we set",
+  "The editor shows a capped preview — the full file is always the download",
+  "CSV → JSON output runs ~2.9× the input size, so it's the tightest fit",
+  "CSV ⇄ TSV stays ~1× and handles the largest tables of the three",
+  "No accounts, no upload, no “processing on our servers” — there are no servers",
+];
+
+const faqs = [
+  {
+    q: "How large a file can I actually convert?",
+    a: "There's no fixed cap — the limit is your device's available memory. Multi-megabyte tables convert comfortably on most machines; the CSV ⇄ TSV pair handles the largest files because its output is roughly the same size as the input.",
+  },
+  {
+    q: "Does the file get uploaded to check its size?",
+    a: "No. The file is read locally by your browser into a Web Worker. Nothing is transmitted anywhere — there is no backend for it to be transmitted to.",
+  },
+  {
+    q: "Why do I get a preview instead of the full result in the editor?",
+    a: "Rendering tens of megabytes into a text editor would lock your tab. So we render a capped preview you can inspect, and hand you the complete result as a download. You lose nothing.",
+  },
+  {
+    q: "Which tool should I use for a large file?",
+    a: "CSV → TSV or TSV → CSV for the biggest tables (1× output). CSV → JSON when you need structure — its output is ~2.9× the input, so give it the most headroom.",
+  },
+];
+---
+
+<BaseLayout
+  title="Convert Large CSV Files Online — Free, Local, No Upload | Free JSON Toolkit"
+  description="Most online converters cap out at a few megabytes or make you upload the file to find out. Ours converts multi-megabyte CSV and TSV tables entirely in your browser — background worker, preview, full download. Nothing is ever uploaded."
+  activePath="/large-files"
+>
+  <main>
+    {/* ── HERO: asymmetric console, the intake readout is the centerpiece ── */}
+    <section class="lf-hero">
+      <Container size="wide">
+        <div class="lf-hero-grid">
+          <div class="lf-hero-copy">
+            <p class="lf-kicker caption-mono">
+              <span class="lf-kicker-dot" aria-hidden="true"></span>
+              LARGE FILE MODE · 0 BYTES UPLOADED
+            </p>
+            <h1 class="lf-h1 display-xl">
+              Convert the CSV files<br />
+              <span class="lf-accent">other tools refuse.</span>
+            </h1>
+            <p class="lf-lede body-lg">
+              Most converters cap out at a few megabytes — or make you upload your data to find out.
+              Ours reads, converts and exports multi‑megabyte tables entirely in your browser, in a
+              background worker, with nothing sent anywhere.
+            </p>
+            <div class="lf-cta">
+              {
+                LARGE_TOOLS.map((t) => (
+                  <Button href={t.href} variant="primary" size="lg" shape="square">
+                    {t.name}
+                  </Button>
+                ))
+              }
+            </div>
+            <p class="lf-cta-note caption">Free · no account · works offline once loaded</p>
+          </div>
+
+          {/* live intake readout — the "alive" proof */}
+          <div class="lf-console" aria-hidden="true">
+            <span class="lf-scan"></span>
+            <div class="lf-con-bar">
+              <span class="lf-con-dot"></span><span class="lf-con-dot"></span><span
+                class="lf-con-dot"></span>
+              <span class="lf-con-title caption-mono">intake · 41.2 MB · local</span>
+            </div>
+            <div class="lf-con-body caption-mono">
+              <p class="lf-con-line" style="--i:0">
+                <span class="lf-prompt">$</span> drop big-table.csv
+              </p>
+              <p class="lf-con-line" style="--i:1">
+                <span class="lf-ok">✓</span> 41.2 MB read locally
+              </p>
+              <p class="lf-con-line" style="--i:2"><span class="lf-ok">✓</span> 0 bytes uploaded</p>
+              <p class="lf-con-line" style="--i:3">
+                <span class="lf-live">●</span> worker converting…
+              </p>
+              <p class="lf-con-line" style="--i:4"><span class="lf-ok">✓</span> preview ready</p>
+              <p class="lf-con-line" style="--i:5">
+                <span class="lf-star">↓</span> full file → download
+              </p>
+              <p class="lf-con-line" style="--i:6">
+                <span class="lf-prompt">$</span>
+                <span class="lf-con-caret">▍</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </Container>
+    </section>
+
+    {/* ── THE PAIN: why big files break everywhere else ── */}
+    <section class="lf-pain lf-reveal">
+      <Container size="wide">
+        <div class="lf-sec-head">
+          <span class="lf-sec-eyebrow caption-mono">The familiar wall</span>
+          <h2 class="lf-sec-title display-lg">Why large files break other converters</h2>
+          <p class="lf-sec-sub body-sm">
+            It's never your file's fault. It's a business model that can't afford to process it for
+            free — or won't risk touching it at all.
+          </p>
+        </div>
+        <div class="lf-pain-grid">
+          {
+            failures.map((f) => (
+              <div class="lf-pain-card">
+                <span class="lf-pain-tag caption-mono">{f.tag}</span>
+                <p class="lf-pain-text body-sm">{f.text}</p>
+              </div>
+            ))
+          }
+        </div>
+      </Container>
+    </section>
+
+    {/* ── THE FIX: how we handle it ── */}
+    <section class="lf-how lf-reveal">
+      <Container size="wide">
+        <div class="lf-sec-head">
+          <span class="lf-sec-eyebrow caption-mono">How it works here</span>
+          <h2 class="lf-sec-title display-lg">Built to take the big one</h2>
+        </div>
+        <div class="lf-how-grid">
+          {
+            mechanics.map((m) => (
+              <div class="lf-how-card">
+                <div class="lf-how-top">
+                  <span class="lf-how-step caption-mono">{m.step}</span>
+                  <h3 class="lf-how-name body-md-strong">{m.title}</h3>
+                </div>
+                <p class="lf-how-text caption">{m.text}</p>
+              </div>
+            ))
+          }
+        </div>
+      </Container>
+    </section>
+
+    {/* ── THE TOOLS ── */}
+    <section class="lf-tools lf-reveal">
+      <Container size="wide">
+        <div class="lf-sec-head">
+          <span class="lf-sec-eyebrow caption-mono">The large-file converters</span>
+          <h2 class="lf-sec-title display-lg">Pick your direction</h2>
+        </div>
+        <div class="lf-tool-grid">
+          {
+            LARGE_TOOLS.map((t) => (
+              <a class="lf-tool-card" href={t.href}>
+                <div class="lf-tool-top">
+                  <span class="mono-badge" aria-hidden="true">
+                    {MONO[t.category]}
+                  </span>
+                  <span class="lf-tool-flag caption-mono">large-file ready</span>
+                </div>
+                <h3 class="lf-tool-name display-sm">{t.name}</h3>
+                <p class="lf-tool-tag caption">{t.tagline}</p>
+                <span class="lf-tool-go body-sm-strong">
+                  Open tool <span aria-hidden="true">→</span>
+                </span>
+              </a>
+            ))
+          }
+        </div>
+      </Container>
+    </section>
+
+    {/* ── HONEST LIMITS: the trust ledger ── */}
+    <section class="lf-limits lf-reveal">
+      <Container size="wide">
+        <div class="lf-limits-grid">
+          <div class="lf-limits-copy">
+            <span class="lf-sec-eyebrow caption-mono">The honest part</span>
+            <h2 class="lf-sec-title display-lg">Where the ceiling really is</h2>
+            <p class="lf-limits-text body-md">
+              We'd rather tell you the real limit than invent a comfortable one. Because everything
+              runs on your machine, there's no quota we impose and no server to time out — but
+              there's also no server-grade RAM. The boundary is your device, and we say so up front.
+            </p>
+            <a class="lf-trust-link body-sm-strong" href="/why-local">
+              See the live proof it never uploads →
+            </a>
+          </div>
+          <div class="lf-ledger" aria-label="Honest limits">
+            <div class="lf-ledger-bar caption-mono">
+              <span class="lf-ledger-dot" aria-hidden="true"></span> honest-limits.txt
+            </div>
+            <ul class="lf-ledger-list">
+              {
+                limits.map((l) => (
+                  <li class="lf-ledger-row">
+                    <span class="lf-ledger-check" aria-hidden="true">
+                      ✓
+                    </span>
+                    <span class="lf-ledger-text">{l}</span>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+        </div>
+      </Container>
+    </section>
+
+    {/* ── FAQ ── */}
+    <section class="lf-faq lf-reveal" aria-labelledby="lf-faq-title">
+      <Container size="narrow">
+        <div class="lf-faq-header">
+          <span class="lf-sec-eyebrow caption-mono">Straight answers</span>
+          <h2 id="lf-faq-title" class="lf-sec-title display-lg">Large files, asked plainly</h2>
+        </div>
+        <div class="lf-faq-list">
+          {
+            faqs.map((f) => (
+              <details class="lf-faq-item">
+                <summary class="lf-faq-summary">{f.q}</summary>
+                <p class="body-md lf-faq-answer">{f.a}</p>
+              </details>
+            ))
+          }
+        </div>
+      </Container>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      if ("IntersectionObserver" in window) {
+        var els = Array.prototype.slice.call(document.querySelectorAll(".lf-reveal"));
+        var io = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (en) {
+              if (en.isIntersecting) {
+                en.target.classList.add("is-in");
+                io.unobserve(en.target);
+              }
+            });
+          },
+          { threshold: 0.12 },
+        );
+        els.forEach(function (el, i) {
+          el.style.transitionDelay = Math.min(i, 6) * 60 + "ms";
+          io.observe(el);
+        });
+      }
+    })();
+  </script>
+
+  <style>
+    /* ── HERO ── */
+    .lf-hero {
+      position: relative;
+      padding: var(--spacing-4xl) 0 var(--spacing-3xl);
+      background-color: var(--color-canvas);
+      background-image: radial-gradient(var(--color-hairline) 1px, transparent 1px);
+      background-size: 22px 22px;
+      border-bottom: 1px solid var(--color-hairline);
+      overflow: hidden;
+    }
+    .lf-hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(120% 80% at 85% 0%, rgba(33, 167, 138, 0.06), transparent 60%);
+    }
+    .lf-hero-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: var(--spacing-3xl);
+      align-items: center;
+    }
+    .lf-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-mute);
+      letter-spacing: 0.12em;
+      margin: 0 0 var(--spacing-md);
+    }
+    .lf-kicker-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--color-accent);
+      animation: lf-pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes lf-pulse {
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(33, 167, 138, 0.45);
+      }
+      50% {
+        box-shadow: 0 0 0 5px rgba(33, 167, 138, 0);
+      }
+    }
+    .lf-h1 {
+      letter-spacing: -0.035em;
+      line-height: 1.02;
+      margin: 0 0 var(--spacing-md);
+    }
+    .lf-accent {
+      color: var(--color-accent-active);
+    }
+    .lf-lede {
+      color: var(--color-body);
+      margin: 0 0 var(--spacing-lg);
+      max-width: 52ch;
+      line-height: 1.6;
+    }
+    .lf-cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-sm);
+    }
+    .lf-cta-note {
+      color: var(--color-mute);
+      margin: var(--spacing-sm) 0 0;
+    }
+
+    /* intake console */
+    .lf-console {
+      position: relative;
+      border: 1px solid var(--color-hairline);
+      border-radius: var(--rounded-lg);
+      background-color: var(--color-primary);
+      overflow: hidden;
+      box-shadow: 0 30px 70px rgba(17, 17, 17, 0.22);
+    }
+    .lf-console::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      border-radius: inherit;
+      opacity: 0.55;
+      background:
+        linear-gradient(var(--color-accent), var(--color-accent)) left 8px top 8px / 12px 1.5px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) left 8px top 8px / 1.5px 12px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) right 8px top 8px / 12px 1.5px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) right 8px top 8px / 1.5px 12px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) left 8px bottom 8px / 12px 1.5px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) left 8px bottom 8px / 1.5px 12px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) right 8px bottom 8px / 12px 1.5px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) right 8px bottom 8px / 1.5px 12px
+          no-repeat;
+    }
+    .lf-scan {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 2px;
+      z-index: 3;
+      background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+      transform: translateX(-100%);
+      animation: lf-scan 3.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+    @keyframes lf-scan {
+      0% {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+      12% {
+        opacity: 0.9;
+      }
+      60% {
+        opacity: 0.9;
+      }
+      100% {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+    .lf-con-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px var(--spacing-md);
+      background-color: rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .lf-con-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.18);
+    }
+    .lf-con-title {
+      margin-left: auto;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 10px;
+      letter-spacing: 0.05em;
+    }
+    .lf-con-body {
+      padding: var(--spacing-md);
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 13px;
+      line-height: 1.85;
+    }
+    .lf-con-line {
+      margin: 0;
+      animation: lf-line-in 0.4s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+      animation-delay: calc(var(--i) * 0.11s + 0.1s);
+    }
+    @keyframes lf-line-in {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+    .lf-prompt {
+      color: var(--color-accent);
+    }
+    .lf-ok {
+      color: var(--color-accent);
+    }
+    .lf-star {
+      color: var(--color-accent);
+    }
+    .lf-live {
+      color: var(--color-accent);
+      animation: lf-pulse 1.8s ease-in-out infinite;
+      border-radius: 50%;
+    }
+    .lf-con-caret {
+      color: var(--color-accent);
+      animation: lf-blink 1.05s step-end infinite;
+    }
+    @keyframes lf-blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    /* ── shared section heads ── */
+    .lf-sec-eyebrow {
+      display: block;
+      color: var(--color-accent-active);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .lf-sec-title {
+      color: var(--color-ink);
+      margin: 0 0 var(--spacing-xs);
+      letter-spacing: -0.02em;
+    }
+    .lf-sec-head {
+      max-width: 720px;
+      margin: 0 0 var(--spacing-xl);
+    }
+    .lf-sec-sub {
+      color: var(--color-body);
+      margin: var(--spacing-xs) 0 0;
+      line-height: 1.6;
+    }
+
+    /* ── PAIN ── */
+    .lf-pain {
+      padding: var(--spacing-4xl) 0;
+      background-color: var(--color-canvas-soft);
+      border-bottom: 1px solid var(--color-hairline);
+    }
+    .lf-pain-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-md);
+    }
+    .lf-pain-card {
+      padding: var(--spacing-lg);
+      border: 1px solid var(--color-hairline);
+      border-left: 3px solid var(--color-error);
+      border-radius: var(--rounded-sm);
+      background-color: var(--color-canvas);
+    }
+    .lf-pain-tag {
+      display: inline-block;
+      color: var(--color-error);
+      border: 1px solid var(--color-error-soft);
+      background-color: rgba(238, 0, 0, 0.05);
+      border-radius: var(--rounded-xs);
+      padding: 2px 8px;
+      margin-bottom: var(--spacing-sm);
+      letter-spacing: 0.06em;
+    }
+    .lf-pain-text {
+      color: var(--color-body);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    /* ── HOW ── */
+    .lf-how {
+      padding: var(--spacing-4xl) 0;
+      border-bottom: 1px solid var(--color-hairline);
+    }
+    .lf-how-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--spacing-md);
+    }
+    .lf-how-card {
+      position: relative;
+      padding: var(--spacing-lg);
+      border: 1px solid var(--color-hairline);
+      border-radius: var(--rounded-md);
+      background-color: var(--color-canvas);
+      transition:
+        border-color 0.16s ease,
+        transform 0.16s ease,
+        box-shadow 0.16s ease;
+    }
+    .lf-how-card:hover {
+      border-color: var(--color-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(33, 167, 138, 0.12);
+    }
+    .lf-how-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: var(--spacing-sm);
+    }
+    .lf-how-step {
+      color: var(--color-accent-active);
+      border: 1px solid var(--color-hairline-strong);
+      border-radius: var(--rounded-xs);
+      padding: 2px 6px;
+    }
+    .lf-how-name {
+      margin: 0;
+      color: var(--color-ink);
+    }
+    .lf-how-text {
+      color: var(--color-body);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    /* ── TOOLS ── */
+    .lf-tools {
+      padding: var(--spacing-4xl) 0;
+      background-color: var(--color-canvas-soft);
+      border-bottom: 1px solid var(--color-hairline);
+    }
+    .lf-tool-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--spacing-md);
+    }
+    .lf-tool-card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+      padding: var(--spacing-lg);
+      border: 1px solid var(--color-hairline);
+      border-radius: var(--rounded-md);
+      background-color: var(--color-canvas);
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+      transition:
+        border-color 0.15s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+    }
+    .lf-tool-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 2px;
+      background-color: var(--color-accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.2s ease;
+    }
+    .lf-tool-card:hover {
+      border-color: var(--color-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 14px 34px rgba(33, 167, 138, 0.12);
+    }
+    .lf-tool-card:hover::before {
+      transform: scaleX(1);
+    }
+    .lf-tool-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-sm);
+    }
+    .lf-tool-flag {
+      color: var(--color-accent-active);
+      border: 1px solid rgba(33, 167, 138, 0.25);
+      background-color: rgba(33, 167, 138, 0.08);
+      border-radius: var(--rounded-pill-sm);
+      padding: 2px 10px;
+      letter-spacing: 0.04em;
+    }
+    .lf-tool-name {
+      margin: var(--spacing-xxs) 0 0;
+      color: var(--color-ink);
+    }
+    .lf-tool-tag {
+      color: var(--color-mute);
+      margin: 0;
+      line-height: 1.5;
+    }
+    .lf-tool-go {
+      margin-top: auto;
+      padding-top: var(--spacing-sm);
+      color: var(--color-ink);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .lf-tool-go span {
+      color: var(--color-accent-active);
+      transition: transform 0.15s ease;
+    }
+    .lf-tool-card:hover .lf-tool-go span {
+      transform: translateX(3px);
+    }
+
+    /* ── HONEST LIMITS ── */
+    .lf-limits {
+      padding: var(--spacing-4xl) 0;
+      border-bottom: 1px solid var(--color-hairline);
+    }
+    .lf-limits-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-3xl);
+      align-items: center;
+    }
+    .lf-limits-text {
+      color: var(--color-body);
+      margin: 0 0 var(--spacing-md);
+      line-height: 1.7;
+      max-width: 48ch;
+    }
+    .lf-trust-link {
+      color: var(--color-accent-active);
+      text-decoration: none;
+    }
+    .lf-trust-link:hover {
+      text-decoration: underline;
+    }
+    .lf-ledger {
+      border: 1px solid var(--color-hairline);
+      border-radius: var(--rounded-md);
+      background-color: var(--color-primary);
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(17, 17, 17, 0.18);
+    }
+    .lf-ledger-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px var(--spacing-md);
+      background-color: rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.55);
+    }
+    .lf-ledger-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--color-accent);
+    }
+    .lf-ledger-list {
+      list-style: none;
+      margin: 0;
+      padding: var(--spacing-sm) 0;
+    }
+    .lf-ledger-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px var(--spacing-md);
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .lf-ledger-check {
+      color: var(--color-accent);
+      font-family: var(--font-mono);
+      font-weight: 700;
+      flex: none;
+    }
+
+    /* ── FAQ ── */
+    .lf-faq {
+      padding: var(--spacing-4xl) 0 var(--spacing-5xl);
+    }
+    .lf-faq-header {
+      margin: 0 0 var(--spacing-lg);
+    }
+    .lf-faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+    }
+    .lf-faq-item {
+      border: 1px solid var(--color-hairline);
+      border-radius: var(--rounded-sm);
+      background-color: var(--color-canvas-soft);
+      padding: var(--spacing-md) var(--spacing-lg);
+    }
+    .lf-faq-summary {
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-ink);
+      padding: var(--spacing-xs) 0;
+      user-select: none;
+    }
+    .lf-faq-summary:hover {
+      color: var(--color-accent);
+    }
+    .lf-faq-answer {
+      margin-top: var(--spacing-sm);
+      color: var(--color-body);
+      line-height: 1.65;
+    }
+
+    /* ── scroll reveal ── */
+    .lf-reveal {
+      opacity: 0;
+      transform: translateY(14px);
+      transition:
+        opacity 0.5s ease,
+        transform 0.5s ease;
+    }
+    .lf-reveal.is-in {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ── responsive ── */
+    @media (max-width: 959px) {
+      .lf-hero-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+      }
+      .lf-how-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .lf-tool-grid {
+        grid-template-columns: 1fr;
+      }
+      .lf-limits-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+      }
+      .lf-pain-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</BaseLayout>

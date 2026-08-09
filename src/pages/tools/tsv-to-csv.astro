@@ -150,6 +150,15 @@ Ada	Engineer	London`}
           </p>
         </details>
         <details class="faq-item">
+          <summary class="faq-summary">Can it handle large TSV files?</summary>
+          <p class="body-md faq-answer">
+            Yes. Files above about 15 MB switch to a dedicated large-file mode: the file is read and
+            converted in a background worker, you see a capped preview in the editor, and the full
+            CSV is a one-click download. Nothing is uploaded — the only ceiling is your device's
+            memory. <a href="/large-files">See how large-file mode works →</a>
+          </p>
+        </details>
+        <details class="faq-item">
           <summary class="faq-summary">What happens to a field that contains a comma?</summary>
           <p class="body-md faq-answer">
             It's preserved and quoted. In TSV a comma is ordinary data; in CSV it's the delimiter,

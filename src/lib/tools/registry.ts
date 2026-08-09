@@ -132,8 +132,7 @@ export const tools: ToolManifest[] = [
     family: "json",
     status: "available",
     href: "/tools/csv-to-json",
-    keywords: ["csv to json", "convert csv to json"],
-    addedIn: "v1.1",
+    keywords: ["csv to json", "convert csv to json", "large csv to json", "big csv to json converter", "convert large csv to json"], addedIn: "v1.1",
   },
   {
     id: "json-to-xml",
@@ -186,8 +185,7 @@ export const tools: ToolManifest[] = [
     category: "convert",
     status: "available",
     href: "/tools/csv-to-tsv",
-    keywords: ["csv to tsv", "convert csv to tsv", "csv to tab separated"],
-    addedIn: "v1.5",
+    keywords: ["csv to tsv", "convert csv to tsv", "csv to tab separated", "large csv to tsv", "convert large csv to tsv"], addedIn: "v1.5",
     family: "data-formats",
   },
   {
@@ -197,8 +195,7 @@ export const tools: ToolManifest[] = [
     category: "convert",
     status: "available",
     href: "/tools/tsv-to-csv",
-    keywords: ["tsv to csv", "convert tsv to csv", "tab separated to csv"],
-    addedIn: "v1.5",
+    keywords: ["tsv to csv", "convert tsv to csv", "tab separated to csv", "large tsv to csv", "convert large tsv to csv"], addedIn: "v1.5",
     family: "data-formats",
   },
   {

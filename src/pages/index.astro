@@ -235,7 +235,31 @@ const guarantees = [
         </div>
       </Container>
     </section>
-
+    {/* ── LARGE-FILE CALLOUT: the new capability, sold hard ── */}
+    <section class="hp-largefile hp-reveal">
+      <Container size="wide">
+        <a class="hp-lf-card" href="/large-files">
+          <span class="hp-lf-scan" aria-hidden="true"></span>
+          <div class="hp-lf-left">
+            <span class="hp-lf-badge caption-mono">
+              <span class="hp-lf-badge-dot" aria-hidden="true"></span>
+              NEW · LARGE FILE MODE
+            </span>
+            <h2 class="hp-lf-title display-md">Convert the CSV files other tools refuse.</h2>
+            <p class="hp-lf-text body-sm">
+              Multi‑megabyte tables, processed in a background worker, nothing uploaded. Preview in
+              the editor, the full file as a one‑click download.
+            </p>
+          </div>
+          <div class="hp-lf-right">
+            <span class="hp-lf-tools caption-mono">CSV → TSV · TSV → CSV · CSV → JSON</span>
+            <span class="hp-lf-cta body-sm-strong">
+              See how it works <span aria-hidden="true">→</span>
+            </span>
+          </div>
+        </a>
+      </Container>
+    </section>
     {/* ── DIRECTORY: browse by category (the homepage becomes a directory) ── */}
     <section class="hp-directory hp-reveal" id="hp-directory">
       <Container size="wide">
@@ -613,7 +637,138 @@ const guarantees = [
       max-width: 52ch;
       line-height: 1.6;
     }
-
+    /* ── LARGE-FILE CALLOUT ── */
+    .hp-largefile {
+      padding: var(--spacing-2xl) 0;
+      border-bottom: 1px solid var(--color-hairline);
+    }
+    .hp-lf-card {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-xl);
+      padding: var(--spacing-lg) var(--spacing-xl);
+      border: 1px solid var(--color-hairline);
+      border-radius: var(--rounded-md);
+      background-color: var(--color-primary);
+      background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      background-size: 20px 20px;
+      text-decoration: none;
+      color: inherit;
+      overflow: hidden;
+      transition:
+        border-color 0.16s ease,
+        box-shadow 0.16s ease,
+        transform 0.16s ease;
+    }
+    .hp-lf-card:hover {
+      border-color: var(--color-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 16px 40px rgba(33, 167, 138, 0.18);
+    }
+    /* HUD corner brackets */
+    .hp-lf-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      border-radius: inherit;
+      opacity: 0.55;
+      background:
+        linear-gradient(var(--color-accent), var(--color-accent)) left 8px top 8px / 12px 1.5px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) left 8px top 8px / 1.5px 12px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) right 8px top 8px / 12px 1.5px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) right 8px top 8px / 1.5px 12px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) left 8px bottom 8px / 12px 1.5px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) left 8px bottom 8px / 1.5px 12px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) right 8px bottom 8px / 12px 1.5px
+          no-repeat,
+        linear-gradient(var(--color-accent), var(--color-accent)) right 8px bottom 8px / 1.5px 12px
+          no-repeat;
+    }
+    .hp-lf-scan {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 2px;
+      z-index: 3;
+      background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+      transform: translateX(-100%);
+      animation: hp-scan 3.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+    .hp-lf-left {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+      min-width: 0;
+    }
+    .hp-lf-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-accent);
+      letter-spacing: 0.12em;
+    }
+    .hp-lf-badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--color-accent);
+      animation: hp-pulse 1.8s ease-in-out infinite;
+    }
+    .hp-lf-title {
+      color: var(--color-on-primary);
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+    .hp-lf-text {
+      color: rgba(255, 255, 255, 0.72);
+      margin: 0;
+      line-height: 1.55;
+      max-width: 54ch;
+    }
+    .hp-lf-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--spacing-sm);
+      flex: none;
+    }
+    .hp-lf-tools {
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 0.04em;
+    }
+    .hp-lf-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--color-accent);
+    }
+    .hp-lf-cta span {
+      transition: transform 0.15s ease;
+    }
+    .hp-lf-card:hover .hp-lf-cta span {
+      transform: translateX(3px);
+    }
+    @media (max-width: 959px) {
+      .hp-lf-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+      }
+      .hp-lf-right {
+        align-items: flex-start;
+      }
+    }
     /* search bar = palette trigger */
     .hp-searchbar {
       display: flex;
