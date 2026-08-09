@@ -1,6 +1,6 @@
 import type { Store } from "../../state/toolStore";
 import type { JsonFormatterState, IndentOption } from "./types";
-import { formatJson, validateJson } from "./engine";
+import { validateJson } from "./engine";
 import { MAX_INPUT_CHARS, SAMPLE_JSON } from "./constants";
 
 // ── Worker management: keeps big-file formatting off the main thread ──

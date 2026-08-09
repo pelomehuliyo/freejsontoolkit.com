@@ -96,9 +96,9 @@ function tokenize(s: string): Token[] {
   const n = s.length;
   let i = 0;
 
-  const fail = (position: number, message: string): never => {
+  function fail(position: number, message: string): never {
     throw { position, message } as Fail;
-  };
+  }
 
   while (i < n) {
     const c = s[i];
@@ -232,9 +232,9 @@ function validateStructure(
   };
   const duplicateKeys: string[] = [];
 
-  const fail = (position: number, message: string): never => {
+  function fail(position: number, message: string): never {
     throw { position, message } as Fail;
-  };
+  }
   const peek = (): Token | undefined => tokens[p];
   const here = (): Token => tokens[p] ?? { type: "rbrace", start: s.length }; // EOF sentinel for messages
 
