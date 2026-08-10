@@ -38,7 +38,7 @@ export function handleInput(store: Store<JsonValidatorState>, text: string): voi
       ...state,
       jsonInput: text,
       result: null,
-      inputStatus: "ready",
+      inputStatus: "too-large",
       outputStatus: "empty",
       isValidating: false,
       error:
@@ -53,7 +53,15 @@ export function handleInput(store: Store<JsonValidatorState>, text: string): voi
 
   if (text.length > LIVE_VALIDATE_THRESHOLD) {
     // Defer the real check to the worker on Validate; keep the box responsive.
-    store.set({ ...state, jsonInput: text, inputStatus: "ready", error: null });
+    store.set({
+      ...state,
+      jsonInput: text,
+      result: null,
+      inputStatus: "ready",
+      outputStatus: "empty",
+      isValidating: false,
+      error: null,
+    });
     return;
   }
 
@@ -63,7 +71,15 @@ export function handleInput(store: Store<JsonValidatorState>, text: string): voi
     includeNormalized: false,
   });
   live.authoritative = false;
-  store.set({ ...state, jsonInput: text, result: live, inputStatus: "ready", error: null });
+  store.set({
+    ...state,
+    jsonInput: text,
+    result: live,
+    inputStatus: "ready",
+    outputStatus: "empty",
+    isValidating: false,
+    error: null,
+  });
 }
 
 /** The explicit Validate — runs in the worker, drives the output report and
@@ -73,6 +89,20 @@ export function validate(store: Store<JsonValidatorState>): void {
   if (state.isValidating) return;
   if (!state.jsonInput.trim()) {
     store.update((s) => ({ ...s, error: "Paste or load JSON first." }));
+    return;
+  }
+  if (state.jsonInput.length > MAX_INPUT_CHARS) {
+    store.update((s) => ({
+      ...s,
+      isValidating: false,
+      error:
+        "Input is too large to validate. Limit is " +
+        MAX_INPUT_CHARS.toLocaleString() +
+        " characters.",
+      inputStatus: "too-large",
+      result: null,
+      outputStatus: "empty",
+    }));
     return;
   }
 
@@ -119,8 +149,19 @@ export function validate(store: Store<JsonValidatorState>): void {
 }
 
 export function loadSample(store: Store<JsonValidatorState>): void {
-  // Load only — never auto-run. The user clicks Validate explicitly.
-  handleInput(store, SAMPLE_JSON);
+  // House rule: Load Sample only loads — it never auto-runs. The user clicks
+  // Validate explicitly. We set the input directly (without the live-validate
+  // path) so no report is produced on load.
+  reqId++;
+  store.update((s) => ({
+    ...s,
+    jsonInput: SAMPLE_JSON,
+    result: null,
+    inputStatus: "ready",
+    outputStatus: "empty",
+    isValidating: false,
+    error: null,
+  }));
 }
 
 export function clearAll(store: Store<JsonValidatorState>): void {
@@ -134,11 +175,6 @@ export function clearAll(store: Store<JsonValidatorState>): void {
     isValidating: false,
     error: null,
   }));
-}
-
-export function getReportContent(store: Store<JsonValidatorState>): string | null {
-  const r = store.get().result;
-  return r ? null : null; // report text is built in the page; this returns raw only if needed
 }
 
 export function setFlagDuplicateKeys(store: Store<JsonValidatorState>, value: boolean): void {

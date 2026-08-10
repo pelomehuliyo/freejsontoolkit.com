@@ -40,7 +40,7 @@ export interface ValidationResult {
 export interface JsonValidatorState {
   jsonInput: string;
   result: ValidationResult | null;
-  inputStatus: "empty" | "ready";
+  inputStatus: "empty" | "ready" | "too-large";
   outputStatus: "empty" | "valid" | "invalid";
   isValidating: boolean;
   error: string | null;
