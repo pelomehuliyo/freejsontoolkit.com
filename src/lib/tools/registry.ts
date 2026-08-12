@@ -132,7 +132,7 @@ export const tools: ToolManifest[] = [
     family: "json",
     status: "available",
     href: "/tools/csv-to-json",
-    keywords: ["csv to json", "convert csv to json", "large csv to json", "big csv to json converter", "convert large csv to json"], addedIn: "v1.1",
+    keywords: ["csv to json", "convert csv to json", "large csv to json", "big csv to json converter", "convert large csv to json", "csv parser online"],
   },
   {
     id: "json-to-xml",
@@ -219,7 +219,7 @@ export const tools: ToolManifest[] = [
     status: "available",
     href: "/tools/json-formatter",
     // captures formatter / beautifier / pretty-print intent in one tool
-    keywords: ["json formatter", "json beautifier", "json pretty print", "prettify json"],
+    keywords: ["json formatter", "json beautifier", "json pretty print", "prettify json", "json indent", "format json online"],
     addedIn: "v1.1",
   },
   {
@@ -243,7 +243,7 @@ export const tools: ToolManifest[] = [
     family: "json",
     status: "available",
     href: "/tools/json-validator",
-    keywords: ["json validator", "validate json", "json syntax checker"],
+    keywords: ["json validator", "validate json", "json syntax checker", "json lint", "json parse error checker", "json syntax validator"],
     addedIn: "v1.2",
   },
   {
@@ -266,7 +266,7 @@ export const tools: ToolManifest[] = [
     family: "json",
     status: "available",
     href: "/tools/json-diff",
-    keywords: ["json diff", "compare json", "json compare tool"],
+    keywords: ["json diff", "compare json", "json compare tool", "json diff online", "compare two json files"],
     addedIn: "v1.2",
   },
   {
@@ -313,7 +313,7 @@ export const tools: ToolManifest[] = [
     family: "encoding",
     status: "available",
     href: "/tools/base64",
-    keywords: ["base64 decode", "base64 encode", "base64 converter"],
+    keywords: ["base64 decode", "base64 encode", "base64 converter", "base64 decode online", "base64 encode online", "base64 to text"],
     addedIn: "v1.3",
   },
   {
@@ -346,7 +346,7 @@ export const tools: ToolManifest[] = [
     family: "developer-utilities",
     status: "available",
     href: "/tools/timestamp-converter",
-    keywords: ["unix timestamp converter", "epoch converter", "timestamp to date", "date to timestamp"],
+    keywords: ["unix timestamp converter", "epoch converter", "timestamp to date", "date to timestamp", "current unix timestamp", "epoch time converter"],
     addedIn: "v1.5",
   },
 
@@ -369,7 +369,7 @@ export const tools: ToolManifest[] = [
     family: "developer-utilities",
     status: "available",
     href: "/tools/regex-tester",
-    keywords: ["regex tester", "regular expression tester", "test regex online", "regex match"],
+    keywords: ["regex tester", "regular expression tester", "test regex online", "regex match", "regex evaluator", "regex 101 alternative"],
     addedIn: "v1.5",
   },
 ];

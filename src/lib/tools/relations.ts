@@ -70,8 +70,9 @@ export const RELATIONS: Record<string, Relation[]> = {
     { id: "json-to-csv", label: "Or flatten to CSV", kind: "pair" },
   ],
   "regex-tester": [
-    { id: "json-validator", label: "Validate structured data", kind: "pair" },
-    { id: "base64", label: "Encode the result", kind: "next" },
+    { id: "text-diff", label: "Compare matched outputs", kind: "next" },
+    { id: "json-validator", label: "Validate extracted JSON", kind: "next" },
+    { id: "base64", label: "Encode the result", kind: "pair" },
     { id: "url-encode", label: "Percent-encode it", kind: "pair" },
   ],
   "xml-to-json": [
@@ -111,6 +112,8 @@ export const RELATIONS: Record<string, Relation[]> = {
   ],
   "text-diff": [
     { id: "json-diff", label: "Diff structured JSON", kind: "pair" },
+    { id: "regex-tester", label: "Extract patterns first", kind: "next" },
+    { id: "base64", label: "Compare encoded payloads", kind: "pair" },
   ],
   "json-schema-validator": [
     { id: "json-validator", label: "Check the syntax first", kind: "next" },

@@ -66,11 +66,13 @@ Ada,Engineer,7`}
         <div class="settings-group">
           <span class="settings-label">Embedded newlines</span>
           <div class="seg" id="newline-select" role="group" aria-label="Embedded newlines">
-            {NEWLINE_STRATEGIES.map((opt) => (
-              <button type="button" class="seg-btn" data-value={opt.value}>
-                {opt.label}
-              </button>
-            ))}
+            {
+              NEWLINE_STRATEGIES.map((opt) => (
+                <button type="button" class="seg-btn" data-value={opt.value}>
+                  {opt.label}
+                </button>
+              ))
+            }
           </div>
           <p class="settings-help">
             TSV can't keep a newline inside one cell. Refuse is the honest default.
@@ -137,6 +139,17 @@ Ada,Engineer,7`}
         <h2 id="faq-title" class="display-md section-title">Frequently asked questions</h2>
       </div>
       <div class="faq-list">
+        <details class="faq-item">
+          <summary class="faq-summary">How does the large-file mode work?</summary>
+          <p class="body-md faq-answer">
+            If you drop a file larger than 15 MB, the tool switches to a background worker. It reads
+            the file off the main thread, converts it in one pass, and gives you a capped preview in
+            the editor. The full result is always available as a download. Nothing is uploaded.
+            <a href="/large-files" style="color: var(--color-accent); font-weight: 500;"
+              >Read the honest limits in our large-file guide →</a
+            >
+          </p>
+        </details>
         <details class="faq-item">
           <summary class="faq-summary">Is my CSV uploaded anywhere?</summary>
           <p class="body-md faq-answer">
@@ -359,10 +372,7 @@ Ada,Engineer,7`}
   if (newlineBtns.length) {
     newlineBtns.forEach((b) =>
       b.addEventListener("click", () =>
-        setNewlineStrategy(
-          csvToTsvStore,
-          b.dataset.value as ConvertOptions["newlineStrategy"],
-        ),
+        setNewlineStrategy(csvToTsvStore, b.dataset.value as ConvertOptions["newlineStrategy"]),
       ),
     );
   }
@@ -420,7 +430,11 @@ Ada,Engineer,7`}
           return;
         }
         if (lastOut) {
-          downloadFile(lastOut, "csv-to-tsv-converted.tsv", "text/tab-separated-values;charset=utf-8;");
+          downloadFile(
+            lastOut,
+            "csv-to-tsv-converted.tsv",
+            "text/tab-separated-values;charset=utf-8;",
+          );
           announce("Download started");
         } else {
           announce("Nothing to download yet");

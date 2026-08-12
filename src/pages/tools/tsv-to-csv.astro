@@ -118,6 +118,17 @@ Ada	Engineer	London`}
       </div>
       <div class="faq-list">
         <details class="faq-item">
+          <summary class="faq-summary">How does the large-file mode work?</summary>
+          <p class="body-md faq-answer">
+            If you drop a file larger than 15 MB, the tool switches to a background worker. It reads
+            the file off the main thread, converts it in one pass, and gives you a capped preview in
+            the editor. The full result is always available as a download. Nothing is uploaded.
+            <a href="/large-files" style="color: var(--color-accent); font-weight: 500;"
+              >Read the honest limits in our large-file guide →</a
+            >
+          </p>
+        </details>
+        <details class="faq-item">
           <summary class="faq-summary">Is my TSV uploaded anywhere?</summary>
           <p class="body-md faq-answer">
             No. Parsing and conversion run entirely in your browser (in a background worker for
