@@ -66,7 +66,7 @@ export function convert(store: Store<YamlToJsonState>): void {
   const state = store.get();
   if (state.isConverting) return;
   if (!state.yamlInput.trim()) {
-    store.update((s) => ({ ...s, error: "Paste or load YAML first." }));
+    store.update((s) => ({ ...s, error: "Nothing to convert yet. Add YAML to the input box, then press Convert." }));
     return;
   }
   const id = ++reqId;
@@ -92,7 +92,7 @@ export function convert(store: Store<YamlToJsonState>): void {
       store.update((s) => ({
         ...s,
         isConverting: false,
-        error: data.error ?? "Conversion failed.",
+        error: data.error ?? "Conversion failed. The YAML could not be converted. Check the input and try again.",
       }));
     }
   };

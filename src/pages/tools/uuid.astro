@@ -2,6 +2,7 @@
 import ToolShell from "../../components/tools/ToolShell.astro";
 import ToolHeader from "../../components/tools/ToolHeader.astro";
 import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import ToolActions from "../../components/tools/ToolActions.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
@@ -29,6 +30,8 @@ import RelatedTools from "../../components/tools/RelatedTools.astro";
 import ToolDocs from "../../components/tools/ToolDocs.astro";
 import CompareLinks from "../../components/tools/CompareLinks.astro";
 import ToolNudge from "../../components/tools/ToolNudge.astro";
+import HowItWorks from "../../components/tools/HowItWorks.astro";
+import "../../styles/tool-options.css";
 ---
 
 <ToolShell
@@ -40,7 +43,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "UUID Generator" }]}
     title="UUID Generator"
-    subtitle="Generate v1, v4, v5 or v7 identifiers in bulk — sortable, random, or name-based. Offline."
+    subtitle="Generate v1, v4, v5 or v7 identifiers in bulk — sortable, random, or name-based."
   />
 
   <section class="uu-stage">
@@ -49,7 +52,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
       <Card variant="flat" class="workspace-card uu-config">
         <div class="uu-config-grid">
           <div class="uu-field">
-            <span class="uu-flabel caption-mono">version</span>
+            <span class="settings-label">version</span>
             <div class="seg" role="group" aria-label="UUID version">
               {
                 versions.map((x, i) => (
@@ -67,22 +70,22 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
           </div>
 
           <div class="uu-field">
-            <span class="uu-flabel caption-mono">count</span>
-            <div class="uu-count">
+            <span class="settings-label">count</span>
+            <div class="chip-count">
               <input
                 type="number"
                 id="uu-count"
-                class="uu-num"
+                class="countval"
                 min="1"
                 max="5000"
                 value="5"
                 inputmode="numeric"
                 aria-label="How many UUIDs"
               />
-              <div class="uu-chips" role="group" aria-label="Quick counts">
+              <div class="chip-row" role="group" aria-label="Quick counts">
                 {
                   COUNT_PRESETS.map((n) => (
-                    <button type="button" class="uu-chip" data-uu-count={n}>
+                    <button type="button" class="chip" data-uu-count={n}>
                       {n}
                     </button>
                   ))
@@ -92,7 +95,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
           </div>
 
           <div class="uu-field">
-            <span class="uu-flabel caption-mono">format</span>
+            <span class="settings-label">format</span>
             <div class="seg" role="group" aria-label="Output format">
               {
                 formats.map((x, i) => (
@@ -110,10 +113,10 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
           </div>
 
           <div class="uu-field uu-field-case">
-            <span class="uu-flabel caption-mono">case</span>
-            <label class="uu-toggle body-sm">
+            <span class="settings-label">case</span>
+            <label class="opt-check">
               <input type="checkbox" id="uu-upper" />
-              <span class="uu-switch" aria-hidden="true"></span>
+              <span class="box"></span>
               <span id="uu-case-label">lower</span>
             </label>
           </div>
@@ -122,9 +125,9 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
         {/* v5-only inputs */}
         <div class="uu-v5" id="uu-v5" hidden>
           <div class="uu-field">
-            <span class="uu-flabel caption-mono">namespace</span>
+            <span class="settings-label">namespace</span>
             <div class="select-wrapper uu-ns-select">
-              <select id="uu-ns" class="settings-select">
+              <select id="uu-ns" class="select-control">
                 {NAMESPACE_PRESETS.map((p) => <option value={p.id}>{p.label}</option>)}
                 <option value="custom">custom…</option>
               </select>
@@ -140,7 +143,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
             />
           </div>
           <div class="uu-field uu-field-grow">
-            <span class="uu-flabel caption-mono">name</span>
+            <span class="settings-label">name</span>
             <input
               type="text"
               id="uu-name"
@@ -153,6 +156,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
         </div>
 
         <div class="uu-go">
+          <ToolActions id="uu-input-actions" variant="bar" actions={["sample", "clear"]} />
           <Button id="uu-generate" variant="primary" size="lg" shape="square" class="uu-gen-btn">
             Generate
           </Button>
@@ -262,6 +266,23 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
       </div>
     </Container>
   </section>
+  <HowItWorks
+    heading="Generate UUIDs in three steps"
+    steps={[
+      {
+        title: "Pick a version",
+        desc: "Choose v1, v4, v5, or v7 depending on whether you need time-based, random, namespaced, or sortable identifiers.",
+      },
+      {
+        title: "Set the batch",
+        desc: "Choose how many to generate, plus the output format, case, and separator for the list.",
+      },
+      {
+        title: "Generate & export",
+        desc: "Click Generate — v7 batches come out already sorted — then copy or download the entire list.",
+      },
+    ]}
+  />
   <ToolDocs />
   <CompareLinks />
   <RelatedTools />
@@ -321,6 +342,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     setCustomNamespace,
     setName,
     clearAll,
+    loadSample,
     runGenerate,
   } from "../../lib/tools/uuid/actions";
   import { maxCount, RENDER_CAP } from "../../lib/tools/uuid/constants";
@@ -500,6 +522,20 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
   });
 
   // ── events ──
+  const inputActions = document.getElementById("uu-input-actions");
+  if (inputActions) {
+    inputActions.addEventListener("tool-action", (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      if (action === "sample") {
+        loadSample(uuidStore);
+        announce("Sample config loaded");
+      }
+      if (action === "clear") {
+        clearAll(uuidStore);
+        announce("Cleared");
+      }
+    });
+  }
   if (genBtn) genBtn.addEventListener("click", () => runGenerate(uuidStore));
   verBtns.forEach((b) =>
     b.addEventListener("click", () =>
@@ -570,7 +606,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     dlBtn.addEventListener("click", () => {
       const arr = allFormatted();
       if (!arr.length) return;
-      downloadFile(arr.join("\n"), "uuids.txt", "text/plain;charset=utf-8;");
+      downloadFile(arr.join("\n"), "uuid-uuids.txt", "text/plain;charset=utf-8;");
       announce("Download started");
     });
 
@@ -751,136 +787,8 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     gap: 7px;
     min-width: 0;
   }
-  .uu-flabel {
-    color: var(--color-mute);
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
   .uu-field-case {
     align-items: flex-start;
-  }
-
-  /* segmented control */
-  .seg {
-    display: inline-flex;
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    overflow: hidden;
-    width: 100%;
-  }
-  .seg-btn {
-    flex: 1;
-    border: none;
-    background: var(--color-canvas);
-    color: var(--color-body);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    padding: 8px 6px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition:
-      background-color 0.18s ease,
-      color 0.18s ease;
-  }
-  .seg-btn + .seg-btn {
-    border-left: 1px solid var(--color-hairline);
-  }
-  .seg-btn.is-active {
-    background-color: var(--color-primary);
-    color: var(--color-on-primary);
-  }
-  .seg-btn:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: -2px;
-  }
-
-  .uu-count {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-  }
-  .uu-num {
-    width: 72px;
-    height: 36px;
-    padding: 0 8px;
-    font-family: var(--font-mono);
-    font-size: 14px;
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    background-color: var(--color-canvas);
-    color: var(--color-ink);
-    outline: none;
-  }
-  .uu-num:focus {
-    border-color: var(--color-accent);
-  }
-  .uu-chips {
-    display: flex;
-    gap: 4px;
-  }
-  .uu-chip {
-    border: 1px solid var(--color-hairline);
-    background: var(--color-canvas);
-    color: var(--color-mute);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    padding: 6px 8px;
-    border-radius: var(--rounded-sm);
-    cursor: pointer;
-    transition:
-      color 0.12s ease,
-      border-color 0.12s ease;
-  }
-  .uu-chip:hover {
-    color: var(--color-accent-active);
-    border-color: var(--color-accent);
-  }
-
-  /* case toggle */
-  .uu-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    user-select: none;
-    color: var(--color-ink);
-    height: 36px;
-  }
-  .uu-toggle input {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-  .uu-switch {
-    width: 34px;
-    height: 18px;
-    border-radius: var(--rounded-full);
-    background-color: var(--color-hairline-strong);
-    position: relative;
-    transition: background-color 0.18s ease;
-  }
-  .uu-switch::after {
-    content: "";
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background-color: var(--color-canvas);
-    transition: transform 0.18s ease;
-  }
-  .uu-toggle input:checked ~ .uu-switch {
-    background-color: var(--color-accent);
-  }
-  .uu-toggle input:checked ~ .uu-switch::after {
-    transform: translateX(16px);
-  }
-  .uu-toggle input:focus-visible ~ .uu-switch {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
   }
 
   /* v5 inputs */
@@ -895,34 +803,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
   .uu-field-grow {
     width: 100%;
   }
-  .select-wrapper {
-    position: relative;
-    width: 100%;
-  }
-  .settings-select {
-    width: 100%;
-    height: 36px;
-    padding: 0 var(--spacing-md);
-    font-family: var(--font-mono);
-    font-size: 13px;
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    background-color: var(--color-canvas);
-    color: var(--color-ink);
-    appearance: none;
-    outline: none;
-    cursor: pointer;
-  }
-  .select-wrapper::after {
-    content: "▼";
-    font-size: 9px;
-    color: var(--color-body);
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-  }
+
   .uu-text {
     width: 100%;
     height: 36px;

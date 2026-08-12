@@ -58,7 +58,7 @@ export function convert(store: Store<JsonToXmlState>): void {
   const state = store.get();
   if (state.isConverting) return;
   if (!state.jsonInput.trim()) {
-    store.update((s) => ({ ...s, error: "Paste or load JSON first." }));
+    store.update((s) => ({ ...s, error: "Nothing to convert yet. Add JSON to the input box, then press Convert." }));
     return;
   }
   const id = ++reqId;
@@ -83,7 +83,7 @@ export function convert(store: Store<JsonToXmlState>): void {
         ...s,
         isConverting: false,
         inputStatus: "invalid",
-        error: d.error ?? "Failed to convert JSON.",
+        error: d.error ?? "Conversion failed. The JSON could not be converted. Check the input and try again.",
       }));
     }
   };

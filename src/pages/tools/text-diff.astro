@@ -4,6 +4,7 @@ import ToolHeader from "../../components/tools/ToolHeader.astro";
 import CodeEditor from "../../components/tools/CodeEditor.astro";
 import ToolActions from "../../components/tools/ToolActions.astro";
 import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import HowItWorks from "../../components/tools/HowItWorks.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
@@ -11,6 +12,7 @@ import RelatedTools from "../../components/tools/RelatedTools.astro";
 import ToolDocs from "../../components/tools/ToolDocs.astro";
 import CompareLinks from "../../components/tools/CompareLinks.astro";
 import ToolNudge from "../../components/tools/ToolNudge.astro";
+import "../../styles/tool-options.css";
 ---
 
 <ToolShell
@@ -22,7 +24,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "Text Diff" }]}
     title="Text Diff"
-    subtitle="Compare any two texts and see exactly what changed — offline."
+    subtitle="Compare any two texts and see exactly what changed."
   />
 
   <section class="dj-stage">
@@ -38,7 +40,12 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
             id="diff-a"
             label="Original text (A)"
             placeholder="Paste the original text here…"
-          />
+          >
+            <div class="editor-info-bar">
+              <span class="info-status" id="diff-a-status">Status: Empty</span>
+              <span class="info-meta" id="diff-a-count">0 chars</span>
+            </div>
+          </CodeEditor>
         </Card>
 
         <Card variant="flat" class="workspace-card diff-input-card">
@@ -50,7 +57,12 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
             id="diff-b"
             label="Modified text (B)"
             placeholder="Paste the modified text here…"
-          />
+          >
+            <div class="editor-info-bar">
+              <span class="info-status" id="diff-b-status">Status: Empty</span>
+              <span class="info-meta" id="diff-b-count">0 chars</span>
+            </div>
+          </CodeEditor>
         </Card>
       </div>
 
@@ -58,20 +70,20 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
       <Card variant="flat" class="workspace-card dj-controls-card">
         <div class="dj-controls">
           <div class="dj-opts">
-            <label class="dj-check body-sm">
+            <label class="opt-check">
               <input type="checkbox" id="ignore-ws" />
-              <span class="dj-box"></span>
+              <span class="box"></span>
               Ignore whitespace
             </label>
-            <label class="dj-check body-sm">
+            <label class="opt-check">
               <input type="checkbox" id="ignore-case" />
-              <span class="dj-box"></span>
+              <span class="box"></span>
               Ignore case
             </label>
-            <div class="dj-mode" role="group" aria-label="Diff view">
+            <div class="seg dj-mode" role="group" aria-label="Diff view">
               <button
                 type="button"
-                class="dj-mode-btn is-active"
+                class="seg-btn is-active"
                 data-diff-mode="side"
                 aria-pressed="true"
               >
@@ -79,7 +91,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
               </button>
               <button
                 type="button"
-                class="dj-mode-btn"
+                class="seg-btn"
                 data-diff-mode="unified"
                 aria-pressed="false"
               >
@@ -89,9 +101,8 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
           </div>
 
           <div class="dj-actions">
+            <Button id="sample-btn" variant="secondary" size="md" shape="square">Load Sample</Button>
             <Button id="compare-btn" variant="primary" size="md" shape="square">Compare</Button>
-            <Button id="sample-btn" variant="secondary" size="md" shape="square">Load sample</Button
-            >
           </div>
         </div>
 
@@ -142,6 +153,11 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
           <ToolActions id="out-actions" variant="inset" actions={["copy", "download"]} />
         </div>
 
+        <div class="editor-info-bar">
+          <span class="info-status" id="diff-out-status">Output: Empty</span>
+          <span class="info-meta" id="diff-out-count"></span>
+        </div>
+
         <div class="dj-idle" id="dj-idle">
           <p class="dj-idle-cmd caption-mono">$ diff a.txt b.txt</p>
           <p class="body-sm dj-idle-msg">
@@ -163,39 +179,23 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     </Container>
   </section>
 
-  <section class="tool-content-section" aria-labelledby="how-title">
-    <Container size="narrow">
-      <div class="content-section-header">
-        <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
-        <h2 id="how-title" class="display-md section-title">Compare text in three steps</h2>
-      </div>
-      <div class="steps-grid">
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">1</span>
-          <h3 class="body-sm-strong step-title">Paste both sides</h3>
-          <p class="caption step-desc">
-            Original in A, modified in B. Any text — logs, configs, code, markdown. The diff runs as
-            you type.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">2</span>
-          <h3 class="body-sm-strong step-title">Read the changes</h3>
-          <p class="caption step-desc">
-            Additions in teal, deletions in red, changed lines facing each other. Toggle unified for
-            a single column.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">3</span>
-          <h3 class="body-sm-strong step-title">Tune &amp; export</h3>
-          <p class="caption step-desc">
-            Ignore whitespace or case to cut noise, then copy or download the unified patch.
-          </p>
-        </div>
-      </div>
-    </Container>
-  </section>
+  <HowItWorks
+    heading="Compare text in three steps"
+    steps={[
+      {
+        title: "Paste both sides",
+        desc: "Original in A, modified in B. Any text — logs, configs, code, markdown. The diff runs as you type.",
+      },
+      {
+        title: "Read the changes",
+        desc: "Additions in teal, deletions in red, changed lines facing each other. Toggle unified for a single column.",
+      },
+      {
+        title: "Tune & export",
+        desc: "Ignore whitespace or case to cut noise, then copy or download the unified patch.",
+      },
+    ]}
+  />
 
   <ToolDocs />
   <CompareLinks />
@@ -277,6 +277,12 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
   const ignoreCase = document.getElementById("ignore-case") as HTMLInputElement | null;
   const modeBtns = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-diff-mode]"));
   const errorBanner = document.getElementById("text-diff-error") as HTMLElement | null;
+  const aStatus = document.getElementById("diff-a-status") as HTMLElement | null;
+  const aCount = document.getElementById("diff-a-count") as HTMLElement | null;
+  const bStatus = document.getElementById("diff-b-status") as HTMLElement | null;
+  const bCount = document.getElementById("diff-b-count") as HTMLElement | null;
+  const outStatus = document.getElementById("diff-out-status") as HTMLElement | null;
+  const outCount = document.getElementById("diff-out-count") as HTMLElement | null;
 
   const nAdd = document.getElementById("dj-n-add") as HTMLElement | null;
   const nRemove = document.getElementById("dj-n-remove") as HTMLElement | null;
@@ -401,6 +407,22 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
       bTextarea.value = state.inputB;
       bTextarea.dispatchEvent(new Event("editor-refresh"));
     }
+
+    // input + output status bars
+    if (aStatus)
+      aStatus.textContent = state.inputA.trim() ? "Status: Ready" : "Status: Empty";
+    if (aCount) aCount.textContent = state.inputA.length.toLocaleString() + " chars";
+    if (bStatus)
+      bStatus.textContent = state.inputB.trim() ? "Status: Ready" : "Status: Empty";
+    if (bCount) bCount.textContent = state.inputB.length.toLocaleString() + " chars";
+    if (outStatus)
+      outStatus.textContent = state.result ? "Output: Ready" : "Output: Empty";
+    if (outCount && state.result)
+      outCount.textContent =
+        state.result.stats.added.toLocaleString() +
+        " added · " +
+        state.result.stats.removed.toLocaleString() +
+        " removed";
 
     // mode buttons
     modeBtns.forEach((b) => {
@@ -571,6 +593,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
       if (!r) return;
       const text = "--- a\n+++ b\n" + unifiedText(r);
       if (action === "copy") {
+        if (r.truncated) announce("Copy includes only the first 20,000 lines of a very large diff");
         const ok = await copyToClipboard(text);
         const btn = outActions.querySelector("[data-action='copy']");
         if (ok && btn) {
@@ -583,7 +606,9 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
         }
       }
       if (action === "download") {
-        downloadFile(text, "diff.patch", "text/plain;charset=utf-8;");
+        if (r.truncated)
+          announce("Download includes only the first 20,000 lines of a very large diff");
+        downloadFile(text, "text-diff-diff.patch", "text/plain;charset=utf-8;");
         announce("Download started");
       }
     });
@@ -730,80 +755,6 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     flex-wrap: wrap;
     align-items: center;
     gap: var(--spacing-md);
-  }
-  .dj-check {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    user-select: none;
-    color: var(--color-ink);
-  }
-  .dj-check input {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-  .dj-box {
-    width: 16px;
-    height: 16px;
-    border: 1px solid var(--color-hairline-strong);
-    border-radius: 4px;
-    background-color: var(--color-canvas);
-    position: relative;
-    transition:
-      background-color 0.1s ease,
-      border-color 0.1s ease;
-  }
-  .dj-check input:checked ~ .dj-box {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-  }
-  .dj-check input:checked ~ .dj-box::after {
-    content: "";
-    position: absolute;
-    left: 5px;
-    top: 2px;
-    width: 4px;
-    height: 8px;
-    border: solid #fff;
-    border-width: 0 1.5px 1.5px 0;
-    transform: rotate(45deg);
-  }
-  .dj-check input:focus-visible ~ .dj-box {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
-  }
-
-  .dj-mode {
-    display: inline-flex;
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    overflow: hidden;
-  }
-  .dj-mode-btn {
-    border: none;
-    background: var(--color-canvas);
-    color: var(--color-body);
-    font-family: var(--font-sans);
-    font-size: 13px;
-    padding: 7px 12px;
-    cursor: pointer;
-    transition:
-      background-color 0.15s ease,
-      color 0.15s ease;
-  }
-  .dj-mode-btn + .dj-mode-btn {
-    border-left: 1px solid var(--color-hairline);
-  }
-  .dj-mode-btn.is-active {
-    background-color: var(--color-primary);
-    color: var(--color-on-primary);
-  }
-  .dj-mode-btn:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: -2px;
   }
 
   .dj-actions {
@@ -967,20 +918,6 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     font-size: 11px;
     letter-spacing: 0.05em;
   }
-  .tool-content-section {
-    padding: var(--spacing-5xl) 0;
-    background-color: var(--color-canvas-soft);
-    border-top: 1px solid var(--color-hairline);
-  }
-  .content-section-header {
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto var(--spacing-3xl);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-xs);
-  }
   .section-eyebrow {
     color: var(--color-mute);
     letter-spacing: 0.1em;
@@ -988,45 +925,6 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
   .section-title {
     color: var(--color-ink);
     margin: 0;
-  }
-  .steps-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-xl);
-  }
-  .step-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-lg);
-    background-color: var(--color-canvas);
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    text-align: center;
-    align-items: center;
-  }
-  .step-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--rounded-full);
-    background-color: var(--color-accent);
-    color: var(--color-on-primary);
-    font-family: var(--font-mono);
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: var(--spacing-xs);
-  }
-  .step-title {
-    color: var(--color-ink);
-    margin: 0;
-  }
-  .step-desc {
-    color: var(--color-body);
-    margin: 0;
-    line-height: 1.5;
   }
   .faq-section {
     padding: var(--spacing-5xl) 0;
@@ -1091,10 +989,6 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     }
     .dj-sbs .dj-cell:nth-child(odd) {
       border-right: none;
-    }
-    .steps-grid {
-      grid-template-columns: 1fr;
-      gap: var(--spacing-md);
     }
   }
 </style>

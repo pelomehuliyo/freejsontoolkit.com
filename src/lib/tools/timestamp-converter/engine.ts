@@ -339,7 +339,7 @@ export function run(input: string, opts: TsOptions): TsResult {
         if (!d) {
             return {
                 valid: false,
-                error: "That doesn't look like a valid " + opts.unit + " timestamp.",
+                error: "That doesn't look like a valid " + opts.unit + " timestamp. Check the number and the selected unit, then try again.",
                 date: null,
                 values: null,
                 inputNumber: null,

@@ -6,6 +6,7 @@ import CodeEditor from "../../components/tools/CodeEditor.astro";
 import DragDropZone from "../../components/tools/DragDropZone.astro";
 import ToolActions from "../../components/tools/ToolActions.astro";
 import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import HowItWorks from "../../components/tools/HowItWorks.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
@@ -18,6 +19,7 @@ import RelatedTools from "../../components/tools/RelatedTools.astro";
 import ToolDocs from "../../components/tools/ToolDocs.astro";
 import CompareLinks from "../../components/tools/CompareLinks.astro";
 import ToolNudge from "../../components/tools/ToolNudge.astro";
+import "../../styles/tool-options.css";
 ---
 
 <ToolShell
@@ -29,7 +31,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "CSV to JSON" }]}
     title="CSV → JSON Converter"
-    subtitle="Turn CSV tables into structured JSON arrays — offline."
+    subtitle="Turn CSV tables into structured JSON arrays."
   />
 
   <ToolWorkspace slot="workspace" layout="3-col">
@@ -54,7 +56,7 @@ id,name,email
 1,Ada,ada@example.com"
         >
           <div class="editor-info-bar">
-            <span class="info-status" id="csv-validation-status">CSV Status: Empty</span>
+            <span class="info-status" id="csv-validation-status">Status: Empty</span>
             <span class="info-meta" id="csv-char-count">0 chars</span>
           </div>
         </CodeEditor>
@@ -67,36 +69,40 @@ id,name,email
         <div class="settings-divider"></div>
 
         <div class="settings-group">
-          <label class="settings-label caption-mono" for="delimiter-select">Delimiter</label>
-          <div class="select-wrapper">
-            <select id="delimiter-select" class="settings-select">
-              {DELIMITER_OPTIONS.map((opt) => <option value={opt.value}>{opt.label}</option>)}
-            </select>
+          <span class="settings-label">Delimiter</span>
+          <div class="seg" id="delimiter-select" role="group" aria-label="Delimiter">
+            {DELIMITER_OPTIONS.map((opt) => (
+              <button type="button" class="seg-btn" data-value={opt.value}>
+                {opt.label}
+              </button>
+            ))}
           </div>
         </div>
 
         <div class="settings-group">
-          <label class="settings-label caption-mono" for="indent-select">Output indentation</label>
-          <div class="select-wrapper">
-            <select id="indent-select" class="settings-select">
-              {INDENT_OPTIONS.map((opt) => <option value={opt.value}>{opt.label}</option>)}
-            </select>
+          <span class="settings-label">Output indentation</span>
+          <div class="seg" id="indent-select" role="group" aria-label="Output indentation">
+            {INDENT_OPTIONS.map((opt) => (
+              <button type="button" class="seg-btn" data-value={opt.value}>
+                {opt.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        <div class="settings-group checkbox-group">
-          <label class="checkbox-container body-sm">
+        <div class="settings-group">
+          <label class="opt-check">
             <input type="checkbox" id="has-header-checkbox" checked />
-            <span class="checkbox-checkmark"></span>
+            <span class="box"></span>
             First row is a header
           </label>
-          <p class="caption settings-help">Use the first row as object keys.</p>
+          <p class="settings-help">Use the first row as object keys.</p>
         </div>
 
-        <div class="settings-group checkbox-group">
-          <label class="checkbox-container body-sm">
+        <div class="settings-group">
+          <label class="opt-check">
             <input type="checkbox" id="skip-empty-checkbox" checked />
-            <span class="checkbox-checkmark"></span>
+            <span class="box"></span>
             Skip empty lines
           </label>
         </div>
@@ -139,37 +145,20 @@ id,name,email
     </div>
   </ToolWorkspace>
 
-  <section class="tool-content-section" aria-labelledby="how-title">
-    <Container size="narrow">
-      <div class="content-section-header">
-        <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
-        <h2 id="how-title" class="display-md section-title">Convert CSV to JSON in three steps</h2>
-      </div>
-      <div class="steps-grid">
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">1</span>
-          <h3 class="body-sm-strong step-title">Paste or upload</h3>
-          <p class="caption step-desc">
-            Drop in CSV — comma, semicolon, tab, or pipe delimited. We auto-detect.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">2</span>
-          <h3 class="body-sm-strong step-title">Set options</h3>
-          <p class="caption step-desc">
-            Choose delimiter, header handling, and output indentation.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">3</span>
-          <h3 class="body-sm-strong step-title">Convert &amp; export</h3>
-          <p class="caption step-desc">
-            Click Convert, then copy or download the JSON array — all offline.
-          </p>
-        </div>
-      </div>
-    </Container>
-  </section>
+  <HowItWorks
+    heading="Convert CSV to JSON in three steps"
+    steps={[
+      {
+        title: "Paste or upload",
+        desc: "Drop in CSV — comma, semicolon, tab, or pipe delimited. We auto-detect.",
+      },
+      { title: "Set options", desc: "Choose delimiter, header handling, and output indentation." },
+      {
+        title: "Convert & export",
+        desc: "Click Convert, then copy or download the JSON array — all offline.",
+      },
+    ]}
+  />
 
   <ToolDocs />
   <CompareLinks />
@@ -245,8 +234,14 @@ id,name,email
   const inputCharCount = document.getElementById("csv-char-count") as HTMLElement | null;
   const outputStatus = document.getElementById("json-output-status") as HTMLElement | null;
   const outputCharCount = document.getElementById("json-output-count") as HTMLElement | null;
-  const delimiterSelect = document.getElementById("delimiter-select") as HTMLSelectElement | null;
-  const indentSelect = document.getElementById("indent-select") as HTMLSelectElement | null;
+  const delimiterSeg = document.getElementById("delimiter-select") as HTMLElement | null;
+  const delimiterBtns = delimiterSeg
+    ? (Array.from(delimiterSeg.querySelectorAll("[data-value]")) as HTMLButtonElement[])
+    : [];
+  const indentSeg = document.getElementById("indent-select") as HTMLElement | null;
+  const indentBtns = indentSeg
+    ? (Array.from(indentSeg.querySelectorAll("[data-value]")) as HTMLButtonElement[])
+    : [];
   const hasHeaderCheckbox = document.getElementById(
     "has-header-checkbox",
   ) as HTMLInputElement | null;
@@ -300,8 +295,7 @@ id,name,email
     }
 
     if (inputStatus) {
-      inputStatus.textContent =
-        state.inputStatus === "ready" ? "CSV Status: Ready" : "CSV Status: Empty";
+      inputStatus.textContent = state.inputStatus === "ready" ? "Status: Ready" : "Status: Empty";
       inputStatus.style.color = state.inputStatus === "ready" ? "var(--color-success)" : "";
     }
     if (inputCharCount)
@@ -310,7 +304,11 @@ id,name,email
     if (outputStatus) {
       outputStatus.textContent =
         large != null
-          ? "Output: Preview"
+          ? "Output: Preview — first " +
+            large.rows.toLocaleString() +
+            " of " +
+            large.totalRows.toLocaleString() +
+            " records · Download for the full file"
           : state.outputStatus === "converted"
             ? `Output: ${state.recordCount.toLocaleString()} record${
                 state.recordCount === 1 ? "" : "s"
@@ -319,19 +317,24 @@ id,name,email
     }
     if (outputCharCount) {
       if (large) {
-        outputCharCount.textContent =
-          large.preview.length.toLocaleString() +
-          " chars preview · first " +
-          large.rows.toLocaleString() +
-          " of " +
-          large.totalRows.toLocaleString() +
-          " records · Download for full file";
+        outputCharCount.textContent = large.preview.length.toLocaleString() + " chars preview";
       } else if (state.outputStatus === "converted") {
         const delim = state.delimiterUsed ? " · " + delimiterLabel(state.delimiterUsed) : "";
         outputCharCount.textContent = state.jsonOutput.length.toLocaleString() + " chars" + delim;
       } else {
         outputCharCount.textContent = "0 chars";
       }
+    }
+
+    if (delimiterBtns.length) {
+      delimiterBtns.forEach((b) => {
+        b.classList.toggle("is-active", b.dataset.value === state.delimiter);
+      });
+    }
+    if (indentBtns.length) {
+      indentBtns.forEach((b) => {
+        b.classList.toggle("is-active", b.dataset.value === state.indent);
+      });
     }
 
     if (statusDot) {
@@ -344,8 +347,13 @@ id,name,email
         phaseEl.style.color = "var(--color-accent)";
         statusText.textContent = "";
       } else if (large && large.phase === "done") {
-        phaseEl.textContent = "Preview shown — use Download for the full file.";
-        phaseEl.style.color = "var(--color-success)";
+        if (state.staleOptions) {
+          phaseEl.textContent = "Options changed — convert again.";
+          phaseEl.style.color = "var(--color-warning)";
+        } else {
+          phaseEl.textContent = "";
+          phaseEl.style.color = "var(--color-success)";
+        }
         statusText.textContent = "";
       } else {
         phaseEl.textContent = "";
@@ -375,14 +383,20 @@ id,name,email
     csvTextarea.addEventListener("input", () => debouncedInput(csvTextarea.value));
   }
   if (convertBtn) convertBtn.addEventListener("click", () => convert(csvToJsonStore));
-  if (delimiterSelect)
-    delimiterSelect.addEventListener("change", () =>
-      setDelimiter(csvToJsonStore, delimiterSelect.value as CsvDelimiterOption),
+  if (delimiterBtns.length) {
+    delimiterBtns.forEach((b) =>
+      b.addEventListener("click", () =>
+        setDelimiter(csvToJsonStore, b.dataset.value as CsvDelimiterOption),
+      ),
     );
-  if (indentSelect)
-    indentSelect.addEventListener("change", () =>
-      setIndent(csvToJsonStore, indentSelect.value as IndentOption),
+  }
+  if (indentBtns.length) {
+    indentBtns.forEach((b) =>
+      b.addEventListener("click", () =>
+        setIndent(csvToJsonStore, b.dataset.value as IndentOption),
+      ),
     );
+  }
   if (hasHeaderCheckbox)
     hasHeaderCheckbox.addEventListener("change", () =>
       setHasHeader(csvToJsonStore, hasHeaderCheckbox.checked),
@@ -433,19 +447,21 @@ id,name,email
       if (action === "download") {
         // Large-file mode: download the full Blob, not just the preview.
         const large = csvToJsonStore.get().largeFile;
-        if (large && large.blobUrl) {
+        if (large && large.blob) {
+          const blobUrl = URL.createObjectURL(large.blob);
           const a = document.createElement("a");
-          a.href = large.blobUrl;
+          a.href = blobUrl;
           a.download = "converted.json";
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
           announce("Download started (full file)");
           return;
         }
         const out = getJsonContent(csvToJsonStore);
         if (out) {
-          downloadFile(out, "converted.json", "application/json;charset=utf-8;");
+          downloadFile(out, "csv-to-json-converted.json", "application/json;charset=utf-8;");
           announce("Download started");
         }
       }
@@ -522,123 +538,6 @@ id,name,email
     font-weight: 500;
   }
 
-  .settings-card {
-    padding: var(--spacing-lg);
-  }
-  .settings-title {
-    margin: 0;
-  }
-  .settings-divider {
-    height: 1px;
-    background-color: var(--color-hairline);
-    margin: var(--spacing-xs) 0;
-  }
-  .settings-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-md);
-  }
-  .settings-label {
-    color: var(--color-mute);
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .select-wrapper {
-    position: relative;
-    width: 100%;
-  }
-  .settings-select {
-    width: 100%;
-    height: 38px;
-    padding: 0 var(--spacing-md);
-    font-family: var(--font-sans);
-    font-size: 14px;
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    background-color: var(--color-canvas);
-    color: var(--color-ink);
-    appearance: none;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.15s ease;
-  }
-  .settings-select:focus {
-    border-color: var(--color-hairline-strong);
-  }
-  .select-wrapper::after {
-    content: "▼";
-    font-size: 9px;
-    color: var(--color-body);
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-  }
-
-  .checkbox-group {
-    margin-bottom: var(--spacing-sm);
-  }
-  .checkbox-container {
-    display: flex;
-    align-items: center;
-    position: relative;
-    padding-left: 24px;
-    cursor: pointer;
-    user-select: none;
-    color: var(--color-ink);
-  }
-  .checkbox-container input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-  }
-  .checkbox-checkmark {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    left: 0;
-    height: 16px;
-    width: 16px;
-    border: 1px solid var(--color-hairline-strong);
-    border-radius: 4px;
-    background-color: var(--color-canvas);
-    transition:
-      background-color 0.1s ease,
-      border-color 0.1s ease;
-  }
-  .checkbox-container:hover input ~ .checkbox-checkmark {
-    border-color: var(--color-ink);
-  }
-  .checkbox-container input:checked ~ .checkbox-checkmark {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-  }
-  .checkbox-checkmark::after {
-    content: "";
-    position: absolute;
-    display: none;
-  }
-  .checkbox-container input:checked ~ .checkbox-checkmark::after {
-    display: block;
-  }
-  .checkbox-container .checkbox-checkmark::after {
-    left: 5px;
-    top: 2px;
-    width: 4px;
-    height: 8px;
-    border: solid white;
-    border-width: 0 1.5px 1.5px 0;
-    transform: rotate(45deg);
-  }
-  .settings-help {
-    color: var(--color-mute);
-    margin: 4px 0 0 24px;
-    line-height: 1.4;
-  }
   .action-btn {
     width: 100%;
     margin-top: var(--spacing-sm);
@@ -677,20 +576,6 @@ id,name,email
     border-width: 0;
   }
 
-  .tool-content-section {
-    padding: var(--spacing-5xl) 0;
-    background-color: var(--color-canvas-soft);
-    border-top: 1px solid var(--color-hairline);
-  }
-  .content-section-header {
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto var(--spacing-3xl);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-xs);
-  }
   .section-eyebrow {
     color: var(--color-mute);
     letter-spacing: 0.1em;
@@ -698,45 +583,6 @@ id,name,email
   .section-title {
     color: var(--color-ink);
     margin: 0;
-  }
-  .steps-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-xl);
-  }
-  .step-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-lg);
-    background-color: var(--color-canvas);
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    text-align: center;
-    align-items: center;
-  }
-  .step-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--rounded-full);
-    background-color: var(--color-accent);
-    color: var(--color-on-primary);
-    font-family: var(--font-mono);
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: var(--spacing-xs);
-  }
-  .step-title {
-    color: var(--color-ink);
-    margin: 0;
-  }
-  .step-desc {
-    color: var(--color-body);
-    margin: 0;
-    line-height: 1.5;
   }
 
   .faq-section {
@@ -800,10 +646,6 @@ id,name,email
     }
     .workspace-card :global(.editor-wrapper) {
       height: 100%;
-    }
-    .steps-grid {
-      grid-template-columns: 1fr;
-      gap: var(--spacing-md);
     }
   }
 </style>

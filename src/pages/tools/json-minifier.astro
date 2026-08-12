@@ -6,6 +6,7 @@ import CodeEditor from "../../components/tools/CodeEditor.astro";
 import DragDropZone from "../../components/tools/DragDropZone.astro";
 import ToolActions from "../../components/tools/ToolActions.astro";
 import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import HowItWorks from "../../components/tools/HowItWorks.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
@@ -13,6 +14,7 @@ import RelatedTools from "../../components/tools/RelatedTools.astro";
 import ToolDocs from "../../components/tools/ToolDocs.astro";
 import CompareLinks from "../../components/tools/CompareLinks.astro";
 import ToolNudge from "../../components/tools/ToolNudge.astro";
+import "../../styles/tool-options.css";
 ---
 
 <ToolShell
@@ -24,7 +26,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "JSON Minifier" }]}
     title="JSON Minifier"
-    subtitle="Strip whitespace and shrink JSON to a single line — offline."
+    subtitle="Strip whitespace and shrink JSON to a single line."
   />
 
   <ToolWorkspace slot="workspace" layout="3-col">
@@ -43,7 +45,7 @@ Example:
 { "id": 1, "name": "Ada" }'
         >
           <div class="editor-info-bar">
-            <span class="info-status" id="json-validation-status">JSON Status: Empty</span>
+            <span class="info-status" id="json-validation-status">Status: Empty</span>
             <span class="info-meta" id="json-char-count">0 chars</span>
           </div>
         </CodeEditor>
@@ -55,13 +57,13 @@ Example:
         <h2 class="display-sm settings-title">Options</h2>
         <div class="settings-divider"></div>
 
-        <div class="settings-group checkbox-group">
-          <label class="checkbox-container body-sm">
+        <div class="settings-group">
+          <label class="opt-check">
             <input type="checkbox" id="sort-keys-checkbox" />
-            <span class="checkbox-checkmark"></span>
-            Sort object keys (A→Z)
+            <span class="box"></span>
+            Sort object keys
           </label>
-          <p class="caption settings-help">
+          <p class="settings-help">
             Deterministic output for diffing. Values are never changed.
           </p>
         </div>
@@ -69,7 +71,7 @@ Example:
         <div class="settings-divider"></div>
 
         <Button id="minify-btn" variant="primary" size="lg" shape="square" class="action-btn">
-          Minify JSON
+          Minify
         </Button>
 
         {
@@ -128,39 +130,23 @@ Example:
     </div>
   </ToolWorkspace>
 
-  <section class="tool-content-section" aria-labelledby="how-title">
-    <Container size="narrow">
-      <div class="content-section-header">
-        <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
-        <h2 id="how-title" class="display-md section-title">Minify JSON in three steps</h2>
-      </div>
-      <div class="steps-grid">
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">1</span>
-          <h3 class="body-sm-strong step-title">Paste or upload</h3>
-          <p class="caption step-desc">
-            Drop in formatted or pretty-printed JSON — validity is checked as you type.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">2</span>
-          <h3 class="body-sm-strong step-title">Minify</h3>
-          <p class="caption step-desc">
-            Whitespace is stripped to a single line. Optionally sort keys for a deterministic
-            result.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">3</span>
-          <h3 class="body-sm-strong step-title">Copy &amp; ship</h3>
-          <p class="caption step-desc">
-            Grab the smaller payload — copy to clipboard or download — and watch the saved-bytes
-            readout.
-          </p>
-        </div>
-      </div>
-    </Container>
-  </section>
+  <HowItWorks
+    heading="Minify JSON in three steps"
+    steps={[
+      {
+        title: "Paste or upload",
+        desc: "Drop in formatted or pretty-printed JSON — validity is checked as you type.",
+      },
+      {
+        title: "Minify",
+        desc: "Whitespace is stripped to a single line. Optionally sort keys for a deterministic result.",
+      },
+      {
+        title: "Copy & ship",
+        desc: "Grab the smaller payload — copy to clipboard or download — and watch the saved-bytes readout.",
+      },
+    ]}
+  />
   <ToolDocs />
   <CompareLinks />
   <RelatedTools />
@@ -255,13 +241,13 @@ Example:
 
     if (inputStatus) {
       if (state.inputStatus === "empty") {
-        inputStatus.textContent = "JSON Status: Empty";
+        inputStatus.textContent = "Status: Empty";
         inputStatus.style.color = "";
       } else if (state.inputStatus === "invalid") {
-        inputStatus.textContent = "JSON Status: Invalid";
+        inputStatus.textContent = "Status: Invalid";
         inputStatus.style.color = "var(--color-error)";
       } else {
-        inputStatus.textContent = "JSON Status: Valid";
+        inputStatus.textContent = "Status: Ready";
         inputStatus.style.color = "var(--color-success)";
       }
     }
@@ -270,8 +256,7 @@ Example:
 
     if (outputStatus) {
       outputStatus.textContent =
-        state.outputStatus === "minified" ? "Output: Minified" : "Output: Empty";
-      outputStatus.style.color = state.outputStatus === "minified" ? "var(--color-success)" : "";
+        state.outputStatus === "minified" ? "Output: JSON" : "Output: Empty";
     }
     if (outputCharCount)
       outputCharCount.textContent =
@@ -285,7 +270,7 @@ Example:
     }
 
     if (minifyBtn) {
-      minifyBtn.textContent = state.isMinifying ? "Minifying…" : "Minify JSON";
+      minifyBtn.textContent = state.isMinifying ? "Minifying…" : "Minify";
       minifyBtn.disabled = state.isMinifying;
     }
 
@@ -356,7 +341,7 @@ Example:
       }
       if (action === "download") {
         if (out) {
-          downloadFile(out, "minified.json", "application/json;charset=utf-8;");
+          downloadFile(out, "json-minifier-minified.json", "application/json;charset=utf-8;");
           announce("Download started");
         }
       }
@@ -424,85 +409,6 @@ Example:
     font-weight: 500;
   }
 
-  .settings-card {
-    padding: var(--spacing-lg);
-  }
-  .settings-title {
-    margin: 0;
-  }
-  .settings-divider {
-    height: 1px;
-    background-color: var(--color-hairline);
-    margin: var(--spacing-xs) 0;
-  }
-  .settings-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-md);
-  }
-  .checkbox-group {
-    margin-bottom: var(--spacing-sm);
-  }
-  .checkbox-container {
-    display: flex;
-    align-items: center;
-    position: relative;
-    padding-left: 24px;
-    cursor: pointer;
-    user-select: none;
-    color: var(--color-ink);
-  }
-  .checkbox-container input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-  }
-  .checkbox-checkmark {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    left: 0;
-    height: 16px;
-    width: 16px;
-    border: 1px solid var(--color-hairline-strong);
-    border-radius: 4px;
-    background-color: var(--color-canvas);
-    transition:
-      background-color 0.1s ease,
-      border-color 0.1s ease;
-  }
-  .checkbox-container:hover input ~ .checkbox-checkmark {
-    border-color: var(--color-ink);
-  }
-  .checkbox-container input:checked ~ .checkbox-checkmark {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-  }
-  .checkbox-checkmark::after {
-    content: "";
-    position: absolute;
-    display: none;
-  }
-  .checkbox-container input:checked ~ .checkbox-checkmark::after {
-    display: block;
-  }
-  .checkbox-container .checkbox-checkmark::after {
-    left: 5px;
-    top: 2px;
-    width: 4px;
-    height: 8px;
-    border: solid white;
-    border-width: 0 1.5px 1.5px 0;
-    transform: rotate(45deg);
-  }
-  .settings-help {
-    color: var(--color-mute);
-    margin: 4px 0 0 24px;
-    line-height: 1.4;
-  }
   .action-btn {
     width: 100%;
     margin-top: var(--spacing-sm);
@@ -593,20 +499,6 @@ Example:
     border-width: 0;
   }
 
-  .tool-content-section {
-    padding: var(--spacing-5xl) 0;
-    background-color: var(--color-canvas-soft);
-    border-top: 1px solid var(--color-hairline);
-  }
-  .content-section-header {
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto var(--spacing-3xl);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-xs);
-  }
   .section-eyebrow {
     color: var(--color-mute);
     letter-spacing: 0.1em;
@@ -614,45 +506,6 @@ Example:
   .section-title {
     color: var(--color-ink);
     margin: 0;
-  }
-  .steps-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-xl);
-  }
-  .step-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-lg);
-    background-color: var(--color-canvas);
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    text-align: center;
-    align-items: center;
-  }
-  .step-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--rounded-full);
-    background-color: var(--color-accent);
-    color: var(--color-on-primary);
-    font-family: var(--font-mono);
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: var(--spacing-xs);
-  }
-  .step-title {
-    color: var(--color-ink);
-    margin: 0;
-  }
-  .step-desc {
-    color: var(--color-body);
-    margin: 0;
-    line-height: 1.5;
   }
   .faq-section {
     padding: var(--spacing-5xl) 0;
@@ -715,10 +568,6 @@ Example:
     }
     .workspace-card :global(.editor-wrapper) {
       height: 100%;
-    }
-    .steps-grid {
-      grid-template-columns: 1fr;
-      gap: var(--spacing-md);
     }
   }
 </style>

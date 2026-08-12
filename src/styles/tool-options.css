@@ -1,0 +1,285 @@
+/* ────────────────────────────────────────────────────────────────────────────
+   Tool option controls — single source of truth.
+
+   Every tool page's Options area must feel identical. Pages import this file
+   and must NOT re-declare these classes in their scoped <style>. If a tweak is
+   needed, change it HERE so it applies everywhere.
+
+   Grouping conventions:
+     .settings-card            card chrome (when the options area is a card)
+     .settings-title           "Options" heading
+     .settings-divider         hairline between groups
+     .settings-group           stacks a label above its control
+     .settings-label           the option label  — mono, uppercase, tracked, muted
+     .settings-help            helper sentence under a group
+     .seg / .seg-btn           segmented buttons for exclusive choices
+     .select-wrapper / .select-control   plain <select> (only long/numerous sets)
+     .checkbox-container / .checkbox-box  standard boolean checkbox
+     .chip-count / .chip       quick quantity chips (count + flags)
+   --------------------------------------------------------------------------- */
+
+/* ── Option labels ────────────────────────────────────────────────────────── */
+.settings-label {
+  color: var(--color-mute);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.settings-help {
+  color: var(--color-mute);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.settings-card {
+  padding: var(--spacing-lg);
+}
+
+.settings-title {
+  margin: 0;
+}
+
+.settings-divider {
+  height: 1px;
+  background-color: var(--color-hairline);
+  margin: var(--spacing-xs) 0 var(--spacing-md);
+}
+
+/* ── Segmented buttons (exclusive choices) ────────────────────────────────── */
+.seg {
+  display: flex;
+  width: 100%;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--rounded-sm);
+  overflow: hidden;
+}
+
+.seg-btn {
+  flex: 1;
+  border: none;
+  background: var(--color-canvas);
+  color: var(--color-body);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.seg-btn + .seg-btn {
+  border-left: 1px solid var(--color-hairline);
+}
+
+.seg-btn.is-active {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.seg-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.seg-btn.is-dim {
+  opacity: 0.45;
+}
+
+.seg-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+/* ── Plain <select> (only for long/numerous choice sets) ──────────────────── */
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.select-wrapper::after {
+  content: "▼";
+  font-size: 9px;
+  color: var(--color-body);
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.select-control {
+  width: 100%;
+  height: 38px;
+  padding: 0 var(--spacing-md);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--rounded-sm);
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  appearance: none;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.select-control:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Standard checkbox ────────────────────────────────────────────────────── */
+.opt-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  padding-left: 24px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--color-mute);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+.opt-check input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.opt-check .opt-box {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0;
+  height: 16px;
+  width: 16px;
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: 4px;
+  background-color: var(--color-canvas);
+  transition:
+    background-color 0.1s ease,
+    border-color 0.1s ease;
+}
+
+.opt-check:hover input ~ .box {
+  border-color: var(--color-ink);
+}
+
+.opt-check input:checked ~ .box {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.opt-check input:checked ~ .box::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid var(--color-on-primary);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.opt-check input:focus-visible ~ .box {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.opt-check input:disabled ~ .box {
+  opacity: 0.45;
+}
+
+.opt-check.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Quantity chips (records / count) ─────────────────────────────────────── */
+.chip-count {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.chip-count .countval {
+  width: 72px;
+  height: 38px;
+  padding: 0 var(--spacing-sm);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--rounded-sm);
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  text-align: center;
+}
+
+.chip-row {
+  display: flex;
+  gap: var(--spacing-xxs);
+}
+
+.chip {
+  min-width: 28px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--rounded-pill-sm);
+  background-color: var(--color-canvas);
+  color: var(--color-mute);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.chip.is-active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.chip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+/* ── Dim group wrapper used when a subset of options is inactive ──────────── */
+.options-group-disabled {
+  opacity: 0.55;
+}

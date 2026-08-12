@@ -76,7 +76,7 @@ export function decodeJwt(input: string, indent: string): JwtDecodeResult {
     });
 
     const cleaned = input.trim().replace(/^Bearer\s+/i, "").replace(/\s+/g, "");
-    if (!cleaned) return fail("Empty input");
+    if (!cleaned) return fail("Input is empty. Add a JWT token to the input box, then press Decode.");
 
     const parts = cleaned.split(".");
     if (parts.length !== 3) {
@@ -90,8 +90,8 @@ export function decodeJwt(input: string, indent: string): JwtDecodeResult {
     if (header.error) {
         return fail(
             header.error === "base64"
-                ? "The header segment isn't valid base64url."
-                : "The header decoded but isn't valid JSON.",
+                ? "The header segment isn't valid base64url. Check the token and try again."
+                : "The header decoded but isn't valid JSON. Check the token and try again.",
             "header",
         );
     }
@@ -99,8 +99,8 @@ export function decodeJwt(input: string, indent: string): JwtDecodeResult {
     if (payload.error) {
         return fail(
             payload.error === "base64"
-                ? "The payload segment isn't valid base64url."
-                : "The payload decoded but isn't valid JSON.",
+                ? "The payload segment isn't valid base64url. Check the token and try again."
+                : "The payload decoded but isn't valid JSON. Check the token and try again.",
             "payload",
         );
     }
@@ -110,7 +110,7 @@ export function decodeJwt(input: string, indent: string): JwtDecodeResult {
         try {
             signatureBytes = base64UrlToBytes(parts[2]).length;
         } catch {
-            return fail("The signature segment isn't valid base64url.", "signature");
+            return fail("The signature segment isn't valid base64url. Check the token and try again.", "signature");
         }
     }
 

@@ -15,7 +15,7 @@ export interface TsvToCsvFile {
 
 export interface LargeFileInfo {
   file: TsvToCsvFile;
-  blobUrl: string | null;
+  blob: Blob | null;
   preview: string;
   phase: string;
   rows: number;

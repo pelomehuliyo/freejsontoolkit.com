@@ -87,7 +87,7 @@ export function convertJsonToToml(input: string, opts: ConvertOptions): ConvertR
             output: "",
             sourceSize,
             nullPaths: [],
-            error: { message: "Empty input" },
+            error: { message: "Input is empty. Add JSON data, then press Convert." },
         };
     }
 
@@ -187,7 +187,8 @@ export function convertJsonToToml(input: string, opts: ConvertOptions): ConvertR
             error: {
                 message:
                     "This JSON can't be represented as TOML: " +
-                    (e instanceof Error ? e.message : "unserializable value"),
+                    (e instanceof Error ? e.message : "unserializable value") +
+                    ". Check the JSON and try again.",
             },
         };
     }

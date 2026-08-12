@@ -68,7 +68,7 @@ export function handleInput(store: Store<XmlToJsonState>, text: string): void {
       ...state,
       xmlInput: text,
       inputStatus: "invalid",
-      error: `Input too large (${text.length.toLocaleString()} chars). Limit is ${MAX_INPUT_CHARS.toLocaleString()}.`,
+      error: `Input is too large (${text.length.toLocaleString()} chars). The limit is ${MAX_INPUT_CHARS.toLocaleString()} chars. Shorten the XML and try again.`,
     });
     return;
   }
@@ -103,7 +103,7 @@ export function convert(store: Store<XmlToJsonState>): void {
   if (state.isConverting) return;
 
   if (!state.xmlInput.trim()) {
-    store.update((s) => ({ ...s, error: "Paste or load XML first." }));
+    store.update((s) => ({ ...s, error: "Nothing to convert yet. Add XML to the input box, then press Convert." }));
     return;
   }
 
@@ -134,7 +134,7 @@ export function convert(store: Store<XmlToJsonState>): void {
         ...s,
         isConverting: false,
         inputStatus: "invalid",
-        error: data.error ?? "Conversion failed.",
+        error: data.error ?? "Conversion failed. The XML could not be converted. Check the input and try again.",
       }));
     }
   };

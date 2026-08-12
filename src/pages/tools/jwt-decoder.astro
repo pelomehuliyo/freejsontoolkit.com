@@ -5,6 +5,7 @@ import ToolWorkspace from "../../components/tools/ToolWorkspace.astro";
 import CodeEditor from "../../components/tools/CodeEditor.astro";
 import ToolActions from "../../components/tools/ToolActions.astro";
 import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import HowItWorks from "../../components/tools/HowItWorks.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
@@ -13,6 +14,7 @@ import RelatedTools from "../../components/tools/RelatedTools.astro";
 import ToolDocs from "../../components/tools/ToolDocs.astro";
 import CompareLinks from "../../components/tools/CompareLinks.astro";
 import ToolNudge from "../../components/tools/ToolNudge.astro";
+import "../../styles/tool-options.css";
 ---
 
 <ToolShell
@@ -24,7 +26,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "JWT Decoder" }]}
     title="JWT Decoder"
-    subtitle="Open up a token's header and payload — without sending it anywhere."
+    subtitle="Open up a token's header and payload."
   />
   <ToolWorkspace slot="workspace" layout="3-col">
     <div slot="input" class="ws-fill">
@@ -40,7 +42,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
 header.payload.signature`}
         >
           <div class="editor-info-bar">
-            <span class="info-status" id="jwt-status">Token: Empty</span>
+            <span class="info-status" id="jwt-status">Status: Empty</span>
             <span class="info-meta" id="jwt-char-count">0 chars</span>
           </div>
         </CodeEditor>
@@ -61,16 +63,18 @@ header.payload.signature`}
           </div>
         </div>
         <div class="settings-group">
-          <label class="settings-label caption-mono" for="indent-select">JSON indent</label>
-          <div class="select-wrapper">
-            <select id="indent-select" class="settings-select">
-              {INDENT_OPTIONS.map((opt) => <option value={opt.value}>{opt.label}</option>)}
-            </select>
+          <span class="settings-label">JSON indent</span>
+          <div class="seg" id="indent-select" role="group" aria-label="JSON indent">
+            {INDENT_OPTIONS.map((opt) => (
+              <button type="button" class="seg-btn" data-value={opt.value}>
+                {opt.label}
+              </button>
+            ))}
           </div>
         </div>
         <div class="settings-divider"></div>
         <Button id="decode-btn" variant="primary" size="lg" shape="square" class="action-btn">
-          Decode token
+          Decode
         </Button>
         <ErrorBanner id="decode-error" />
         <div class="status-banner caption">
@@ -100,37 +104,23 @@ header.payload.signature`}
       </Card>
     </div>
   </ToolWorkspace>
-  <section class="tool-content-section" aria-labelledby="how-title">
-    <Container size="narrow">
-      <div class="content-section-header">
-        <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
-        <h2 id="how-title" class="display-md section-title">Decode a JWT in three steps</h2>
-      </div>
-      <div class="steps-grid">
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">1</span>
-          <h3 class="body-sm-strong step-title">Paste the token</h3>
-          <p class="caption step-desc">
-            A full header.payload.signature string — a leading "Bearer " is stripped for you.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">2</span>
-          <h3 class="body-sm-strong step-title">Decode</h3>
-          <p class="caption step-desc">
-            Header and payload are base64url-decoded and pretty-printed, right on your machine.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">3</span>
-          <h3 class="body-sm-strong step-title">Read the claims</h3>
-          <p class="caption step-desc">
-            exp / iat / nbf become human dates with an expired / valid-so-far indicator.
-          </p>
-        </div>
-      </div>
-    </Container>
-  </section>
+  <HowItWorks
+    heading="Decode a JWT in three steps"
+    steps={[
+      {
+        title: "Paste the token",
+        desc: 'A full header.payload.signature string — a leading "Bearer " is stripped for you.',
+      },
+      {
+        title: "Decode",
+        desc: "Header and payload are base64url-decoded and pretty-printed, right on your machine.",
+      },
+      {
+        title: "Read the claims",
+        desc: "exp / iat / nbf become human dates with an expired / valid-so-far indicator.",
+      },
+    ]}
+  />
   <ToolDocs />
   <CompareLinks />
   <RelatedTools />
@@ -199,7 +189,10 @@ header.payload.signature`}
   const inputCharCount = document.getElementById("jwt-char-count") as HTMLElement | null;
   const outputStatus = document.getElementById("jwt-output-status") as HTMLElement | null;
   const outputCharCount = document.getElementById("jwt-output-count") as HTMLElement | null;
-  const indentSelect = document.getElementById("indent-select") as HTMLSelectElement | null;
+  const indentSeg = document.getElementById("indent-select") as HTMLElement | null;
+  const indentBtns = indentSeg
+    ? (Array.from(indentSeg.querySelectorAll("[data-value]")) as HTMLButtonElement[])
+    : [];
   const decodeBtn = document.getElementById("decode-btn") as HTMLButtonElement | null;
   const errorBanner = document.getElementById("decode-error") as HTMLElement | null;
   const statusDot = document.getElementById("status-dot") as HTMLElement | null;
@@ -234,21 +227,21 @@ header.payload.signature`}
 
     if (inputStatus) {
       if (state.inputStatus === "empty") {
-        inputStatus.textContent = "Token: Empty";
+        inputStatus.textContent = "Status: Empty";
         inputStatus.style.color = "";
       } else if (state.result && !state.result.ok && state.result.error) {
-        const seg = state.result.error.segment ? ` · ${state.result.error.segment}` : "";
-        inputStatus.textContent = `Token: Invalid${seg}`;
+        const seg = state.result.error.segment ? ` — ${state.result.error.segment}` : "";
+        inputStatus.textContent = `Status: Invalid${seg}`;
         inputStatus.style.color = "var(--color-error)";
       } else if (state.result && state.result.ok) {
         inputStatus.textContent = state.result.expired
-          ? "Token: Decodable · expired"
-          : "Token: Decodable";
+          ? "Status: Ready — expired"
+          : "Status: Ready";
         inputStatus.style.color = state.result.expired
           ? "var(--color-warning)"
           : "var(--color-success)";
       } else {
-        inputStatus.textContent = "Token: Ready";
+        inputStatus.textContent = "Status: Ready";
         inputStatus.style.color = "";
       }
     }
@@ -271,6 +264,10 @@ header.payload.signature`}
     }
     if (outputCharCount) outputCharCount.textContent = lastOut.length.toLocaleString() + " chars";
 
+    if (indentBtns.length) {
+      indentBtns.forEach((b) => b.classList.toggle("is-active", b.dataset.value === state.indent));
+    }
+
     if (statusDot) {
       statusDot.classList.remove("idle", "active", "error");
       statusDot.classList.add(state.outputStatus === "invalid" ? "error" : "idle");
@@ -291,10 +288,13 @@ header.payload.signature`}
     tokenTextarea.addEventListener("input", () => debouncedInput(tokenTextarea.value));
   }
   if (decodeBtn) decodeBtn.addEventListener("click", () => decode(jwtDecoderStore));
-  if (indentSelect)
-    indentSelect.addEventListener("change", () =>
-      setIndent(jwtDecoderStore, indentSelect.value as IndentOption),
+  if (indentBtns.length) {
+    indentBtns.forEach((b) =>
+      b.addEventListener("click", () =>
+        setIndent(jwtDecoderStore, b.dataset.value as IndentOption),
+      ),
     );
+  }
 
   const inputActions = document.getElementById("input-actions");
   if (inputActions) {
@@ -329,7 +329,7 @@ header.payload.signature`}
       }
       if (action === "download") {
         if (lastOut) {
-          downloadFile(lastOut, "jwt-decoded.txt", "text/plain;charset=utf-8;");
+          downloadFile(lastOut, "jwt-decoder-decoded.txt", "text/plain;charset=utf-8;");
           announce("Download started");
         } else {
           announce("Nothing to download yet");
@@ -385,60 +385,7 @@ header.payload.signature`}
   .info-status {
     font-weight: 500;
   }
-  .settings-card {
-    padding: var(--spacing-lg);
-  }
-  .settings-title {
-    margin: 0;
-  }
-  .settings-divider {
-    height: 1px;
-    background-color: var(--color-hairline);
-    margin: var(--spacing-xs) 0;
-  }
-  .settings-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-md);
-  }
-  .settings-label {
-    color: var(--color-mute);
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .select-wrapper {
-    position: relative;
-    width: 100%;
-  }
-  .settings-select {
-    width: 100%;
-    height: 38px;
-    padding: 0 var(--spacing-md);
-    font-family: var(--font-sans);
-    font-size: 14px;
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    background-color: var(--color-canvas);
-    color: var(--color-ink);
-    appearance: none;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.15s ease;
-  }
-  .settings-select:focus {
-    border-color: var(--color-hairline-strong);
-  }
-  .select-wrapper::after {
-    content: "▼";
-    font-size: 9px;
-    color: var(--color-body);
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-  }
+
   .jwt-warning {
     display: flex;
     gap: var(--spacing-sm);
@@ -509,20 +456,6 @@ header.payload.signature`}
     white-space: nowrap;
     border-width: 0;
   }
-  .tool-content-section {
-    padding: var(--spacing-5xl) 0;
-    background-color: var(--color-canvas-soft);
-    border-top: 1px solid var(--color-hairline);
-  }
-  .content-section-header {
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto var(--spacing-3xl);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-xs);
-  }
   .section-eyebrow {
     color: var(--color-mute);
     letter-spacing: 0.1em;
@@ -530,45 +463,6 @@ header.payload.signature`}
   .section-title {
     color: var(--color-ink);
     margin: 0;
-  }
-  .steps-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-xl);
-  }
-  .step-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-lg);
-    background-color: var(--color-canvas);
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    text-align: center;
-    align-items: center;
-  }
-  .step-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--rounded-full);
-    background-color: var(--color-accent);
-    color: var(--color-on-primary);
-    font-family: var(--font-mono);
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: var(--spacing-xs);
-  }
-  .step-title {
-    color: var(--color-ink);
-    margin: 0;
-  }
-  .step-desc {
-    color: var(--color-body);
-    margin: 0;
-    line-height: 1.5;
   }
   .faq-section {
     padding: var(--spacing-5xl) 0;
@@ -637,10 +531,6 @@ header.payload.signature`}
     }
     .workspace-card :global(.editor-wrapper) {
       height: 100%;
-    }
-    .steps-grid {
-      grid-template-columns: 1fr;
-      gap: var(--spacing-md);
     }
   }
 </style>

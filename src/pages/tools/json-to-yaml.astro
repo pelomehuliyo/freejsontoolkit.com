@@ -6,12 +6,16 @@ import CodeEditor from "../../components/tools/CodeEditor.astro";
 import DragDropZone from "../../components/tools/DragDropZone.astro";
 import ToolActions from "../../components/tools/ToolActions.astro";
 import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import HowItWorks from "../../components/tools/HowItWorks.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
 import { INDENT_OPTIONS } from "../../lib/tools/json-to-yaml/constants";
 import RelatedTools from "../../components/tools/RelatedTools.astro";
 import CompareLinks from "../../components/tools/CompareLinks.astro";
+import ToolDocs from "../../components/tools/ToolDocs.astro";
+import ToolNudge from "../../components/tools/ToolNudge.astro";
+import "../../styles/tool-options.css";
 ---
 
 <ToolShell
@@ -23,7 +27,7 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "JSON to YAML" }]}
     title="JSON → YAML Converter"
-    subtitle="Turn JSON into clean, readable YAML — offline."
+    subtitle="Turn JSON into clean, readable YAML."
   />
 
   <ToolWorkspace slot="workspace" layout="3-col">
@@ -40,7 +44,7 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
           placeholder='{"name":"Ada","role":"engineer"}'
         >
           <div class="editor-info-bar">
-            <span class="info-status" id="json-validation-status">JSON Status: Empty</span>
+            <span class="info-status" id="json-validation-status">Status: Empty</span>
             <span class="info-meta" id="json-char-count">0 chars</span>
           </div>
         </CodeEditor>
@@ -52,30 +56,32 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
         <h2 class="display-sm settings-title">Options</h2>
         <div class="settings-divider"></div>
 
-        <div class="settings-group checkbox-group">
-          <label class="checkbox-container body-sm">
+        <div class="settings-group">
+          <label class="opt-check">
             <input type="checkbox" id="sort-keys" />
-            <span class="checkbox-checkmark"></span>
-            Sort object keys (A→Z)
+            <span class="box"></span>
+            Sort object keys
           </label>
-          <p class="caption settings-help">
+          <p class="settings-help">
             Produces deterministic YAML; array order is always preserved.
           </p>
         </div>
 
         <div class="settings-group">
-          <label class="settings-label caption-mono" for="indent-select">Indentation</label>
-          <div class="select-wrapper">
-            <select id="indent-select" class="settings-select">
-              {INDENT_OPTIONS.map((opt) => <option value={opt.value}>{opt.label}</option>)}
-            </select>
+          <span class="settings-label">Indentation</span>
+          <div class="seg" id="indent-select" role="group" aria-label="Indentation">
+            {INDENT_OPTIONS.map((opt) => (
+              <button type="button" class="seg-btn" data-value={opt.value}>
+                {opt.label}
+              </button>
+            ))}
           </div>
         </div>
 
         <div class="settings-divider"></div>
 
         <Button id="convert-btn" variant="primary" size="lg" shape="square" class="action-btn">
-          Convert to YAML
+          Convert
         </Button>
 
         <ErrorBanner id="convert-error" />
@@ -109,40 +115,28 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
     </div>
   </ToolWorkspace>
 
-  <section class="tool-content-section" aria-labelledby="how-title">
-    <Container size="narrow">
-      <div class="content-section-header">
-        <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
-        <h2 id="how-title" class="display-md section-title">Convert JSON to YAML in three steps</h2>
-      </div>
-      <div class="steps-grid">
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">1</span>
-          <h3 class="body-sm-strong step-title">Paste or upload</h3>
-          <p class="caption step-desc">
-            Drop in any JSON — objects, arrays, nested data — up to 15M characters.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">2</span>
-          <h3 class="body-sm-strong step-title">Set options</h3>
-          <p class="caption step-desc">
-            Choose indentation (2/4 spaces or tab), and optionally sort keys for stable output.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">3</span>
-          <h3 class="body-sm-strong step-title">Convert &amp; export</h3>
-          <p class="caption step-desc">
-            Click Convert, then copy or download the resulting YAML — all offline.
-          </p>
-        </div>
-      </div>
-    </Container>
-  </section>
+  <HowItWorks
+    heading="Convert JSON to YAML in three steps"
+    steps={[
+      {
+        title: "Paste or upload",
+        desc: "Drop in any JSON — objects, arrays, nested data — up to 15M characters.",
+      },
+      {
+        title: "Set options",
+        desc: "Choose indentation (2/4 spaces or tab), and optionally sort keys for stable output.",
+      },
+      {
+        title: "Convert & export",
+        desc: "Click Convert, then copy or download the resulting YAML — all offline.",
+      },
+    ]}
+  />
 
+  <ToolDocs />
   <CompareLinks />
   <RelatedTools />
+  <ToolNudge />
   <section class="faq-section" aria-labelledby="faq-title">
     <Container size="narrow">
       <div class="faq-header">
@@ -204,7 +198,10 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
   const inputCharCount = document.getElementById("json-char-count") as HTMLElement | null;
   const outputStatus = document.getElementById("yaml-output-status") as HTMLElement | null;
   const outputCharCount = document.getElementById("yaml-output-count") as HTMLElement | null;
-  const indentSelect = document.getElementById("indent-select") as HTMLSelectElement | null;
+  const indentSeg = document.getElementById("indent-select") as HTMLElement | null;
+  const indentBtns = indentSeg
+    ? (Array.from(indentSeg.querySelectorAll("[data-value]")) as HTMLButtonElement[])
+    : [];
   const sortKeysCb = document.getElementById("sort-keys") as HTMLInputElement | null;
   const convertBtn = document.getElementById("convert-btn") as HTMLButtonElement | null;
   const errorBanner = document.getElementById("convert-error") as HTMLElement | null;
@@ -230,15 +227,15 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
     if (inputStatus) {
       switch (state.inputStatus) {
         case "empty":
-          inputStatus.textContent = "JSON Status: Empty";
+          inputStatus.textContent = "Status: Empty";
           inputStatus.style.color = "";
           break;
         case "ready":
-          inputStatus.textContent = "JSON Status: Valid";
+          inputStatus.textContent = "Status: Ready";
           inputStatus.style.color = "var(--color-success)";
           break;
         case "invalid":
-          inputStatus.textContent = "JSON Status: Invalid";
+          inputStatus.textContent = "Status: Invalid";
           inputStatus.style.color = "var(--color-error)";
           break;
       }
@@ -248,11 +245,17 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
 
     if (outputStatus) {
       outputStatus.textContent =
-        state.outputStatus === "converted" ? "Output: Ready" : "Output: Empty";
+        state.outputStatus === "converted" ? "Output: YAML" : "Output: Empty";
       outputStatus.style.color = state.outputStatus === "converted" ? "var(--color-success)" : "";
     }
     if (outputCharCount)
       outputCharCount.textContent = state.yamlOutput.length.toLocaleString() + " chars";
+
+    if (indentBtns.length) {
+      indentBtns.forEach((b) => {
+        b.classList.toggle("is-active", b.dataset.value === state.indent);
+      });
+    }
 
     if (statusDot) {
       statusDot.classList.remove("idle", "active", "error");
@@ -262,7 +265,7 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
     }
 
     if (convertBtn) {
-      convertBtn.textContent = state.isConverting ? "Converting…" : "Convert to YAML";
+      convertBtn.textContent = state.isConverting ? "Converting…" : "Convert";
       convertBtn.disabled = state.isConverting;
     }
 
@@ -277,10 +280,13 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
     jsonTextarea.addEventListener("input", () => debouncedInput(jsonTextarea.value));
   }
   if (convertBtn) convertBtn.addEventListener("click", () => convert(jsonToYamlStore));
-  if (indentSelect)
-    indentSelect.addEventListener("change", () =>
-      setIndent(jsonToYamlStore, indentSelect.value as IndentOption),
+  if (indentBtns.length) {
+    indentBtns.forEach((b) =>
+      b.addEventListener("click", () =>
+        setIndent(jsonToYamlStore, b.dataset.value as IndentOption),
+      ),
     );
+  }
   if (sortKeysCb)
     sortKeysCb.addEventListener("change", () => setSortKeys(jsonToYamlStore, sortKeysCb.checked));
 
@@ -318,7 +324,7 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
       }
       if (action === "download") {
         if (out) {
-          downloadFile(out, "converted.yaml", "text/yaml;charset=utf-8;");
+          downloadFile(out, "json-to-yaml-converted.yaml", "text/yaml;charset=utf-8;");
           announce("Download started");
         }
       }
@@ -385,123 +391,6 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
     font-weight: 500;
   }
 
-  .settings-card {
-    padding: var(--spacing-lg);
-  }
-  .settings-title {
-    margin: 0;
-  }
-  .settings-divider {
-    height: 1px;
-    background-color: var(--color-hairline);
-    margin: var(--spacing-xs) 0;
-  }
-  .settings-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-md);
-  }
-  .settings-label {
-    color: var(--color-mute);
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .select-wrapper {
-    position: relative;
-    width: 100%;
-  }
-  .settings-select {
-    width: 100%;
-    height: 38px;
-    padding: 0 var(--spacing-md);
-    font-family: var(--font-sans);
-    font-size: 14px;
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    background-color: var(--color-canvas);
-    color: var(--color-ink);
-    appearance: none;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.15s ease;
-  }
-  .settings-select:focus {
-    border-color: var(--color-hairline-strong);
-  }
-  .select-wrapper::after {
-    content: "▼";
-    font-size: 9px;
-    color: var(--color-body);
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-  }
-
-  .checkbox-group {
-    margin-bottom: var(--spacing-sm);
-  }
-  .checkbox-container {
-    display: flex;
-    align-items: center;
-    position: relative;
-    padding-left: 24px;
-    cursor: pointer;
-    user-select: none;
-    color: var(--color-ink);
-  }
-  .checkbox-container input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-  }
-  .checkbox-checkmark {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    left: 0;
-    height: 16px;
-    width: 16px;
-    border: 1px solid var(--color-hairline-strong);
-    border-radius: 4px;
-    background-color: var(--color-canvas);
-    transition:
-      background-color 0.1s ease,
-      border-color 0.1s ease;
-  }
-  .checkbox-container:hover input ~ .checkbox-checkmark {
-    border-color: var(--color-ink);
-  }
-  .checkbox-container input:checked ~ .checkbox-checkmark {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-  }
-  .checkbox-checkmark::after {
-    content: "";
-    position: absolute;
-    display: none;
-  }
-  .checkbox-container input:checked ~ .checkbox-checkmark::after {
-    display: block;
-  }
-  .checkbox-container .checkbox-checkmark::after {
-    left: 5px;
-    top: 2px;
-    width: 4px;
-    height: 8px;
-    border: solid white;
-    border-width: 0 1.5px 1.5px 0;
-    transform: rotate(45deg);
-  }
-  .settings-help {
-    color: var(--color-mute);
-    margin: 4px 0 0 24px;
-    line-height: 1.4;
-  }
   .action-btn {
     width: 100%;
     margin-top: var(--spacing-sm);
@@ -540,20 +429,6 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
     border-width: 0;
   }
 
-  .tool-content-section {
-    padding: var(--spacing-5xl) 0;
-    background-color: var(--color-canvas-soft);
-    border-top: 1px solid var(--color-hairline);
-  }
-  .content-section-header {
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto var(--spacing-3xl);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-xs);
-  }
   .section-eyebrow {
     color: var(--color-mute);
     letter-spacing: 0.1em;
@@ -561,45 +436,6 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
   .section-title {
     color: var(--color-ink);
     margin: 0;
-  }
-  .steps-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-xl);
-  }
-  .step-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-lg);
-    background-color: var(--color-canvas);
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    text-align: center;
-    align-items: center;
-  }
-  .step-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--rounded-full);
-    background-color: var(--color-accent);
-    color: var(--color-on-primary);
-    font-family: var(--font-mono);
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: var(--spacing-xs);
-  }
-  .step-title {
-    color: var(--color-ink);
-    margin: 0;
-  }
-  .step-desc {
-    color: var(--color-body);
-    margin: 0;
-    line-height: 1.5;
   }
 
   .faq-section {
@@ -670,10 +506,6 @@ import CompareLinks from "../../components/tools/CompareLinks.astro";
     }
     .workspace-card :global(.editor-wrapper) {
       height: 100%;
-    }
-    .steps-grid {
-      grid-template-columns: 1fr;
-      gap: var(--spacing-md);
     }
   }
 </style>

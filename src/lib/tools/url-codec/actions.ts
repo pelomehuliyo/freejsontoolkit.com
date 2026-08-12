@@ -64,7 +64,7 @@ export function transform(store: Store<UrlCodecState>, forced = false): void {
   if (s.input.length > MAX_INPUT_CHARS) {
     store.update((x) => ({
       ...x,
-      error: "Input too large. Limit is " + MAX_INPUT_CHARS.toLocaleString() + " chars.",
+      error: "Input is too large. The limit is " + MAX_INPUT_CHARS.toLocaleString() + " chars. Shorten the input and try again.",
     }));
     return;
   }
@@ -107,10 +107,11 @@ export function transform(store: Store<UrlCodecState>, forced = false): void {
 }
 
 export function loadSample(store: Store<UrlCodecState>): void {
+  // House rule: Load Sample only loads — it never auto-runs. The user clicks
+  // Encode / Decode explicitly.
   store.update((s) => {
-    const next = { ...s, input: SAMPLE_TEXT, error: null };
+    const next = { ...s, input: SAMPLE_TEXT, result: null, error: null };
     next.validity = validityFor(next);
     return next;
   });
-  transform(store, true);
 }

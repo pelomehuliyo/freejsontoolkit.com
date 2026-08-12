@@ -23,7 +23,7 @@ export function recompute(store: Store<SchemaLiteState>, forced = false): void {
     if (s.jsonInput.length > MAX_INPUT_CHARS || s.schemaInput.length > MAX_INPUT_CHARS) {
         store.update((x) => ({
             ...x,
-            error: "Input too large. Limit is " + MAX_INPUT_CHARS.toLocaleString() + " chars per side.",
+            error: "Input is too large. The limit is " + MAX_INPUT_CHARS.toLocaleString() + " chars per side. Shorten one or both inputs and try again.",
         }));
         return;
     }

@@ -6,6 +6,7 @@ import CodeEditor from "../../components/tools/CodeEditor.astro";
 import DragDropZone from "../../components/tools/DragDropZone.astro";
 import ToolActions from "../../components/tools/ToolActions.astro";
 import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import HowItWorks from "../../components/tools/HowItWorks.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
@@ -17,6 +18,7 @@ import RelatedTools from "../../components/tools/RelatedTools.astro";
 import ToolDocs from "../../components/tools/ToolDocs.astro";
 import CompareLinks from "../../components/tools/CompareLinks.astro";
 import ToolNudge from "../../components/tools/ToolNudge.astro";
+import "../../styles/tool-options.css";
 ---
 
 <ToolShell
@@ -51,7 +53,7 @@ name,role,level
 Ada,Engineer,7`}
         >
           <div class="editor-info-bar">
-            <span class="info-status" id="csv-status">CSV Status: Empty</span>
+            <span class="info-status" id="csv-status">Status: Empty</span>
             <span class="info-meta" id="csv-char-count">0 chars</span>
           </div>
         </CodeEditor>
@@ -62,19 +64,21 @@ Ada,Engineer,7`}
         <h2 class="display-sm settings-title">Options</h2>
         <div class="settings-divider"></div>
         <div class="settings-group">
-          <label class="settings-label caption-mono" for="newline-select">Embedded newlines</label>
-          <div class="select-wrapper">
-            <select id="newline-select" class="settings-select">
-              {NEWLINE_STRATEGIES.map((opt) => <option value={opt.value}>{opt.label}</option>)}
-            </select>
+          <span class="settings-label">Embedded newlines</span>
+          <div class="seg" id="newline-select" role="group" aria-label="Embedded newlines">
+            {NEWLINE_STRATEGIES.map((opt) => (
+              <button type="button" class="seg-btn" data-value={opt.value}>
+                {opt.label}
+              </button>
+            ))}
           </div>
-          <p class="caption settings-help">
+          <p class="settings-help">
             TSV can't keep a newline inside one cell. Refuse is the honest default.
           </p>
         </div>
         <div class="settings-divider"></div>
         <Button id="convert-btn" variant="primary" size="lg" shape="square" class="action-btn">
-          Convert to TSV
+          Convert
         </Button>
         <ErrorBanner id="convert-error" />
         <div class="status-banner caption">
@@ -105,37 +109,23 @@ Ada,Engineer,7`}
       </Card>
     </div>
   </ToolWorkspace>
-  <section class="tool-content-section" aria-labelledby="how-title">
-    <Container size="narrow">
-      <div class="content-section-header">
-        <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
-        <h2 id="how-title" class="display-md section-title">Convert CSV in three steps</h2>
-      </div>
-      <div class="steps-grid">
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">1</span>
-          <h3 class="body-sm-strong step-title">Paste or drop</h3>
-          <p class="caption step-desc">
-            Any CSV table — the shared RFC 4180 parser handles quoted fields and commas inside them.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">2</span>
-          <h3 class="body-sm-strong step-title">Convert</h3>
-          <p class="caption step-desc">
-            Press Convert (or Ctrl/⌘ + Enter). Big tables run in a background worker.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">3</span>
-          <h3 class="body-sm-strong step-title">Take the TSV</h3>
-          <p class="caption step-desc">
-            Copy or download the tab-separated result — ready for a spreadsheet or a pipeline.
-          </p>
-        </div>
-      </div>
-    </Container>
-  </section>
+  <HowItWorks
+    heading="Convert CSV in three steps"
+    steps={[
+      {
+        title: "Paste or drop",
+        desc: "Any CSV table — the shared RFC 4180 parser handles quoted fields and commas inside them.",
+      },
+      {
+        title: "Convert",
+        desc: "Press Convert (or Ctrl/⌘ + Enter). Big tables run in a background worker.",
+      },
+      {
+        title: "Take the TSV",
+        desc: "Copy or download the tab-separated result — ready for a spreadsheet or a pipeline.",
+      },
+    ]}
+  />
   <ToolDocs />
   <CompareLinks />
   <RelatedTools />
@@ -215,7 +205,10 @@ Ada,Engineer,7`}
   const inputCharCount = document.getElementById("csv-char-count") as HTMLElement | null;
   const outputStatus = document.getElementById("tsv-output-status") as HTMLElement | null;
   const outputCharCount = document.getElementById("tsv-output-count") as HTMLElement | null;
-  const newlineSelect = document.getElementById("newline-select") as HTMLSelectElement | null;
+  const newlineSeg = document.getElementById("newline-select") as HTMLElement | null;
+  const newlineBtns = newlineSeg
+    ? (Array.from(newlineSeg.querySelectorAll("[data-value]")) as HTMLButtonElement[])
+    : [];
   const convertBtn = document.getElementById("convert-btn") as HTMLButtonElement | null;
   const errorBanner = document.getElementById("convert-error") as HTMLElement | null;
   const statusDot = document.getElementById("status-dot") as HTMLElement | null;
@@ -270,16 +263,16 @@ Ada,Engineer,7`}
 
     if (inputStatus) {
       if (state.inputStatus === "empty") {
-        inputStatus.textContent = "CSV Status: Empty";
+        inputStatus.textContent = "Status: Empty";
         inputStatus.style.color = "";
       } else if (state.result && !state.result.ok) {
-        inputStatus.textContent = "CSV Status: Invalid";
+        inputStatus.textContent = "Status: Invalid";
         inputStatus.style.color = "var(--color-error)";
       } else if (state.result && state.result.ok) {
-        inputStatus.textContent = "CSV Status: Valid";
+        inputStatus.textContent = "Status: Ready";
         inputStatus.style.color = "var(--color-success)";
       } else {
-        inputStatus.textContent = "CSV Status: Ready";
+        inputStatus.textContent = "Status: Ready";
         inputStatus.style.color = "";
       }
     }
@@ -288,7 +281,11 @@ Ada,Engineer,7`}
 
     if (outputStatus) {
       outputStatus.textContent = large
-        ? "Output: Preview"
+        ? "Output: Preview — " +
+          large.rows +
+          " rows × " +
+          large.cols +
+          " cols · Download for the full file"
         : state.outputStatus === "converted"
           ? "Output: TSV"
           : state.outputStatus === "invalid"
@@ -304,15 +301,16 @@ Ada,Engineer,7`}
     if (outputCharCount) {
       const ok = state.result && state.result.authoritative && state.result.ok;
       outputCharCount.textContent = large
-        ? large.preview.length.toLocaleString() +
-          " chars preview · " +
-          large.rows +
-          " rows × " +
-          large.cols +
-          " cols · Download for full file"
+        ? large.preview.length.toLocaleString() + " chars preview"
         : lastOut.length.toLocaleString() +
           " chars" +
           (ok ? ` · ${state.result!.rowCount} rows × ${state.result!.colCount} cols` : "");
+    }
+
+    if (newlineBtns.length) {
+      newlineBtns.forEach((b) => {
+        b.classList.toggle("is-active", b.dataset.value === state.newlineStrategy);
+      });
     }
 
     if (statusDot) {
@@ -327,8 +325,13 @@ Ada,Engineer,7`}
         phaseEl.style.color = "var(--color-accent)";
         statusText.textContent = "";
       } else if (large && large.phase === "done") {
-        phaseEl.textContent = "Preview shown — use Download for the full file.";
-        phaseEl.style.color = "var(--color-success)";
+        if (state.staleOptions) {
+          phaseEl.textContent = "Options changed — convert again.";
+          phaseEl.style.color = "var(--color-warning)";
+        } else {
+          phaseEl.textContent = "";
+          phaseEl.style.color = "var(--color-success)";
+        }
         statusText.textContent = "";
       } else {
         phaseEl.textContent = "";
@@ -336,7 +339,7 @@ Ada,Engineer,7`}
       }
     }
     if (convertBtn) {
-      convertBtn.textContent = state.isConverting ? "Converting…" : "Convert to TSV";
+      convertBtn.textContent = state.isConverting ? "Converting…" : "Convert";
       convertBtn.disabled = state.isConverting;
     }
     if (errorBanner) {
@@ -353,10 +356,16 @@ Ada,Engineer,7`}
     csvTextarea.addEventListener("input", () => debouncedInput(csvTextarea.value));
   }
   if (convertBtn) convertBtn.addEventListener("click", () => convert(csvToTsvStore));
-  if (newlineSelect)
-    newlineSelect.addEventListener("change", () =>
-      setNewlineStrategy(csvToTsvStore, newlineSelect.value as ConvertOptions["newlineStrategy"]),
+  if (newlineBtns.length) {
+    newlineBtns.forEach((b) =>
+      b.addEventListener("click", () =>
+        setNewlineStrategy(
+          csvToTsvStore,
+          b.dataset.value as ConvertOptions["newlineStrategy"],
+        ),
+      ),
     );
+  }
 
   const inputActions = document.getElementById("input-actions");
   if (inputActions) {
@@ -398,18 +407,20 @@ Ada,Engineer,7`}
       if (action === "download") {
         // Large-file mode: download the full Blob, not just the preview.
         const large = csvToTsvStore.get().largeFile;
-        if (large && large.blobUrl) {
+        if (large && large.blob) {
+          const blobUrl = URL.createObjectURL(large.blob);
           const a = document.createElement("a");
-          a.href = large.blobUrl;
+          a.href = blobUrl;
           a.download = "converted.tsv";
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
           announce("Download started (full file)");
           return;
         }
         if (lastOut) {
-          downloadFile(lastOut, "converted.tsv", "text/tab-separated-values;charset=utf-8;");
+          downloadFile(lastOut, "csv-to-tsv-converted.tsv", "text/tab-separated-values;charset=utf-8;");
           announce("Download started");
         } else {
           announce("Nothing to download yet");
@@ -487,64 +498,6 @@ Ada,Engineer,7`}
   .info-status {
     font-weight: 500;
   }
-  .settings-card {
-    padding: var(--spacing-lg);
-  }
-  .settings-title {
-    margin: 0;
-  }
-  .settings-divider {
-    height: 1px;
-    background-color: var(--color-hairline);
-    margin: var(--spacing-xs) 0;
-  }
-  .settings-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-md);
-  }
-  .settings-label {
-    color: var(--color-mute);
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .select-wrapper {
-    position: relative;
-    width: 100%;
-  }
-  .settings-select {
-    width: 100%;
-    height: 38px;
-    padding: 0 var(--spacing-md);
-    font-family: var(--font-sans);
-    font-size: 14px;
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    background-color: var(--color-canvas);
-    color: var(--color-ink);
-    appearance: none;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.15s ease;
-  }
-  .settings-select:focus {
-    border-color: var(--color-hairline-strong);
-  }
-  .select-wrapper::after {
-    content: "▼";
-    font-size: 9px;
-    color: var(--color-body);
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-  }
-  .settings-help {
-    color: var(--color-mute);
-    line-height: 1.4;
-  }
   .action-btn {
     width: 100%;
     margin-top: var(--spacing-sm);
@@ -581,20 +534,6 @@ Ada,Engineer,7`}
     white-space: nowrap;
     border-width: 0;
   }
-  .tool-content-section {
-    padding: var(--spacing-5xl) 0;
-    background-color: var(--color-canvas-soft);
-    border-top: 1px solid var(--color-hairline);
-  }
-  .content-section-header {
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto var(--spacing-3xl);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-xs);
-  }
   .section-eyebrow {
     color: var(--color-mute);
     letter-spacing: 0.1em;
@@ -602,45 +541,6 @@ Ada,Engineer,7`}
   .section-title {
     color: var(--color-ink);
     margin: 0;
-  }
-  .steps-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-xl);
-  }
-  .step-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-lg);
-    background-color: var(--color-canvas);
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    text-align: center;
-    align-items: center;
-  }
-  .step-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--rounded-full);
-    background-color: var(--color-accent);
-    color: var(--color-on-primary);
-    font-family: var(--font-mono);
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: var(--spacing-xs);
-  }
-  .step-title {
-    color: var(--color-ink);
-    margin: 0;
-  }
-  .step-desc {
-    color: var(--color-body);
-    margin: 0;
-    line-height: 1.5;
   }
   .faq-section {
     padding: var(--spacing-5xl) 0;
@@ -709,10 +609,6 @@ Ada,Engineer,7`}
     }
     .workspace-card :global(.editor-wrapper) {
       height: 100%;
-    }
-    .steps-grid {
-      grid-template-columns: 1fr;
-      gap: var(--spacing-md);
     }
   }
 </style>

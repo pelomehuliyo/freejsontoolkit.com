@@ -106,7 +106,7 @@ export function convertJsonToYaml(
     parsed = JSON.parse(input);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Invalid JSON";
-    throw new Error(`Invalid JSON: ${msg}`);
+    throw new Error(`Invalid JSON: ${msg}. Check the syntax and try again.`);
   }
   const yaml = stringifyYaml(parsed, opts, 0);
   return { output: yaml };

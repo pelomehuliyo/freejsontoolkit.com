@@ -24,7 +24,7 @@ export function convertTsvToCsv(input: string): ConvertResult {
             sourceSize,
             rowCount: 0,
             colCount: 0,
-            error: { message: "Empty input" },
+            error: { message: "Input is empty. Add TSV data, then press Convert." },
         };
     }
 
@@ -36,7 +36,7 @@ export function convertTsvToCsv(input: string): ConvertResult {
     });
 
     if (!parsed.success || !parsed.csv) {
-        const err = parsed.error ?? { code: "UNKNOWN", message: "Failed to parse TSV." };
+        const err = parsed.error ?? { code: "UNKNOWN", message: "TSV could not be parsed. Check the TSV syntax and try again." };
         return {
             ok: false,
             authoritative: false,

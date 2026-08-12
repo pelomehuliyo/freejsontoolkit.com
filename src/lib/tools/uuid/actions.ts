@@ -35,6 +35,20 @@ export function clearAll(store: Store<UuidState>): void {
   store.update((s) => ({ ...s, result: null, error: null }));
 }
 
+export function loadSample(store: Store<UuidState>): void {
+  // Load only — never auto-run. The user clicks Generate explicitly.
+  store.update((s) => ({
+    ...s,
+    version: "v4",
+    count: 5,
+    format: "hyphen",
+    upper: false,
+    name: "example.com",
+    result: null,
+    error: null,
+  }));
+}
+
 export async function runGenerate(store: Store<UuidState>): Promise<void> {
   const s = store.get();
   if (s.isRunning) return;

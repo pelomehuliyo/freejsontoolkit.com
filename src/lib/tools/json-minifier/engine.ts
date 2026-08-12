@@ -52,7 +52,7 @@ export function minifyJson(input: string, opts: MinifyOptions): MinifyResult {
       includeNormalized: false,
     });
     const e = v.error;
-    throw new Error(e ? `${e.message} (line ${e.line}, column ${e.column})` : "Invalid JSON");
+    throw new Error(e ? `${e.message} at line ${e.line}, column ${e.column}. Check the JSON and try again.` : "Invalid JSON. Check the syntax and try again.");
   }
 
   const value = opts.sortKeys ? sortKeysDeep(parsed) : parsed;

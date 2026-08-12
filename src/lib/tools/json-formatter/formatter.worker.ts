@@ -22,7 +22,7 @@ ctx.onmessage = (e: MessageEvent) => {
     ctx.postMessage({
       id,
       ok: false,
-      error: err instanceof Error ? err.message : "Failed to format JSON.",
+      error: err instanceof Error ? err.message : "Failed to format JSON. Check the syntax and try again.",
     });
   }
 };

@@ -48,7 +48,7 @@ export function transform(store: Store<Base64State>, forced = false): void {
   if (s.input.length > MAX_INPUT_CHARS) {
     store.update((x) => ({
       ...x,
-      error: "Input too large. Limit is " + MAX_INPUT_CHARS.toLocaleString() + " chars.",
+      error: "Input is too large. The limit is " + MAX_INPUT_CHARS.toLocaleString() + " chars. Shorten the input and try again.",
     }));
     return;
   }
@@ -81,7 +81,7 @@ export function transform(store: Store<Base64State>, forced = false): void {
         ...x,
         isRunning: false,
         inputStatus: x.mode === "decode" ? "invalid" : x.inputStatus,
-        error: d.error ?? "Operation failed.",
+        error: d.error ?? "Operation failed. The input could not be processed. Check the input and try again.",
       }));
     }
   };

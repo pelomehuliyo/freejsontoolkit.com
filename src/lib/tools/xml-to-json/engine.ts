@@ -123,7 +123,7 @@ function nodeToJson(node: XmlNode, opts: XmlToJsonOptions): any {
 export function convertXmlToJson(xml: string, opts: XmlToJsonOptions): XmlToJsonResult {
   const root = parseXml(xml);
   if (!root || !root.name) {
-    throw new Error("Empty or invalid XML");
+    throw new Error("XML is empty or invalid. Check the XML and try again.");
   }
   const json = nodeToJson(root, opts);
   const resultObj = { [root.name]: json };

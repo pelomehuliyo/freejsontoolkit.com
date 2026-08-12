@@ -1,6 +1,7 @@
 ## [v1.5.7] — Timestamp Converter
 
 ### Added
+
 - **Timestamp Converter** (`/tools/timestamp-converter`) — convert Unix timestamps to human
   dates and back, in seconds, milliseconds, microseconds, and nanoseconds. Timestamp → Date
   shows the instant in your local time and UTC (plus day-of-year, ISO week, and relative time);
@@ -10,8 +11,8 @@
 - Full docs entry with runnable snippets and examples.
 
 ### Notes
-- Runs entirely on the browser's native Date engine — no worker needed, fully offline.
 
+- Runs entirely on the browser's native Date engine — no worker needed, fully offline.
 
 ## [1.3.1] - 2026-08-01
 
@@ -118,10 +119,10 @@ registry substrate (the "new tool = mostly wiring" thesis, proven).
 - `yaml-to-json` flipped to `status: "available"` — catalog, footer, palette,
   homepage directory, and sitemap all derive from this one entry.
 
-
 ## [v1.5.0] — Collections: browse by what you're doing
 
 ### Added
+
 - **Collections** — a mental-model layer over the catalog. Every tool now declares a
   `family` (the user's "I need to work with JSON" grouping), distinct from its
   operational `category`.
@@ -134,20 +135,22 @@ registry substrate (the "new tool = mostly wiring" thesis, proven).
   can group by family.
 
 ### Changed
+
 - Registry: added `ToolFamily` type, `families` meta array, and the
   `familyLabel` / `toolsByFamily` / `familiesWithAvailableTools` selectors.
 - Footer: Resources column gains a "Collections" link.
 - Sitemap: `/collections` + one entry per family.
 
 ### Families seeded
+
 - **JSON**, **Encoding**, and **Developer Utilities** render as live shelves;
   **Data Formats** and **Networking** are reserved and light up as their tools ship
   (Data Formats fills when CSV ⇄ TSV lands).
 
-
 ## [v1.5.1] — Regex Tester
 
 ### Added
+
 - **Regex Tester** (`/tools/regex-tester`) — live match highlighting (a DOM-built
   `<mark>` render, never `innerHTML`), a match list with numbered and named capture
   groups, live flag toggles (g i m s u y), and a replace preview with `$1` / `$&`.
@@ -158,12 +161,10 @@ registry substrate (the "new tool = mostly wiring" thesis, proven).
   (single-input tools don't listen, so they're untouched); the Regex page intercepts,
   splits line 1 = pattern / rest = test text, fills both inputs, and flashes them.
 
-
-
-
   ## [v1.5.2] — CSV ⇄ TSV
 
 ### Added
+
 - **CSV → TSV converter** (`/tools/csv-to-tsv`) — quoted fields handled by the shared RFC 4180
   parser; the lossy direction is honest: cells with an embedded newline are refused by default
   with line/col, with an explicit "escape to \n" option to force.
@@ -174,40 +175,42 @@ registry substrate (the "new tool = mostly wiring" thesis, proven).
 - Registry entries (data-formats family), relations edges, and sitemap lines for both tools.
 
 ### Deferred
+
 - Docs for both converters — the two-behavior "load into tool" mechanic needs a decision before
   shipping a load button (component renders nothing until then; safe).
-
-
 
   ## [v1.5.3] — TOML → JSON
 
 ### Added
+
 - **TOML → JSON converter** (`/tools/toml-to-json`) — parses TOML configs into clean JSON,
   powered by `smol-toml` (the first deliberate external dependency: tiny, fast, TS-native,
   worker-safe).
 - Registry entry (data-formats family), relations edges, and sitemap line.
 
 ### Notes
+
 - Heavy parses run in the worker; Load Sample stays load-only per the house rule.
 - Docs deferred to a fast-follow (same load-snippet decision as CSV ⇄ TSV).
-
 
 ## [v1.5.4] — JSON → TOML
 
 ### Added
+
 - **JSON → TOML converter** (`/tools/json-to-toml`) — serialize JSON into clean TOML,
   powered by `smol-toml` (the toolkit's external TOML dep: tiny, fast, TS-native,
   worker-safe).
 - Registry entry (data-formats family), relations edges, and sitemap line.
 
 ### Notes
+
 - Heavy serializations run in the worker; Load Sample stays load-only per the house rule.
 - Docs deferred to a fast-follow (same load-snippet decision as the other converters).
-
 
 ## [v1.5.5] — Text Diff
 
 ### Added
+
 - **Text Diff** (`/tools/text-diff`) — line-by-line diff for any two text inputs
   (logs, configs, code, markdown, env files, SQL); added / removed / changed lines
   highlighted, with a similarity readout. Heavy diffs run in a worker.
@@ -215,20 +218,53 @@ registry substrate (the "new tool = mostly wiring" thesis, proven).
   with JSON Diff), and sitemap line.
 
 ### Deferred
+
 - Docs to a fast-follow (same load-snippet decision as the other new converters).
-
-
 
 ## [v1.5.6] — JSON Schema Lite
 
 ### Added
+
 - **JSON Schema Lite** (`/tools/json-schema-lite`) — validate a JSON document against a
   lightweight schema (type checks, required keys, nested structure), fully offline, with
-  errors reported by path. Deliberately *lite* and honest about it: it covers the fast,
+  errors reported by path. Deliberately _lite_ and honest about it: it covers the fast,
   readable core of schema validation and says so, leaving the full JSON Schema spec to the
   v2.0 validator rather than half-implementing it.
 - Registry entry (validate category, JSON family), relations edges, and sitemap line.
 
 ### Notes
+
 - Heavy validations run in a worker; Load Sample stays load-only per the house rule.
 - Docs deferred to a fast-follow (same load-snippet decision as the other new tools).
+
+## v1.6.0
+
+### Added
+
+- Timestamp Converter: Unix timestamp ↔ date conversion in seconds, milliseconds, microseconds, and nanoseconds.
+- Large-file mode for CSV → TSV, TSV → CSV, and CSV → JSON.
+- Background worker conversion for files above the large-file threshold.
+- Capped preview for large conversions, with full-result download.
+- New `/large-files` SEO landing page.
+- Homepage callout for large-file mode.
+- Large-file FAQ entries on the three CSV converter pages.
+- Additional SEO keywords for large CSV conversion intent.
+
+### Changed
+
+- Timestamp Converter now uses BigInt-backed value formatting for exact large-unit output.
+- “Use current time” is now mode-aware in Timestamp Converter.
+- Unit controls are properly disabled in Date → Timestamp mode.
+- Load Sample remains load-only, per house convention.
+
+### Fixed
+
+- Timestamp unit cards now use global styles so dynamically injected nodes render correctly.
+- Timestamp unit-grid output no longer appears stale in Timestamp → Date mode.
+- Large-file object URLs are revoked before replacement/clear.
+
+### Internal
+
+- Hoist-safe `fail` helpers in the JSON Validator engine.
+- Removed unused import from JSON Formatter actions.
+- Sitemap now includes `/large-files`.

@@ -15,6 +15,7 @@ interface SitemapEntry {
 const STATIC_ROUTES: SitemapEntry[] = [
   { loc: "", priority: "1.0", changefreq: "weekly" },
   { loc: "/tools", priority: "0.9", changefreq: "weekly" },
+  { loc: "/large-files", priority: "0.7", changefreq: "weekly" },
   { loc: "/collections", priority: "0.7", changefreq: "weekly" },
   { loc: "/collections/json", priority: "0.6", changefreq: "monthly" },
   { loc: "/collections/encoding", priority: "0.6", changefreq: "monthly" },

@@ -54,7 +54,7 @@ export function testRegex(
     try {
         re = new RegExp(pattern, buildFlagString(flags));
     } catch (e) {
-        return empty(e instanceof Error ? e.message : "Invalid regular expression");
+        return empty(e instanceof Error ? e.message : "Invalid regular expression. Fix the pattern and try again.");
     }
 
     const matches: RegexMatch[] = [];

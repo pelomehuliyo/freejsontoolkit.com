@@ -73,6 +73,8 @@ export interface JsonToCsvState {
   isCancelling: boolean;
   /** Structured progress from the worker (null when not converting) */
   conversionProgress: ConversionProgress | null;
+  /** Set when an option changes after a large-file result — outcome is stale. */
+  staleOptions: boolean;
 }
 
 /** Factory for the default/initial state */
@@ -92,4 +94,5 @@ export const DEFAULT_STATE: JsonToCsvState = {
   isConverting: false,
   isCancelling: false,
   conversionProgress: null,
+  staleOptions: false,
 };

@@ -1,0 +1,151 @@
+---
+/**
+ * HowItWorks — the standard "how it works" three-step section for tool pages.
+ *
+ * Every tool page renders one of these directly after the workspace/stage,
+ * before ToolDocs. The component owns all its markup + styles so pages don't
+ * duplicate ~110 lines of section CSS each.
+ *
+ * Usage:
+ *   <HowItWorks
+ *     heading="Convert JSON to YAML in three steps"
+ *     description="Optional one-line intro paragraph (used by timestamp-converter)."
+ *     steps={[
+ *       { title: "Paste or upload", desc: "Drop in any JSON — objects, arrays, nested data." },
+ *       { title: "Set options", desc: "Choose indentation and key sorting." },
+ *       { title: "Convert & export", desc: "Click Convert, then copy or download — all offline." },
+ *     ]}
+ *   />
+ */
+
+import Container from "../Container.astro";
+
+interface Step {
+  title: string;
+  desc: string;
+}
+
+interface Props {
+  heading: string;
+  steps: Step[];
+  /** Optional intro paragraph under the heading. */
+  description?: string;
+  eyebrow?: string;
+  id?: string;
+}
+
+const { heading, steps, description, eyebrow = "HOW IT WORKS", id = "how-title" } = Astro.props;
+---
+
+<section class="tool-content-section" aria-labelledby={id}>
+  <Container size="narrow">
+    <div class="content-section-header">
+      <span class="caption-mono section-eyebrow">{eyebrow}</span>
+      <h2 id={id} class="display-md section-title">
+        {heading}
+      </h2>
+      {description && <p class="body-sm section-description">{description}</p>}
+    </div>
+    <div class="steps-grid">
+      {
+        steps.map((step, i) => (
+          <div class="step-card">
+            <span class="step-number" aria-hidden="true">
+              {i + 1}
+            </span>
+            <h3 class="body-sm-strong step-title">{step.title}</h3>
+            <p class="caption step-desc">{step.desc}</p>
+          </div>
+        ))
+      }
+    </div>
+  </Container>
+</section>
+
+<style>
+  .tool-content-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas-soft);
+    border-top: 1px solid var(--color-hairline);
+  }
+
+  .content-section-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .section-eyebrow {
+    color: var(--color-mute);
+    letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: var(--spacing-xxs);
+  }
+
+  .section-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+
+  .section-description {
+    color: var(--color-body);
+    margin: var(--spacing-xs) auto 0;
+    max-width: 62ch;
+    line-height: 1.6;
+  }
+
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xl);
+  }
+
+  .step-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-lg);
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    text-align: center;
+    align-items: center;
+  }
+
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-accent);
+    color: var(--color-on-primary);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .step-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+
+  .step-desc {
+    color: var(--color-body);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 959px) {
+    .steps-grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-md);
+    }
+  }
+</style>

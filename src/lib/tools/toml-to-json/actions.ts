@@ -62,7 +62,7 @@ export function convert(store: Store<TomlToJsonState>): void {
     const state = store.get();
     if (state.isConverting) return;
     if (!state.tomlInput.trim()) {
-        store.update((s) => ({ ...s, error: "Paste or load TOML first." }));
+        store.update((s) => ({ ...s, error: "Nothing to convert yet. Add TOML to the input box, then press Convert." }));
         return;
     }
     const id = ++reqId;
@@ -88,7 +88,7 @@ export function convert(store: Store<TomlToJsonState>): void {
             store.update((s) => ({
                 ...s,
                 isConverting: false,
-                error: data.error ?? "Conversion failed.",
+                error: data.error ?? "Conversion failed. The TOML could not be converted. Check the input and try again.",
             }));
         }
     };

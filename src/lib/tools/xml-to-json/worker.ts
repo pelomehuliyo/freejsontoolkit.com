@@ -18,7 +18,7 @@ ctx.onmessage = (e: MessageEvent) => {
     const result = convertXmlToJson(xml, options);
     ctx.postMessage({ id, ok: true, result });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to convert XML";
+    const message = err instanceof Error ? err.message : "Failed to convert XML. Check the XML and try again.";
     ctx.postMessage({ id, ok: false, error: message });
   }
 };

@@ -88,7 +88,7 @@ export function jsonToXml(input: string, opts: XmlOptions): XmlResult {
       includeNormalized: false,
     });
     const e = v.error;
-    throw new Error(e ? `${e.message} (line ${e.line}, column ${e.column})` : "Invalid JSON");
+    throw new Error(e ? `${e.message} at line ${e.line}, column ${e.column}. Check the JSON and try again.` : "Invalid JSON. Check the syntax and try again.");
   }
   const ctx: Ctx = { elements: 0, maxDepth: 0 };
   const parts: string[] = [];

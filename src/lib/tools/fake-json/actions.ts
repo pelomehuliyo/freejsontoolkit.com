@@ -18,7 +18,15 @@ export function setPretty(store: Store<FakeJsonState>, pretty: boolean): void {
 }
 
 export function clearAll(store: Store<FakeJsonState>): void {
-  store.update((s) => ({ ...s, result: null, error: null }));
+  store.update((s) => ({
+    ...s,
+    template: "",
+    validity: validateTemplate(""),
+    result: null,
+    error: null,
+    isRunning: false,
+    needsManual: false,
+  }));
 }
 
 /** Produce the dataset. Live calls pass forced=false and skip work when the

@@ -6,12 +6,16 @@ import CodeEditor from "../../components/tools/CodeEditor.astro";
 import DragDropZone from "../../components/tools/DragDropZone.astro";
 import ToolActions from "../../components/tools/ToolActions.astro";
 import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import HowItWorks from "../../components/tools/HowItWorks.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
 import { MIME_PRESETS } from "../../lib/tools/base64/constants";
+import ToolDocs from "../../components/tools/ToolDocs.astro";
 import CompareLinks from "../../components/tools/CompareLinks.astro";
+import RelatedTools from "../../components/tools/RelatedTools.astro";
 import ToolNudge from "../../components/tools/ToolNudge.astro";
+import "../../styles/tool-options.css";
 ---
 
 <ToolShell
@@ -23,7 +27,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "Base64" }]}
     title="Base64 Encode / Decode"
-    subtitle="Encode text to Base64 or decode it back — with URL-safe, padding, and data-URI options. Offline."
+    subtitle="Encode text to Base64 or decode it back — with URL-safe, padding, and data-URI options."
   />
 
   <ToolWorkspace slot="workspace" layout="3-col">
@@ -57,7 +61,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
         <div class="settings-divider"></div>
 
         <div class="settings-group">
-          <span class="settings-label caption-mono">Direction</span>
+          <span class="settings-label">Direction</span>
           <div class="seg" role="group" aria-label="Direction">
             <button
               type="button"
@@ -72,7 +76,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
         </div>
 
         <div class="settings-group">
-          <span class="settings-label caption-mono">Alphabet</span>
+          <span class="settings-label">Alphabet</span>
           <div class="seg" role="group" aria-label="Alphabet">
             <button
               type="button"
@@ -86,22 +90,22 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
           </div>
         </div>
 
-        <div class="settings-group checkbox-group">
-          <label class="checkbox-container body-sm">
+        <div class="settings-group">
+          <label class="opt-check">
             <input type="checkbox" id="b64-padding" checked />
-            <span class="checkbox-checkmark"></span>
+            <span class="box"></span>
             Include padding <span class="caption-mono">=</span>
           </label>
         </div>
 
         <div class="settings-group b64-wrap-group" id="b64-wrap-group">
-          <label class="checkbox-container body-sm">
+          <label class="opt-check">
             <input type="checkbox" id="b64-datauri" />
-            <span class="checkbox-checkmark"></span>
+            <span class="box"></span>
             Wrap as <span class="caption-mono">data:</span> URI
           </label>
           <div class="select-wrapper">
-            <select id="b64-mime" class="settings-select" disabled>
+            <select id="b64-mime" class="select-control" disabled>
               {MIME_PRESETS.map((m) => <option value={m}>{m}</option>)}
             </select>
           </div>
@@ -171,40 +175,27 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     </div>
   </ToolWorkspace>
 
-  <section class="tool-content-section" aria-labelledby="how-title">
-    <Container size="narrow">
-      <div class="content-section-header">
-        <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
-        <h2 id="how-title" class="display-md section-title">Encode or decode in three steps</h2>
-      </div>
-      <div class="steps-grid">
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">1</span>
-          <h3 class="body-sm-strong step-title">Paste or upload</h3>
-          <p class="caption step-desc">
-            Text to encode, or Base64 to decode. It recomputes live as you type.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">2</span>
-          <h3 class="body-sm-strong step-title">Pick the variant</h3>
-          <p class="caption step-desc">
-            Standard or URL-safe alphabet, with or without padding, optionally wrapped as a data
-            URI.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">3</span>
-          <h3 class="body-sm-strong step-title">Read &amp; copy</h3>
-          <p class="caption step-desc">
-            Watch the expansion meter, see what a decoded blob actually is, then copy or download.
-          </p>
-        </div>
-      </div>
-    </Container>
-  </section>
-  <ToolNudge />
+  <HowItWorks
+    heading="Encode or decode in three steps"
+    steps={[
+      {
+        title: "Paste or upload",
+        desc: "Text to encode, or Base64 to decode. It recomputes live as you type.",
+      },
+      {
+        title: "Pick the variant",
+        desc: "Standard or URL-safe alphabet, with or without padding, optionally wrapped as a data URI.",
+      },
+      {
+        title: "Read & copy",
+        desc: "Watch the expansion meter, see what a decoded blob actually is, then copy or download.",
+      },
+    ]}
+  />
+  <ToolDocs />
   <CompareLinks />
+  <RelatedTools />
+  <ToolNudge />
 
   <section class="faq-section" aria-labelledby="faq-title">
     <Container size="narrow">
@@ -335,8 +326,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
         runBtn.textContent = state.mode === "encode" ? "Encoding…" : "Decoding…";
         runBtn.disabled = true;
       } else if (state.needsManual) {
-        runBtn.textContent =
-          state.mode === "encode" ? "Encode (large input)" : "Decode (large input)";
+        runBtn.textContent = state.mode === "encode" ? "Encode" : "Decode";
         runBtn.disabled = false;
       } else {
         runBtn.textContent = state.mode === "encode" ? "Encode" : "Decode";
@@ -355,10 +345,10 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
         inStatus.style.color = "";
       } else if (state.inputStatus === "invalid") {
         inStatus.textContent =
-          state.mode === "decode" ? "Status: Invalid Base64" : "Status: Too large";
+          state.mode === "decode" ? "Status: Invalid" : "Status: Invalid — too large";
         inStatus.style.color = "var(--color-error)";
       } else {
-        inStatus.textContent = state.mode === "decode" ? "Status: Valid Base64" : "Status: Ready";
+        inStatus.textContent = "Status: Ready";
         inStatus.style.color = "var(--color-success)";
       }
     }
@@ -499,7 +489,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
       }
       if (action === "download") {
         if (out) {
-          const ext = base64Store.get().mode === "encode" ? "b64.txt" : "decoded.txt";
+          const ext = base64Store.get().mode === "encode" ? "base64-encoded.txt" : "base64-decoded.txt";
           downloadFile(out, ext, "text/plain;charset=utf-8;");
           announce("Download started");
         }
@@ -568,153 +558,6 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     font-weight: 500;
   }
 
-  .settings-card {
-    padding: var(--spacing-lg);
-  }
-  .settings-title {
-    margin: 0;
-  }
-  .settings-divider {
-    height: 1px;
-    background-color: var(--color-hairline);
-    margin: var(--spacing-xs) 0;
-  }
-  .settings-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-md);
-  }
-  .settings-label {
-    color: var(--color-mute);
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .select-wrapper {
-    position: relative;
-    width: 100%;
-  }
-  .settings-select {
-    width: 100%;
-    height: 38px;
-    padding: 0 var(--spacing-md);
-    font-family: var(--font-sans);
-    font-size: 14px;
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    background-color: var(--color-canvas);
-    color: var(--color-ink);
-    appearance: none;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.15s ease;
-  }
-  .settings-select:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  .select-wrapper::after {
-    content: "▼";
-    font-size: 9px;
-    color: var(--color-body);
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-  }
-
-  /* segmented control — the direction / alphabet switch */
-  .seg {
-    display: inline-flex;
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    overflow: hidden;
-  }
-  .seg-btn {
-    flex: 1;
-    border: none;
-    background: var(--color-canvas);
-    color: var(--color-body);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.02em;
-    padding: 8px 12px;
-    cursor: pointer;
-    transition:
-      background-color 0.18s ease,
-      color 0.18s ease;
-  }
-  .seg-btn + .seg-btn {
-    border-left: 1px solid var(--color-hairline);
-  }
-  .seg-btn.is-active {
-    background-color: var(--color-primary);
-    color: var(--color-on-primary);
-  }
-  .seg-btn:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: -2px;
-  }
-
-  .checkbox-group {
-    margin-bottom: var(--spacing-sm);
-  }
-  .checkbox-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    position: relative;
-    padding-left: 24px;
-    cursor: pointer;
-    user-select: none;
-    color: var(--color-ink);
-  }
-  .checkbox-container input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-  }
-  .checkbox-checkmark {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    left: 0;
-    height: 16px;
-    width: 16px;
-    border: 1px solid var(--color-hairline-strong);
-    border-radius: 4px;
-    background-color: var(--color-canvas);
-    transition:
-      background-color 0.1s ease,
-      border-color 0.1s ease;
-  }
-  .checkbox-container:hover input ~ .checkbox-checkmark {
-    border-color: var(--color-ink);
-  }
-  .checkbox-container input:checked ~ .checkbox-checkmark {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-  }
-  .checkbox-checkmark::after {
-    content: "";
-    position: absolute;
-    display: none;
-  }
-  .checkbox-container input:checked ~ .checkbox-checkmark::after {
-    display: block;
-  }
-  .checkbox-container .checkbox-checkmark::after {
-    left: 5px;
-    top: 2px;
-    width: 4px;
-    height: 8px;
-    border: solid white;
-    border-width: 0 1.5px 1.5px 0;
-    transform: rotate(45deg);
-  }
   /* de-emphasize the data-URI group when it doesn't apply (decode mode) */
   .b64-wrap-group.is-disabled {
     opacity: 0.45;
@@ -875,20 +718,6 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     border-width: 0;
   }
 
-  .tool-content-section {
-    padding: var(--spacing-5xl) 0;
-    background-color: var(--color-canvas-soft);
-    border-top: 1px solid var(--color-hairline);
-  }
-  .content-section-header {
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto var(--spacing-3xl);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-xs);
-  }
   .section-eyebrow {
     color: var(--color-mute);
     letter-spacing: 0.1em;
@@ -896,45 +725,6 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
   .section-title {
     color: var(--color-ink);
     margin: 0;
-  }
-  .steps-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-xl);
-  }
-  .step-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-lg);
-    background-color: var(--color-canvas);
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    text-align: center;
-    align-items: center;
-  }
-  .step-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--rounded-full);
-    background-color: var(--color-accent);
-    color: var(--color-on-primary);
-    font-family: var(--font-mono);
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: var(--spacing-xs);
-  }
-  .step-title {
-    color: var(--color-ink);
-    margin: 0;
-  }
-  .step-desc {
-    color: var(--color-body);
-    margin: 0;
-    line-height: 1.5;
   }
   .faq-section {
     padding: var(--spacing-5xl) 0;
@@ -1004,10 +794,6 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     }
     .workspace-card :global(.editor-wrapper) {
       height: 100%;
-    }
-    .steps-grid {
-      grid-template-columns: 1fr;
-      gap: var(--spacing-md);
     }
   }
 </style>

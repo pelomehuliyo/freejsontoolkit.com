@@ -88,7 +88,7 @@ export function validate(store: Store<JsonValidatorState>): void {
   const state = store.get();
   if (state.isValidating) return;
   if (!state.jsonInput.trim()) {
-    store.update((s) => ({ ...s, error: "Paste or load JSON first." }));
+    store.update((s) => ({ ...s, error: "Nothing to validate yet. Add JSON to the input box, then press Validate." }));
     return;
   }
   if (state.jsonInput.length > MAX_INPUT_CHARS) {
@@ -96,9 +96,9 @@ export function validate(store: Store<JsonValidatorState>): void {
       ...s,
       isValidating: false,
       error:
-        "Input is too large to validate. Limit is " +
+        "Input is too large to validate. The limit is " +
         MAX_INPUT_CHARS.toLocaleString() +
-        " characters.",
+        " characters. Shorten the JSON and try again.",
       inputStatus: "too-large",
       result: null,
       outputStatus: "empty",

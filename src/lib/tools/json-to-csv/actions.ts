@@ -77,6 +77,7 @@ export function handleInput(store: Store<JsonToCsvState>, text: string): void {
     isPreview: false,
     error: null,
     conversionProgress: null,
+    staleOptions: false,
   };
 
   if (!text.trim()) {
@@ -155,7 +156,7 @@ export async function convertJsonToCsv(
   const trimmed = input.trim();
 
   if (!trimmed) {
-    store.update((s) => ({ ...s, error: "Please paste or load JSON first." }));
+    store.update((s) => ({ ...s, error: "Nothing to convert yet. Add JSON to the input box, then press Convert." }));
     return;
   }
 
@@ -184,6 +185,7 @@ export async function convertJsonToCsv(
     isConverting: true,
     isCancelling: false,
     conversionProgress: null,
+    staleOptions: false,
   }));
 
   // ── Claim this run. Any older in-flight conversion now reads as stale
@@ -235,15 +237,15 @@ export async function convertJsonToCsv(
       outputNotice = "The JSON array was empty - no CSV rows were generated.";
     }
 
-    // Handle large output with external preview banner (no in-content truncation text)
+    // Large output: preview the head of the CSV and note the scale in the status line.
     if (result.csv.length > LARGE_FILE_THRESHOLD) {
       const preview = result.csv.substring(0, PREVIEW_LENGTH);
       outputNotice =
-        "Large output: showing first " +
+        "first " +
         PREVIEW_LENGTH.toLocaleString() +
         " of " +
         result.csv.length.toLocaleString() +
-        " characters. Use Copy or Download to get the full CSV.";
+        " characters · Download for full file";
       isPreview = true;
 
       store.update((s) => ({
@@ -285,7 +287,7 @@ export async function convertJsonToCsv(
 
     store.update((s) => ({
       ...s,
-      error: isCancel ? null : err?.message || "Failed to convert JSON.",
+      error: isCancel ? null : err?.message || "Conversion failed. The JSON could not be converted. Check the input and try again.",
       csvOutput: isCancel ? s.csvOutput : "",
       largeCsvContent: isCancel ? s.largeCsvContent : null,
       outputStatus: isCancel ? s.outputStatus : "empty",
@@ -425,6 +427,7 @@ export function clearAll(store: Store<JsonToCsvState>): void {
     isConverting: false,
     isCancelling: false,
     conversionProgress: null,
+    staleOptions: false,
   }));
 }
 
@@ -441,14 +444,21 @@ export function getCsvContent(store: Store<JsonToCsvState>): string | null {
 
 // ── Settings Mutators ──
 
+/** Option changes are STAGED only — click Convert to apply them. While a
+    large CSV preview is on screen they mark the outcome stale instead of
+    silently keeping the old conversion ("Options changed — convert again."). */
+function stale(prev: JsonToCsvState): boolean {
+  return prev.isPreview && !prev.isConverting;
+}
+
 export function setDelimiter(store: Store<JsonToCsvState>, value: Delimiter): void {
-  store.update((s) => ({ ...s, delimiter: value }));
+  store.update((s) => ({ ...s, delimiter: value, staleOptions: s.staleOptions || stale(s) }));
 }
 
 export function setFlatten(store: Store<JsonToCsvState>, value: boolean): void {
-  store.update((s) => ({ ...s, flatten: value }));
+  store.update((s) => ({ ...s, flatten: value, staleOptions: s.staleOptions || stale(s) }));
 }
 
 export function setIncludeHeaders(store: Store<JsonToCsvState>, value: boolean): void {
-  store.update((s) => ({ ...s, includeHeaders: value }));
+  store.update((s) => ({ ...s, includeHeaders: value, staleOptions: s.staleOptions || stale(s) }));
 }

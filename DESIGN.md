@@ -597,6 +597,10 @@ The brand uses STACKED shadows — multiple small offsets layered to fake natura
 
 ### Buttons
 
+> **Brand invariant:** the tool pages' primary action button is white-on-teal
+> (`{colors.on-primary}` on `{colors.primary}`). This is a frozen brand
+> decision — never restyle or invert it.
+
 **`button-primary`** — the canonical 100-px-radius black pill, marketing scale.
 
 - Background `{colors.primary}`, text `{colors.on-primary}`, label set in `{typography.button-lg}`, padding `0px {spacing.sm}` 12 px, shape `{rounded.pill}` 100 px. Renders ~48 px tall when paired with the marketing flex layout.

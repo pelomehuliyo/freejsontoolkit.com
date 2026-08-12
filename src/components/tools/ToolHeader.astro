@@ -4,15 +4,21 @@
  *
  * Placed inside ToolShell's "header" slot.
  *
+ * Copy contract (see AGENTS.md → Copy & Content → Tool header contract):
+ * every header has exactly breadcrumbs + title + subtitle; breadcrumbs are
+ * "Home → Tool Name"; the subtitle is one plain, factual sentence with no
+ * marketing fluff and no privacy claim (the notice below owns that).
+ *
  * Usage:
  *   <ToolHeader slot="header"
  *     breadcrumbs={[{ label: "Home", href: "/" }, { label: "JSON to CSV" }]}
  *     title="JSON to CSV Converter"
- *     subtitle="Flatten and convert nested JSON arrays into clean CSV tables offline."
+ *     subtitle="Flatten nested JSON arrays into clean CSV tables."
  *   />
  */
 
 import Container from "../Container.astro";
+import { tools, families } from "../../lib/tools/registry";
 
 interface Breadcrumb {
   label: string;
@@ -31,6 +37,21 @@ interface Props {
 }
 
 const { breadcrumbs, title, subtitle } = Astro.props;
+
+// Collection/family context: infer the current tool from the URL and insert a
+// "Home / {Family} / Tool" breadcrumb so every tool page links back to its
+// collection. Falls back to the passed trail unchanged on non-registry pages.
+const path = Astro.url.pathname.replace(/\/+$/, "");
+const current = tools.find((t) => t.href === path);
+const family = current ? families.find((f) => f.id === current.family) : undefined;
+const trail: Breadcrumb[] =
+  current && family
+    ? [
+        ...breadcrumbs.slice(0, -1),
+        { label: family.label, href: `/collections/${family.id}` },
+        breadcrumbs[breadcrumbs.length - 1],
+      ]
+    : breadcrumbs;
 ---
 
 <Container size="wide">
@@ -39,8 +60,8 @@ const { breadcrumbs, title, subtitle } = Astro.props;
     <nav class="breadcrumb" aria-label="Breadcrumb">
       <ol class="breadcrumb-list">
         {
-          breadcrumbs.map((crumb, i) => {
-            const isLast = i === breadcrumbs.length - 1;
+          trail.map((crumb, i) => {
+            const isLast = i === trail.length - 1;
             return (
               <li class="breadcrumb-item">
                 {crumb.href ? (

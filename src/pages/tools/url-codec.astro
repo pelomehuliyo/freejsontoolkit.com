@@ -5,6 +5,7 @@ import ToolWorkspace from "../../components/tools/ToolWorkspace.astro";
 import CodeEditor from "../../components/tools/CodeEditor.astro";
 import ToolActions from "../../components/tools/ToolActions.astro";
 import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import HowItWorks from "../../components/tools/HowItWorks.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
@@ -13,6 +14,7 @@ import RelatedTools from "../../components/tools/RelatedTools.astro";
 import ToolDocs from "../../components/tools/ToolDocs.astro";
 import CompareLinks from "../../components/tools/CompareLinks.astro";
 import ToolNudge from "../../components/tools/ToolNudge.astro";
+import "../../styles/tool-options.css";
 ---
 
 <ToolShell
@@ -24,7 +26,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "URL Encode / Decode" }]}
     title="URL Encode / Decode"
-    subtitle="Percent-encode a value, a whole URL, or a form body — and see exactly what changes. Offline."
+    subtitle="Percent-encode a value, a whole URL, or a form body — and see exactly what changes."
   />
 
   <ToolWorkspace slot="workspace" layout="3-col">
@@ -53,7 +55,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
         <div class="settings-divider"></div>
 
         <div class="settings-group">
-          <span class="settings-label caption-mono">direction</span>
+          <span class="settings-label">direction</span>
           <div class="seg" role="group" aria-label="Direction">
             {
               MODES.map((m, i) => (
@@ -71,7 +73,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
         </div>
 
         <div class="settings-group">
-          <span class="settings-label caption-mono">encoding</span>
+          <span class="settings-label">encoding</span>
           <div class="seg seg-3" role="group" aria-label="Encoding">
             {
               ENCODINGS.map((e, i) => (
@@ -88,10 +90,10 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
           </div>
         </div>
 
-        <div class="settings-group checkbox-group" id="url-plus-group">
-          <label class="checkbox-container body-sm">
+        <div class="settings-group url-plus-group" id="url-plus-group">
+          <label class="opt-check">
             <input type="checkbox" id="url-plus" checked />
-            <span class="checkbox-checkmark"></span>
+            <span class="box"></span>
             Decode <span class="caption-mono">+</span> as space
           </label>
           <p class="caption settings-help">
@@ -167,6 +169,24 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
       </Card>
     </div>
   </ToolWorkspace>
+
+  <HowItWorks
+    heading="Encode or decode in three steps"
+    steps={[
+      {
+        title: "Paste a value",
+        desc: "Type or paste a URL, query component, or form body that needs transforming.",
+      },
+      {
+        title: "Pick a mode",
+        desc: "Choose Encode or Decode, then match the target — component, whole URL, or form encoding.",
+      },
+      {
+        title: "Read & copy",
+        desc: "Watch the footprint meter, then copy or download the transformed result.",
+      },
+    ]}
+  />
 
   {/* the three encodings, as a comparison matrix — the documentation, not cards */}
   <section class="url-ref url-reveal">
@@ -404,8 +424,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
         runBtn.textContent = state.mode === "encode" ? "Encoding…" : "Decoding…";
       } else if (state.needsManual) {
         runBtn.disabled = false;
-        runBtn.textContent =
-          state.mode === "encode" ? "Encode (large input)" : "Decode (large input)";
+        runBtn.textContent = state.mode === "encode" ? "Encode" : "Decode";
       } else {
         runBtn.disabled = false;
         runBtn.textContent = state.mode === "encode" ? "Encode" : "Decode";
@@ -418,10 +437,10 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
         inStatus.textContent = "Status: Empty";
         inStatus.style.color = "";
       } else if (state.mode === "decode" && !state.validity.ok) {
-        inStatus.textContent = "Status: Invalid encoding";
+        inStatus.textContent = "Status: Invalid";
         inStatus.style.color = "var(--color-error)";
       } else {
-        inStatus.textContent = state.mode === "encode" ? "Status: Ready" : "Status: Valid";
+        inStatus.textContent = "Status: Ready";
         inStatus.style.color = "var(--color-success)";
       }
     }
@@ -543,7 +562,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
       }
       if (action === "download") {
         if (out) {
-          const ext = urlCodecStore.get().mode === "encode" ? "encoded.txt" : "decoded.txt";
+          const ext = urlCodecStore.get().mode === "encode" ? "url-codec-encoded.txt" : "url-codec-decoded.txt";
           downloadFile(out, ext, "text/plain;charset=utf-8;");
           announce("Download started");
         }
@@ -632,134 +651,15 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
 </style>
 
 <style>
-  .settings-card {
-    padding: var(--spacing-lg);
-  }
-  .settings-title {
-    margin: 0;
-  }
-  .settings-divider {
-    height: 1px;
-    background-color: var(--color-hairline);
-    margin: var(--spacing-xs) 0;
-  }
-  .settings-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-md);
-  }
-  .settings-label {
-    color: var(--color-mute);
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .settings-help {
-    color: var(--color-mute);
-    margin: 2px 0 0;
-    line-height: 1.4;
-  }
-
-  /* segmented control */
-  .seg {
-    display: inline-flex;
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    overflow: hidden;
-    width: 100%;
-  }
-  .seg-btn {
-    flex: 1;
-    border: none;
-    background: var(--color-canvas);
-    color: var(--color-body);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    padding: 8px 6px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition:
-      background-color 0.18s ease,
-      color 0.18s ease;
-  }
-  .seg-btn + .seg-btn {
-    border-left: 1px solid var(--color-hairline);
-  }
-  .seg-btn.is-active {
-    background-color: var(--color-primary);
-    color: var(--color-on-primary);
-  }
-  .seg-btn:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: -2px;
-  }
-
-  .checkbox-group {
-    margin-bottom: var(--spacing-sm);
-  }
-  .checkbox-group.is-disabled {
-    opacity: 0.45;
-    pointer-events: none;
-  }
-  .checkbox-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    position: relative;
-    padding-left: 24px;
-    cursor: pointer;
-    user-select: none;
-    color: var(--color-ink);
-  }
-  .checkbox-container input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-  }
-  .checkbox-checkmark {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    left: 0;
-    height: 16px;
-    width: 16px;
-    border: 1px solid var(--color-hairline-strong);
-    border-radius: 4px;
-    background-color: var(--color-canvas);
-    transition:
-      background-color 0.1s ease,
-      border-color 0.1s ease;
-  }
-  .checkbox-container:hover input ~ .checkbox-checkmark {
-    border-color: var(--color-ink);
-  }
-  .checkbox-container input:checked ~ .checkbox-checkmark {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-  }
-  .checkbox-checkmark::after {
-    content: "";
-    position: absolute;
-    display: none;
-  }
-  .checkbox-container input:checked ~ .checkbox-checkmark::after {
-    display: block;
-  }
-  .checkbox-container .checkbox-checkmark::after {
-    left: 5px;
-    top: 2px;
-    width: 4px;
-    height: 8px;
-    border: solid white;
-    border-width: 0 1.5px 1.5px 0;
-    transform: rotate(45deg);
-  }
-
   .action-btn {
     width: 100%;
     margin-top: var(--spacing-sm);
+  }
+
+  /* de-emphasize the plus-space group when it doesn't apply (encode mode) */
+  .url-plus-group.is-disabled {
+    opacity: 0.45;
+    pointer-events: none;
   }
 
   /* live readout */

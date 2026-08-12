@@ -22,7 +22,7 @@ export const MAX_INPUT_CHARS = 15_000_000;
 export const USE_WORKER_ABOVE_CHARS = 400_000;
 
 /** Number of characters to show in preview mode for both input and output */
-export const PREVIEW_LENGTH = 20_000;
+export const PREVIEW_LENGTH = 100_000;
 
 // ── Worker progress stages ──
 // Matches the WorkerStage union in workerProtocol.ts

@@ -19,7 +19,7 @@ ctx.onmessage = (e: MessageEvent) => {
     result.authoritative = true;
     ctx.postMessage({ id, ok: true, result });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Conversion failed unexpectedly.";
+    const message = err instanceof Error ? err.message : "Conversion failed unexpectedly. Check the YAML and try again.";
     ctx.postMessage({ id, ok: false, error: message });
   }
 };

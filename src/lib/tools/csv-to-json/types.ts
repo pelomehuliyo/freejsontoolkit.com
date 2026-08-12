@@ -8,7 +8,9 @@ export interface CsvToJsonFile {
 
 export interface LargeFileInfo {
   file: CsvToJsonFile;
-  blobUrl: string | null;
+  /** The original File, retained so a changed option can re-run the conversion. */
+  source?: File;
+  blob: Blob | null;
   preview: string;
   phase: string;
   /** Records shown in the capped preview. */
@@ -32,6 +34,8 @@ export interface CsvToJsonState {
   delimiterUsed: string;
   /** Set while a file takes the large-file mode path. */
   largeFile: LargeFileInfo | null;
+  /** Set when an option changes after a large-file result — outcome is stale. */
+  staleOptions: boolean;
 }
 
 export const DEFAULT_STATE: CsvToJsonState = {
@@ -48,4 +52,5 @@ export const DEFAULT_STATE: CsvToJsonState = {
   recordCount: 0,
   delimiterUsed: "",
   largeFile: null,
+  staleOptions: false,
 };

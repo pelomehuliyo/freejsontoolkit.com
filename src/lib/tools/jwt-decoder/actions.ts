@@ -26,7 +26,7 @@ export function handleInput(store: Store<JwtDecoderState>, text: string): void {
             result: null,
             inputStatus: "ready",
             outputStatus: "empty",
-            error: "Input too large (" + text.length.toLocaleString() + " chars).",
+            error: "Input is too large (" + text.length.toLocaleString() + " chars). Shorten the token and try again.",
         });
         return;
     }
@@ -39,7 +39,7 @@ export function handleInput(store: Store<JwtDecoderState>, text: string): void {
 export function decode(store: Store<JwtDecoderState>): void {
     const state = store.get();
     if (!state.tokenInput.trim()) {
-        store.update((s) => ({ ...s, error: "Paste or load a token first." }));
+        store.update((s) => ({ ...s, error: "Nothing to decode yet. Add a JWT token to the input box, then press Decode." }));
         return;
     }
     const result = decodeJwt(state.tokenInput, state.indent);

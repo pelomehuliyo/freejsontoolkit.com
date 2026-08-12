@@ -89,7 +89,7 @@ export function format(store: Store<JsonFormatterState>): void {
   const state = store.get();
   if (state.isFormatting) return; // ignore double-clicks / re-entrant triggers
   if (!state.jsonInput.trim()) {
-    store.update((s) => ({ ...s, error: "Paste or load JSON first." }));
+    store.update((s) => ({ ...s, error: "Nothing to format yet. Add JSON to the input box, then press Format." }));
     return;
   }
 
@@ -117,7 +117,7 @@ export function format(store: Store<JsonFormatterState>): void {
         ...s,
         isFormatting: false,
         inputStatus: "invalid",
-        error: data.error ?? "Failed to format JSON.",
+        error: data.error ?? "Failed to format JSON. Check the syntax and try again.",
       }));
     }
   };
@@ -130,10 +130,10 @@ export function format(store: Store<JsonFormatterState>): void {
   });
 }
 
-/** Demo action — loads the sample AND formats it so you see the result. */
+/** House rule: Load Sample only loads — it never auto-runs. The user clicks
+ *  Format explicitly. */
 export function loadSample(store: Store<JsonFormatterState>): void {
   handleInput(store, SAMPLE_JSON);
-  format(store);
 }
 
 export function clearAll(store: Store<JsonFormatterState>): void {

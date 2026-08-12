@@ -61,7 +61,7 @@ async function handleLarge(req: LargeWorkerRequest): Promise<void> {
       id,
       phase: "done",
       ok: false,
-      error: result.error?.message ?? "Conversion failed.",
+      error: result.error?.message ?? "Conversion failed. Check the CSV and try again.",
       rows: 0,
       cols: 0,
     });
@@ -96,7 +96,7 @@ ctx.onmessage = (e: MessageEvent) => {
     result.authoritative = true;
     ctx.postMessage({ id, ok: true, result });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Conversion failed unexpectedly.";
+    const msg = err instanceof Error ? err.message : "Conversion failed unexpectedly. Check the CSV and try again.";
     ctx.postMessage({ id, ok: false, error: msg });
   }
 };

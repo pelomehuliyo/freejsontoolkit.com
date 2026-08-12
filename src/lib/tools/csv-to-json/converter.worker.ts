@@ -138,7 +138,7 @@ async function handleLarge(req: LargeWorkerRequest): Promise<void> {
       id,
       phase: "done",
       ok: false,
-      error: err instanceof Error ? err.message : "Failed to convert CSV.",
+      error: err instanceof Error ? err.message : "Failed to convert CSV. Check the input and try again.",
     });
   }
 }
@@ -165,7 +165,7 @@ ctx.onmessage = (e: MessageEvent) => {
     ctx.postMessage({
       id,
       ok: false,
-      error: err instanceof Error ? err.message : "Failed to convert CSV.",
+      error: err instanceof Error ? err.message : "Failed to convert CSV. Check the input and try again.",
     });
   }
 };

@@ -6,6 +6,7 @@ import CodeEditor from "../../components/tools/CodeEditor.astro";
 import DragDropZone from "../../components/tools/DragDropZone.astro";
 import ToolActions from "../../components/tools/ToolActions.astro";
 import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import HowItWorks from "../../components/tools/HowItWorks.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
@@ -14,6 +15,7 @@ import RelatedTools from "../../components/tools/RelatedTools.astro";
 import ToolDocs from "../../components/tools/ToolDocs.astro";
 import CompareLinks from "../../components/tools/CompareLinks.astro";
 import ToolNudge from "../../components/tools/ToolNudge.astro";
+import "../../styles/tool-options.css";
 ---
 
 <ToolShell
@@ -25,7 +27,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "YAML → JSON" }]}
     title="YAML → JSON"
-    subtitle="Turn YAML configs into clean JSON — without leaving your browser."
+    subtitle="Turn YAML configs into clean JSON."
   />
   <ToolWorkspace slot="workspace" layout="3-col">
     <div slot="input" class="ws-fill">
@@ -45,7 +47,7 @@ tags:
   - pioneer`}
         >
           <div class="editor-info-bar">
-            <span class="info-status" id="yaml-status">YAML Status: Empty</span>
+            <span class="info-status" id="yaml-status">Status: Empty</span>
             <span class="info-meta" id="yaml-char-count">0 chars</span>
           </div>
         </CodeEditor>
@@ -56,16 +58,18 @@ tags:
         <h2 class="display-sm settings-title">Options</h2>
         <div class="settings-divider"></div>
         <div class="settings-group">
-          <label class="settings-label caption-mono" for="indent-select">JSON indent</label>
-          <div class="select-wrapper">
-            <select id="indent-select" class="settings-select">
-              {INDENT_OPTIONS.map((opt) => <option value={opt.value}>{opt.label}</option>)}
-            </select>
+          <span class="settings-label">JSON indent</span>
+          <div class="seg" id="indent-select" role="group" aria-label="JSON indent">
+            {INDENT_OPTIONS.map((opt) => (
+              <button type="button" class="seg-btn" data-value={opt.value}>
+                {opt.label}
+              </button>
+            ))}
           </div>
         </div>
         <div class="settings-divider"></div>
         <Button id="convert-btn" variant="primary" size="lg" shape="square" class="action-btn">
-          Convert to JSON
+          Convert
         </Button>
         <ErrorBanner id="convert-error" />
         <div class="status-banner caption">
@@ -95,37 +99,23 @@ tags:
       </Card>
     </div>
   </ToolWorkspace>
-  <section class="tool-content-section" aria-labelledby="how-title">
-    <Container size="narrow">
-      <div class="content-section-header">
-        <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
-        <h2 id="how-title" class="display-md section-title">Convert YAML in three steps</h2>
-      </div>
-      <div class="steps-grid">
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">1</span>
-          <h3 class="body-sm-strong step-title">Paste or drop</h3>
-          <p class="caption step-desc">
-            Any .yaml / .yml config — validity reads as you type, up to 15M characters.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">2</span>
-          <h3 class="body-sm-strong step-title">Convert</h3>
-          <p class="caption step-desc">
-            Press Convert (or Ctrl/⌘ + Enter). Big files run in a background worker.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">3</span>
-          <h3 class="body-sm-strong step-title">Take the JSON</h3>
-          <p class="caption step-desc">
-            Copy or download pretty-printed JSON — 2-space, 4-space, or tabs.
-          </p>
-        </div>
-      </div>
-    </Container>
-  </section>
+  <HowItWorks
+    heading="Convert YAML in three steps"
+    steps={[
+      {
+        title: "Paste or drop",
+        desc: "Any .yaml / .yml config — validity reads as you type, up to 15M characters.",
+      },
+      {
+        title: "Convert",
+        desc: "Press Convert (or Ctrl/⌘ + Enter). Big files run in a background worker.",
+      },
+      {
+        title: "Take the JSON",
+        desc: "Copy or download pretty-printed JSON — 2-space, 4-space, or tabs.",
+      },
+    ]}
+  />
   <ToolDocs />
   <CompareLinks />
   <RelatedTools />
@@ -200,7 +190,10 @@ tags:
   const inputCharCount = document.getElementById("yaml-char-count") as HTMLElement | null;
   const outputStatus = document.getElementById("json-output-status") as HTMLElement | null;
   const outputCharCount = document.getElementById("json-output-count") as HTMLElement | null;
-  const indentSelect = document.getElementById("indent-select") as HTMLSelectElement | null;
+  const indentSeg = document.getElementById("indent-select") as HTMLElement | null;
+  const indentBtns = indentSeg
+    ? (Array.from(indentSeg.querySelectorAll("[data-value]")) as HTMLButtonElement[])
+    : [];
   const convertBtn = document.getElementById("convert-btn") as HTMLButtonElement | null;
   const errorBanner = document.getElementById("convert-error") as HTMLElement | null;
   const statusDot = document.getElementById("status-dot") as HTMLElement | null;
@@ -237,20 +230,20 @@ tags:
 
     if (inputStatus) {
       if (state.inputStatus === "empty") {
-        inputStatus.textContent = "YAML Status: Empty";
+        inputStatus.textContent = "Status: Empty";
         inputStatus.style.color = "";
       } else if (state.result && !state.result.ok && state.result.error?.line != null) {
         const e = state.result.error;
-        inputStatus.textContent = `YAML Status: Invalid · line ${e.line}, col ${e.column ?? "?"}`;
+        inputStatus.textContent = `Status: Invalid — line ${e.line}, col ${e.column ?? "?"}`;
         inputStatus.style.color = "var(--color-error)";
       } else if (state.result && !state.result.ok && state.result.error) {
-        inputStatus.textContent = "YAML Status: Invalid";
+        inputStatus.textContent = "Status: Invalid";
         inputStatus.style.color = "var(--color-error)";
       } else if (state.result && state.result.ok) {
-        inputStatus.textContent = "YAML Status: Valid";
+        inputStatus.textContent = "Status: Ready";
         inputStatus.style.color = "var(--color-success)";
       } else {
-        inputStatus.textContent = "YAML Status: Ready";
+        inputStatus.textContent = "Status: Ready";
         inputStatus.style.color = "";
       }
     }
@@ -279,6 +272,10 @@ tags:
         (st ? ` · depth ${st.maxDepth} · ${st.keys.toLocaleString()} keys` : "");
     }
 
+    if (indentBtns.length) {
+      indentBtns.forEach((b) => b.classList.toggle("is-active", b.dataset.value === state.indent));
+    }
+
     if (statusDot) {
       statusDot.classList.remove("idle", "active", "error");
       statusDot.classList.add(
@@ -286,7 +283,7 @@ tags:
       );
     }
     if (convertBtn) {
-      convertBtn.textContent = state.isConverting ? "Converting…" : "Convert to JSON";
+      convertBtn.textContent = state.isConverting ? "Converting…" : "Convert";
       convertBtn.disabled = state.isConverting;
     }
 
@@ -319,10 +316,13 @@ tags:
     yamlTextarea.addEventListener("input", () => debouncedInput(yamlTextarea.value));
   }
   if (convertBtn) convertBtn.addEventListener("click", () => convert(yamlToJsonStore));
-  if (indentSelect)
-    indentSelect.addEventListener("change", () =>
-      setIndent(yamlToJsonStore, indentSelect.value as IndentOption),
+  if (indentBtns.length) {
+    indentBtns.forEach((b) =>
+      b.addEventListener("click", () =>
+        setIndent(yamlToJsonStore, b.dataset.value as IndentOption),
+      ),
     );
+  }
 
   const inputActions = document.getElementById("input-actions");
   if (inputActions) {
@@ -358,7 +358,7 @@ tags:
       if (action === "download") {
         const st = yamlToJsonStore.get();
         if (st.result && st.result.ok) {
-          downloadFile(st.result.output, "converted.json", "application/json;charset=utf-8;");
+          downloadFile(st.result.output, "yaml-to-json-converted.json", "application/json;charset=utf-8;");
           announce("Download started");
         } else {
           announce("Nothing to download yet");
@@ -426,60 +426,7 @@ tags:
   .info-status {
     font-weight: 500;
   }
-  .settings-card {
-    padding: var(--spacing-lg);
-  }
-  .settings-title {
-    margin: 0;
-  }
-  .settings-divider {
-    height: 1px;
-    background-color: var(--color-hairline);
-    margin: var(--spacing-xs) 0;
-  }
-  .settings-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-md);
-  }
-  .settings-label {
-    color: var(--color-mute);
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .select-wrapper {
-    position: relative;
-    width: 100%;
-  }
-  .settings-select {
-    width: 100%;
-    height: 38px;
-    padding: 0 var(--spacing-md);
-    font-family: var(--font-sans);
-    font-size: 14px;
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    background-color: var(--color-canvas);
-    color: var(--color-ink);
-    appearance: none;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.15s ease;
-  }
-  .settings-select:focus {
-    border-color: var(--color-hairline-strong);
-  }
-  .select-wrapper::after {
-    content: "▼";
-    font-size: 9px;
-    color: var(--color-body);
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-  }
+
   .action-btn {
     width: 100%;
     margin-top: var(--spacing-sm);
@@ -516,20 +463,6 @@ tags:
     white-space: nowrap;
     border-width: 0;
   }
-  .tool-content-section {
-    padding: var(--spacing-5xl) 0;
-    background-color: var(--color-canvas-soft);
-    border-top: 1px solid var(--color-hairline);
-  }
-  .content-section-header {
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto var(--spacing-3xl);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-xs);
-  }
   .section-eyebrow {
     color: var(--color-mute);
     letter-spacing: 0.1em;
@@ -537,45 +470,6 @@ tags:
   .section-title {
     color: var(--color-ink);
     margin: 0;
-  }
-  .steps-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-xl);
-  }
-  .step-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-lg);
-    background-color: var(--color-canvas);
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    text-align: center;
-    align-items: center;
-  }
-  .step-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--rounded-full);
-    background-color: var(--color-accent);
-    color: var(--color-on-primary);
-    font-family: var(--font-mono);
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: var(--spacing-xs);
-  }
-  .step-title {
-    color: var(--color-ink);
-    margin: 0;
-  }
-  .step-desc {
-    color: var(--color-body);
-    margin: 0;
-    line-height: 1.5;
   }
   .faq-section {
     padding: var(--spacing-5xl) 0;
@@ -644,10 +538,6 @@ tags:
     }
     .workspace-card :global(.editor-wrapper) {
       height: 100%;
-    }
-    .steps-grid {
-      grid-template-columns: 1fr;
-      gap: var(--spacing-md);
     }
   }
 </style>

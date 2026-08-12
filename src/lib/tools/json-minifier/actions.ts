@@ -70,7 +70,7 @@ export function minify(store: Store<JsonMinifierState>): void {
   const state = store.get();
   if (state.isMinifying) return;
   if (!state.jsonInput.trim()) {
-    store.update((s) => ({ ...s, error: "Paste or load JSON first." }));
+    store.update((s) => ({ ...s, error: "Nothing to minify yet. Add JSON to the input box, then press Minify." }));
     return;
   }
 
@@ -97,7 +97,7 @@ export function minify(store: Store<JsonMinifierState>): void {
         ...s,
         isMinifying: false,
         inputStatus: "invalid",
-        error: d.error ?? "Failed to minify JSON.",
+        error: d.error ?? "Failed to minify JSON. Check the syntax and try again.",
       }));
     }
   };

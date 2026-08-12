@@ -203,7 +203,7 @@ function evalToken(kind: string, arg: string | undefined, rng: Rng, ctx: Ctx): u
     case "pick":
       return arg ? rng.pick(arg.split("|")) : "";
     default:
-      throw new Error(`unknown token {{${kind}}}`);
+      throw new Error(`Unknown token {{${kind}}}. Check the template and try again.`);
   }
 }
 
@@ -274,7 +274,7 @@ export function validateTemplate(tpl: string): TemplateValidity {
     if (!KNOWN.has(m[1])) {
       const before = tpl.slice(0, m.index);
       const line = before.split("\n").length;
-      return { ok: false, message: `unknown token {{${m[1]}}} (line ${line})` };
+      return { ok: false, message: `Unknown token {{${m[1]}}} at line ${line}. Check the template, fix the token, and try again.` };
     }
   }
   void parsed;

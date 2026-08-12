@@ -5,6 +5,7 @@ import ToolWorkspace from "../../components/tools/ToolWorkspace.astro";
 import CodeEditor from "../../components/tools/CodeEditor.astro";
 import ToolActions from "../../components/tools/ToolActions.astro";
 import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import HowItWorks from "../../components/tools/HowItWorks.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
@@ -13,6 +14,7 @@ import RelatedTools from "../../components/tools/RelatedTools.astro";
 import ToolDocs from "../../components/tools/ToolDocs.astro";
 import CompareLinks from "../../components/tools/CompareLinks.astro";
 import ToolNudge from "../../components/tools/ToolNudge.astro";
+import "../../styles/tool-options.css";
 ---
 
 <ToolShell
@@ -24,7 +26,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "Fake JSON" }]}
     title="Fake JSON Generator"
-    subtitle="Describe a shape, get realistic mock data. Seeded and reproducible — offline."
+    subtitle="Describe a shape, get realistic mock data — seeded and reproducible."
   />
 
   <ToolWorkspace slot="workspace" layout="3-col">
@@ -40,7 +42,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
           placeholder='{"id":"{{index1}}","name":"{{name}}"}'
         >
           <div class="editor-info-bar">
-            <span class="info-status" id="fj-template-status">Template: Empty</span>
+            <span class="info-status" id="fj-template-status">Status: Empty</span>
             <span class="info-meta" id="fj-template-count">0 chars</span>
           </div>
         </CodeEditor>
@@ -53,22 +55,22 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
         <div class="settings-divider"></div>
 
         <div class="settings-group">
-          <span class="settings-label caption-mono">records</span>
-          <div class="fj-count">
+          <span class="settings-label">records</span>
+          <div class="chip-count">
             <input
               type="number"
               id="fj-count"
-              class="fj-num"
+              class="countval"
               min="1"
               max="5000"
               value="5"
               inputmode="numeric"
               aria-label="How many records"
             />
-            <div class="fj-chips" role="group" aria-label="Quick counts">
+            <div class="chip-row" role="group" aria-label="Quick counts">
               {
                 COUNT_PRESETS.map((n) => (
-                  <button type="button" class="fj-chip" data-fj-count={n}>
+                  <button type="button" class="chip" data-fj-count={n}>
                     {n}
                   </button>
                 ))
@@ -78,7 +80,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
         </div>
 
         <div class="settings-group">
-          <label class="settings-label caption-mono" for="fj-seed">seed (optional)</label>
+          <label class="settings-label" for="fj-seed">seed (optional)</label>
           <input
             type="text"
             id="fj-seed"
@@ -90,10 +92,10 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
           <p class="caption settings-help">Same seed = same data, every time.</p>
         </div>
 
-        <div class="settings-group checkbox-group">
-          <label class="checkbox-container body-sm">
+        <div class="settings-group">
+          <label class="opt-check">
             <input type="checkbox" id="fj-pretty" checked />
-            <span class="checkbox-checkmark"></span>
+            <span class="box"></span>
             Pretty-print output
           </label>
         </div>
@@ -162,6 +164,24 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
       </Card>
     </div>
   </ToolWorkspace>
+
+  <HowItWorks
+    heading="Generate realistic JSON in three steps"
+    steps={[
+      {
+        title: "Write a template",
+        desc: "Start with any JSON shape and drop in tokens like {{name}} or {{email}} — a value that is only a token keeps its real type.",
+      },
+      {
+        title: "Tune the batch",
+        desc: "Set the record count and let nested arrays grow the data to the size you need — thousands of rows, still typed.",
+      },
+      {
+        title: "Generate & export",
+        desc: "Click Generate, then copy the JSON or download it as a file — all processed in your browser.",
+      },
+    ]}
+  />
 
   {/* token reference — varied grouped rows, not equal cards; the docs */}
   <section class="fj-ref">
@@ -310,20 +330,20 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
     // template status bar
     if (tplStatus) {
       if (state.template.trim() === "") {
-        tplStatus.textContent = "Template: Empty";
+        tplStatus.textContent = "Status: Empty";
         tplStatus.style.color = "";
       } else if (state.validity.ok) {
-        tplStatus.textContent = "Template: Valid";
+        tplStatus.textContent = "Status: Ready";
         tplStatus.style.color = "var(--color-success)";
       } else {
-        tplStatus.textContent = "Template: Invalid";
+        tplStatus.textContent = "Status: Invalid";
         tplStatus.style.color = "var(--color-error)";
       }
     }
     if (tplCount) tplCount.textContent = state.template.length.toLocaleString() + " chars";
 
     if (outStatus) {
-      outStatus.textContent = state.result ? "Output: Ready" : "Output: Empty";
+      outStatus.textContent = state.result ? "Output: JSON" : "Output: Empty";
       outStatus.style.color = state.result ? "var(--color-success)" : "";
     }
     if (outCount)
@@ -484,7 +504,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
       }
       if (action === "download") {
         if (out) {
-          downloadFile(out, "fake-data.json", "application/json;charset=utf-8;");
+          downloadFile(out, "fake-json-data.json", "application/json;charset=utf-8;");
           announce("Download started");
         }
       }
@@ -539,75 +559,6 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
 </style>
 
 <style>
-  .settings-card {
-    padding: var(--spacing-lg);
-  }
-  .settings-title {
-    margin: 0;
-  }
-  .settings-divider {
-    height: 1px;
-    background-color: var(--color-hairline);
-    margin: var(--spacing-xs) 0;
-  }
-  .settings-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-md);
-  }
-  .settings-label {
-    color: var(--color-mute);
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .settings-help {
-    color: var(--color-mute);
-    margin: 2px 0 0;
-    line-height: 1.4;
-  }
-
-  .fj-count {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-  }
-  .fj-num {
-    width: 72px;
-    height: 36px;
-    padding: 0 8px;
-    font-family: var(--font-mono);
-    font-size: 14px;
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    background-color: var(--color-canvas);
-    color: var(--color-ink);
-    outline: none;
-  }
-  .fj-num:focus {
-    border-color: var(--color-accent);
-  }
-  .fj-chips {
-    display: flex;
-    gap: 4px;
-  }
-  .fj-chip {
-    border: 1px solid var(--color-hairline);
-    background: var(--color-canvas);
-    color: var(--color-mute);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    padding: 6px 8px;
-    border-radius: var(--rounded-sm);
-    cursor: pointer;
-    transition:
-      color 0.12s ease,
-      border-color 0.12s ease;
-  }
-  .fj-chip:hover {
-    color: var(--color-accent-active);
-    border-color: var(--color-accent);
-  }
   .fj-text {
     width: 100%;
     height: 36px;
@@ -622,65 +573,6 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
   }
   .fj-text:focus {
     border-color: var(--color-accent);
-  }
-
-  .checkbox-group {
-    margin-bottom: var(--spacing-sm);
-  }
-  .checkbox-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    position: relative;
-    padding-left: 24px;
-    cursor: pointer;
-    user-select: none;
-    color: var(--color-ink);
-  }
-  .checkbox-container input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-  }
-  .checkbox-checkmark {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    left: 0;
-    height: 16px;
-    width: 16px;
-    border: 1px solid var(--color-hairline-strong);
-    border-radius: 4px;
-    background-color: var(--color-canvas);
-    transition:
-      background-color 0.1s ease,
-      border-color 0.1s ease;
-  }
-  .checkbox-container:hover input ~ .checkbox-checkmark {
-    border-color: var(--color-ink);
-  }
-  .checkbox-container input:checked ~ .checkbox-checkmark {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-  }
-  .checkbox-checkmark::after {
-    content: "";
-    position: absolute;
-    display: none;
-  }
-  .checkbox-container input:checked ~ .checkbox-checkmark::after {
-    display: block;
-  }
-  .checkbox-container .checkbox-checkmark::after {
-    left: 5px;
-    top: 2px;
-    width: 4px;
-    height: 8px;
-    border: solid white;
-    border-width: 0 1.5px 1.5px 0;
-    transform: rotate(45deg);
   }
 
   .action-btn {

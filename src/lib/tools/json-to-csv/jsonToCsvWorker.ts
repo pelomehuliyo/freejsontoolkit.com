@@ -77,7 +77,7 @@ export function convertInWorker(
         },
       };
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Conversion failed";
+      const message = err instanceof Error ? err.message : "Conversion failed. Check the JSON and try again.";
       return {
         result: Promise.reject<WorkerClientResult>(new Error(message)),
         cancel: () => {
@@ -110,7 +110,7 @@ function createWorkerConversion(
         type: "module",
       });
     } catch {
-      reject(new Error("Failed to create conversion worker. Try a smaller input."));
+      reject(new Error("Couldn't create the conversion worker. Try a smaller input or reload the page."));
       return;
     }
 
@@ -120,7 +120,7 @@ function createWorkerConversion(
         isDone = true;
         worker?.terminate();
         worker = null;
-        reject(new Error("Conversion timed out. Try a smaller input."));
+        reject(new Error("Conversion timed out while running in the worker. Try a smaller input."));
       }
     }, WORKER_TIMEOUT_MS);
 
@@ -176,7 +176,7 @@ function createWorkerConversion(
         clearTimeout(timeoutId);
         worker?.terminate();
         worker = null;
-        reject(new Error("Conversion worker crashed. Try a smaller input."));
+        reject(new Error("The conversion worker crashed while running. Try a smaller input or reload the page."));
       }
     };
 

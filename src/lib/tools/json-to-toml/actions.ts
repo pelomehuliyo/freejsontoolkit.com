@@ -63,7 +63,7 @@ export function convert(store: Store<JsonToTomlState>): void {
     const state = store.get();
     if (state.isConverting) return;
     if (!state.jsonInput.trim()) {
-        store.update((s) => ({ ...s, error: "Paste or load JSON first." }));
+        store.update((s) => ({ ...s, error: "Nothing to convert yet. Add JSON to the input box, then press Convert." }));
         return;
     }
     const id = ++reqId;
@@ -83,13 +83,13 @@ export function convert(store: Store<JsonToTomlState>): void {
                 result,
                 inputStatus: "ready",
                 outputStatus: result.ok ? "converted" : "invalid",
-                error: result.ok ? null : (result.error?.message ?? "Conversion failed."),
+                error: result.ok ? null : (result.error?.message ?? "Conversion failed. The JSON could not be converted. Check the input and try again."),
             }));
         } else {
             store.update((s) => ({
                 ...s,
                 isConverting: false,
-                error: data.error ?? "Conversion failed.",
+                error: data.error ?? "Conversion failed. The JSON could not be converted. Check the input and try again.",
             }));
         }
     };

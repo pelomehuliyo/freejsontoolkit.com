@@ -153,7 +153,7 @@ export function parseCsv(csvStr: string, options: ParseOptions = {}): ParseResul
 export function csvToJson(csvStr: string, options: ParseOptions = {}): string {
   const result = parseCsv(csvStr, options);
   if (!result.success || !result.csv) {
-    const err = result.error ?? { code: "UNKNOWN", message: "Failed to parse CSV" };
+    const err = result.error ?? { code: "UNKNOWN", message: "Failed to parse CSV. Check the CSV syntax and try again." };
     throw new Error(`[${err.code}] ${err.message}`);
   }
   return JSON.stringify(result.csv.records, null, 2);

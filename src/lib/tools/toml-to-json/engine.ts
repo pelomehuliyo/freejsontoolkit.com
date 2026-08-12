@@ -72,7 +72,7 @@ export function convertTomlToJson(input: string, opts: ConverterOptions): Conver
             authoritative: false,
             output: "",
             sourceSize,
-            error: { message: "Empty input" },
+            error: { message: "Input is empty. Add TOML data, then press Convert." },
         };
     }
 

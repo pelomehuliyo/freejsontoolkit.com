@@ -47,7 +47,7 @@ export function convertJsonToCsv(jsonStr: string, options: ConversionOptions = {
   try {
     parsed = JSON.parse(input);
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : "Failed to parse JSON";
+    const msg = err instanceof Error ? err.message : "Failed to parse JSON. Check the JSON syntax and try again.";
     throw new Error(`Invalid JSON syntax: ${msg}`);
   }
 

@@ -350,7 +350,7 @@ export function validateJson(input: string, opts: ValidatorOptions): ValidationR
       valid: false,
       authoritative: false,
       size,
-      error: { message: "Empty input", position: 0, line: 1, column: 1 },
+      error: { message: "Input is empty. Add JSON data, then press Validate.", position: 0, line: 1, column: 1 },
     };
   }
 

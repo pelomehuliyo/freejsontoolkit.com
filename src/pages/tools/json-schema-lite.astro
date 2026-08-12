@@ -4,6 +4,7 @@ import ToolHeader from "../../components/tools/ToolHeader.astro";
 import CodeEditor from "../../components/tools/CodeEditor.astro";
 import ToolActions from "../../components/tools/ToolActions.astro";
 import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import HowItWorks from "../../components/tools/HowItWorks.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
@@ -40,7 +41,12 @@ import { LITE_SUPPORTED, LITE_UNSUPPORTED } from "../../lib/tools/json-schema-li
             label="JSON instance"
             placeholder={`Paste the JSON to validate
 {"name":"Ada","role":"engineer"}`}
-          />
+          >
+            <div class="editor-info-bar">
+              <span class="info-status" id="schema-json-status">Status: Empty</span>
+              <span class="info-meta" id="schema-json-count">0 chars</span>
+            </div>
+          </CodeEditor>
         </Card>
 
         <Card variant="flat" class="workspace-card diff-input-card">
@@ -53,7 +59,12 @@ import { LITE_SUPPORTED, LITE_UNSUPPORTED } from "../../lib/tools/json-schema-li
             label="JSON Schema"
             placeholder={`Paste the JSON Schema
 {"type":"object","required":["name"]}`}
-          />
+          >
+            <div class="editor-info-bar">
+              <span class="info-status" id="schema-schema-status">Status: Empty</span>
+              <span class="info-meta" id="schema-schema-count">0 chars</span>
+            </div>
+          </CodeEditor>
         </Card>
       </div>
 
@@ -67,7 +78,7 @@ import { LITE_SUPPORTED, LITE_UNSUPPORTED } from "../../lib/tools/json-schema-li
           </div>
           <div class="dj-actions">
             <Button id="validate-btn" variant="primary" size="md" shape="square">Validate</Button>
-            <Button id="sample-btn" variant="secondary" size="md" shape="square">Load sample</Button
+            <Button id="sample-btn" variant="secondary" size="md" shape="square">Load Sample</Button
             >
           </div>
         </div>
@@ -98,6 +109,11 @@ import { LITE_SUPPORTED, LITE_UNSUPPORTED } from "../../lib/tools/json-schema-li
           <ToolActions id="out-actions" variant="inset" actions={["copy", "download"]} />
         </div>
 
+        <div class="editor-info-bar">
+          <span class="info-status" id="schema-out-status">Output: Empty</span>
+          <span class="info-meta" id="schema-out-count"></span>
+        </div>
+
         <div class="dj-idle" id="dj-idle">
           <p class="dj-idle-cmd caption-mono">$ schema --check instance.json</p>
           <p class="body-sm dj-idle-msg">
@@ -114,42 +130,23 @@ import { LITE_SUPPORTED, LITE_UNSUPPORTED } from "../../lib/tools/json-schema-li
     </Container>
   </section>
 
-  <section class="tool-content-section" aria-labelledby="how-title">
-    <Container size="narrow">
-      <div class="content-section-header">
-        <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
-        <h2 id="how-title" class="display-md section-title">
-          Validate against a schema in three steps
-        </h2>
-      </div>
-      <div class="steps-grid">
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">1</span>
-          <h3 class="body-sm-strong step-title">Paste both sides</h3>
-          <p class="caption step-desc">
-            Your JSON in the left editor, the schema it must satisfy on the right. The verdict runs
-            as you type.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">2</span>
-          <h3 class="body-sm-strong step-title">Read the violations</h3>
-          <p class="caption step-desc">
-            Every problem carries its exact path — <code>/users/2/email</code> — so you can jump straight
-            to the offending value.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">3</span>
-          <h3 class="body-sm-strong step-title">Fix &amp; re-run</h3>
-          <p class="caption step-desc">
-            Correct the JSON (or the schema) and watch the ledger shrink to zero. Copy or download
-            the report.
-          </p>
-        </div>
-      </div>
-    </Container>
-  </section>
+  <HowItWorks
+    heading="Validate against a schema in three steps"
+    steps={[
+      {
+        title: "Paste both sides",
+        desc: "Your JSON in the left editor, the schema it must satisfy on the right. The verdict runs as you type.",
+      },
+      {
+        title: "Read the violations",
+        desc: "Every problem carries its exact path — /users/2/email — so you can jump straight to the offending value.",
+      },
+      {
+        title: "Fix & re-run",
+        desc: "Correct the JSON (or the schema) and watch the ledger shrink to zero. Copy or download the report.",
+      },
+    ]}
+  />
 
   <ToolDocs />
   <CompareLinks />
@@ -233,6 +230,12 @@ import { LITE_SUPPORTED, LITE_UNSUPPORTED } from "../../lib/tools/json-schema-li
   const nSize = document.getElementById("dj-n-size") as HTMLElement | null;
   const verdictEl = document.getElementById("dj-verdict") as HTMLElement | null;
   const errorBanner = document.getElementById("schema-lite-error") as HTMLElement | null;
+  const jsonStatus = document.getElementById("schema-json-status") as HTMLElement | null;
+  const jsonCount = document.getElementById("schema-json-count") as HTMLElement | null;
+  const schemaStatus = document.getElementById("schema-schema-status") as HTMLElement | null;
+  const schemaCount = document.getElementById("schema-schema-count") as HTMLElement | null;
+  const outStatus = document.getElementById("schema-out-status") as HTMLElement | null;
+  const outCount = document.getElementById("schema-out-count") as HTMLElement | null;
 
   initAnnounce("schema-lite-announce");
 
@@ -248,6 +251,20 @@ import { LITE_SUPPORTED, LITE_UNSUPPORTED } from "../../lib/tools/json-schema-li
     if (schemaTextarea && schemaTextarea.value !== state.schemaInput && !schemaFocused) {
       schemaTextarea.value = state.schemaInput;
       schemaTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+
+    // input + output status bars
+    if (jsonStatus)
+      jsonStatus.textContent = state.jsonInput.trim() ? "Status: Ready" : "Status: Empty";
+    if (jsonCount) jsonCount.textContent = state.jsonInput.length.toLocaleString() + " chars";
+    if (schemaStatus)
+      schemaStatus.textContent = state.schemaInput.trim() ? "Status: Ready" : "Status: Empty";
+    if (schemaCount) schemaCount.textContent = state.schemaInput.length.toLocaleString() + " chars";
+    if (outStatus)
+      outStatus.textContent = state.result ? "Output: Ready" : "Output: Empty";
+    if (outCount && state.result) {
+      const n = state.result.errors.length;
+      outCount.textContent = n === 0 ? "0 violations" : n.toLocaleString() + " violations";
     }
 
     const hasResult = !!state.result;
@@ -360,7 +377,7 @@ import { LITE_SUPPORTED, LITE_UNSUPPORTED } from "../../lib/tools/json-schema-li
         }
       }
       if (action === "download") {
-        downloadFile(text, "schema-report.txt", "text/plain;charset=utf-8;");
+        downloadFile(text, "json-schema-lite-schema-report.txt", "text/plain;charset=utf-8;");
         announce("Download started");
       }
     });
@@ -510,20 +527,6 @@ import { LITE_SUPPORTED, LITE_UNSUPPORTED } from "../../lib/tools/json-schema-li
     font-size: 11px;
     letter-spacing: 0.05em;
   }
-  .tool-content-section {
-    padding: var(--spacing-5xl) 0;
-    background-color: var(--color-canvas-soft);
-    border-top: 1px solid var(--color-hairline);
-  }
-  .content-section-header {
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto var(--spacing-3xl);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-xs);
-  }
   .section-eyebrow {
     color: var(--color-mute);
     letter-spacing: 0.1em;
@@ -531,45 +534,6 @@ import { LITE_SUPPORTED, LITE_UNSUPPORTED } from "../../lib/tools/json-schema-li
   .section-title {
     color: var(--color-ink);
     margin: 0;
-  }
-  .steps-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-xl);
-  }
-  .step-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-lg);
-    background-color: var(--color-canvas);
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    text-align: center;
-    align-items: center;
-  }
-  .step-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--rounded-full);
-    background-color: var(--color-accent);
-    color: var(--color-on-primary);
-    font-family: var(--font-mono);
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: var(--spacing-xs);
-  }
-  .step-title {
-    color: var(--color-ink);
-    margin: 0;
-  }
-  .step-desc {
-    color: var(--color-body);
-    margin: 0;
-    line-height: 1.5;
   }
   .faq-section {
     padding: var(--spacing-5xl) 0;
@@ -634,10 +598,6 @@ import { LITE_SUPPORTED, LITE_UNSUPPORTED } from "../../lib/tools/json-schema-li
   @media (max-width: 959px) {
     .dj-inputs {
       grid-template-columns: 1fr;
-    }
-    .steps-grid {
-      grid-template-columns: 1fr;
-      gap: var(--spacing-md);
     }
   }
 </style>

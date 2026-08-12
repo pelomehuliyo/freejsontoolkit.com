@@ -27,7 +27,7 @@ export function convertCsvToJson(input: string, opts: ConvertOptions): ConvertRe
   if (!result.success || !result.csv) {
     const msg = result.error
       ? `[${result.error.code}] ${result.error.message}`
-      : "Failed to parse CSV.";
+      : "Failed to parse CSV. Check the CSV syntax and try again.";
     throw new Error(msg);
   }
 

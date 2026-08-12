@@ -16,7 +16,7 @@ ctx.onmessage = (e: MessageEvent) => {
     const result = jsonToXml(input, options);
     ctx.postMessage({ id, ok: true, result });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Conversion failed unexpectedly.";
+    const message = err instanceof Error ? err.message : "Conversion failed unexpectedly. Check the JSON and try again.";
     ctx.postMessage({ id, ok: false, error: message });
   }
 };

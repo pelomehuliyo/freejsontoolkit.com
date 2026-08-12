@@ -28,7 +28,9 @@ export interface CsvToTsvFile {
 
 export interface LargeFileInfo {
   file: CsvToTsvFile;
-  blobUrl: string | null;
+  /** The original File, retained so a changed option can re-run the conversion. */
+  source?: File;
+  blob: Blob | null;
   preview: string;
   phase: string;
   rows: number;
@@ -45,6 +47,8 @@ export interface CsvToTsvState {
   newlineStrategy: "reject" | "escape";
   /** Set while a file takes the large-file mode path. */
   largeFile: LargeFileInfo | null;
+  /** Set when an option changes after a large-file result — outcome is stale. */
+  staleOptions: boolean;
 }
 
 export const DEFAULT_STATE: CsvToTsvState = {
@@ -56,4 +60,5 @@ export const DEFAULT_STATE: CsvToTsvState = {
   error: null,
   newlineStrategy: "reject",
   largeFile: null,
+  staleOptions: false,
 };

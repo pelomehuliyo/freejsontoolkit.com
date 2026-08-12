@@ -62,7 +62,7 @@ export function convert(store: Store<TsvToCsvState>): void {
   const state = store.get();
   if (state.isConverting) return;
   if (!state.tsvInput.trim()) {
-    store.update((s) => ({ ...s, error: "Paste or load TSV first." }));
+    store.update((s) => ({ ...s, error: "Nothing to convert yet. Add TSV to the input box, then press Convert." }));
     return;
   }
   const id = ++reqId;
@@ -88,7 +88,7 @@ export function convert(store: Store<TsvToCsvState>): void {
       store.update((s) => ({
         ...s,
         isConverting: false,
-        error: data.error ?? "Conversion failed.",
+        error: data.error ?? "Conversion failed. The TSV could not be converted. Check the input and try again.",
       }));
     }
   };
@@ -117,7 +117,9 @@ export function clearAll(store: Store<TsvToCsvState>): void {
 // ── Large-file mode (interim): worker owns read + single-pass convert ──
 // The result is a Blob (full file, download-only) plus a capped preview for the
 // editor. Each dispatch gets its own reqId so a second dropped file supersedes
-// the first (staleness guard). Previous blob URLs are revoked before new ones.
+// the first (staleness guard). The Blob is kept in state until a fresh
+// conversion replaces it or the mode is cleared; an object URL is created
+// only at download time so no URL can outlive the file it points at.
 let largeReqId = 0;
 
 export function convertLargeFile(
@@ -128,16 +130,6 @@ export function convertLargeFile(
 ): void {
   const id = ++largeReqId;
 
-  // Revoke any previous blob URL before we create a new one.
-  const prev = store.get().largeFile;
-  if (prev && prev.blobUrl) {
-    try {
-      URL.revokeObjectURL(prev.blobUrl);
-    } catch {
-      /* no-op */
-    }
-  }
-
   store.update((s) => ({
     ...s,
     isConverting: true,
@@ -145,7 +137,7 @@ export function convertLargeFile(
     outputStatus: "empty",
     largeFile: {
       file: { name, size },
-      blobUrl: null,
+      blob: null,
       preview: "",
       phase: "reading",
       rows: 0,
@@ -177,14 +169,13 @@ export function convertLargeFile(
     if (data.id !== largeReqId) return; // superseded by a newer file
 
     if (data.ok && data.blob) {
-      const blobUrl = URL.createObjectURL(data.blob);
       store.update((s) => ({
         ...s,
         isConverting: false,
         largeFile: s.largeFile
           ? {
               ...s.largeFile,
-              blobUrl,
+              blob: data.blob ?? null,
               preview: data.preview ?? "",
               rows: data.rows ?? 0,
               cols: data.cols ?? 0,
@@ -195,7 +186,7 @@ export function convertLargeFile(
       store.update((s) => ({
         ...s,
         isConverting: false,
-        error: data.error ?? "Conversion failed.",
+        error: data.error ?? "Conversion failed. The TSV could not be converted. Check the input and try again.",
       }));
     }
   };
@@ -203,17 +194,8 @@ export function convertLargeFile(
   w.postMessage({ id, kind: "large", file });
 }
 
-/** Release the active large-file blob URL and reset the mode. */
+/** Release the active large-file mode and reset. */
 export function clearLargeFile(store: Store<TsvToCsvState>): void {
   largeReqId++;
-  const prev = store.get().largeFile;
-  // Revoke the active blob URL before clearing the mode.
-  if (prev && prev.blobUrl) {
-    try {
-      URL.revokeObjectURL(prev.blobUrl);
-    } catch {
-      /* no-op */
-    }
-  }
   store.update((s) => ({ ...s, largeFile: null }));
 }

@@ -68,7 +68,7 @@ function decodeAll(input: string, encoding: UrlEncoding, plusSpace: boolean): st
 export function validate(input: string, encoding: UrlEncoding, plusSpace: boolean): UrlValidity {
   const bad = /%(?![0-9a-fA-F]{2})/.exec(input);
   if (bad) {
-    return { ok: false, message: `Stray '%' at position ${bad.index + 1}` };
+    return { ok: false, message: `Stray '%' at position ${bad.index + 1}. Check the percent-encoding and try again.` };
   }
   try {
     decodeAll(input, encoding, plusSpace);

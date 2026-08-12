@@ -40,7 +40,7 @@ export function handleInput(store: Store<JsonToYamlState>, text: string): void {
       ...state,
       jsonInput: text,
       inputStatus: "invalid",
-      error: `Input too large (${text.length.toLocaleString()} chars). Limit is ${MAX_INPUT_CHARS.toLocaleString()}.`,
+      error: `Input is too large (${text.length.toLocaleString()} chars). The limit is ${MAX_INPUT_CHARS.toLocaleString()} chars. Shorten the JSON and try again.`,
     });
     return;
   }
@@ -51,7 +51,7 @@ export function handleInput(store: Store<JsonToYamlState>, text: string): void {
       ...state,
       jsonInput: text,
       inputStatus: "invalid",
-      error: `Invalid JSON: ${result.error}`,
+      error: `Invalid JSON: ${result.error}. Fix the syntax and try again.`,
     });
     return;
   }
@@ -69,7 +69,7 @@ export function convert(store: Store<JsonToYamlState>): void {
   if (state.isConverting) return;
 
   if (!state.jsonInput.trim()) {
-    store.update((s) => ({ ...s, error: "Paste or load JSON first." }));
+    store.update((s) => ({ ...s, error: "Nothing to convert yet. Add JSON to the input box, then press Convert." }));
     return;
   }
   if (state.inputStatus === "invalid") {
@@ -99,7 +99,7 @@ export function convert(store: Store<JsonToYamlState>): void {
         ...s,
         isConverting: false,
         inputStatus: "invalid",
-        error: data.error ?? "Conversion failed.",
+        error: data.error ?? "Conversion failed. The JSON could not be converted. Check the input and try again.",
       }));
     }
   };

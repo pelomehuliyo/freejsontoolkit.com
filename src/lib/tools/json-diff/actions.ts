@@ -30,7 +30,7 @@ export function compare(store: Store<JsonDiffState>, forced = false): void {
   if (s.inputA.length > MAX_INPUT_CHARS || s.inputB.length > MAX_INPUT_CHARS) {
     store.update((x) => ({
       ...x,
-      error: "Input too large. Limit is " + MAX_INPUT_CHARS.toLocaleString() + " chars per side.",
+      error: "Input is too large. The limit is " + MAX_INPUT_CHARS.toLocaleString() + " chars per side. Shorten one or both inputs and try again.",
     }));
     return;
   }
@@ -72,8 +72,9 @@ export function compare(store: Store<JsonDiffState>, forced = false): void {
 }
 
 export function loadSample(store: Store<JsonDiffState>): void {
-  store.update((s) => ({ ...s, inputA: SAMPLE_A, inputB: SAMPLE_B, error: null }));
-  compare(store, true);
+  // House rule: Load Sample only loads — it never auto-runs. The user clicks
+  // Compare explicitly.
+  store.update((s) => ({ ...s, inputA: SAMPLE_A, inputB: SAMPLE_B, result: null, error: null }));
 }
 
 export function clearAll(store: Store<JsonDiffState>): void {

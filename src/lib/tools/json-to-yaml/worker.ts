@@ -18,7 +18,7 @@ ctx.onmessage = (e: MessageEvent) => {
     const result = convertJsonToYaml(input, options);
     ctx.postMessage({ id, ok: true, output: result.output });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Conversion failed";
+    const message = err instanceof Error ? err.message : "Conversion failed. Check the JSON and try again.";
     ctx.postMessage({ id, ok: false, error: message });
   }
 };

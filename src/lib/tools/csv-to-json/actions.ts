@@ -71,8 +71,16 @@ export function handleInput(store: Store<CsvToJsonState>, text: string): void {
 export function convert(store: Store<CsvToJsonState>): void {
   const state = store.get();
   if (state.isConverting) return;
+
+  // Large-file mode: re-run from the retained file when options changed.
+  const largeSource = state.largeFile?.source;
+  if (largeSource) {
+    convertLargeFile(store, largeSource, state.largeFile!.file.name, state.largeFile!.file.size);
+    return;
+  }
+
   if (!state.csvInput.trim()) {
-    store.update((s) => ({ ...s, error: "Paste or load CSV first." }));
+    store.update((s) => ({ ...s, error: "Nothing to convert yet. Add CSV to the input box, then press Convert." }));
     return;
   }
 
@@ -107,7 +115,7 @@ export function convert(store: Store<CsvToJsonState>): void {
       store.update((s) => ({
         ...s,
         isConverting: false,
-        error: data.error ?? "Failed to convert CSV.",
+        error: data.error ?? "Conversion failed. The CSV could not be converted. Check the input and try again.",
       }));
     }
   };
@@ -125,10 +133,10 @@ export function convert(store: Store<CsvToJsonState>): void {
   });
 }
 
-/** Demo action — loads the sample AND converts it so you see the result. */
+/** House rule: Load Sample only loads — it never auto-runs. The user clicks
+ *  Convert explicitly. */
 export function loadSample(store: Store<CsvToJsonState>): void {
   handleInput(store, SAMPLE_CSV);
-  convert(store);
 }
 
 export function clearAll(store: Store<CsvToJsonState>): void {
@@ -143,6 +151,7 @@ export function clearAll(store: Store<CsvToJsonState>): void {
     recordCount: 0,
     delimiterUsed: "",
     error: null,
+    staleOptions: false,
   }));
 }
 
@@ -150,24 +159,37 @@ export function getJsonContent(store: Store<CsvToJsonState>): string | null {
   return store.get().jsonOutput || null;
 }
 
-/** Option changes are STAGED only — click Convert to apply them. */
+/** Option changes are STAGED only — click Convert to apply them. In
+    large-file mode they mark the outcome stale instead so the page can say
+    "Options changed — convert again." rather than silently keeping the old
+    preview. */
+/** Option changes are STAGED only — click Convert to apply them. In
+    large-file mode they mark the outcome stale instead so the page can say
+    "Options changed — convert again." rather than silently keeping the old
+    preview. */
+function stale(prev: CsvToJsonState): boolean {
+  return !!prev.largeFile && prev.outputStatus === "converted" && !prev.isConverting;
+}
+
 export function setDelimiter(store: Store<CsvToJsonState>, value: CsvDelimiterOption): void {
-  store.update((s) => ({ ...s, delimiter: value }));
+  store.update((s) => ({ ...s, delimiter: value, staleOptions: s.staleOptions || stale(s) }));
 }
 export function setHasHeader(store: Store<CsvToJsonState>, value: boolean): void {
-  store.update((s) => ({ ...s, hasHeader: value }));
+  store.update((s) => ({ ...s, hasHeader: value, staleOptions: s.staleOptions || stale(s) }));
 }
 export function setSkipEmptyLines(store: Store<CsvToJsonState>, value: boolean): void {
-  store.update((s) => ({ ...s, skipEmptyLines: value }));
+  store.update((s) => ({ ...s, skipEmptyLines: value, staleOptions: s.staleOptions || stale(s) }));
 }
 export function setIndent(store: Store<CsvToJsonState>, value: IndentOption): void {
-  store.update((s) => ({ ...s, indent: value }));
+  store.update((s) => ({ ...s, indent: value, staleOptions: s.staleOptions || stale(s) }));
 }
 
 // ── Large-file mode (interim): worker owns read + single-pass convert ──
 // The result is a Blob (full file, download-only) plus a capped preview for the
 // editor. Each dispatch gets its own reqId so a second dropped file supersedes
-// the first (staleness guard). Previous blob URLs are revoked before new ones.
+// the first (staleness guard). The Blob is kept in state until a new
+// conversion replaces it or the user clears it; an object URL is created
+// only at download time so no URL can outlive the file it points at.
 let largeReqId = 0;
 
 export function convertLargeFile(
@@ -178,25 +200,17 @@ export function convertLargeFile(
 ): void {
   const id = ++largeReqId;
 
-  // Revoke any previous blob URL before we create a new one.
-  const prev = store.get().largeFile;
-  if (prev && prev.blobUrl) {
-    try {
-      URL.revokeObjectURL(prev.blobUrl);
-    } catch {
-      /* no-op */
-    }
-  }
-
   store.update((s) => ({
     ...s,
     isConverting: true,
     error: null,
     outputStatus: "empty",
     jsonOutput: "",
+    staleOptions: false,
     largeFile: {
       file: { name, size },
-      blobUrl: null,
+      source: file,
+      blob: null,
       preview: "",
       phase: "reading",
       rows: 0,
@@ -229,7 +243,6 @@ export function convertLargeFile(
     if (data.id !== largeReqId) return; // superseded by a newer file
 
     if (data.ok && data.blob) {
-      const blobUrl = URL.createObjectURL(data.blob);
       store.update((s) => ({
         ...s,
         isConverting: false,
@@ -237,7 +250,7 @@ export function convertLargeFile(
         largeFile: s.largeFile
           ? {
               ...s.largeFile,
-              blobUrl,
+              blob: data.blob ?? null,
               preview: data.preview ?? "",
               rows: data.rows ?? 0,
               totalRows: data.totalRows ?? 0,
@@ -248,7 +261,7 @@ export function convertLargeFile(
       store.update((s) => ({
         ...s,
         isConverting: false,
-        error: data.error ?? "Conversion failed.",
+        error: data.error ?? "Conversion failed. The CSV could not be converted. Check the input and try again.",
       }));
     }
   };
@@ -266,17 +279,8 @@ export function convertLargeFile(
   });
 }
 
-/** Release the active large-file blob URL and reset the mode. */
+/** Release the active large-file mode and reset. */
 export function clearLargeFile(store: Store<CsvToJsonState>): void {
   largeReqId++;
-  const prev = store.get().largeFile;
-  // Revoke the active blob URL before clearing the mode.
-  if (prev && prev.blobUrl) {
-    try {
-      URL.revokeObjectURL(prev.blobUrl);
-    } catch {
-      /* no-op */
-    }
-  }
-  store.update((s) => ({ ...s, largeFile: null }));
+  store.update((s) => ({ ...s, largeFile: null, staleOptions: false }));
 }

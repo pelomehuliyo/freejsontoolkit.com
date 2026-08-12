@@ -94,7 +94,7 @@ export function convert(store: Store<TsState>, forced = false): void {
             store.update((x) => ({
                 ...x,
                 isRunning: false,
-                error: err instanceof Error ? err.message : "Conversion failed.",
+                error: err instanceof Error ? err.message : "Conversion failed. Check the input and try again.",
             }));
         }
     });

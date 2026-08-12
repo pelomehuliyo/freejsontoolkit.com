@@ -6,13 +6,16 @@ import CodeEditor from "../../components/tools/CodeEditor.astro";
 import DragDropZone from "../../components/tools/DragDropZone.astro";
 import ToolActions from "../../components/tools/ToolActions.astro";
 import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import HowItWorks from "../../components/tools/HowItWorks.astro";
 import Card from "../../components/Card.astro";
+import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
 import { FLAG_ORDER, FLAG_LABELS } from "../../lib/tools/regex-tester/constants";
 import RelatedTools from "../../components/tools/RelatedTools.astro";
 import ToolDocs from "../../components/tools/ToolDocs.astro";
 import CompareLinks from "../../components/tools/CompareLinks.astro";
 import ToolNudge from "../../components/tools/ToolNudge.astro";
+import "../../styles/tool-options.css";
 ---
 
 <ToolShell
@@ -41,7 +44,7 @@ import ToolNudge from "../../components/tools/ToolNudge.astro";
 Matches highlight as you type`}
         >
           <div class="editor-info-bar">
-            <span class="info-status" id="regex-status">No pattern yet</span>
+            <span class="info-status" id="regex-status">Status: Empty</span>
             <span class="info-meta" id="regex-char-count">0 chars</span>
           </div>
         </CodeEditor>
@@ -52,7 +55,7 @@ Matches highlight as you type`}
         <h2 class="display-sm settings-title">Pattern</h2>
         <div class="settings-divider"></div>
         <div class="settings-group">
-          <label class="settings-label caption-mono" for="pattern-input">Expression</label>
+          <label class="settings-label" for="pattern-input">Expression</label>
           <div class="pattern-shell">
             <span class="pattern-delim" aria-hidden="true">/</span>
             <input
@@ -71,15 +74,15 @@ Matches highlight as you type`}
           </div>
         </div>
         <div class="settings-group">
-          <span class="settings-label caption-mono" id="flags-label">Flags</span>
-          <div class="flag-row" role="group" aria-labelledby="flags-label">
+          <span class="settings-label" id="flags-label">Flags</span>
+          <div class="chip-row" role="group" aria-labelledby="flags-label">
             {
               FLAG_ORDER.map((f) => (
                 <button
                   type="button"
-                  class="flag-chip"
+                  class="chip"
                   data-flag={f}
-                  class:list={[{ "is-on": f === "g" }]}
+                  class:list={[{ "is-active": f === "g" }]}
                   aria-pressed={f === "g" ? "true" : "false"}
                   title={FLAG_LABELS[f]}
                 >
@@ -90,14 +93,13 @@ Matches highlight as you type`}
           </div>
         </div>
         <div class="settings-divider"></div>
-        <div class="settings-group">
-          <span class="settings-label caption-mono">Replace</span>
-          <input
-            id="replace-toggle"
-            type="checkbox"
-            class="replace-toggle"
-            aria-label="Show replace preview"
-          />
+<div class="settings-group">
+          <span class="settings-label">Replace</span>
+          <label class="opt-check">
+            <input type="checkbox" id="replace-toggle" />
+            <span class="box"></span>
+            Show replace preview
+          </label>
           <input
             id="replace-input"
             class="pattern-input replace-input"
@@ -110,6 +112,9 @@ Matches highlight as you type`}
         </div>
         <div class="settings-divider"></div>
         <div class="match-count body-sm-strong" id="match-count">0 matches</div>
+        <Button id="test-btn" variant="primary" size="lg" shape="square" class="action-btn">
+          Test
+        </Button>
         <ErrorBanner id="regex-error" />
         <div class="status-banner caption">
           <span class="status-indicator"><span class="dot idle" id="status-dot"></span></span>
@@ -139,37 +144,23 @@ Matches highlight as you type`}
       </Card>
     </div>
   </ToolWorkspace>
-  <section class="tool-content-section" aria-labelledby="how-title">
-    <Container size="narrow">
-      <div class="content-section-header">
-        <span class="caption-mono section-eyebrow">HOW IT WORKS</span>
-        <h2 id="how-title" class="display-md section-title">Test a regex in three steps</h2>
-      </div>
-      <div class="steps-grid">
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">1</span>
-          <h3 class="body-sm-strong step-title">Write the pattern</h3>
-          <p class="caption step-desc">
-            Type your expression between the slashes and toggle the flags you need.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">2</span>
-          <h3 class="body-sm-strong step-title">Paste the text</h3>
-          <p class="caption step-desc">
-            Matches highlight live, with capture groups and named groups listed per match.
-          </p>
-        </div>
-        <div class="step-card">
-          <span class="step-number" aria-hidden="true">3</span>
-          <h3 class="body-sm-strong step-title">Replace or copy</h3>
-          <p class="caption step-desc">
-            Preview a replacement with $1 / $& support, then copy the result.
-          </p>
-        </div>
-      </div>
-    </Container>
-  </section>
+  <HowItWorks
+    heading="Test a regex in three steps"
+    steps={[
+      {
+        title: "Write the pattern",
+        desc: "Type your expression between the slashes and toggle the flags you need.",
+      },
+      {
+        title: "Paste the text",
+        desc: "Matches highlight live, with capture groups and named groups listed per match.",
+      },
+      {
+        title: "Replace or copy",
+        desc: "Preview a replacement with $1 / $& support, then copy the result.",
+      },
+    ]}
+  />
   <ToolDocs />
   <CompareLinks />
   <RelatedTools />
@@ -391,11 +382,11 @@ Matches highlight as you type`}
       patternInput.value = state.pattern;
     }
     if (flagEcho) flagEcho.textContent = flagString(state.flags);
-    document.querySelectorAll(".flag-chip").forEach((chip) => {
+    document.querySelectorAll("[data-flag]").forEach((chip) => {
       const f = chip.getAttribute("data-flag") as keyof RegexFlags | null;
       if (!f) return;
       const on = state.flags[f];
-      chip.classList.toggle("is-on", on);
+      chip.classList.toggle("is-active", on);
       chip.setAttribute("aria-pressed", on ? "true" : "false");
     });
     if (replaceToggle) replaceToggle.checked = state.showReplace;
@@ -419,9 +410,9 @@ Matches highlight as you type`}
       matchCount.textContent =
         n + (n === 1 ? " match" : " matches") + (state.result?.truncated ? " (capped)" : "");
     if (statusEl) {
-      if (!state.pattern && !state.testInput) statusEl.textContent = "No pattern yet";
-      else if (!state.result?.ok) statusEl.textContent = "Invalid pattern";
-      else statusEl.textContent = n + (n === 1 ? " match" : " matches");
+      if (!state.pattern && !state.testInput) statusEl.textContent = "Status: Empty";
+      else if (!state.result?.ok) statusEl.textContent = "Status: Invalid";
+      else statusEl.textContent = "Status: Ready — " + n + (n === 1 ? " match" : " matches");
       statusEl.style.color =
         state.result && !state.result.ok
           ? "var(--color-error)"
@@ -451,7 +442,7 @@ Matches highlight as you type`}
     replaceToggle.addEventListener("change", () =>
       setShowReplace(regexStore, replaceToggle.checked),
     );
-  document.querySelectorAll(".flag-chip").forEach((chip) => {
+  document.querySelectorAll("[data-flag]").forEach((chip) => {
     chip.addEventListener("click", () => {
       const f = chip.getAttribute("data-flag") as keyof RegexFlags | null;
       if (f) toggleFlag(regexStore, f);
@@ -497,6 +488,25 @@ Matches highlight as you type`}
       }
     });
   }
+
+  // Keyboard shortcut: Ctrl/Cmd+Enter → Test now. Matching is live, so the
+  // primary action flushes any pending debounced edits and re-runs the test.
+  function runTest(): void {
+    if (patternInput) setPattern(regexStore, patternInput.value);
+    if (testTextarea && testTextarea.value !== regexStore.get().testInput)
+      setTestInput(regexStore, testTextarea.value);
+    if (replaceInput && !replaceInput.disabled) setReplaceValue(regexStore, replaceInput.value);
+  }
+  const testBtn = document.getElementById("test-btn") as HTMLButtonElement | null;
+  if (testBtn) testBtn.addEventListener("click", runTest);
+  document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "SELECT") return;
+      e.preventDefault();
+      runTest();
+    }
+  });
 </script>
 <style>
   .workspace-card {
@@ -536,28 +546,6 @@ Matches highlight as you type`}
   .info-status {
     font-weight: 500;
   }
-  .settings-card {
-    padding: var(--spacing-lg);
-  }
-  .settings-title {
-    margin: 0;
-  }
-  .settings-divider {
-    height: 1px;
-    background-color: var(--color-hairline);
-    margin: var(--spacing-xs) 0;
-  }
-  .settings-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-md);
-  }
-  .settings-label {
-    color: var(--color-mute);
-    font-size: 11px;
-    font-weight: 600;
-  }
   .pattern-shell {
     display: flex;
     align-items: center;
@@ -596,42 +584,6 @@ Matches highlight as you type`}
   .pattern-flags {
     color: var(--color-accent-active);
     font-weight: 600;
-  }
-  .flag-row {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-  .flag-chip {
-    width: 30px;
-    height: 30px;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--color-mute);
-    background-color: var(--color-canvas);
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    cursor: pointer;
-    transition:
-      color 0.12s ease,
-      border-color 0.12s ease,
-      background-color 0.12s ease;
-  }
-  .flag-chip:hover {
-    border-color: var(--color-hairline-strong);
-    color: var(--color-ink);
-  }
-  .flag-chip.is-on {
-    color: var(--color-on-primary);
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-  }
-  .replace-toggle {
-    width: 16px;
-    height: 16px;
-    accent-color: var(--color-accent);
-    cursor: pointer;
   }
   .replace-input {
     border: 1px solid var(--color-hairline);
@@ -758,20 +710,6 @@ Matches highlight as you type`}
     font-size: 10px;
     letter-spacing: 0.08em;
   }
-  .tool-content-section {
-    padding: var(--spacing-5xl) 0;
-    background-color: var(--color-canvas-soft);
-    border-top: 1px solid var(--color-hairline);
-  }
-  .content-section-header {
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto var(--spacing-3xl);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-xs);
-  }
   .section-eyebrow {
     color: var(--color-mute);
     letter-spacing: 0.1em;
@@ -779,45 +717,6 @@ Matches highlight as you type`}
   .section-title {
     color: var(--color-ink);
     margin: 0;
-  }
-  .steps-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-xl);
-  }
-  .step-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-lg);
-    background-color: var(--color-canvas);
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    text-align: center;
-    align-items: center;
-  }
-  .step-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--rounded-full);
-    background-color: var(--color-accent);
-    color: var(--color-on-primary);
-    font-family: var(--font-mono);
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: var(--spacing-xs);
-  }
-  .step-title {
-    color: var(--color-ink);
-    margin: 0;
-  }
-  .step-desc {
-    color: var(--color-body);
-    margin: 0;
-    line-height: 1.5;
   }
   .faq-section {
     padding: var(--spacing-5xl) 0;
@@ -886,10 +785,6 @@ Matches highlight as you type`}
     }
     .workspace-card :global(.editor-wrapper) {
       height: 100%;
-    }
-    .steps-grid {
-      grid-template-columns: 1fr;
-      gap: var(--spacing-md);
     }
   }
 </style>

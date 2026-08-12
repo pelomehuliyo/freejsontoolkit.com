@@ -140,7 +140,7 @@ function v1(fmt: UuidFormat, upper: boolean): UuidItem {
 function parseUuidBytes(s: string): Uint8Array {
   const h = s.replace(/-/g, "");
   if (h.length !== 32 || !/^[0-9a-f]{32}$/i.test(h)) {
-    throw new Error("Namespace must be a 32-hex (36-char) UUID");
+    throw new Error("Namespace is not a valid UUID. Use a 32-hex (36-char) UUID and try again.");
   }
   const b = new Uint8Array(16);
   for (let i = 0; i < 16; i++) b[i] = parseInt(h.substr(i * 2, 2), 16);
@@ -179,7 +179,7 @@ export async function generate(opts: GenerateOpts): Promise<UuidGenerateResult> 
   const count = Math.max(1, Math.min(opts.count || 1, cap));
 
   if (opts.version === "v5" && opts.name.trim() === "") {
-    throw new Error("Version 5 needs a name to hash.");
+    throw new Error("Version 5 needs a name to hash. Enter a name and try again.");
   }
 
   const t0 = performance.now();

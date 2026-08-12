@@ -77,13 +77,13 @@ function decodeString(str: string, alpha: string): Uint8Array {
   for (let i = 0; i < s.length; i++) {
     const code = s.charCodeAt(i);
     if (code >= 128 || t[code] === -1) {
-      throw new Error(`Invalid character ${JSON.stringify(s[i])} at position ${i + 1}`);
+      throw new Error(`Invalid character ${JSON.stringify(s[i])} at position ${i + 1}. Remove it from the base64 input and try again.`);
     }
   }
   const rem = s.length % 4;
-  if (rem === 1) throw new Error("Incomplete base64 group (1 trailing character)");
+  if (rem === 1) throw new Error("Incomplete base64 group (1 trailing character). Add the missing padding and try again.");
   if (padCount > 0 && (s.length + padCount) % 4 !== 0) {
-    throw new Error("Incorrect base64 padding");
+    throw new Error("Incorrect base64 padding. Fix the padding characters and try again.");
   }
   const groups = (s.length - rem) / 4;
   const tailBytes = rem === 2 ? 1 : rem === 3 ? 2 : 0;

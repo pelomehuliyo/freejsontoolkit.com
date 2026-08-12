@@ -18,6 +18,7 @@ function getWorker(): Worker {
  *  but NEVER the output box — output only changes on the explicit Convert. */
 export function handleInput(store: Store<CsvToTsvState>, text: string): void {
   reqId++;
+  clearLargeFile(store); // typing supersedes a large-file preview
   const state = store.get();
   if (!text.trim()) {
     store.set({
@@ -61,8 +62,16 @@ export function handleInput(store: Store<CsvToTsvState>, text: string): void {
 export function convert(store: Store<CsvToTsvState>): void {
   const state = store.get();
   if (state.isConverting) return;
+
+  // Large-file mode: re-run from the retained file when options changed.
+  const largeSource = state.largeFile?.source;
+  if (largeSource) {
+    convertLargeFile(store, largeSource, state.largeFile!.file.name, state.largeFile!.file.size);
+    return;
+  }
+
   if (!state.csvInput.trim()) {
-    store.update((s) => ({ ...s, error: "Paste or load CSV first." }));
+    store.update((s) => ({ ...s, error: "Nothing to convert yet. Add CSV to the input box, then press Convert." }));
     return;
   }
   const id = ++reqId;
@@ -88,7 +97,7 @@ export function convert(store: Store<CsvToTsvState>): void {
       store.update((s) => ({
         ...s,
         isConverting: false,
-        error: data.error ?? "Conversion failed.",
+        error: data.error ?? "Conversion failed. The CSV could not be converted. Check the input and try again.",
       }));
     }
   };
@@ -111,20 +120,30 @@ export function clearAll(store: Store<CsvToTsvState>): void {
     outputStatus: "empty",
     isConverting: false,
     error: null,
+    staleOptions: false,
   }));
+}
+
+/** Option changes are STAGED only — click Convert to apply them. In
+    large-file mode they mark the outcome stale instead of silently keeping
+    the old preview ("Options changed — convert again."). */
+function stale(prev: CsvToTsvState): boolean {
+  return !!prev.largeFile && prev.outputStatus === "converted" && !prev.isConverting;
 }
 
 export function setNewlineStrategy(
   store: Store<CsvToTsvState>,
   value: ConvertOptions["newlineStrategy"],
 ): void {
-  store.update((s) => ({ ...s, newlineStrategy: value }));
+  store.update((s) => ({ ...s, newlineStrategy: value, staleOptions: s.staleOptions || stale(s) }));
 }
 
 // ── Large-file mode (interim): worker owns read + single-pass convert ──
 // The result is a Blob (full file, download-only) plus a capped preview for the
 // editor. Each dispatch gets its own reqId so a second dropped file supersedes
-// the first (staleness guard). Previous blob URLs are revoked before new ones.
+// the first (staleness guard). The Blob is kept in state until a new
+// conversion replaces it or the user clears it; an object URL is created
+// only at download time so no URL can outlive the file it points at.
 let largeReqId = 0;
 
 export function convertLargeFile(
@@ -135,24 +154,16 @@ export function convertLargeFile(
 ): void {
   const id = ++largeReqId;
 
-  // Revoke any previous blob URL before we create a new one.
-  const prev = store.get().largeFile;
-  if (prev && prev.blobUrl) {
-    try {
-      URL.revokeObjectURL(prev.blobUrl);
-    } catch {
-      /* no-op */
-    }
-  }
-
   store.update((s) => ({
     ...s,
     isConverting: true,
     error: null,
     outputStatus: "empty",
+    staleOptions: false,
     largeFile: {
       file: { name, size },
-      blobUrl: null,
+      source: file,
+      blob: null,
       preview: "",
       phase: "reading",
       rows: 0,
@@ -184,14 +195,13 @@ export function convertLargeFile(
     if (data.id !== largeReqId) return; // superseded by a newer file
 
     if (data.ok && data.blob) {
-      const blobUrl = URL.createObjectURL(data.blob);
       store.update((s) => ({
         ...s,
         isConverting: false,
         largeFile: s.largeFile
           ? {
               ...s.largeFile,
-              blobUrl,
+              blob: data.blob ?? null,
               preview: data.preview ?? "",
               rows: data.rows ?? 0,
               cols: data.cols ?? 0,
@@ -202,7 +212,7 @@ export function convertLargeFile(
       store.update((s) => ({
         ...s,
         isConverting: false,
-        error: data.error ?? "Conversion failed.",
+        error: data.error ?? "Conversion failed. The CSV could not be converted. Check the input and try again.",
       }));
     }
   };
@@ -215,16 +225,8 @@ export function convertLargeFile(
   });
 }
 
-/** Release the large-file blob URL and reset the mode. */
+/** Release the active large-file mode and reset. */
 export function clearLargeFile(store: Store<CsvToTsvState>): void {
   largeReqId++;
-  const prev = store.get().largeFile;
-  if (prev && prev.blobUrl) {
-    try {
-      URL.revokeObjectURL(prev.blobUrl);
-    } catch {
-      /* no-op */
-    }
-  }
-  store.update((s) => ({ ...s, largeFile: null }));
+  store.update((s) => ({ ...s, largeFile: null, staleOptions: false }));
 }
