@@ -122,14 +122,22 @@ export const RELATIONS: Record<string, Relation[]> = {
   ],
   "sha-256": [
     { id: "sha-512", label: "Stronger hash", kind: "pair" },
+    { id: "md5", label: "Legacy checksum", kind: "pair" },
     { id: "bcrypt", label: "Hash passwords instead", kind: "next" },
     { id: "hmac", label: "Authenticate with a key", kind: "next" },
     { id: "base64", label: "Encode result", kind: "pair" },
   ],
   "sha-512": [
     { id: "sha-256", label: "Faster 256-bit hash", kind: "pair" },
+    { id: "md5", label: "Legacy checksum", kind: "pair" },
     { id: "bcrypt", label: "Hash passwords instead", kind: "next" },
     { id: "hmac", label: "Authenticate with a key", kind: "next" },
+    { id: "base64", label: "Encode result", kind: "pair" },
+  ],
+  md5: [
+    { id: "sha-256", label: "Secure replacement", kind: "next" },
+    { id: "sha-512", label: "Stronger checksum", kind: "pair" },
+    { id: "bcrypt", label: "Hash passwords instead", kind: "pair" },
     { id: "base64", label: "Encode result", kind: "pair" },
   ],
   bcrypt: [

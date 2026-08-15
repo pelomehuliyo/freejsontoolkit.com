@@ -4,16 +4,33 @@
  */
 
 export function md5(bytes: Uint8Array): Uint8Array {
-    // Convert byte array to word array for processing
-    const words: number[] = [];
-    for (let i = 0; i < bytes.length; i++) {
-        words[i >> 2] |= bytes[i] << ((i % 4) * 8);
-    }
-    words[bytes.length >> 2] |= 0x80 << ((bytes.length % 4) * 8);
+    const bitLenLo = (bytes.length * 8) >>> 0;
+    const bitLenHi = Math.floor(bytes.length / 0x20000000) >>> 0;
 
-    const bitLen = bytes.length * 8;
-    words[(((bytes.length + 8) >> 6) + 1) * 16 - 2] = bitLen;
-    words[(((bytes.length + 8) >> 6) + 1) * 16 - 1] = 0; // High bits (0 for < 512MB)
+    const paddedLen = (((bytes.length + 8) >> 6) + 1) << 6;
+    const padded = new Uint8Array(paddedLen);
+    padded.set(bytes);
+    padded[bytes.length] = 0x80;
+
+    let v = bitLenLo;
+    for (let i = 0; i < 4; i++) {
+        padded[paddedLen - 8 + i] = v & 0xff;
+        v >>>= 8;
+    }
+    v = bitLenHi;
+    for (let i = 0; i < 4; i++) {
+        padded[paddedLen - 4 + i] = v & 0xff;
+        v >>>= 8;
+    }
+
+    const words = new Uint32Array(paddedLen / 4);
+    for (let i = 0; i < words.length; i++) {
+        words[i] =
+            padded[i * 4] |
+            (padded[i * 4 + 1] << 8) |
+            (padded[i * 4 + 2] << 16) |
+            (padded[i * 4 + 3] << 24);
+    }
 
     let a = 0x67452301, b = 0xefcdab89, c = 0x98badcfe, d = 0x10325476;
 
@@ -29,8 +46,9 @@ export function md5(bytes: Uint8Array): Uint8Array {
         K[i] = Math.floor(Math.abs(Math.sin(i + 1)) * 0x100000000);
     }
 
+    const rot = (x: number, c: number): number => (x << c) | (x >>> (32 - c));
+
     for (let i = 0; i < words.length; i += 16) {
-        const f = 0, g = 0; // placeholders for logic flow
         const aa = a, bb = b, cc = c, dd = d;
 
         for (let j = 0; j < 64; j++) {
@@ -43,14 +61,16 @@ export function md5(bytes: Uint8Array): Uint8Array {
             const temp = d;
             d = c;
             c = b;
-            const rot = (x: number, c: number) => (x << c) | (x >>> (32 - c));
-            b = b + rot((a + f_val + K[j] + words[i + g_val]), S[j]);
+            b = (b + rot(a + f_val + K[j] + words[i + g_val], S[j])) >>> 0;
             a = temp;
         }
-        a += aa; b += bb; c += cc; d += dd;
+
+        a = (a + aa) >>> 0;
+        b = (b + bb) >>> 0;
+        c = (c + cc) >>> 0;
+        d = (d + dd) >>> 0;
     }
 
-    // Convert back to bytes (Little Endian)
     const result = new Uint8Array(16);
     const view = new DataView(result.buffer);
     view.setUint32(0, a, true);

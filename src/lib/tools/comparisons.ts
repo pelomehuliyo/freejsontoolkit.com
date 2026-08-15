@@ -739,4 +739,53 @@ export const COMPARISONS: Record<string, Comparison> = {
       "use a slow, salted function like bcrypt. Neither tool uploads your input; both run entirely in " +
       "the browser.",
   },
+
+  "md5-vs-sha-256": {
+    slug: "md5-vs-sha-256",
+    aId: "md5",
+    bId: "sha-256",
+    title: "MD5 vs SHA-256",
+    intro:
+      "MD5 and SHA-256 are both one-way hashes, but they live in different eras. MD5 is a legacy " +
+      "128-bit checksum that has been cryptographically broken since 2004 — collisions are practical, " +
+      "so it can't resist tampering. SHA-256 is a modern 256-bit hash from the SHA-2 family with no " +
+      "known practical collision attacks. If you're starting anything new, SHA-256 is the obvious " +
+      "choice; MD5 survives only in legacy systems and non-security checksums. Both tools run 100% in " +
+      "your browser.",
+    useA: {
+      heading: "Use MD5 when",
+      points: [
+        "You must match an existing legacy system, old checksum convention, or database dedup key that hard-codes MD5.",
+        "Collisions are harmless — the checksum isn't defending anything, it's just a fingerprint.",
+        "You only need a compact 32-char digest and speed over security.",
+        "Interoperability with an old spec outweighs the cryptographic weakness.",
+      ],
+    },
+    useB: {
+      heading: "Use SHA-256 when",
+      points: [
+        "The checksum protects something — file integrity, downloads, or any data that could be tampered with.",
+        "You're starting a new project or spec with no legacy constraint.",
+        "You want collision resistance: no practical way to craft two inputs that hash the same.",
+        "There's any chance the digest will be used in a security-sensitive decision.",
+      ],
+    },
+    attributes: [
+      { label: "Digest size", a: "128 bits", b: "256 bits" },
+      { label: "Hex length", a: "32 chars", b: "64 chars" },
+      { label: "Released", a: "1992", b: "2001" },
+      { label: "Collision resistance", a: "Broken (practical attacks)", b: "Strong" },
+      { label: "Status", a: "Legacy", b: "Current best practice" },
+      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+    ],
+    verdict:
+      "Reach for SHA-256 by default — it's stronger, current, and just as easy to compute. Reserve " +
+      "MD5 for the rare legacy case where you must interoperate with an old system or convention. If " +
+      "a collision would matter — for signatures, passwords, or tamper-prone data — MD5 is simply not " +
+      "an option.",
+    note:
+      "Neither MD5 nor SHA-256 is suitable for password storage — both are far too fast. For " +
+      "passwords use a slow, salted function like bcrypt. Neither tool uploads your input; both run " +
+      "entirely in the browser.",
+  },
 };

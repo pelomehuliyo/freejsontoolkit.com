@@ -406,7 +406,7 @@ export const tools: ToolManifest[] = [
     tagline: "Generate MD5 checksums (legacy use only).",
     category: "utilities",
     family: "security",
-    status: "planned",
+    status: "available",
     href: "/tools/md5",
     keywords: ["md5 generator", "md5 hash", "md5 checksum", "md5 decrypt"],
     addedIn: "v1.7",

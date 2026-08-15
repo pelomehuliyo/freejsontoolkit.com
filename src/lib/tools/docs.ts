@@ -1793,4 +1793,68 @@ role = engineer`,
       },
     ],
   },
+  md5: {
+    eyebrow: "Docs · Security",
+    conceptTitle: "A legacy 128-bit checksum — not for security use",
+    concept:
+      "MD5 produces a fixed 128-bit digest (32 hex chars) from any input. It was once the default " +
+      "checksum and still appears in old systems, dedup keys, and legacy conventions. But MD5 is " +
+      "cryptographically broken: since 2004 researchers have shown practical collision attacks that " +
+      "let an attacker craft two different inputs with the same checksum. That makes it useless for " +
+      "passwords, signatures, or integrity that must resist tampering. Keep it for legacy " +
+      "compatibility and non-security checksums only; for anything security-sensitive use SHA-256 or " +
+      "SHA-512. The digest is computed entirely in your browser with a local implementation — your " +
+      "text never leaves the machine.",
+    lead: "before-after",
+    itemsLabel: "Things to know",
+    items: [
+      {
+        kind: "error",
+        title: "Legacy — not for security",
+        body:
+          "MD5 collisions are practical, so the checksum can't prove a file or message hasn't been " +
+          "deliberately forged. If a decision depends on the result, prefer SHA-256 or SHA-512.",
+      },
+      {
+        kind: "note",
+        title: "Fixed 128-bit digest",
+        body:
+          "Every input maps to exactly 32 hex chars (or 24 base64 chars) regardless of length. The " +
+          "digest is deterministic: the same text always yields the same checksum.",
+      },
+      {
+        kind: "note",
+        title: "One-way, not reversible",
+        body:
+          "There is no decryption. Online 'MD5 decrypt' services only look up known inputs in " +
+          "precomputed tables — they can't recover arbitrary text, and collisions mean a match never " +
+          "proves the original input.",
+      },
+      {
+        kind: "note",
+        title: "Still used in the wild",
+        body:
+          "Legacy APIs, database dedup, and old checksum conventions still reference MD5. This tool " +
+          "exists for those cases — it isn't an endorsement of the algorithm.",
+      },
+    ],
+    examplesLabel: "Try these",
+    examples: [
+      {
+        title: "The empty string",
+        note: "MD5 of an empty input is a known constant: d41d8cd98f00b204e9800998ecf8427e.",
+        snippet: "",
+      },
+      {
+        title: "A classic vector",
+        note: "MD5 of 'abc' is 900150983cd24fb0d6963f7d28e17f72 — a widely published test value.",
+        snippet: `abc`,
+      },
+      {
+        title: "A legacy API payload",
+        note: "Checksum a typical JSON payload the way legacy systems expect.",
+        snippet: `{"user": "ada", "role": "admin", "ts": 1752624000}`,
+      },
+    ],
+  },
 };
