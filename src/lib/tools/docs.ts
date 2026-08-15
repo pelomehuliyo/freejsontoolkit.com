@@ -1550,4 +1550,117 @@ role = engineer`,
       },
     ],
   },
-};
+  "sha-256": {
+    eyebrow: "Docs · Security",
+    conceptTitle: "The default SHA-2 checksum, computed in your browser",
+    concept:
+      "SHA-256 is the 32-bit-word member of the SHA-2 family and the default hash across the modern " +
+      "web — TLS certificates, SSH key fingerprints, and most file checksums all use it. Given any " +
+      "message it produces a fixed 256-bit digest — 32 bytes, rendered here as 64 hex characters or 44 " +
+      "base64 characters — and the same input always yields the same digest, while a single changed byte " +
+      "produces a completely different one. That makes it a strong integrity check: compare digests to " +
+      "verify that a file, payload, or message hasn't been altered. The hashing runs entirely in your " +
+      "browser via the native Web Crypto API — nothing is uploaded, and no backend exists to receive it. " +
+      "Note that SHA-256 is a fast checksum, not a password function: use bcrypt for anything meant to " +
+      "withstand offline guessing.",
+    lead: "before-after",
+    itemsLabel: "Things to know",
+    items: [
+      {
+        kind: "error",
+        title: "Empty input hashes nothing",
+        body:
+          "With nothing to hash the tool reports empty output. Paste or type a message first, then " +
+          "the digest appears — every input, no matter how small, produces a full 256-bit result.",
+      },
+      {
+        kind: "note",
+        title: "A fixed-length digest",
+        body:
+          "The output is always 64 hex chars (32 bytes) regardless of input length — one word in and " +
+          "a 10 MB file both yield the same digest size. That's why it's handy as a checksum.",
+      },
+      {
+        kind: "note",
+        title: "Not for password storage",
+        body:
+          "SHA-256 is fast, which makes it weak against brute force when the input is guessable. For " +
+          "passwords use a deliberately slow, salted function like bcrypt.",
+      },
+    ],
+    examplesLabel: "Try these",
+    examples: [
+      {
+        title: "A known vector",
+        note: "SHA-256 of 'abc' — a well-known, verifiable digest.",
+        snippet: `abc`,
+      },
+      {
+        title: "Classic hello",
+        note: "Hash the classic greeting and compare it against a trusted reference.",
+        snippet: `Hello, world!`,
+      },
+      {
+        title: "Checksum a payload",
+        note: "Paste any text or JSON you need to fingerprint — the digest size stays fixed.",
+        snippet: `{"id": 42, "status": "ok", "tags": ["ship", "verify"]}`,
+      },
+    ],
+  },
+  "sha-512": {
+    eyebrow: "Docs · Security",
+    conceptTitle: "A 512-bit fingerprint, computed in your browser",
+    concept:
+      "SHA-512 is the 64-bit-word member of the SHA-2 family. Given any message it produces a fixed " +
+      "512-bit digest — 64 bytes, rendered here as 128 hex characters or 88 base64 characters — and " +
+      "the same input always yields the same digest, while a single changed byte produces a completely " +
+      "different one. That makes it a strong integrity check: compare digests to verify that a file, " +
+      "payload, or message hasn't been altered. The hashing runs entirely in your browser via the native " +
+      "Web Crypto API — nothing is uploaded, and no backend exists to receive it. Note that SHA-512 is a " +
+      "fast checksum, not a password function: use bcrypt for anything meant to withstand offline " +
+      "guessing.",
+    lead: "before-after",
+    itemsLabel: "Things to know",
+    items: [
+      {
+        kind: "error",
+        title: "Empty input hashes nothing",
+        body:
+          "With nothing to hash the tool reports empty output. Paste or type a message first, then " +
+          "the digest appears — every input, no matter how small, produces a full 512-bit result.",
+      },
+      {
+        kind: "note",
+        title: "A fixed-length digest",
+        body:
+          "The output is always 128 hex chars (64 bytes) regardless of input length — one word in and " +
+          "a 10 MB file both yield the same digest size. That's why it's handy as a checksum.",
+      },
+      {
+        kind: "note",
+        title: "Not for password storage",
+        body:
+          "SHA-512 is fast, which makes it weak against brute force when the input is guessable. For " +
+          "passwords use a deliberately slow, salted function like bcrypt.",
+      },
+    ],
+    examplesLabel: "Try these",
+    examples: [
+      {
+        title: "A known vector",
+        note: "SHA-512 of 'abc' — a well-known, verifiable digest.",
+        snippet: `abc`,
+      },
+      {
+        title: "Classic hello",
+        note: "Hash the classic greeting and compare it against a trusted reference.",
+        snippet: `Hello, world!`,
+      },
+      {
+        title: "Checksum a payload",
+        note: "Paste any text or JSON you need to fingerprint — the digest size stays fixed.",
+        snippet: `{"id": 42, "status": "ok", "tags": ["ship", "verify"]}`,
+      },
+    ],
+  },
+  };

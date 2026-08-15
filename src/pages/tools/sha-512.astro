@@ -1,0 +1,581 @@
+---
+import ToolShell from "../../components/tools/ToolShell.astro";
+import ToolHeader from "../../components/tools/ToolHeader.astro";
+import ToolWorkspace from "../../components/tools/ToolWorkspace.astro";
+import CodeEditor from "../../components/tools/CodeEditor.astro";
+import ToolActions from "../../components/tools/ToolActions.astro";
+import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import HowItWorks from "../../components/tools/HowItWorks.astro";
+import Card from "../../components/Card.astro";
+import Button from "../../components/Button.astro";
+import Container from "../../components/Container.astro";
+import RelatedTools from "../../components/tools/RelatedTools.astro";
+import ToolDocs from "../../components/tools/ToolDocs.astro";
+import CompareLinks from "../../components/tools/CompareLinks.astro";
+import ToolNudge from "../../components/tools/ToolNudge.astro";
+import { ENCODINGS } from "../../lib/tools/sha-512/constants";
+---
+
+<ToolShell
+  title="SHA-512 Hash Generator — Free, Local, Secure"
+  description="Generate SHA-512 hashes from text instantly. 100% local, no upload. Supports Hex and Base64 output."
+  activePath="/tools/sha-512"
+>
+  <ToolHeader
+    slot="header"
+    breadcrumbs={[{ label: "Home", href: "/" }, { label: "SHA-512" }]}
+    title="SHA-512 Hash Generator"
+    subtitle="Generate a 512-bit SHA-512 hash from any text — instantly, in your browser."
+  />
+
+  <ToolWorkspace slot="workspace" layout="3-col">
+    <div slot="input" class="ws-fill">
+      <Card variant="flat" class="workspace-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">INPUT</span>
+          <ToolActions id="input-actions" variant="inset" actions={["sample", "clear"]} />
+        </div>
+        <CodeEditor
+          id="sha512-input"
+          label="SHA-512 input"
+          placeholder={"Paste text to hash\n…or type a message to generate a checksum"}
+        >
+          <div class="editor-info-bar">
+            <span class="info-status" id="sha512-input-status">Status: Empty</span>
+            <span class="info-meta" id="sha512-input-count">0 chars</span>
+          </div>
+        </CodeEditor>
+      </Card>
+    </div>
+
+    <div slot="controls">
+      <Card variant="flat" class="workspace-card settings-card">
+        <h2 class="display-sm settings-title">Options</h2>
+        <div class="settings-divider"></div>
+
+        <div class="settings-group">
+          <span class="settings-label caption-mono">encoding</span>
+          <div class="seg seg-2" role="group" aria-label="Encoding">
+            {
+              ENCODINGS.map((e, i) => (
+                <button
+                  type="button"
+                  class:list={["seg-btn", { "is-active": i === 0 }]}
+                  data-encoding={e.id}
+                  aria-pressed={i === 0 ? "true" : "false"}
+                >
+                  {e.label}
+                </button>
+              ))
+            }
+          </div>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <Button id="sha512-run" variant="primary" size="lg" shape="square" class="action-btn">
+          Hash
+        </Button>
+        <div class="sha512-readout" id="sha512-readout">
+          <div class="sha512-row">
+            <span class="sha512-label caption-mono">algorithm</span>
+            <span class="sha512-val">SHA-512</span>
+          </div>
+          <div class="sha512-row">
+            <span class="sha512-label caption-mono">digest</span>
+            <span class="sha512-val">512 bits</span>
+          </div>
+          <div class="sha512-row">
+            <span class="sha512-label caption-mono">hex length</span>
+            <span class="sha512-val">128 chars</span>
+          </div>
+          <div class="sha512-row">
+            <span class="sha512-label caption-mono">base64 length</span>
+            <span class="sha512-val">88 chars</span>
+          </div>
+        </div>
+        <ErrorBanner id="sha512-error" />
+
+        <div class="status-banner caption">
+          <span class="status-indicator"><span class="dot idle" id="sha512-status-dot"></span></span
+          >
+          <span class="sr-only" id="sha512-announce" aria-live="polite"></span>
+          Local sandbox active
+        </div>
+      </Card>
+    </div>
+
+    <div slot="output" class="ws-fill ws-output">
+      <Card variant="flat" class="workspace-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">OUTPUT</span>
+          <ToolActions id="output-actions" variant="inset" actions={["copy", "download"]} />
+        </div>
+        <CodeEditor
+          id="sha512-output"
+          label="SHA-512 output"
+          placeholder="The hash appears here…"
+          readonly
+        >
+          <div class="editor-info-bar">
+            <span class="info-status" id="sha512-output-status">Output: Empty</span>
+            <span class="info-meta" id="sha512-output-count">0 chars</span>
+          </div>
+        </CodeEditor>
+      </Card>
+    </div>
+  </ToolWorkspace>
+
+  <HowItWorks
+    heading="Generate a SHA-512 hash in three steps"
+    steps={[
+      {
+        title: "Paste your text",
+        desc: "Type or paste the message you want to hash — a password, a payload, a file checksum, anything.",
+      },
+      {
+        title: "Pick an encoding",
+        desc: "Hex is the standard for checksums and APIs; Base64 is more compact for tokens and URLs.",
+      },
+      {
+        title: "Hash & export",
+        desc: "Click Hash, then copy the digest or download it — the hashing never leaves your browser.",
+      },
+    ]}
+  />
+
+  <ToolDocs />
+  <CompareLinks />
+  <RelatedTools />
+  <ToolNudge />
+
+  <section class="faq-section" aria-labelledby="faq-title">
+    <Container size="narrow">
+      <div class="faq-header">
+        <span class="caption-mono section-eyebrow">FAQ</span>
+        <h2 id="faq-title" class="display-lg section-title">Quick answers</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary class="faq-summary">Is my text uploaded?</summary>
+          <p class="body-md faq-answer">
+            No. The hashing happens entirely in your browser using the native Web Crypto API.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">How is SHA-512 different from SHA-256?</summary>
+          <p class="body-md faq-answer">
+            Both belong to the SHA-2 family. SHA-512 produces a 512-bit digest (128 hex chars) vs
+            SHA-256's 256 bits (64 hex chars), and uses 64-bit word operations — which is why it's
+            the natural choice on 64-bit platforms. See the{" "}
+            <a href="/compare/sha-256-vs-sha-512">SHA-256 vs SHA-512 comparison</a>.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Can I use this for passwords?</summary>
+          <p class="body-md faq-answer">
+            SHA-512 is too fast for password storage. Use a deliberately slow, salted function like{" "}
+            <a href="/tools/bcrypt">bcrypt</a> instead.
+          </p>
+        </details>
+      </div>
+    </Container>
+  </section>
+</ToolShell>
+
+<script>
+  import { sha512Store } from "../../lib/tools/sha-512/store";
+  import {
+    setInput,
+    setEncoding,
+    clearAll,
+    convert,
+    loadSample,
+  } from "../../lib/tools/sha-512/actions";
+  import type { HashEncoding } from "../../lib/tools/sha-512/types";
+  import { debounce } from "../../shared/debounce";
+  import { announce, initAnnounce } from "../../shared/announce";
+  import { copyToClipboard } from "../../shared/clipboard";
+  import { downloadFile } from "../../shared/download";
+
+  const inTextarea = document.getElementById("sha512-input-textarea") as HTMLTextAreaElement | null;
+  const outTextarea = document.getElementById(
+    "sha512-output-textarea",
+  ) as HTMLTextAreaElement | null;
+  const inStatus = document.getElementById("sha512-input-status") as HTMLElement | null;
+  const inCount = document.getElementById("sha512-input-count") as HTMLElement | null;
+  const outStatus = document.getElementById("sha512-output-status") as HTMLElement | null;
+  const outCount = document.getElementById("sha512-output-count") as HTMLElement | null;
+  const runBtn = document.getElementById("sha512-run") as HTMLButtonElement | null;
+  const errorBanner = document.getElementById("sha512-error") as HTMLElement | null;
+  const statusDot = document.getElementById("sha512-status-dot") as HTMLElement | null;
+  const encodingBtns = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-encoding]"));
+
+  initAnnounce("sha512-announce");
+
+  const debouncedInput = debounce((value: string) => {
+    setInput(sha512Store, value);
+    convert(sha512Store);
+  }, 300);
+
+  sha512Store.subscribe((state) => {
+    const focused = inTextarea && document.activeElement === inTextarea;
+    if (inTextarea && inTextarea.value !== state.input && !focused) {
+      inTextarea.value = state.input;
+      inTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+
+    // Encoding reflection
+    encodingBtns.forEach((b) => {
+      const on = b.getAttribute("data-encoding") === state.encoding;
+      b.classList.toggle("is-active", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+
+    // Button state
+    if (runBtn) {
+      if (state.isRunning) {
+        runBtn.disabled = true;
+        runBtn.textContent = "Hashing…";
+      } else {
+        runBtn.disabled = false;
+        runBtn.textContent = "Hash";
+      }
+    }
+
+    // Input status
+    if (inStatus) {
+      if (state.input.trim() === "") {
+        inStatus.textContent = "Status: Empty";
+        inStatus.style.color = "";
+      } else if (state.error) {
+        inStatus.textContent = "Status: Error";
+        inStatus.style.color = "var(--color-error)";
+      } else {
+        inStatus.textContent = "Status: Ready";
+        inStatus.style.color = "var(--color-success)";
+      }
+    }
+    if (inCount) inCount.textContent = state.input.length.toLocaleString() + " chars";
+
+    // Output area
+    const hasResult = !!state.result;
+    const outText = hasResult ? (state.result as any)[state.encoding] : "";
+
+    if (outTextarea && outTextarea.value !== outText) {
+      outTextarea.value = outText;
+      outTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+
+    if (outStatus) {
+      if (!hasResult) {
+        outStatus.textContent = "Output: Empty";
+        outStatus.style.color = "";
+      } else {
+        outStatus.textContent = "Output: " + (state.encoding === "hex" ? "Hex" : "Base64");
+        outStatus.style.color = "var(--color-success)";
+      }
+    }
+    if (outCount) outCount.textContent = outText.length.toLocaleString() + " chars";
+
+    // Status dot
+    if (statusDot) {
+      statusDot.classList.remove("idle", "active", "error");
+      statusDot.classList.add(
+        state.isRunning ? "active" : hasResult ? "active" : state.error ? "error" : "idle",
+      );
+    }
+
+    // Error banner
+    if (errorBanner) {
+      if (state.error) (errorBanner as any).show?.(state.error);
+      else (errorBanner as any).hide?.();
+    }
+  });
+
+  if (inTextarea) inTextarea.addEventListener("input", () => debouncedInput(inTextarea.value));
+
+  if (runBtn) runBtn.addEventListener("click", () => convert(sha512Store));
+
+  encodingBtns.forEach((b) =>
+    b.addEventListener("click", () => {
+      setEncoding(sha512Store, b.getAttribute("data-encoding") as HashEncoding);
+    }),
+  );
+
+  const inputActions = document.getElementById("input-actions");
+  if (inputActions)
+    inputActions.addEventListener("tool-action", (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      if (action === "sample") {
+        loadSample(sha512Store);
+        announce("Sample loaded");
+      }
+      if (action === "clear") {
+        clearAll(sha512Store);
+        announce("Cleared");
+      }
+    });
+
+  const outputActions = document.getElementById("output-actions");
+  if (outputActions)
+    outputActions.addEventListener("tool-action", async (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      const st = sha512Store.get();
+      const out = st.result ? (st.result as any)[st.encoding] : "";
+
+      if (action === "copy") {
+        const ok = out ? await copyToClipboard(out) : false;
+        const btn = outputActions.querySelector("[data-action='copy']");
+        if (ok && btn) {
+          const orig = btn.textContent || "Copy";
+          btn.textContent = "Copied!";
+          announce("Hash copied");
+          setTimeout(() => {
+            btn.textContent = orig;
+          }, 1500);
+        }
+      }
+      if (action === "download") {
+        if (out) {
+          const ext = st.encoding === "hex" ? "hex" : "b64";
+          downloadFile(out, `sha512-hash.${ext}`, "text/plain;charset=utf-8;");
+          announce("Download started");
+        }
+      }
+    });
+
+  document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "SELECT") return;
+      e.preventDefault();
+      convert(sha512Store);
+    }
+  });
+</script>
+
+<style>
+  .workspace-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    gap: var(--spacing-md);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-hairline);
+    padding-bottom: var(--spacing-sm);
+  }
+  .column-title {
+    color: var(--color-mute);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+  .editor-info-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--color-hairline);
+    border-top: none;
+    border-bottom-left-radius: var(--rounded-sm);
+    border-bottom-right-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    padding: 6px var(--spacing-sm);
+    font-size: 11px;
+    color: var(--color-mute);
+    font-family: var(--font-sans);
+  }
+  .info-status {
+    font-weight: 500;
+  }
+  .settings-card {
+    padding: var(--spacing-lg);
+  }
+  .settings-title {
+    margin: 0;
+  }
+  .settings-divider {
+    height: 1px;
+    background-color: var(--color-hairline);
+    margin: var(--spacing-xs) 0;
+  }
+  .settings-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-md);
+  }
+  .settings-label {
+    color: var(--color-mute);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .sha512-readout {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .sha512-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+  }
+  .sha512-label {
+    color: var(--color-mute);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    flex: none;
+  }
+  .sha512-val {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-ink);
+    text-align: right;
+  }
+
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    overflow: hidden;
+    width: 100%;
+  }
+  .seg-btn {
+    flex: 1;
+    border: none;
+    background: var(--color-canvas);
+    color: var(--color-body);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 8px 6px;
+    cursor: pointer;
+    transition:
+      background-color 0.18s ease,
+      color 0.18s ease;
+  }
+  .seg-btn + .seg-btn {
+    border-left: 1px solid var(--color-hairline);
+  }
+  .seg-btn.is-active {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+  }
+  .seg-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+  }
+
+  .action-btn {
+    width: 100%;
+    margin-top: var(--spacing-sm);
+  }
+
+  .status-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-mute);
+    margin-top: auto;
+    padding-top: var(--spacing-md);
+  }
+  .status-indicator .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-hairline-strong);
+  }
+  .status-indicator .dot.active {
+    background-color: var(--color-accent);
+  }
+  .status-indicator .dot.error {
+    background-color: var(--color-error);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .faq-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .faq-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .faq-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft);
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  .faq-summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink);
+    padding: var(--spacing-xs) 0;
+    user-select: none;
+  }
+  .faq-summary:hover {
+    color: var(--color-accent);
+  }
+  .faq-answer {
+    margin-top: var(--spacing-sm);
+    font-size: 13px;
+    color: var(--color-body);
+    line-height: 1.6;
+  }
+  @media (min-width: 960px) {
+    .workspace-card :global(.editor-outer) {
+      flex: none;
+      height: 650px;
+      min-height: 650px;
+    }
+    .workspace-card :global(.editor-wrapper) {
+      height: 100%;
+    }
+  }
+  @media (max-width: 959px) {
+    .workspace-card :global(.editor-outer) {
+      height: 320px;
+      flex: 0 0 320px;
+      min-height: 0;
+    }
+    .workspace-card :global(.editor-wrapper) {
+      height: 100%;
+    }
+  }
+</style>

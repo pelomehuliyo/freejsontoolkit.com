@@ -593,4 +593,53 @@ export const COMPARISONS: Record<string, Comparison> = {
       "Neither is encryption — both are trivially reversible encodings, not protection. If you're Base64-ing " +
       "something sensitive, it's still readable to anyone who decodes it.",
   },
+
+  "sha-256-vs-sha-512": {
+    slug: "sha-256-vs-sha-512",
+    aId: "sha-256",
+    bId: "sha-512",
+    title: "SHA-256 vs SHA-512",
+    intro:
+      "SHA-256 and SHA-512 are the two workhorses of the SHA-2 family. They share the same design " +
+      "philosophy and both are cryptographically secure, but they produce digests of different sizes and " +
+      "run on different word widths. Neither is 'better' in the abstract — which one fits depends on the " +
+      "protocol you're matching and the platform you're on. Both tools run 100% in your browser.",
+    useA: {
+      heading: "Use SHA-256 when",
+      points: [
+        "You need to match an existing spec or protocol — TLS, certificates, and most checksums default to SHA-256.",
+        "You want a compact 32-byte digest (64 hex chars) that's easy to embed, store, and compare.",
+        "You're on a 32-bit platform or a constrained device where the smaller word width is a natural fit.",
+        "256 bits of security is already beyond brute-force reach — which it is for all practical purposes today.",
+      ],
+    },
+    useB: {
+      heading: "Use SHA-512 when",
+      points: [
+        "You need the larger 64-byte digest (128 hex chars) — a common choice for integrity checks on large files.",
+        "You're on a modern 64-bit processor, where SHA-512's 64-bit operations are typically faster than SHA-256.",
+        "Your spec or hash chain explicitly calls for SHA-512, so matching it matters more than the size.",
+        "You want the extra headroom for future-proofing against advances in cryptanalysis.",
+      ],
+    },
+    attributes: [
+      { label: "Family", a: "SHA-2", b: "SHA-2" },
+      { label: "Digest size", a: "256 bits · 32 bytes", b: "512 bits · 64 bytes" },
+      { label: "Hex length", a: "64 chars", b: "128 chars" },
+      { label: "Base64 length", a: "44 chars", b: "88 chars" },
+      { label: "Word width", a: "32-bit words", b: "64-bit words" },
+      { label: "Fastest on", a: "32-bit platforms", b: "64-bit platforms" },
+      { label: "Security level", a: "Collision-safe in practice", b: "Collision-safe with more headroom" },
+      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+    ],
+    verdict:
+      "Choose SHA-256 when you need to match an existing standard — it's the default everywhere from TLS to " +
+      "common checksums. Choose SHA-512 when the protocol calls for it, when you're on 64-bit hardware and want " +
+      "the larger digest, or when you want maximum headroom on file-integrity checks. For either, remember: a " +
+      "fast hash is for integrity, not passwords — reach for bcrypt when security against guessing is the job.",
+    note:
+      "Both are checksums, not password functions — their speed is a strength for integrity and a weakness " +
+      "against brute force. Neither tool uploads your input; hashing happens entirely in the browser via the " +
+      "Web Crypto API.",
+  },
 };
