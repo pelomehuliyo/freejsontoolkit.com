@@ -25,7 +25,7 @@ export type ToolStatus = "available" | "soon" | "planned";
  * this field, so a new tool declares its home here and appears everywhere.
  */
 export type ToolFamily =
-  "json" | "encoding" | "data-formats" | "developer-utilities" | "networking";
+  "json" | "encoding" | "data-formats" | "developer-utilities" | "networking" | "security";
 
 export interface ToolManifest {
   /** Stable id, matches the URL slug: /tools/<id> */
@@ -83,6 +83,11 @@ export const families: FamilyMeta[] = [
     id: "data-formats",
     label: "Data Formats",
     blurb: "Work with CSV, TSV and other tabular formats.",
+  },
+  {
+    id: "security",
+    label: "Security",
+    blurb: "Hashing, HMAC, and password security.",
   },
   {
     id: "developer-utilities",
@@ -371,6 +376,62 @@ export const tools: ToolManifest[] = [
     href: "/tools/regex-tester",
     keywords: ["regex tester", "regular expression tester", "test regex online", "regex match", "regex evaluator", "regex 101 alternative"],
     addedIn: "v1.5",
+  },
+  // ── Security ───────────────────────────────────────────────────────
+  {
+    id: "sha-256",
+    name: "SHA-256 Hash Generator",
+    tagline: "Generate secure SHA-256 hashes from text or files.",
+    category: "utilities",
+    family: "security",
+    status: "planned",
+    href: "/tools/sha-256",
+    keywords: ["sha 256 generator", "sha256 hash", "generate sha 256", "sha 256 online"],
+    addedIn: "v1.7",
+  },
+  {
+    id: "sha-512",
+    name: "SHA-512 Hash Generator",
+    tagline: "Generate SHA-512 hashes for high-security applications.",
+    category: "utilities",
+    family: "security",
+    status: "planned",
+    href: "/tools/sha-512",
+    keywords: ["sha 512 generator", "sha512 hash", "generate sha 512"],
+    addedIn: "v1.7",
+  },
+  {
+    id: "md5",
+    name: "MD5 Hash Generator",
+    tagline: "Generate MD5 checksums (legacy use only).",
+    category: "utilities",
+    family: "security",
+    status: "planned",
+    href: "/tools/md5",
+    keywords: ["md5 generator", "md5 hash", "md5 checksum", "md5 decrypt"],
+    addedIn: "v1.7",
+  },
+  {
+    id: "hmac",
+    name: "HMAC Generator",
+    tagline: "Generate Hash-based Message Authentication Codes.",
+    category: "utilities",
+    family: "security",
+    status: "planned",
+    href: "/tools/hmac",
+    keywords: ["hmac generator", "hmac sha256", "generate hmac online"],
+    addedIn: "v1.7",
+  },
+  {
+    id: "bcrypt",
+    name: "bcrypt Password Hasher",
+    tagline: "Generate secure bcrypt hashes for passwords.",
+    category: "utilities",
+    family: "security",
+    status: "available",
+    href: "/tools/bcrypt",
+    keywords: ["bcrypt generator", "bcrypt hash", "password hash generator", "bcrypt online"],
+    addedIn: "v1.7",
   },
 ];
 

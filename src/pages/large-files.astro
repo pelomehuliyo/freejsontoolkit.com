@@ -294,8 +294,8 @@ const faqs = [
   <script>
     (function () {
       if ("IntersectionObserver" in window) {
-        var els = Array.prototype.slice.call(document.querySelectorAll(".lf-reveal"));
-        var io = new IntersectionObserver(
+        const els = Array.prototype.slice.call(document.querySelectorAll(".lf-reveal"));
+        const io = new IntersectionObserver(
           function (entries) {
             entries.forEach(function (en) {
               if (en.isIntersecting) {
