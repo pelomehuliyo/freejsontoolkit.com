@@ -19,3 +19,24 @@ export async function hash(algo: HashAlgorithm, data: Uint8Array): Promise<Uint8
 export function textToBytes(text: string): Uint8Array {
     return new TextEncoder().encode(text);
 }
+
+/**
+ * HMAC with a shared secret key.
+ * Uses native Web Crypto (importKey + sign). MD5 is not supported for HMAC
+ * by Web Crypto, so algorithms are the SHA family only.
+ */
+export async function hmac(
+    algo: "SHA-256" | "SHA-512",
+    data: Uint8Array,
+    key: Uint8Array,
+): Promise<Uint8Array> {
+    const cryptoKey = await crypto.subtle.importKey(
+        "raw",
+        key.slice(),
+        { name: "HMAC", hash: algo },
+        false,
+        ["sign"],
+    );
+    const buffer = await crypto.subtle.sign("HMAC", cryptoKey, data.slice());
+    return new Uint8Array(buffer);
+}

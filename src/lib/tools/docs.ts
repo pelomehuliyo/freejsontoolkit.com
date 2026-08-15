@@ -1728,4 +1728,69 @@ role = engineer`,
       },
     ],
   },
+  "hmac": {
+    eyebrow: "Docs · Security",
+    conceptTitle: "A keyed message authentication code, computed locally",
+    concept:
+      "HMAC (Hash-based Message Authentication Code) combines a message with a shared secret key and " +
+      "hashes the result. It proves both integrity and authenticity at once: the message hasn't been " +
+      "tampered with, and whoever produced the MAC knew the key. Because the key is folded into the " +
+      "hash, an attacker who doesn't have it can't forge a matching MAC — something a plain checksum " +
+      "like SHA-256 can never promise. The result is the same size as the underlying hash: 64 hex " +
+      "chars for HMAC-SHA-256, 128 for HMAC-SHA-512. Signing runs entirely in your browser via the " +
+      "native Web Crypto API — the message and key never leave your machine. The key is a shared " +
+      "secret, so guard it like a password: whoever holds it can both sign and verify.",
+    lead: "before-after",
+    itemsLabel: "Things to know",
+    items: [
+      {
+        kind: "error",
+        title: "Both message and key are required",
+        body:
+          "With either side empty the tool reports empty output. Enter the message to authenticate " +
+          "and the shared secret key, then click Generate.",
+      },
+      {
+        kind: "note",
+        title: "A different key, a different MAC",
+        body:
+          "The MAC changes completely if the message or the key changes — even by one character. " +
+          "That's the point: it binds the two together so a tampered message is detected instantly.",
+      },
+      {
+        kind: "note",
+        title: "Not a checksum, not a password hash",
+        body:
+          "A plain checksum has no secret and proves nothing about who made it. HMAC needs a key and " +
+          "proves authenticity. For password storage use a slow, salted function like bcrypt — HMAC " +
+          "is for signing messages, not storing secrets.",
+      },
+      {
+        kind: "note",
+        title: "Keep the key secret",
+        body:
+          "The key is the security of the scheme. Treat it like a password: never paste real " +
+          "production keys into any online tool, and rotate keys if they might have leaked.",
+      },
+    ],
+    examplesLabel: "Try these",
+    examples: [
+      {
+        title: "A known vector",
+        note: "HMAC-SHA-256 of 'The quick brown fox jumps over the lazy dog' with key 'key' — a well-known, verifiable digest.",
+        snippet: `The quick brown fox jumps over the lazy dog`,
+      },
+      {
+        title: "Sign an API request",
+        note: "Authenticate a typical request body with a shared secret key.",
+        snippet: `POST /api/v1/orders
+{"customer": "acme", "total": 129.99, "currency": "USD"}`,
+      },
+      {
+        title: "A JSON webhook",
+        note: "Sign a webhook payload so the receiver can verify it came from you.",
+        snippet: `{"event": "payment.succeeded", "order_id": "ord_8f3k2", "amount": 5000, "ts": 1752624000}`,
+      },
+    ],
+  },
 };

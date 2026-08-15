@@ -417,7 +417,7 @@ export const tools: ToolManifest[] = [
     tagline: "Generate Hash-based Message Authentication Codes.",
     category: "utilities",
     family: "security",
-    status: "planned",
+    status: "available",
     href: "/tools/hmac",
     keywords: ["hmac generator", "hmac sha256", "generate hmac online"],
     addedIn: "v1.7",

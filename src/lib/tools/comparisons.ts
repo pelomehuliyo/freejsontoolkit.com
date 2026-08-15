@@ -691,4 +691,52 @@ export const COMPARISONS: Record<string, Comparison> = {
       "bcrypt is slow by design and salted per hash. Neither tool uploads your input; both run entirely " +
       "in the browser.",
   },
+
+  "sha-256-vs-hmac": {
+    slug: "sha-256-vs-hmac",
+    aId: "sha-256",
+    bId: "hmac",
+    title: "SHA-256 vs HMAC",
+    intro:
+      "SHA-256 and HMAC both produce a fixed-size digest, but they answer different questions. SHA-256 " +
+      "is an unkeyed checksum — anyone can compute it, so it detects accidental corruption but says " +
+      "nothing about who made the data. HMAC is the same hash family wrapped in a secret key — only " +
+      "parties who share the key can produce or verify it, so it proves authenticity as well as " +
+      "integrity. Both tools run 100% in your browser.",
+    useA: {
+      heading: "Use SHA-256 when",
+      points: [
+        "You need a checksum or fingerprint — file integrity, content addressing, or verifying a payload wasn't altered.",
+        "There is no shared secret — e.g. public downloads, cache keys, dedup, or matching an existing spec.",
+        "Anyone should be able to recompute and verify the digest, not just key holders.",
+        "You want the simplest possible hash with no key to manage.",
+      ],
+    },
+    useB: {
+      heading: "Use HMAC when",
+      points: [
+        "You must prove the data came from someone who knows the secret — API signing, webhooks, auth tokens.",
+        "The message or payload could be tampered with by an attacker, not just corrupted by accident.",
+        "You and the receiver already share a secret key you can keep out of the message itself.",
+        "You need to detect forgery, not just accidental damage.",
+      ],
+    },
+    attributes: [
+      { label: "Purpose", a: "Unkeyed checksum", b: "Keyed authentication code" },
+      { label: "Secret key", a: "None", b: "Required — shared between parties" },
+      { label: "Proves", a: "Integrity (not tampered)", b: "Integrity + authenticity (from the key holder)" },
+      { label: "Who can verify", a: "Anyone", b: "Anyone with the key" },
+      { label: "Output (SHA-256)", a: "64 hex chars", b: "64 hex chars" },
+      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+    ],
+    verdict:
+      "Use SHA-256 when there's no secret and you just need to detect corruption — file checksums, " +
+      "cache keys, content addressing. Reach for HMAC when authenticity matters: if an attacker could " +
+      "forge the data, an unkeyed hash proves nothing. When in doubt, integrity-only work → SHA-256, " +
+      "signed or authenticated exchanges → HMAC.",
+    note:
+      "HMAC is not a substitute for password hashing — it's for signing messages. For password storage " +
+      "use a slow, salted function like bcrypt. Neither tool uploads your input; both run entirely in " +
+      "the browser.",
+  },
 };

@@ -1,0 +1,686 @@
+---
+import ToolShell from "../../components/tools/ToolShell.astro";
+import ToolHeader from "../../components/tools/ToolHeader.astro";
+import CodeEditor from "../../components/tools/CodeEditor.astro";
+import ToolActions from "../../components/tools/ToolActions.astro";
+import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import HowItWorks from "../../components/tools/HowItWorks.astro";
+import Card from "../../components/Card.astro";
+import Button from "../../components/Button.astro";
+import Container from "../../components/Container.astro";
+import RelatedTools from "../../components/tools/RelatedTools.astro";
+import ToolDocs from "../../components/tools/ToolDocs.astro";
+import CompareLinks from "../../components/tools/CompareLinks.astro";
+import ToolNudge from "../../components/tools/ToolNudge.astro";
+import { ALGORITHMS, ENCODINGS } from "../../lib/tools/hmac/constants";
+---
+
+<ToolShell
+  title="HMAC Generator — Free, Local, Secure"
+  description="Generate HMAC message authentication codes from a message and secret key. 100% local, no upload. Supports SHA-256 and SHA-512 with Hex or Base64 output."
+  activePath="/tools/hmac"
+>
+  <ToolHeader
+    slot="header"
+    breadcrumbs={[{ label: "Home", href: "/" }, { label: "HMAC" }]}
+    title="HMAC Generator"
+    subtitle="Generate a keyed HMAC from a message and a secret — entirely in your browser."
+  />
+
+  <section class="dj-stage">
+    <Container size="wide">
+      {/* ── Two inputs: message + secret key ── */}
+      <div class="dj-inputs">
+        <Card variant="flat" class="workspace-card hmac-input-card">
+          <div class="card-header">
+            <span class="caption-mono column-title">MESSAGE</span>
+            <ToolActions id="msg-actions" variant="inset" actions={["sample", "clear"]} />
+          </div>
+          <CodeEditor
+            id="hmac-msg"
+            label="Message"
+            placeholder={"Paste the message to authenticate\n…or type any text you want to sign"}
+          >
+            <div class="editor-info-bar">
+              <span class="info-status" id="hmac-msg-status">Status: Empty</span>
+              <span class="info-meta" id="hmac-msg-count">0 chars</span>
+            </div>
+          </CodeEditor>
+        </Card>
+
+        <Card variant="flat" class="workspace-card hmac-input-card">
+          <div class="card-header">
+            <span class="caption-mono column-title">SECRET KEY</span>
+            <ToolActions id="key-actions" variant="inset" actions={["sample", "clear"]} />
+          </div>
+          <CodeEditor
+            id="hmac-key"
+            label="Secret key"
+            placeholder="Enter the shared secret key…"
+          >
+            <div class="editor-info-bar">
+              <span class="info-status" id="hmac-key-status">Status: Empty</span>
+              <span class="info-meta" id="hmac-key-count">0 chars</span>
+            </div>
+          </CodeEditor>
+        </Card>
+      </div>
+
+      {/* ── Controls ── */}
+      <Card variant="flat" class="workspace-card dj-controls-card">
+        <div class="dj-controls">
+          <div class="dj-opts">
+            <div class="hmac-opt">
+              <span class="hmac-opt-label caption-mono">algorithm</span>
+              <div class="seg seg-2" role="group" aria-label="Algorithm">
+                {
+                  ALGORITHMS.map((a, i) => (
+                    <button
+                      type="button"
+                      class:list={["seg-btn", { "is-active": i === 0 }]}
+                      data-hmac-alg={a.id}
+                      aria-pressed={i === 0 ? "true" : "false"}
+                    >
+                      {a.label}
+                    </button>
+                  ))
+                }
+              </div>
+            </div>
+            <div class="hmac-opt">
+              <span class="hmac-opt-label caption-mono">encoding</span>
+              <div class="seg seg-2" role="group" aria-label="Encoding">
+                {
+                  ENCODINGS.map((e, i) => (
+                    <button
+                      type="button"
+                      class:list={["seg-btn", { "is-active": i === 0 }]}
+                      data-hmac-enc={e.id}
+                      aria-pressed={i === 0 ? "true" : "false"}
+                    >
+                      {e.label}
+                    </button>
+                  ))
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="dj-actions">
+            <Button id="hmac-run" variant="primary" size="md" shape="square">
+              Generate
+            </Button>
+          </div>
+        </div>
+
+        <div class="hmac-readout" id="hmac-readout">
+          <div class="hmac-row">
+            <span class="hmac-label caption-mono">algorithm</span>
+            <span class="hmac-val" id="hmac-alg-val">HMAC-SHA-256</span>
+          </div>
+          <div class="hmac-row">
+            <span class="hmac-label caption-mono">keyed by</span>
+            <span class="hmac-val">secret key</span>
+          </div>
+          <div class="hmac-row">
+            <span class="hmac-label caption-mono">digest length</span>
+            <span class="hmac-val">64 hex chars</span>
+          </div>
+        </div>
+        <ErrorBanner id="hmac-error" />
+
+        <div class="status-banner caption">
+          <span class="status-indicator"><span class="dot idle" id="hmac-status-dot"></span></span
+          >
+          <span class="sr-only" id="hmac-announce" aria-live="polite"></span>
+          Local sandbox active
+        </div>
+      </Card>
+
+      {/* ── Output ── */}
+      <Card variant="flat" class="workspace-card hmac-out-card">
+        <div class="card-header">
+          <span class="caption-mono column-title">OUTPUT</span>
+          <ToolActions id="output-actions" variant="inset" actions={["copy", "download"]} />
+        </div>
+        <CodeEditor
+          id="hmac-output"
+          label="HMAC output"
+          placeholder="The MAC appears here…"
+          readonly
+        >
+          <div class="editor-info-bar">
+            <span class="info-status" id="hmac-output-status">Output: Empty</span>
+            <span class="info-meta" id="hmac-output-count">0 chars</span>
+          </div>
+        </CodeEditor>
+      </Card>
+    </Container>
+  </section>
+
+  <HowItWorks
+    heading="Generate an HMAC in three steps"
+    steps={[
+      {
+        title: "Enter a message",
+        desc: "Type or paste the message you want to authenticate — an API request, a payload, a token.",
+      },
+      {
+        title: "Add the secret key",
+        desc: "Enter the shared secret only you and the receiver know. The same key must be used to verify.",
+      },
+      {
+        title: "Pick & generate",
+        desc: "Choose SHA-256 or SHA-512, pick an encoding, then copy the MAC — the key never leaves your browser.",
+      },
+    ]}
+  />
+
+  <ToolDocs />
+  <CompareLinks />
+  <RelatedTools />
+  <ToolNudge />
+
+  <section class="faq-section" aria-labelledby="faq-title">
+    <Container size="narrow">
+      <div class="faq-header">
+        <span class="caption-mono section-eyebrow">FAQ</span>
+        <h2 id="faq-title" class="display-lg section-title">Quick answers</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary class="faq-summary">Is my message or key uploaded?</summary>
+          <p class="body-md faq-answer">
+            No. The MAC is computed entirely in your browser using the native Web Crypto API. Nothing
+            you enter leaves your machine.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">What is HMAC, exactly?</summary>
+          <p class="body-md faq-answer">
+            HMAC (Hash-based Message Authentication Code) is a hash computed with a secret key. It
+            proves two things at once: the message hasn't been altered, and whoever produced it knew
+            the key. Unlike a plain checksum, an attacker who doesn't know the key can't forge a
+            matching MAC.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Why do I need a secret key?</summary>
+          <p class="body-md faq-answer">
+            The key is what makes the MAC trustworthy. Anyone can compute SHA-256, but only parties
+            who share the secret can produce or verify an HMAC. Keep the key secret — treat it like
+            a password, and never paste real production keys into any tool.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Which algorithm should I use?</summary>
+          <p class="body-md faq-answer">
+            SHA-256 is the common default and matches most APIs and protocols. SHA-512 gives a larger
+            512-bit MAC and is a good choice for high-security or high-throughput setups. See the{" "}
+            <a href="/compare/sha-256-vs-hmac">SHA-256 vs HMAC comparison</a>.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Is HMAC the same as a hash?</summary>
+          <p class="body-md faq-answer">
+            Not quite. A plain hash like SHA-256 has no secret — anyone can compute it, so it detects
+            accidental corruption but not forgery. HMAC adds a key, so it also proves authenticity.
+            For password storage specifically, use a slow, salted function like{" "}
+            <a href="/tools/bcrypt">bcrypt</a> instead.
+          </p>
+        </details>
+      </div>
+    </Container>
+  </section>
+</ToolShell>
+
+<script>
+  import { hmacStore } from "../../lib/tools/hmac/store";
+  import {
+    setMessage,
+    setKey,
+    setAlgorithm,
+    setEncoding,
+    clearAll,
+    convert,
+    loadSample,
+  } from "../../lib/tools/hmac/actions";
+  import type { HmacAlgorithm, HmacEncoding } from "../../lib/tools/hmac/types";
+  import { debounce } from "../../shared/debounce";
+  import { announce, initAnnounce } from "../../shared/announce";
+  import { copyToClipboard } from "../../shared/clipboard";
+  import { downloadFile } from "../../shared/download";
+
+  const msgTextarea = document.getElementById("hmac-msg-textarea") as HTMLTextAreaElement | null;
+  const keyTextarea = document.getElementById("hmac-key-textarea") as HTMLTextAreaElement | null;
+  const outTextarea = document.getElementById("hmac-output-textarea") as HTMLTextAreaElement | null;
+  const msgStatus = document.getElementById("hmac-msg-status") as HTMLElement | null;
+  const msgCount = document.getElementById("hmac-msg-count") as HTMLElement | null;
+  const keyStatus = document.getElementById("hmac-key-status") as HTMLElement | null;
+  const keyCount = document.getElementById("hmac-key-count") as HTMLElement | null;
+  const outStatus = document.getElementById("hmac-output-status") as HTMLElement | null;
+  const outCount = document.getElementById("hmac-output-count") as HTMLElement | null;
+  const runBtn = document.getElementById("hmac-run") as HTMLButtonElement | null;
+  const errorBanner = document.getElementById("hmac-error") as HTMLElement | null;
+  const statusDot = document.getElementById("hmac-status-dot") as HTMLElement | null;
+  const algVal = document.getElementById("hmac-alg-val") as HTMLElement | null;
+  const algBtns = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-hmac-alg]"));
+  const encBtns = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-hmac-enc]"));
+
+  initAnnounce("hmac-announce");
+
+  const debouncedMsg = debounce((value: string) => {
+    setMessage(hmacStore, value);
+  }, 300);
+  const debouncedKey = debounce((value: string) => {
+    setKey(hmacStore, value);
+  }, 300);
+
+  hmacStore.subscribe((state) => {
+    // Input reflection
+    if (msgTextarea && msgTextarea.value !== state.message) {
+      msgTextarea.value = state.message;
+      msgTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+    if (keyTextarea && keyTextarea.value !== state.key) {
+      keyTextarea.value = state.key;
+      keyTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+
+    // Segmented controls
+    algBtns.forEach((b) => {
+      const on = b.getAttribute("data-hmac-alg") === state.algorithm;
+      b.classList.toggle("is-active", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    encBtns.forEach((b) => {
+      const on = b.getAttribute("data-hmac-enc") === state.encoding;
+      b.classList.toggle("is-active", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+
+    // Readout
+    if (algVal) algVal.textContent = `HMAC-${state.algorithm}`;
+
+    // Button state
+    if (runBtn) {
+      if (state.isRunning) {
+        runBtn.disabled = true;
+        runBtn.textContent = "Generating…";
+      } else {
+        runBtn.disabled = false;
+        runBtn.textContent = "Generate";
+      }
+    }
+
+    // Input statuses
+    if (msgStatus) {
+      if (state.message.trim() === "") {
+        msgStatus.textContent = "Status: Empty";
+        msgStatus.style.color = "";
+      } else if (state.error) {
+        msgStatus.textContent = "Status: Error";
+        msgStatus.style.color = "var(--color-error)";
+      } else {
+        msgStatus.textContent = "Status: Ready";
+        msgStatus.style.color = "var(--color-success)";
+      }
+    }
+    if (msgCount) msgCount.textContent = state.message.length.toLocaleString() + " chars";
+    if (keyStatus) {
+      if (state.key.trim() === "") {
+        keyStatus.textContent = "Status: Empty";
+        keyStatus.style.color = "";
+      } else if (state.error) {
+        keyStatus.textContent = "Status: Error";
+        keyStatus.style.color = "var(--color-error)";
+      } else {
+        keyStatus.textContent = "Status: Ready";
+        keyStatus.style.color = "var(--color-success)";
+      }
+    }
+    if (keyCount) keyCount.textContent = state.key.length.toLocaleString() + " chars";
+
+    // Output area
+    const hasResult = !!state.result;
+    const outText = hasResult ? (state.result as any)[state.encoding] : "";
+
+    if (outTextarea && outTextarea.value !== outText) {
+      outTextarea.value = outText;
+      outTextarea.dispatchEvent(new Event("editor-refresh"));
+    }
+
+    if (outStatus) {
+      if (!hasResult) {
+        outStatus.textContent = "Output: Empty";
+        outStatus.style.color = "";
+      } else {
+        outStatus.textContent = "Output: HMAC";
+        outStatus.style.color = "var(--color-success)";
+      }
+    }
+    if (outCount) outCount.textContent = outText.length.toLocaleString() + " chars";
+
+    // Status dot
+    if (statusDot) {
+      statusDot.classList.remove("idle", "active", "error");
+      statusDot.classList.add(
+        state.isRunning ? "active" : hasResult ? "active" : state.error ? "error" : "idle",
+      );
+    }
+
+    // Error banner
+    if (errorBanner) {
+      if (state.error) (errorBanner as any).show?.(state.error);
+      else (errorBanner as any).hide?.();
+    }
+  });
+
+  if (msgTextarea) msgTextarea.addEventListener("input", () => debouncedMsg(msgTextarea.value));
+  if (keyTextarea) keyTextarea.addEventListener("input", () => debouncedKey(keyTextarea.value));
+
+  if (runBtn) runBtn.addEventListener("click", () => convert(hmacStore));
+
+  algBtns.forEach((b) =>
+    b.addEventListener("click", () => {
+      setAlgorithm(hmacStore, b.getAttribute("data-hmac-alg") as HmacAlgorithm);
+    }),
+  );
+  encBtns.forEach((b) =>
+    b.addEventListener("click", () => {
+      setEncoding(hmacStore, b.getAttribute("data-hmac-enc") as HmacEncoding);
+    }),
+  );
+
+  const msgActions = document.getElementById("msg-actions");
+  const keyActions = document.getElementById("key-actions");
+  const applyInputAction = (e: Event) => {
+    const action = (e as CustomEvent).detail?.action;
+    if (action === "sample") {
+      loadSample(hmacStore);
+      announce("Sample loaded");
+    }
+    if (action === "clear") {
+      clearAll(hmacStore);
+      announce("Cleared");
+    }
+  };
+  if (msgActions)
+    msgActions.addEventListener("tool-action", (e: Event) => applyInputAction(e));
+  if (keyActions)
+    keyActions.addEventListener("tool-action", (e: Event) => applyInputAction(e));
+
+  const outputActions = document.getElementById("output-actions");
+  if (outputActions)
+    outputActions.addEventListener("tool-action", async (e: Event) => {
+      const action = (e as CustomEvent).detail?.action;
+      const st = hmacStore.get();
+      const out = st.result ? (st.result as any)[st.encoding] : "";
+
+      if (action === "copy") {
+        const ok = out ? await copyToClipboard(out) : false;
+        const btn = outputActions.querySelector("[data-action='copy']");
+        if (ok && btn) {
+          const orig = btn.textContent || "Copy";
+          btn.textContent = "Copied!";
+          announce("MAC copied");
+          setTimeout(() => {
+            btn.textContent = orig;
+          }, 1500);
+        }
+      }
+      if (action === "download") {
+        if (out) {
+          const ext = st.encoding === "hex" ? "hex" : "b64";
+          downloadFile(out, `hmac.${ext}`, "text/plain;charset=utf-8;");
+          announce("Download started");
+        }
+      }
+    });
+
+  document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "SELECT") return;
+      e.preventDefault();
+      convert(hmacStore);
+    }
+  });
+</script>
+
+<style>
+  .workspace-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    gap: var(--spacing-md);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-hairline);
+    padding-bottom: var(--spacing-sm);
+  }
+  .column-title {
+    color: var(--color-mute);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+  .editor-info-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--color-hairline);
+    border-top: none;
+    border-bottom-left-radius: var(--rounded-sm);
+    border-bottom-right-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    padding: 6px var(--spacing-sm);
+    font-size: 11px;
+    color: var(--color-mute);
+    font-family: var(--font-sans);
+  }
+  .info-status {
+    font-weight: 500;
+  }
+
+  /* ── dj-stage layout ── */
+  .dj-stage {
+    padding: var(--spacing-3xl) 0 var(--spacing-5xl);
+    background-color: var(--color-canvas-soft);
+    background-image: radial-gradient(var(--color-hairline) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .dj-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+  .hmac-input-card :global(.editor-outer) {
+    height: 300px;
+    min-height: 300px;
+    flex: 0 0 300px;
+  }
+  .hmac-input-card :global(.editor-wrapper) {
+    height: 100%;
+  }
+  .dj-controls-card {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+  .dj-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+  }
+  .dj-opts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+  .hmac-opt {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  .hmac-opt-label {
+    color: var(--color-mute);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .dj-actions {
+    display: flex;
+    gap: var(--spacing-xs);
+  }
+
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    overflow: hidden;
+  }
+  .seg-btn {
+    flex: 1;
+    border: none;
+    background: var(--color-canvas);
+    color: var(--color-body);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition:
+      background-color 0.18s ease,
+      color 0.18s ease;
+  }
+  .seg-btn + .seg-btn {
+    border-left: 1px solid var(--color-hairline);
+  }
+  .seg-btn.is-active {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+  }
+  .seg-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+  }
+
+  .hmac-readout {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .hmac-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+  }
+  .hmac-label {
+    color: var(--color-mute);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    flex: none;
+  }
+  .hmac-val {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-ink);
+    text-align: right;
+  }
+
+  .status-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-mute);
+    margin-top: auto;
+    padding-top: var(--spacing-md);
+  }
+  .status-indicator .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-hairline-strong);
+  }
+  .status-indicator .dot.active {
+    background-color: var(--color-accent);
+  }
+  .status-indicator .dot.error {
+    background-color: var(--color-error);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .faq-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .faq-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-3xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .faq-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas-soft);
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  .faq-summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink);
+    padding: var(--spacing-xs) 0;
+    user-select: none;
+  }
+  .faq-summary:hover {
+    color: var(--color-accent);
+  }
+  .faq-answer {
+    margin-top: var(--spacing-sm);
+    font-size: 13px;
+    color: var(--color-body);
+    line-height: 1.6;
+  }
+  @media (max-width: 959px) {
+    .dj-inputs {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
