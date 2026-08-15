@@ -6,6 +6,11 @@ import "../styles/global.css";
 import "../styles/tool-cards.css";
 import { tools, categoryLabel, familyLabel } from "../lib/tools/registry";
 
+// Latin subset woff2 — preloaded in <head> so the two core fonts render as soon
+// as the CSS is parsed instead of waiting for the full font source to load.
+import interLatin from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2";
+import jetbrainsMonoLatin from "@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2";
+
 interface Props {
   title?: string;
   description?: string;
@@ -90,6 +95,11 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
     <meta name="apple-mobile-web-app-title" content="Free JSON Toolkit" />
     <link rel="manifest" href="/site.webmanifest" />
 
+    <!-- Preload the latin subsets of our two variable fonts so FCP doesn't wait
+         on font discovery. crossorigin is required for font preloads. -->
+    <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={jetbrainsMonoLatin} as="font" type="font/woff2" crossorigin />
+
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content="#171717" />
 
@@ -125,21 +135,32 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
     <!-- Structured Data -->
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
-    <!-- Google Analytics (Production Only) -->
+    <!-- Google Analytics (Production Only) — deferred until first interaction
+         or a 3s timeout so it never blocks the main thread on load. -->
     {
       import.meta.env.PROD && (
-        <>
-          <script
-            async
-            src="https://www.googletagmanager.com/gtag/js?id=G-PYSH78FPX0"
-          ></script>
-          <script is:inline>
-            window.dataLayer = window.dataLayer || [];
-            function gtag() { dataLayer.push(arguments); }
-            gtag('js', new Date());
-            gtag('config', 'G-PYSH78FPX0');
-          </script>
-        </>
+        <script is:inline>
+          (function () {
+            var gtmLoaded = false;
+            function loadGA() {
+              if (gtmLoaded) return;
+              gtmLoaded = true;
+              window.dataLayer = window.dataLayer || [];
+              function gtag() { dataLayer.push(arguments); }
+              window.gtag = gtag;
+              gtag("js", new Date());
+              gtag("config", "G-PYSH78FPX0");
+              var s = document.createElement("script");
+              s.async = true;
+              s.src = "https://www.googletagmanager.com/gtag/js?id=G-PYSH78FPX0";
+              document.head.appendChild(s);
+            }
+            window.addEventListener("scroll", loadGA, { once: true, passive: true });
+            window.addEventListener("click", loadGA, { once: true });
+            window.addEventListener("touchstart", loadGA, { once: true, passive: true });
+            setTimeout(loadGA, 3000);
+          })();
+        </script>
       )
     }
   </head>

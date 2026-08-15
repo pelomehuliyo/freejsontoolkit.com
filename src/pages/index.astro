@@ -599,6 +599,9 @@ const guarantees = [
       gap: var(--spacing-3xl);
       align-items: center;
     }
+    .hp-hero-copy {
+      min-width: 0;
+    }
     .hp-kicker {
       display: inline-flex;
       align-items: center;
@@ -613,14 +616,17 @@ const guarantees = [
       border-radius: 50%;
       background-color: var(--color-accent);
       animation: hp-pulse 1.8s ease-in-out infinite;
+      will-change: opacity, transform;
     }
     @keyframes hp-pulse {
       0%,
       100% {
-        box-shadow: 0 0 0 0 rgba(33, 167, 138, 0.45);
+        opacity: 1;
+        transform: scale(1);
       }
       50% {
-        box-shadow: 0 0 0 5px rgba(33, 167, 138, 0);
+        opacity: 0.55;
+        transform: scale(1.45);
       }
     }
     .hp-h1 {
@@ -724,6 +730,7 @@ const guarantees = [
       border-radius: 50%;
       background-color: var(--color-accent);
       animation: hp-pulse 1.8s ease-in-out infinite;
+      will-change: opacity, transform;
     }
     .hp-lf-title {
       color: var(--color-on-primary);
@@ -980,6 +987,7 @@ const guarantees = [
       color: var(--color-accent);
       animation: hp-pulse 1.8s ease-in-out infinite;
       border-radius: 50%;
+      will-change: opacity, transform;
     }
     .hp-con-caret {
       color: var(--color-accent);
@@ -1194,6 +1202,7 @@ const guarantees = [
       gap: var(--spacing-md);
     }
     .hp-cat {
+      min-width: 0;
       padding: var(--spacing-lg);
       border: 1px solid var(--color-hairline);
       border-radius: var(--rounded-md);
@@ -1484,6 +1493,7 @@ const guarantees = [
       gap: var(--spacing-xs);
     }
     .hp-pipe-row {
+      min-width: 0;
       display: flex;
       align-items: center;
       gap: 12px;
