@@ -5,6 +5,7 @@ import ToolWorkspace from "../../components/tools/ToolWorkspace.astro";
 import CodeEditor from "../../components/tools/CodeEditor.astro";
 import ToolActions from "../../components/tools/ToolActions.astro";
 import ErrorBanner from "../../components/tools/ErrorBanner.astro";
+import HowItWorks from "../../components/tools/HowItWorks.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
@@ -12,19 +13,19 @@ import RelatedTools from "../../components/tools/RelatedTools.astro";
 import ToolDocs from "../../components/tools/ToolDocs.astro";
 import CompareLinks from "../../components/tools/CompareLinks.astro";
 import ToolNudge from "../../components/tools/ToolNudge.astro";
-import { ENCODINGS } from "../../lib/tools/sha-256/constants";
+import { COST_FACTORS } from "../../lib/tools/bcrypt/constants";
 ---
 
 <ToolShell
-  title="SHA-256 Hash Generator — Free, Local, Secure"
-  description="Generate SHA-256 hashes from text instantly. 100% local, no upload. Supports Hex and Base64 output."
-  activePath="/tools/sha-256"
+  title="bcrypt Password Hasher — Free, Local, Secure"
+  description="Generate secure bcrypt hashes for passwords with a configurable cost factor. 100% local, no upload. Salted, adaptive, worker-backed."
+  activePath="/tools/bcrypt"
 >
   <ToolHeader
     slot="header"
-    breadcrumbs={[{ label: "Home", href: "/" }, { label: "SHA-256" }]}
-    title="SHA-256 Hash Generator"
-    subtitle="Generate secure SHA-256 hashes from text — instantly, locally, and without uploading."
+    breadcrumbs={[{ label: "Home", href: "/" }, { label: "bcrypt" }]}
+    title="bcrypt Password Hasher"
+    subtitle="Generate a salted, adaptive bcrypt hash for any password — locally in your browser."
   />
 
   <ToolWorkspace slot="workspace" layout="3-col">
@@ -35,13 +36,13 @@ import { ENCODINGS } from "../../lib/tools/sha-256/constants";
           <ToolActions id="input-actions" variant="inset" actions={["sample", "clear"]} />
         </div>
         <CodeEditor
-          id="sha-input"
-          label="SHA-256 input"
-          placeholder={"Paste text to hash\n…or type a message to generate a checksum"}
+          id="bcrypt-input"
+          label="Password input"
+          placeholder={"Enter a password to hash\n…or type any secret to generate a bcrypt hash"}
         >
           <div class="editor-info-bar">
-            <span class="info-status" id="sha-input-status">Status: Empty</span>
-            <span class="info-meta" id="sha-input-count">0 chars</span>
+            <span class="info-status" id="bcrypt-input-status">Status: Empty</span>
+            <span class="info-meta" id="bcrypt-input-count">0 chars</span>
           </div>
         </CodeEditor>
       </Card>
@@ -53,51 +54,42 @@ import { ENCODINGS } from "../../lib/tools/sha-256/constants";
         <div class="settings-divider"></div>
 
         <div class="settings-group">
-          <span class="settings-label caption-mono">encoding</span>
-          <div class="seg seg-2" role="group" aria-label="Encoding">
-            {
-              ENCODINGS.map((e, i) => (
-                <button
-                  type="button"
-                  class:list={["seg-btn", { "is-active": i === 0 }]}
-                  data-encoding={e.id}
-                  aria-pressed={i === 0 ? "true" : "false"}
-                >
-                  {e.label}
-                </button>
-              ))
-            }
+          <label class="settings-label caption-mono" for="bcrypt-cost">cost factor</label>
+          <div class="select-wrapper">
+            <select id="bcrypt-cost" class="select-control">
+              {COST_FACTORS.map((c) => <option value={c.value}>{c.label}</option>)}
+            </select>
           </div>
+          <p class="settings-hint caption">
+            Higher is slower to compute and harder to brute-force. 10 is the common default.
+          </p>
         </div>
 
         <div class="settings-divider"></div>
 
-        <Button id="sha-run" variant="primary" size="lg" shape="square" class="action-btn">
-          Hash
+        <Button id="bcrypt-run" variant="primary" size="lg" shape="square" class="action-btn">
+          Generate
         </Button>
-        <div class="sha-readout" id="sha-readout">
-          <div class="sha-row">
-            <span class="sha-label caption-mono">algorithm</span>
-            <span class="sha-val">SHA-256</span>
+        <div class="bcrypt-readout" id="bcrypt-readout">
+          <div class="bcrypt-row">
+            <span class="bcrypt-label caption-mono">algorithm</span>
+            <span class="bcrypt-val">bcrypt</span>
           </div>
-          <div class="sha-row">
-            <span class="sha-label caption-mono">digest</span>
-            <span class="sha-val">256 bits</span>
+          <div class="bcrypt-row">
+            <span class="bcrypt-label caption-mono">salt</span>
+            <span class="bcrypt-val">random, embedded</span>
           </div>
-          <div class="sha-row">
-            <span class="sha-label caption-mono">hex length</span>
-            <span class="sha-val">64 chars</span>
-          </div>
-          <div class="sha-row">
-            <span class="sha-label caption-mono">base64 length</span>
-            <span class="sha-val">44 chars</span>
+          <div class="bcrypt-row">
+            <span class="bcrypt-label caption-mono">hash length</span>
+            <span class="bcrypt-val">60 chars</span>
           </div>
         </div>
-        <ErrorBanner id="sha-error" />
+        <ErrorBanner id="bcrypt-error" />
 
         <div class="status-banner caption">
-          <span class="status-indicator"><span class="dot idle" id="sha-status-dot"></span></span>
-          <span class="sr-only" id="sha-announce" aria-live="polite"></span>
+          <span class="status-indicator"><span class="dot idle" id="bcrypt-status-dot"></span></span
+          >
+          <span class="sr-only" id="bcrypt-announce" aria-live="polite"></span>
           Local sandbox active
         </div>
       </Card>
@@ -110,19 +102,37 @@ import { ENCODINGS } from "../../lib/tools/sha-256/constants";
           <ToolActions id="output-actions" variant="inset" actions={["copy", "download"]} />
         </div>
         <CodeEditor
-          id="sha-output"
-          label="SHA-256 output"
+          id="bcrypt-output"
+          label="bcrypt hash"
           placeholder="The hash appears here…"
           readonly
         >
           <div class="editor-info-bar">
-            <span class="info-status" id="sha-output-status">Output: Empty</span>
-            <span class="info-meta" id="sha-output-count">0 chars</span>
+            <span class="info-status" id="bcrypt-output-status">Output: Empty</span>
+            <span class="info-meta" id="bcrypt-output-count">0 chars</span>
           </div>
         </CodeEditor>
       </Card>
     </div>
   </ToolWorkspace>
+
+  <HowItWorks
+    heading="Generate a bcrypt hash in three steps"
+    steps={[
+      {
+        title: "Enter a password",
+        desc: "Type or paste the secret you want to hash — a password, a recovery code, an API secret.",
+      },
+      {
+        title: "Pick the cost factor",
+        desc: "Choose how expensive the hash should be. Higher cost means slower, safer hashing — 10 is the recommended default.",
+      },
+      {
+        title: "Generate & store",
+        desc: "Click Generate, then copy the hash. Every run draws a fresh random salt, so the same password never hashes twice alike.",
+      },
+    ]}
+  />
 
   <ToolDocs />
   <CompareLinks />
@@ -137,22 +147,36 @@ import { ENCODINGS } from "../../lib/tools/sha-256/constants";
       </div>
       <div class="faq-list">
         <details class="faq-item">
-          <summary class="faq-summary">Is my text uploaded?</summary>
+          <summary class="faq-summary">Is my password uploaded?</summary>
           <p class="body-md faq-answer">
-            No. The hashing happens entirely in your browser using the native Web Crypto API.
+            No. Hashing runs entirely in your browser, in a background worker. Nothing you enter
+            leaves your machine.
           </p>
         </details>
         <details class="faq-item">
-          <summary class="faq-summary">Can I use this for passwords?</summary>
+          <summary class="faq-summary">Why does the same password give a different hash?</summary>
           <p class="body-md faq-answer">
-            SHA-256 is too fast for password storage. Use a deliberately slow, salted function like{" "}
-            <a href="/tools/bcrypt">bcrypt</a> instead.
+            bcrypt embeds a random salt in every hash, so identical passwords produce different
+            hashes. That's intentional — it stops attackers from precomputing tables or spotting
+            duplicate passwords in a database.
           </p>
         </details>
         <details class="faq-item">
-          <summary class="faq-summary">Which encoding should I use?</summary>
+          <summary class="faq-summary">What does the cost factor do?</summary>
           <p class="body-md faq-answer">
-            Hex is standard for checksums and APIs. Base64 is more compact for URLs or tokens.
+            The cost factor controls how many rounds of key stretching bcrypt runs — 2^cost. Higher
+            values take longer to compute but make brute-forcing far more expensive. 10 is the
+            common default; use 11–12 for new systems. See the{" "}
+            <a href="/compare/sha-256-vs-bcrypt">SHA-256 vs bcrypt comparison</a>.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Is bcrypt right for checking a file checksum?</summary>
+          <p class="body-md faq-answer">
+            No. bcrypt is for password storage. For checksums, fingerprints, and content
+            verification use a fast hash like{" "}
+            <a href="/tools/sha-256">SHA-256</a> or{" "}
+            <a href="/tools/sha-512">SHA-512</a> instead.
           </p>
         </details>
       </div>
@@ -161,60 +185,50 @@ import { ENCODINGS } from "../../lib/tools/sha-256/constants";
 </ToolShell>
 
 <script>
-  import { sha256Store } from "../../lib/tools/sha-256/store";
-  import {
-    setInput,
-    setEncoding,
-    clearAll,
-    convert,
-    loadSample,
-  } from "../../lib/tools/sha-256/actions";
-  import type { HashEncoding } from "../../lib/tools/sha-256/types";
+  import { bcryptStore } from "../../lib/tools/bcrypt/store";
+  import { setInput, setRounds, clearAll, convert, loadSample } from "../../lib/tools/bcrypt/actions";
   import { debounce } from "../../shared/debounce";
   import { announce, initAnnounce } from "../../shared/announce";
   import { copyToClipboard } from "../../shared/clipboard";
   import { downloadFile } from "../../shared/download";
 
-  const inTextarea = document.getElementById("sha-input-textarea") as HTMLTextAreaElement | null;
-  const outTextarea = document.getElementById("sha-output-textarea") as HTMLTextAreaElement | null;
-  const inStatus = document.getElementById("sha-input-status") as HTMLElement | null;
-  const inCount = document.getElementById("sha-input-count") as HTMLElement | null;
-  const outStatus = document.getElementById("sha-output-status") as HTMLElement | null;
-  const outCount = document.getElementById("sha-output-count") as HTMLElement | null;
-  const runBtn = document.getElementById("sha-run") as HTMLButtonElement | null;
-  const errorBanner = document.getElementById("sha-error") as HTMLElement | null;
-  const statusDot = document.getElementById("sha-status-dot") as HTMLElement | null;
-  const encodingBtns = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-encoding]"));
+  const inTextarea = document.getElementById("bcrypt-input-textarea") as HTMLTextAreaElement | null;
+  const outTextarea = document.getElementById(
+    "bcrypt-output-textarea",
+  ) as HTMLTextAreaElement | null;
+  const inStatus = document.getElementById("bcrypt-input-status") as HTMLElement | null;
+  const inCount = document.getElementById("bcrypt-input-count") as HTMLElement | null;
+  const outStatus = document.getElementById("bcrypt-output-status") as HTMLElement | null;
+  const outCount = document.getElementById("bcrypt-output-count") as HTMLElement | null;
+  const runBtn = document.getElementById("bcrypt-run") as HTMLButtonElement | null;
+  const costSel = document.getElementById("bcrypt-cost") as HTMLSelectElement | null;
+  const errorBanner = document.getElementById("bcrypt-error") as HTMLElement | null;
+  const statusDot = document.getElementById("bcrypt-status-dot") as HTMLElement | null;
 
-  initAnnounce("sha-announce");
+  initAnnounce("bcrypt-announce");
 
   const debouncedInput = debounce((value: string) => {
-    setInput(sha256Store, value);
-    convert(sha256Store);
+    setInput(bcryptStore, value);
   }, 300);
 
-  sha256Store.subscribe((state) => {
+  bcryptStore.subscribe((state) => {
     const focused = inTextarea && document.activeElement === inTextarea;
     if (inTextarea && inTextarea.value !== state.input && !focused) {
       inTextarea.value = state.input;
       inTextarea.dispatchEvent(new Event("editor-refresh"));
     }
 
-    // Encoding reflection
-    encodingBtns.forEach((b) => {
-      const on = b.getAttribute("data-encoding") === state.encoding;
-      b.classList.toggle("is-active", on);
-      b.setAttribute("aria-pressed", on ? "true" : "false");
-    });
+    // Cost reflection
+    if (costSel && costSel.value !== String(state.rounds)) costSel.value = String(state.rounds);
 
     // Button state
     if (runBtn) {
       if (state.isRunning) {
         runBtn.disabled = true;
-        runBtn.textContent = "Hashing…";
+        runBtn.textContent = "Generating…";
       } else {
         runBtn.disabled = false;
-        runBtn.textContent = "Hash";
+        runBtn.textContent = "Generate";
       }
     }
 
@@ -235,7 +249,7 @@ import { ENCODINGS } from "../../lib/tools/sha-256/constants";
 
     // Output area
     const hasResult = !!state.result;
-    const outText = hasResult ? (state.result as any)[state.encoding] : "";
+    const outText = hasResult ? (state.result as string) : "";
 
     if (outTextarea && outTextarea.value !== outText) {
       outTextarea.value = outText;
@@ -247,7 +261,7 @@ import { ENCODINGS } from "../../lib/tools/sha-256/constants";
         outStatus.textContent = "Output: Empty";
         outStatus.style.color = "";
       } else {
-        outStatus.textContent = "Output: " + (state.encoding === "hex" ? "Hex" : "Base64");
+        outStatus.textContent = "Output: bcrypt";
         outStatus.style.color = "var(--color-success)";
       }
     }
@@ -270,24 +284,20 @@ import { ENCODINGS } from "../../lib/tools/sha-256/constants";
 
   if (inTextarea) inTextarea.addEventListener("input", () => debouncedInput(inTextarea.value));
 
-  if (runBtn) runBtn.addEventListener("click", () => convert(sha256Store));
+  if (costSel) costSel.addEventListener("change", () => setRounds(bcryptStore, Number(costSel.value)));
 
-  encodingBtns.forEach((b) =>
-    b.addEventListener("click", () => {
-      setEncoding(sha256Store, b.getAttribute("data-encoding") as HashEncoding);
-    }),
-  );
+  if (runBtn) runBtn.addEventListener("click", () => convert(bcryptStore));
 
   const inputActions = document.getElementById("input-actions");
   if (inputActions)
     inputActions.addEventListener("tool-action", (e: Event) => {
       const action = (e as CustomEvent).detail?.action;
       if (action === "sample") {
-        loadSample(sha256Store);
+        loadSample(bcryptStore);
         announce("Sample loaded");
       }
       if (action === "clear") {
-        clearAll(sha256Store);
+        clearAll(bcryptStore);
         announce("Cleared");
       }
     });
@@ -296,8 +306,7 @@ import { ENCODINGS } from "../../lib/tools/sha-256/constants";
   if (outputActions)
     outputActions.addEventListener("tool-action", async (e: Event) => {
       const action = (e as CustomEvent).detail?.action;
-      const st = sha256Store.get();
-      const out = st.result ? (st.result as any)[st.encoding] : "";
+      const out = bcryptStore.get().result ?? "";
 
       if (action === "copy") {
         const ok = out ? await copyToClipboard(out) : false;
@@ -313,8 +322,7 @@ import { ENCODINGS } from "../../lib/tools/sha-256/constants";
       }
       if (action === "download") {
         if (out) {
-          const ext = st.encoding === "hex" ? "hex" : "b64";
-          downloadFile(out, `sha256-hash.${ext}`, "text/plain;charset=utf-8;");
+          downloadFile(out, "bcrypt-hash.txt", "text/plain;charset=utf-8;");
           announce("Download started");
         }
       }
@@ -325,7 +333,7 @@ import { ENCODINGS } from "../../lib/tools/sha-256/constants";
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "SELECT") return;
       e.preventDefault();
-      convert(sha256Store);
+      convert(bcryptStore);
     }
   });
 </script>
@@ -390,7 +398,25 @@ import { ENCODINGS } from "../../lib/tools/sha-256/constants";
     font-size: 11px;
     font-weight: 600;
   }
-  .sha-readout {
+  .settings-hint {
+    color: var(--color-mute);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .select-wrapper {
+    width: 100%;
+  }
+  .select-control {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    color: var(--color-body);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .bcrypt-readout {
     margin-top: var(--spacing-md);
     padding: var(--spacing-sm);
     border: 1px solid var(--color-hairline);
@@ -400,57 +426,25 @@ import { ENCODINGS } from "../../lib/tools/sha-256/constants";
     flex-direction: column;
     gap: 6px;
   }
-  .sha-row {
+  .bcrypt-row {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     gap: var(--spacing-sm);
   }
-  .sha-label {
+  .bcrypt-label {
     color: var(--color-mute);
     font-size: 10px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     flex: none;
   }
-  .sha-val {
+  .bcrypt-val {
     font-family: var(--font-mono);
     font-size: 12px;
     font-weight: 600;
     color: var(--color-ink);
     text-align: right;
-  }
-
-  .seg {
-    display: inline-flex;
-    border: 1px solid var(--color-hairline);
-    border-radius: var(--rounded-sm);
-    overflow: hidden;
-    width: 100%;
-  }
-  .seg-btn {
-    flex: 1;
-    border: none;
-    background: var(--color-canvas);
-    color: var(--color-body);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    padding: 8px 6px;
-    cursor: pointer;
-    transition:
-      background-color 0.18s ease,
-      color 0.18s ease;
-  }
-  .seg-btn + .seg-btn {
-    border-left: 1px solid var(--color-hairline);
-  }
-  .seg-btn.is-active {
-    background-color: var(--color-primary);
-    color: var(--color-on-primary);
-  }
-  .seg-btn:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: -2px;
   }
 
   .action-btn {

@@ -130,6 +130,11 @@ export const RELATIONS: Record<string, Relation[]> = {
     { id: "bcrypt", label: "Hash passwords instead", kind: "next" },
     { id: "base64", label: "Encode result", kind: "pair" },
   ],
+  bcrypt: [
+    { id: "sha-256", label: "Fast checksum instead", kind: "pair" },
+    { id: "sha-512", label: "Stronger checksum", kind: "pair" },
+    { id: "base64", label: "Encode the hash", kind: "pair" },
+  ],
   "jwt-decoder": [
     { id: "base64", label: "Decode raw Base64", kind: "pair" },
     { id: "json-formatter", label: "Format the payload", kind: "next" },

@@ -642,4 +642,53 @@ export const COMPARISONS: Record<string, Comparison> = {
       "against brute force. Neither tool uploads your input; hashing happens entirely in the browser via the " +
       "Web Crypto API.",
   },
+
+  "sha-256-vs-bcrypt": {
+    slug: "sha-256-vs-bcrypt",
+    aId: "sha-256",
+    bId: "bcrypt",
+    title: "SHA-256 vs bcrypt",
+    intro:
+      "SHA-256 and bcrypt are both hash functions, but they solve opposite problems. SHA-256 is a fast " +
+      "checksum — the same input always gives the same digest, which makes it perfect for integrity. " +
+      "bcrypt is a slow, salted password hash — every run gives a different result, which makes it " +
+      "right for storing secrets. Pick by job: fingerprints and file verification want SHA-256; anything " +
+      "meant to resist offline guessing wants bcrypt. Both tools run 100% in your browser.",
+    useA: {
+      heading: "Use SHA-256 when",
+      points: [
+        "You need a checksum or fingerprint — file integrity, content addressing, or verifying a payload wasn't altered.",
+        "You must match an existing spec or protocol, where the exact digest format matters.",
+        "You want a fast, fixed-size digest (64 hex chars) regardless of input length.",
+        "You need to detect accidental corruption, not resist an attacker guessing a password.",
+      ],
+    },
+    useB: {
+      heading: "Use bcrypt when",
+      points: [
+        "You're storing passwords or secrets that must survive offline brute-force attacks.",
+        "You want per-user random salts so identical passwords never hash alike.",
+        "You can tune the workload — raise the cost factor as hardware gets faster.",
+        "You need an adaptive hash you can re-hash and compare by running the check again.",
+      ],
+    },
+    attributes: [
+      { label: "Purpose", a: "Fast integrity checksum", b: "Slow password hash" },
+      { label: "Salt", a: "None — deterministic", b: "Random, embedded in every hash" },
+      { label: "Same input twice", a: "Identical digest", b: "Different hash each time" },
+      { label: "Output", a: "64 hex chars", b: "60-char string ($2b$10$…)" },
+      { label: "Speed", a: "Fast by design", b: "Deliberately slow (2^cost rounds)" },
+      { label: "Best for", a: "Files, payloads, fingerprints", b: "Passwords, secrets, tokens" },
+      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+    ],
+    verdict:
+      "Reach for SHA-256 when you need a fast, repeatable checksum — verifying files, payloads, or that " +
+      "nothing changed in transit. Reach for bcrypt when the input is a password or secret that an attacker " +
+      "might try to guess: its salt defeats precomputed tables, and its tunable cost makes each guess " +
+      "expensive. When in doubt, integrity work → SHA-256, credential storage → bcrypt.",
+    note:
+      "Using a fast hash like SHA-256 on passwords lets attackers test billions of guesses per second. " +
+      "bcrypt is slow by design and salted per hash. Neither tool uploads your input; both run entirely " +
+      "in the browser.",
+  },
 };

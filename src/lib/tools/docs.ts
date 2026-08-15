@@ -1663,4 +1663,69 @@ role = engineer`,
       },
     ],
   },
-  };
+  "bcrypt": {
+    eyebrow: "Docs · Security",
+    conceptTitle: "A salted, adaptive password hash, computed locally",
+    concept:
+      "bcrypt is a password-hashing function built to be deliberately slow and to resist guessing. " +
+      "Instead of a fixed-size checksum, it runs the input through many rounds of key stretching (2^cost " +
+      "— with the default cost of 10 that's 1,024 rounds), mixing in a fresh random salt every time. The " +
+      "result is a 60-character string that embeds the algorithm, cost, salt, and hash, like " +
+      "$2b$10$Kixh0btLXwHixE3GB4m3dOGnUjZQ5L6Za3nHfqHXzJLy9gL8Ywym. Because the salt is unique per " +
+      "hash, the same password never produces the same hash twice — which stops precomputed tables and " +
+      "lets you spot nothing about two users sharing a password. Hashing runs entirely in your browser, " +
+      "in a background worker, so nothing is uploaded and the UI stays responsive even at high cost " +
+      "factors.",
+    lead: "before-after",
+    itemsLabel: "Things to know",
+    items: [
+      {
+        kind: "error",
+        title: "Empty input hashes nothing",
+        body:
+          "With nothing to hash the tool reports empty output. Enter a password first, then click " +
+          "Generate — the result always comes back as a 60-char bcrypt string.",
+      },
+      {
+        kind: "note",
+        title: "The same input never hashes twice alike",
+        body:
+          "Every Generate call draws a fresh random salt, so rerunning the same password gives a " +
+          "different hash — both are valid. Compare by re-hashing, not by string equality.",
+      },
+      {
+        kind: "note",
+        title: "Higher cost, safer hashes",
+        body:
+          "The cost factor controls the workload (2^cost rounds). Higher values take longer to " +
+          "compute — a fraction of a second for you, months of GPU time for an attacker. 10 is the " +
+          "common default; raise it when hardware gets faster.",
+      },
+      {
+        kind: "note",
+        title: "Not a checksum",
+        body:
+          "bcrypt is for password storage, not integrity checking. For content checksums and " +
+          "fingerprints use a fast hash like SHA-256 or SHA-512.",
+      },
+    ],
+    examplesLabel: "Try these",
+    examples: [
+      {
+        title: "A simple password",
+        note: "Hash a typical password and see the 60-char bcrypt string with its embedded salt.",
+        snippet: `correct horse battery staple`,
+      },
+      {
+        title: "An API secret",
+        note: "Longer secrets hash just the same — the output length never changes.",
+        snippet: `my-secret-api-token`,
+      },
+      {
+        title: "High-cost hardening",
+        note: "Set the cost factor to 12 and re-generate — note the $2b$12$ prefix and the pause.",
+        snippet: `my-very-secret-password`,
+      },
+    ],
+  },
+};
