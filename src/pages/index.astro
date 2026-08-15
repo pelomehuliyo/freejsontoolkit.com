@@ -563,11 +563,18 @@ const guarantees = [
               }
             });
           },
-          { threshold: 0.12 },
+          { threshold: 0.05 },
         );
         els.forEach(function (el, i) {
-          el.style.transitionDelay = Math.min(i, 8) * 60 + "ms";
-          io.observe(el);
+          // Sections already on screen at load appear immediately — no hidden
+          // state, no transition — so first paint never waits on the reveal
+          // machinery. Only below-the-fold sections get the entrance motion.
+          if (el.getBoundingClientRect().top < window.innerHeight) {
+            el.classList.add("is-in");
+          } else {
+            el.style.transitionDelay = Math.min(i, 4) * 40 + "ms";
+            io.observe(el);
+          }
         });
       }
     })();
@@ -615,19 +622,6 @@ const guarantees = [
       height: 7px;
       border-radius: 50%;
       background-color: var(--color-accent);
-      animation: hp-pulse 1.8s ease-in-out infinite;
-      will-change: opacity, transform;
-    }
-    @keyframes hp-pulse {
-      0%,
-      100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-      50% {
-        opacity: 0.55;
-        transform: scale(1.45);
-      }
     }
     .hp-h1 {
       letter-spacing: -0.035em;
@@ -708,8 +702,8 @@ const guarantees = [
       height: 2px;
       z-index: 3;
       background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
-      transform: translateX(-100%);
-      animation: hp-scan 3.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      opacity: 0;
+      pointer-events: none;
     }
     .hp-lf-left {
       display: flex;
@@ -729,8 +723,6 @@ const guarantees = [
       height: 7px;
       border-radius: 50%;
       background-color: var(--color-accent);
-      animation: hp-pulse 1.8s ease-in-out infinite;
-      will-change: opacity, transform;
     }
     .hp-lf-title {
       color: var(--color-on-primary);
@@ -823,12 +815,6 @@ const guarantees = [
     .hp-sb-caret {
       color: var(--color-accent);
       font-family: var(--font-mono);
-      animation: hp-blink 1.05s step-end infinite;
-    }
-    @keyframes hp-blink {
-      50% {
-        opacity: 0;
-      }
     }
     .hp-sb-keys {
       display: inline-flex;
@@ -911,24 +897,8 @@ const guarantees = [
       height: 2px;
       z-index: 3;
       background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
-      transform: translateX(-100%);
-      animation: hp-scan 3.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-    }
-    @keyframes hp-scan {
-      0% {
-        transform: translateX(-100%);
-        opacity: 0;
-      }
-      12% {
-        opacity: 0.9;
-      }
-      60% {
-        opacity: 0.9;
-      }
-      100% {
-        transform: translateX(100%);
-        opacity: 0;
-      }
+      opacity: 0;
+      pointer-events: none;
     }
     .hp-con-bar {
       display: flex;
@@ -958,18 +928,8 @@ const guarantees = [
     }
     .hp-con-line {
       margin: 0;
-      animation: hp-line-in 0.4s cubic-bezier(0.2, 0.7, 0.3, 1) both;
-      animation-delay: calc(var(--i) * 0.11s + 0.1s);
-    }
-    @keyframes hp-line-in {
-      from {
-        opacity: 0;
-        transform: translateY(5px);
-      }
-      to {
-        opacity: 1;
-        transform: none;
-      }
+      opacity: 1;
+      transform: none;
     }
     .hp-prompt {
       color: var(--color-accent);
@@ -985,13 +945,10 @@ const guarantees = [
     }
     .hp-live {
       color: var(--color-accent);
-      animation: hp-pulse 1.8s ease-in-out infinite;
       border-radius: 50%;
-      will-change: opacity, transform;
     }
     .hp-con-caret {
       color: var(--color-accent);
-      animation: hp-blink 1.05s step-end infinite;
     }
 
     /* ── shared section heads ── */
@@ -1573,12 +1530,36 @@ const guarantees = [
       opacity: 0;
       transform: translateY(14px);
       transition:
-        opacity 0.5s ease,
-        transform 0.5s ease;
+        opacity 0.3s ease,
+        transform 0.3s ease;
     }
     .hp-reveal.is-in {
       opacity: 1;
       transform: none;
+    }
+
+    /* ── below-the-fold: skip layout/paint until scrolled into view.
+         contain-intrinsic-size reserves each section's height so the
+         scrollbar doesn't jump as sections render on the way down. ── */
+    .hp-directory {
+      content-visibility: auto;
+      contain-intrinsic-size: auto 1400px;
+    }
+    .hp-compare {
+      content-visibility: auto;
+      contain-intrinsic-size: auto 600px;
+    }
+    .hp-trust {
+      content-visibility: auto;
+      contain-intrinsic-size: auto 480px;
+    }
+    .hp-pipeline {
+      content-visibility: auto;
+      contain-intrinsic-size: auto 460px;
+    }
+    .hp-faq {
+      content-visibility: auto;
+      contain-intrinsic-size: auto 640px;
     }
 
     /* ── responsive ── */

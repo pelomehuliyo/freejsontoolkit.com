@@ -333,12 +333,6 @@ const emptyValue = readonly
   }
   .ee-caret {
     color: var(--color-accent);
-    animation: ee-blink 1.1s step-end infinite;
-  }
-  @keyframes ee-blink {
-    50% {
-      opacity: 0;
-    }
   }
 
   .ee-value {
@@ -366,20 +360,9 @@ const emptyValue = readonly
     height: 6px;
     border-radius: 50%;
     background-color: var(--color-accent);
-    animation: ee-pulse 1.8s ease-in-out infinite;
   }
   .ee-dot.idle {
     background-color: var(--color-hairline-strong);
-    animation: none;
-  }
-  @keyframes ee-pulse {
-    0%,
-    100% {
-      box-shadow: 0 0 0 0 rgba(33, 167, 138, 0.4);
-    }
-    50% {
-      box-shadow: 0 0 0 4px rgba(33, 167, 138, 0);
-    }
   }
 
   /* the per-tool example, rendered as a faint watermark; lifts a hair on hover

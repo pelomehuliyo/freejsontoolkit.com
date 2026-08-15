@@ -70,6 +70,15 @@ const { title, description, activePath = "/tools", noindex = false } = Astro.pro
     flex-direction: column;
   }
 
+  /* Perf: every below-the-fold section (how it works, docs, compare, related,
+     FAQ) skips render until it nears the viewport. The .nudge is excluded so
+     its position:fixed keeps working against the viewport (content-visibility
+     would otherwise make the container its containing block). */
+  .tool-content > :not(.nudge) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 900px;
+  }
+
   .sr-only {
     position: absolute;
     width: 1px;

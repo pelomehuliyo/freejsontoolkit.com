@@ -94,6 +94,9 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="Free JSON Toolkit" />
     <link rel="manifest" href="/site.webmanifest" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
     <!-- Preload the latin subsets of our two variable fonts so FCP doesn't wait
          on font discovery. crossorigin is required for font preloads. -->
@@ -158,7 +161,10 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
             window.addEventListener("scroll", loadGA, { once: true, passive: true });
             window.addEventListener("click", loadGA, { once: true });
             window.addEventListener("touchstart", loadGA, { once: true, passive: true });
-            setTimeout(loadGA, 3000);
+            // Generous fallback so GA never lands inside the Core Web Vitals
+            // main-thread window for a passive visit; interaction loads it far
+            // earlier when there's anything to measure.
+            setTimeout(loadGA, 10000);
           })();
         </script>
       )
@@ -664,6 +670,20 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
         }
       })();
     </script>
+
+    <!-- Service worker registration (prod only) — fired on window load so the
+         precache install never competes with first paint. -->
+    {
+      import.meta.env.PROD && (
+        <script is:inline>
+          if ("serviceWorker" in navigator) {
+            window.addEventListener("load", function () {
+              navigator.serviceWorker.register("/sw.js").catch(function () {});
+            });
+          }
+        </script>
+      )
+    }
   </body>
 </html>
 

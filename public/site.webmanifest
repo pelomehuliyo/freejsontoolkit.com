@@ -1,6 +1,12 @@
 {
   "name": "Free JSON Toolkit",
   "short_name": "JSON Toolkit",
+  "description": "A suite of clean, developer-first, JSON tools to transform, validate, and format data — 100% in your browser, works offline.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -17,5 +23,5 @@
   ],
   "theme_color": "#27C79A",
   "background_color": "#FFFFFF",
-  "display": "standalone"
+  "categories": ["developer tools", "utilities"]
 }

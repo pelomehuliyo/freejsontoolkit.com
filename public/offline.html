@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>You're offline — Free JSON Toolkit</title>
+    <style>
+      :root {
+        --ink: #171717;
+        --body: #4d4d4d;
+        --accent: #21a78a;
+        --accent-hover: #1b8971;
+        --hairline: #ebebeb;
+        --canvas: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 24px;
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        text-align: center;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border: 1px solid var(--hairline);
+        border-radius: 100px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--body);
+      }
+
+      .badge-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+
+      h1 {
+        margin: 24px 0 8px;
+        font-size: clamp(28px, 5vw, 40px);
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+      }
+
+      p {
+        margin: 0 auto;
+        max-width: 480px;
+        font-size: 16px;
+        line-height: 1.6;
+        color: var(--body);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 32px;
+      }
+
+      a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 20px;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background-color 0.15s ease, border-color 0.15s ease;
+      }
+
+      .primary {
+        background: var(--accent);
+        color: #ffffff;
+      }
+
+      .primary:hover {
+        background: var(--accent-hover);
+      }
+
+      .secondary {
+        border: 1px solid var(--hairline);
+        color: var(--ink);
+      }
+
+      .secondary:hover {
+        border-color: var(--accent);
+      }
+
+      .note {
+        margin-top: 32px;
+        font-size: 13px;
+        color: var(--body);
+      }
+    </style>
+  </head>
+  <body>
+    <span class="badge" role="status">
+      <span class="badge-dot" aria-hidden="true"></span>
+      Offline
+    </span>
+    <h1>You're offline</h1>
+    <p>
+      This page hasn't been saved to your device yet. The rest of the toolkit
+      still works without a connection — head home or browse the tools.
+    </p>
+    <div class="actions">
+      <a class="primary" href="/">Go to Home</a>
+      <a class="secondary" href="/tools">Browse tools</a>
+    </div>
+    <p class="note">Reconnect to load this page — the toolkit runs 100% locally.</p>
+  </body>
+</html>
