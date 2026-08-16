@@ -179,4 +179,34 @@ export const FAQS: Record<string, Faq[]> = {
     { q: "What about comments, dates, and anchors?", a: "Comments are dropped (JSON has nowhere to keep them), YAML timestamps become ISO-8601 strings (JSON has no date type), and anchors / aliases ( &id / *id ) are resolved to their expanded values." },
     { q: "Which YAML version is supported?", a: "YAML 1.2 with the core schema — the modern spec, and the same parser the JSON → YAML tool uses, so a round trip stays consistent in both directions." },
   ],
+  "sha-512": [
+    {
+      q: "Is my text uploaded?",
+      a: "No. The hashing happens entirely in your browser using the native Web Crypto API.",
+    },
+    {
+      q: "What is SHA-512?",
+      a: "SHA-512 is a one-way cryptographic hash function that produces a 512-bit digest, usually shown as 128 hexadecimal characters. It is used for integrity checks, digital signatures, and high-security hashing.",
+    },
+    {
+      q: "Can SHA-512 be decrypted?",
+      a: "No. SHA-512 is one-way by design. The hash cannot be decrypted back to the original input. Weak inputs can still be discovered by guessing and hashing many candidates.",
+    },
+    {
+      q: "Is SHA-512 secure?",
+      a: "Yes, for hashing and integrity use. SHA-512 has no practical collision attack known. It is not fully quantum-proof, but it provides a large security margin. For passwords, use bcrypt instead.",
+    },
+    {
+      q: "SHA-256 vs SHA-512: which should I use?",
+      a: "Both are secure. SHA-256 is shorter and widely adopted. SHA-512 gives a longer digest and can be faster on 64-bit systems. Use SHA-512 when you want extra margin; use SHA-256 for compatibility.",
+    },
+    {
+      q: "What is the output length of SHA-512?",
+      a: "SHA-512 outputs 512 bits: 64 raw bytes, 128 hex characters, or about 88 Base64 characters.",
+    },
+    {
+      q: "Can I use SHA-512 for passwords?",
+      a: "No. SHA-512 is too fast for password storage. Use a slow password hash such as bcrypt with a unique salt.",
+    },
+  ],
 };

@@ -1,0 +1,356 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Container from "../../components/Container.astro";
+import { ARTICLES, getArticle } from "../../lib/learn/articles";
+import { getTool } from "../../lib/tools/registry";
+
+export function getStaticPaths() {
+  return ARTICLES.map((article) => ({
+    params: { slug: article.slug },
+    props: { article },
+  }));
+}
+
+const { article } = Astro.props;
+const tool = getTool(article.toolId);
+const canonicalPath = `/learn/${article.slug}`;
+
+// Build FAQ JSON-LD for this article
+const faqSchema =
+  article.faq.length > 0
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: article.faq.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      }
+    : null;
+
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  headline: article.title,
+  description: article.description,
+  author: { "@type": "Organization", name: "Free JSON Toolkit" },
+  publisher: { "@type": "Organization", name: "Free JSON Toolkit" },
+};
+---
+
+<BaseLayout
+  title={`${article.title} — Free JSON Toolkit`}
+  description={article.description}
+  activePath="/learn"
+>
+  <!-- Article JSON-LD -->
+  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+  {faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
+
+  <article class="learn-article">
+    <Container size="narrow">
+      <!-- Breadcrumb -->
+      <nav class="learn-breadcrumb caption-mono" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span class="sep">/</span>
+        <a href="/learn">Learn</a>
+        <span class="sep">/</span>
+        <span class="current">{article.title}</span>
+      </nav>
+
+      <!-- Header -->
+      <header class="learn-header">
+        <span class="caption-mono section-eyebrow">{article.eyebrow}</span>
+        <h1 class="display-md learn-article-title">{article.title}</h1>
+        <p class="body-md learn-question">{article.heroQuestion}</p>
+      </header>
+
+      <!-- Short Answer Box -->
+      <div class="answer-box">
+        <span class="caption-mono answer-label">SHORT ANSWER</span>
+        <p class="body-md answer-text">{article.shortAnswer}</p>
+      </div>
+
+      <!-- Body Sections -->
+      {
+        article.sections.map((section) => (
+          <section class="learn-section">
+            <h2 class="body-lg-strong section-heading">{section.heading}</h2>
+            <p class="body-md section-body">{section.body}</p>
+            {section.list && (
+              <ul class="section-list">
+                {section.list.map((item) => (
+                  <li class="body-sm">{item}</li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ))
+      }
+
+      <!-- CTA to tool -->
+      <div class="tool-cta">
+        <span class="caption-mono cta-label">TRY IT LOCALLY</span>
+        <p class="body-sm cta-text">
+          {
+            tool
+              ? `Generate hashes instantly with our ${tool.name}. No upload, no server.`
+              : "Try our tool — no upload, no server."
+          }
+        </p>
+        {
+          tool && (
+            <a href={tool.href} class="cta-btn">
+              Open {tool.name} →
+            </a>
+          )
+        }
+      </div>
+
+      <!-- Related tools -->
+      {
+        article.relatedToolIds.length > 0 && (
+          <div class="related-tools">
+            <span class="caption-mono related-label">RELATED TOOLS</span>
+            <div class="related-links">
+              {article.relatedToolIds.map((id) => {
+                const t = getTool(id);
+                return t ? (
+                  <a href={t.href} class="related-link caption-mono">
+                    {t.name}
+                  </a>
+                ) : null;
+              })}
+            </div>
+          </div>
+        )
+      }
+
+      <!-- FAQ -->
+      {
+        article.faq.length > 0 && (
+          <section class="learn-faq" aria-labelledby="faq-title">
+            <h2 id="faq-title" class="body-lg-strong faq-heading">
+              FAQ
+            </h2>
+            <div class="faq-list">
+              {article.faq.map((f) => (
+                <details class="faq-item">
+                  <summary class="faq-summary">{f.q}</summary>
+                  <p class="body-sm faq-answer">{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        )
+      }
+
+      <!-- Comparison links -->
+      {
+        article.comparisonSlugs.length > 0 && (
+          <div class="comparison-links">
+            <span class="caption-mono comparison-label">COMPARE</span>
+            <div class="comparison-items">
+              {article.comparisonSlugs.map((slug) => (
+                <a href={`/compare/${slug}`} class="comparison-link caption-mono">
+                  {slug.replace(/-/g, " ")}
+                </a>
+              ))}
+            </div>
+          </div>
+        )
+      }
+    </Container>
+  </article>
+</BaseLayout>
+
+<style>
+  .learn-article {
+    padding: var(--spacing-3xl) 0 var(--spacing-5xl);
+  }
+  .learn-breadcrumb {
+    color: var(--color-mute);
+    margin-bottom: var(--spacing-xl);
+    font-size: 11px;
+  }
+  .learn-breadcrumb a {
+    color: var(--color-mute);
+    text-decoration: none;
+  }
+  .learn-breadcrumb a:hover {
+    color: var(--color-accent);
+  }
+  .learn-breadcrumb .sep {
+    margin: 0 6px;
+    opacity: 0.5;
+  }
+  .learn-breadcrumb .current {
+    color: var(--color-ink);
+  }
+  .learn-header {
+    margin-bottom: var(--spacing-xl);
+  }
+  .learn-article-title {
+    color: var(--color-ink);
+    margin: var(--spacing-xs) 0;
+  }
+  .learn-question {
+    color: var(--color-body);
+    font-style: italic;
+  }
+  .answer-box {
+    border: 1px solid var(--color-accent);
+    border-radius: var(--rounded-sm);
+    padding: var(--spacing-lg);
+    background-color: var(--color-canvas-soft);
+    margin-bottom: var(--spacing-2xl);
+  }
+  .answer-label {
+    color: var(--color-accent);
+    display: block;
+    margin-bottom: var(--spacing-xs);
+  }
+  .answer-text {
+    color: var(--color-ink);
+    margin: 0;
+    line-height: 1.6;
+  }
+  .learn-section {
+    margin-bottom: var(--spacing-2xl);
+  }
+  .section-heading {
+    color: var(--color-ink);
+    margin-bottom: var(--spacing-sm);
+  }
+  .section-body {
+    color: var(--color-body);
+    line-height: 1.7;
+  }
+  .section-list {
+    margin-top: var(--spacing-sm);
+    padding-left: var(--spacing-lg);
+  }
+  .section-list li {
+    color: var(--color-body);
+    margin-bottom: 4px;
+    line-height: 1.5;
+  }
+  .tool-cta {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    padding: var(--spacing-lg);
+    margin: var(--spacing-2xl) 0;
+    background-color: var(--color-canvas-soft);
+  }
+  .cta-label {
+    color: var(--color-accent);
+    display: block;
+    margin-bottom: var(--spacing-xs);
+  }
+  .cta-text {
+    color: var(--color-body);
+    margin-bottom: var(--spacing-sm);
+  }
+  .cta-btn {
+    display: inline-block;
+    background-color: var(--color-accent);
+    color: var(--color-on-primary);
+    padding: 8px 16px;
+    border-radius: var(--rounded-sm);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    transition: background-color 0.15s ease;
+  }
+  .cta-btn:hover {
+    background-color: var(--color-accent-hover);
+  }
+  .related-tools {
+    margin-bottom: var(--spacing-2xl);
+  }
+  .related-label {
+    color: var(--color-mute);
+    display: block;
+    margin-bottom: var(--spacing-sm);
+  }
+  .related-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+  }
+  .related-link {
+    color: var(--color-accent);
+    text-decoration: none;
+    border: 1px solid var(--color-hairline);
+    padding: 4px 10px;
+    border-radius: var(--rounded-sm);
+    font-size: 11px;
+    transition: border-color 0.15s ease;
+  }
+  .related-link:hover {
+    border-color: var(--color-accent);
+  }
+  .learn-faq {
+    margin-top: var(--spacing-2xl);
+  }
+  .faq-heading {
+    color: var(--color-ink);
+    margin-bottom: var(--spacing-md);
+  }
+  .faq-list {
+    display: grid;
+    gap: var(--spacing-sm);
+  }
+  .faq-item {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: var(--color-canvas-soft);
+  }
+  .faq-summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink);
+    user-select: none;
+  }
+  .faq-summary:hover {
+    color: var(--color-accent);
+  }
+  .faq-answer {
+    margin-top: var(--spacing-sm);
+    color: var(--color-body);
+    line-height: 1.6;
+  }
+  .comparison-links {
+    margin-top: var(--spacing-2xl);
+  }
+  .comparison-label {
+    color: var(--color-mute);
+    display: block;
+    margin-bottom: var(--spacing-sm);
+  }
+  .comparison-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+  }
+  .comparison-link {
+    color: var(--color-body);
+    text-decoration: none;
+    border: 1px solid var(--color-hairline);
+    padding: 4px 10px;
+    border-radius: var(--rounded-sm);
+    font-size: 11px;
+    text-transform: capitalize;
+    transition:
+      border-color 0.15s ease,
+      color 0.15s ease;
+  }
+  .comparison-link:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+</style>

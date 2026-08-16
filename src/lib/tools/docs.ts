@@ -1609,57 +1609,65 @@ role = engineer`,
   },
   "sha-512": {
     eyebrow: "Docs · Security",
-    conceptTitle: "A 512-bit fingerprint, computed in your browser",
+    conceptTitle: "A 512-bit cryptographic fingerprint",
     concept:
-      "SHA-512 is the 64-bit-word member of the SHA-2 family. Given any message it produces a fixed " +
-      "512-bit digest — 64 bytes, rendered here as 128 hex characters or 88 base64 characters — and " +
-      "the same input always yields the same digest, while a single changed byte produces a completely " +
-      "different one. That makes it a strong integrity check: compare digests to verify that a file, " +
-      "payload, or message hasn't been altered. The hashing runs entirely in your browser via the native " +
-      "Web Crypto API — nothing is uploaded, and no backend exists to receive it. Note that SHA-512 is a " +
-      "fast checksum, not a password function: use bcrypt for anything meant to withstand offline " +
-      "guessing.",
+      "SHA-512 processes input in 1024-bit blocks through 80 rounds and produces a fixed 512-bit digest. " +
+      "It is a one-way function: the same input always gives the same hash, but the original input cannot " +
+      "be recovered from the hash. A single changed character produces a completely different digest, which " +
+      "makes SHA-512 useful for integrity checks, digital signatures, and high-security identifiers. " +
+      "SHA-512 is not encryption, and it is not the right choice for passwords because it is intentionally " +
+      "fast; use bcrypt for password storage.",
     lead: "before-after",
     itemsLabel: "Things to know",
     items: [
       {
-        kind: "error",
-        title: "Empty input hashes nothing",
+        kind: "note",
+        title: "Output length",
         body:
-          "With nothing to hash the tool reports empty output. Paste or type a message first, then " +
-          "the digest appears — every input, no matter how small, produces a full 512-bit result.",
+          "SHA-512 outputs 512 bits: 64 raw bytes, 128 hex characters, or about 88 Base64 characters. " +
+          "Load the example and switch between Hex and Base64 to see both forms.",
+        snippet: `hello`,
       },
       {
         kind: "note",
-        title: "A fixed-length digest",
+        title: "One-way, not encryption",
         body:
-          "The output is always 128 hex chars (64 bytes) regardless of input length — one word in and " +
-          "a 10 MB file both yield the same digest size. That's why it's handy as a checksum.",
+          "You cannot decrypt a SHA-512 hash. Attackers can only try guesses and compare hashes, so weak " +
+          "inputs such as short passwords are still vulnerable even though the algorithm itself is one-way.",
       },
       {
         kind: "note",
-        title: "Not for password storage",
+        title: "SHA-512 vs SHA-256",
         body:
-          "SHA-512 is fast, which makes it weak against brute force when the input is guessable. For " +
-          "passwords use a deliberately slow, salted function like bcrypt.",
+          "Both are secure. SHA-512 has a longer digest and can be faster on 64-bit systems. SHA-256 is " +
+          "shorter, more widely adopted, and often the safer default for interoperability.",
+      },
+      {
+        kind: "note",
+        title: "Not for passwords",
+        body:
+          "SHA-512 is too fast for password storage. Use a slow password hash such as bcrypt with a unique " +
+          "salt and an appropriate cost factor.",
+      },
+      {
+        kind: "note",
+        title: "Avalanche effect",
+        body:
+          "Changing one character completely changes the output. Load both examples below and compare the " +
+          "digests — one capital letter is enough to change the entire hash.",
       },
     ],
     examplesLabel: "Try these",
     examples: [
       {
-        title: "A known vector",
-        note: "SHA-512 of 'abc' — a well-known, verifiable digest.",
-        snippet: `abc`,
+        title: "Basic hash",
+        note: "The SHA-512 hash of 'hello'.",
+        snippet: `hello`,
       },
       {
-        title: "Classic hello",
-        note: "Hash the classic greeting and compare it against a trusted reference.",
-        snippet: `Hello, world!`,
-      },
-      {
-        title: "Checksum a payload",
-        note: "Paste any text or JSON you need to fingerprint — the digest size stays fixed.",
-        snippet: `{"id": 42, "status": "ok", "tags": ["ship", "verify"]}`,
+        title: "Avalanche check",
+        note: "Capital H changes the entire digest.",
+        snippet: `Hello`,
       },
     ],
   },

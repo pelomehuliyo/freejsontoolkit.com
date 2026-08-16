@@ -1,0 +1,112 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Container from "../../components/Container.astro";
+import Card from "../../components/Card.astro";
+import { ARTICLES } from "../../lib/learn/articles";
+import { getTool } from "../../lib/tools/registry";
+---
+
+<BaseLayout
+  title="Learn — Free JSON Toolkit"
+  description="Deep-dive guides on hashing, encoding, and developer security. Honest, technical, and free."
+  activePath="/learn"
+>
+  <section class="learn-hero">
+    <Container size="narrow">
+      <span class="caption-mono section-eyebrow">LEARN</span>
+      <h1 class="display-lg learn-title">Guides & Deep Dives</h1>
+      <p class="body-md learn-sub">
+        Honest technical explainers on hashing, encoding, and security. No fluff, no affiliate
+        links, no upload — just answers.
+      </p>
+    </Container>
+  </section>
+
+  <section class="learn-grid-section">
+    <Container size="wide">
+      <div class="learn-grid">
+        {
+          ARTICLES.map((article) => {
+            const tool = getTool(article.toolId);
+            return (
+              <a href={`/learn/${article.slug}`} class="learn-card">
+                <Card variant="flat" class="learn-card-inner">
+                  <span class="caption-mono learn-eyebrow">{article.eyebrow}</span>
+                  <h2 class="body-lg-strong learn-card-title">{article.title}</h2>
+                  <p class="body-sm learn-card-desc">{article.description}</p>
+                  <div class="learn-card-footer">
+                    <span class="caption-mono learn-tool-link">
+                      Tool: {tool?.name ?? article.toolId} →
+                    </span>
+                  </div>
+                </Card>
+              </a>
+            );
+          })
+        }
+      </div>
+    </Container>
+  </section>
+</BaseLayout>
+
+<style>
+  .learn-hero {
+    padding: var(--spacing-5xl) 0 var(--spacing-3xl);
+    background-color: var(--color-canvas-soft);
+    border-bottom: 1px solid var(--color-hairline);
+    text-align: center;
+  }
+  .learn-title {
+    margin: var(--spacing-xs) 0;
+    color: var(--color-ink);
+  }
+  .learn-sub {
+    color: var(--color-body);
+    max-width: 500px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+  .learn-grid-section {
+    padding: var(--spacing-3xl) 0 var(--spacing-5xl);
+  }
+  .learn-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--spacing-lg);
+  }
+  .learn-card {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .learn-card-inner {
+    padding: var(--spacing-lg);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    transition: border-color 0.15s ease;
+  }
+  .learn-card:hover .learn-card-inner {
+    border-color: var(--color-accent);
+  }
+  .learn-eyebrow {
+    color: var(--color-mute);
+  }
+  .learn-card-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+  .learn-card-desc {
+    color: var(--color-body);
+    line-height: 1.5;
+    flex: 1;
+  }
+  .learn-card-footer {
+    margin-top: var(--spacing-sm);
+  }
+  .learn-tool-link {
+    color: var(--color-accent);
+    font-size: 11px;
+  }
+</style>

@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { tools } from "../lib/tools/registry";
 import { COMPARISONS } from "../lib/tools/comparisons";
+import { ARTICLES } from "../lib/learn/articles";
 
 interface SitemapEntry {
   loc: string;
@@ -24,6 +25,7 @@ const STATIC_ROUTES: SitemapEntry[] = [
   { loc: "/collections/networking", priority: "0.6", changefreq: "monthly" },
   { loc: "/large-files", priority: "0.7", changefreq: "monthly" },
   { loc: "/compare", priority: "0.7", changefreq: "monthly" },
+  { loc: "/learn", priority: "0.7", changefreq: "weekly" },
   { loc: "/why-local", priority: "0.6", changefreq: "monthly" },
   { loc: "/about", priority: "0.4", changefreq: "yearly" },
   { loc: "/contact", priority: "0.3", changefreq: "yearly" },
@@ -45,10 +47,15 @@ export const GET: APIRoute = async ({ site }) => {
     priority: "0.6",
     changefreq: "monthly",
   }));
+  const learnEntries: SitemapEntry[] = ARTICLES.map((a) => ({
+    loc: `/learn/${a.slug}`,
+    priority: "0.6",
+    changefreq: "monthly",
+  }));
 
   // Dedupe by loc (first wins) so the spines can never double-emit a route.
   const seen = new Set<string>();
-  const entries = [...STATIC_ROUTES, ...toolEntries, ...compareEntries].filter((e) => {
+  const entries = [...STATIC_ROUTES, ...toolEntries, ...compareEntries, ...learnEntries].filter((e) => {
     if (seen.has(e.loc)) return false;
     seen.add(e.loc);
     return true;

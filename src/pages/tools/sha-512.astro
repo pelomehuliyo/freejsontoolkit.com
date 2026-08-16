@@ -155,6 +155,7 @@ import { ENCODINGS } from "../../lib/tools/sha-512/constants";
         <span class="caption-mono section-eyebrow">FAQ</span>
         <h2 id="faq-title" class="display-lg section-title">Quick answers</h2>
       </div>
+
       <div class="faq-list">
         <details class="faq-item">
           <summary class="faq-summary">Is my text uploaded?</summary>
@@ -162,23 +163,83 @@ import { ENCODINGS } from "../../lib/tools/sha-512/constants";
             No. The hashing happens entirely in your browser using the native Web Crypto API.
           </p>
         </details>
+
         <details class="faq-item">
-          <summary class="faq-summary">How is SHA-512 different from SHA-256?</summary>
+          <summary class="faq-summary">What is SHA-512?</summary>
           <p class="body-md faq-answer">
-            Both belong to the SHA-2 family. SHA-512 produces a 512-bit digest (128 hex chars) vs
-            SHA-256's 256 bits (64 hex chars), and uses 64-bit word operations — which is why it's
-            the natural choice on 64-bit platforms. See the{" "}
-            <a href="/compare/sha-256-vs-sha-512">SHA-256 vs SHA-512 comparison</a>.
+            SHA-512 is a one-way cryptographic hash function that produces a 512-bit digest, usually
+            shown as 128 hexadecimal characters. It is used for integrity checks, digital
+            signatures, and high-security hashing.
           </p>
         </details>
+
         <details class="faq-item">
-          <summary class="faq-summary">Can I use this for passwords?</summary>
+          <summary class="faq-summary">Can SHA-512 be decrypted?</summary>
           <p class="body-md faq-answer">
-            SHA-512 is too fast for password storage. Use a deliberately slow, salted function like{" "}
-            <a href="/tools/bcrypt">bcrypt</a> instead.
+            No. SHA-512 is one-way by design. The hash cannot be decrypted back to the original
+            input. Weak inputs can still be discovered by guessing and hashing many candidates.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-summary">Is SHA-512 secure?</summary>
+          <p class="body-md faq-answer">
+            Yes, for hashing and integrity use. SHA-512 has no practical collision attack known. It
+            is not fully quantum-proof, but it provides a large security margin. For passwords, use <a
+              href="/tools/bcrypt">bcrypt</a
+            > instead.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-summary">SHA-256 vs SHA-512: which should I use?</summary>
+          <p class="body-md faq-answer">
+            Both are secure. SHA-256 is shorter and widely adopted. SHA-512 gives a longer digest
+            and can be faster on 64-bit systems. Use SHA-512 when you want extra margin; use
+            <a href="/tools/sha-256">SHA-256</a> for compatibility.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-summary">What is the output length of SHA-512?</summary>
+          <p class="body-md faq-answer">
+            SHA-512 outputs 512 bits: 64 raw bytes, 128 hex characters, or about 88 Base64
+            characters.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-summary">Can I use SHA-512 for passwords?</summary>
+          <p class="body-md faq-answer">
+            No. SHA-512 is too fast for password storage. Use a slow password hash such as
+            <a href="/tools/bcrypt">bcrypt</a> with a unique salt.
           </p>
         </details>
       </div>
+      <details class="faq-item">
+        <summary class="faq-summary">Is my text uploaded?</summary>
+        <p class="body-md faq-answer">
+          No. The hashing happens entirely in your browser using the native Web Crypto API.
+        </p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-summary">How is SHA-512 different from SHA-256?</summary>
+        <p class="body-md faq-answer">
+          Both belong to the SHA-2 family. SHA-512 produces a 512-bit digest (128 hex chars) vs
+          SHA-256's 256 bits (64 hex chars), and uses 64-bit word operations — which is why it's the
+          natural choice on 64-bit platforms. See the{" "}
+          <a href="/compare/sha-256-vs-sha-512">SHA-256 vs SHA-512 comparison</a>.
+        </p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-summary">Can I use this for passwords?</summary>
+        <p class="body-md faq-answer">
+          SHA-512 is too fast for password storage. Use a deliberately slow, salted function like{
+            " "
+          }
+          <a href="/tools/bcrypt">bcrypt</a> instead.
+        </p>
+      </details>
     </Container>
   </section>
 </ToolShell>
