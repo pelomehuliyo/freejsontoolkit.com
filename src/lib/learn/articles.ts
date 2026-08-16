@@ -269,3 +269,47 @@ export function getArticle(slug: string): LearnArticle | undefined {
 export function articlesByTool(toolId: string): LearnArticle[] {
     return ARTICLES.filter((a) => a.toolId === toolId);
 }
+
+// ── Palette/search selector ───────────────────────────────────────────
+
+export interface LearnSearchEntry {
+    id: string;
+    title: string;
+    group: string;
+    href: string;
+    keywords: string[];
+}
+
+export function learnSearchEntries(): LearnSearchEntry[] {
+    const hub: LearnSearchEntry = {
+        id: "learn-hub",
+        title: "Learn — Guides & Deep Dives",
+        group: "Learn",
+        href: "/learn",
+        keywords: [
+            "learn",
+            "guides",
+            "deep dives",
+            "tutorials",
+            "docs",
+            "hashing",
+            "security",
+            "sha-512",
+        ],
+    };
+    const articles: LearnSearchEntry[] = ARTICLES.map((article) => ({
+        id: `learn-${article.slug}`,
+        title: article.title,
+        group: "Learn",
+        href: `/learn/${article.slug}`,
+        keywords: [
+            article.title.toLowerCase(),
+            "learn",
+            "guide",
+            "deep dive",
+            article.description.toLowerCase(),
+            ...article.faq.map((f) => f.q.toLowerCase()),
+        ],
+    }));
+    return [hub, ...articles];
+}

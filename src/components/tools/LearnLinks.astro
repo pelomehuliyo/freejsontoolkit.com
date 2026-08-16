@@ -1,0 +1,102 @@
+---
+import Container from "../Container.astro";
+import { articlesByTool } from "../../lib/learn/articles";
+
+interface Props {
+  toolId: string;
+}
+
+const { toolId } = Astro.props;
+
+const articles = articlesByTool(toolId);
+---
+
+{
+  articles.length > 0 && (
+    <section class="learn-links-section" aria-labelledby={`learn-links-title-${toolId}`}>
+      <Container size="narrow">
+        <div class="learn-links-header">
+          <span class="caption-mono section-eyebrow">Deep dives</span>
+          <h2 id={`learn-links-title-${toolId}`} class="display-lg learn-links-title">
+            Go deeper
+          </h2>
+        </div>
+        <div class="learn-links-list">
+          {articles.map((article) => (
+            <a class="learn-link-card" href={`/learn/${article.slug}`}>
+              <span class="caption-mono learn-link-eyebrow">{article.eyebrow}</span>
+              <span class="body-md-strong learn-link-title">{article.title}</span>
+              <span class="body-sm learn-link-desc">{article.description}</span>
+              <span class="caption-mono learn-link-cta">Read guide →</span>
+            </a>
+          ))}
+        </div>
+      </Container>
+    </section>
+  )
+}
+
+<style>
+  .learn-links-section {
+    padding: var(--spacing-5xl) 0;
+    background-color: var(--color-canvas-soft);
+    border-top: 1px solid var(--color-hairline);
+  }
+  .learn-links-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--spacing-2xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  .learn-links-title {
+    color: var(--color-ink);
+    margin: 0;
+  }
+  .learn-links-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--spacing-md);
+  }
+  .learn-link-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: var(--spacing-lg);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--rounded-sm);
+    background-color: var(--color-canvas);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.18s ease;
+  }
+  .learn-link-card:hover {
+    border-color: var(--color-accent);
+  }
+  .learn-link-eyebrow {
+    color: var(--color-mute);
+  }
+  .learn-link-title {
+    color: var(--color-ink);
+  }
+  .learn-link-desc {
+    color: var(--color-body);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .learn-link-cta {
+    margin-top: auto;
+    padding-top: var(--spacing-sm);
+    color: var(--color-accent);
+  }
+  @media (max-width: 720px) {
+    .learn-links-list {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

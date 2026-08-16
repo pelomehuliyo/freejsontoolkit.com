@@ -4,6 +4,7 @@ import Container from "../components/Container.astro";
 import Button from "../components/Button.astro";
 import { tools, categories, toolsByCategory, comingSoon, counts } from "../lib/tools/registry";
 import { COMPARISONS } from "../lib/tools/comparisons";
+import { ARTICLES } from "../lib/learn/articles";
 
 const MONO: Record<string, string> = {
   convert: "CON",
@@ -256,6 +257,31 @@ const guarantees = [
             <span class="hp-lf-cta body-sm-strong">
               See how it works <span aria-hidden="true">→</span>
             </span>
+          </div>
+        </a>
+      </Container>
+    </section>
+    {/* ── LEARN: the guides network, surfaced on the homepage ── */}
+    <section class="hp-learn hp-reveal" aria-labelledby="hp-learn-title">
+      <Container size="wide">
+        <a href="/learn" class="hp-learn-card">
+          <div class="hp-learn-main">
+            <span class="caption-mono hp-learn-eyebrow">NEW · LEARN</span>
+            <h2 id="hp-learn-title" class="display-sm hp-learn-title">
+              Learn the why behind the tools.
+            </h2>
+            <p class="body-sm hp-learn-sub">
+              Honest guides on hashing, encoding, and security — built to answer real developer
+              questions, with nothing uploaded and nothing tracked.
+            </p>
+            <span class="caption-mono hp-learn-cta">Browse guides →</span>
+          </div>
+          <div class="hp-learn-links">
+            {
+              ARTICLES.slice(0, 3).map((article) => (
+                <span class="hp-learn-link caption-mono">{article.title}</span>
+              ))
+            }
           </div>
         </a>
       </Container>
@@ -1135,6 +1161,66 @@ const guarantees = [
     }
     .hp-col-chip:hover .hp-col-go {
       transform: translateX(3px);
+    }
+
+    /* ── LEARN ── */
+    .hp-learn {
+      padding: var(--spacing-3xl) 0;
+      background-color: var(--color-canvas-soft);
+      border-top: 1px solid var(--color-hairline);
+      border-bottom: 1px solid var(--color-hairline);
+    }
+    .hp-learn-card {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: var(--spacing-xl);
+      padding: var(--spacing-xl);
+      border: 1px solid var(--color-hairline);
+      border-radius: var(--rounded-sm);
+      background-color: var(--color-canvas);
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.18s ease;
+    }
+    .hp-learn-card:hover {
+      border-color: var(--color-accent);
+    }
+    .hp-learn-eyebrow {
+      color: var(--color-accent-strong);
+    }
+    .hp-learn-title {
+      margin: var(--spacing-xs) 0;
+      color: var(--color-ink);
+    }
+    .hp-learn-sub {
+      color: var(--color-body);
+      margin-bottom: var(--spacing-md);
+      line-height: 1.5;
+    }
+    .hp-learn-cta {
+      color: var(--color-accent);
+    }
+    .hp-learn-links {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: var(--spacing-xs);
+      border-left: 1px solid var(--color-hairline);
+      padding-left: var(--spacing-lg);
+    }
+    .hp-learn-link {
+      color: var(--color-mute);
+    }
+    @media (max-width: 900px) {
+      .hp-learn-card {
+        grid-template-columns: 1fr;
+      }
+      .hp-learn-links {
+        border-left: none;
+        padding-left: 0;
+        border-top: 1px solid var(--color-hairline);
+        padding-top: var(--spacing-md);
+      }
     }
 
     /* ── DIRECTORY ── */
