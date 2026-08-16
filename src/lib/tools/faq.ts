@@ -27,6 +27,10 @@ export const FAQS: Record<string, Faq[]> = {
     { q: "Why does the same password give a different hash?", a: "bcrypt embeds a random salt in every hash, so identical passwords produce different hashes. That's intentional: it stops attackers from precomputing tables or spotting duplicate passwords in a database." },
     { q: "What does the cost factor do?", a: "The cost factor controls how many rounds of key stretching bcrypt runs: 2^cost. Higher values take longer to compute but make brute-forcing far more expensive. 10 is the common default; use 11–12 for new systems. See the SHA-256 vs bcrypt comparison ." },
     { q: "Is bcrypt right for checking a file checksum?", a: "No. bcrypt is for password storage. For checksums, fingerprints, and content verification use a fast hash like SHA-256 or SHA-512 instead." },
+    { q: "How long does bcrypt hashing take?", a: "With a normal cost factor of 10 to 12, hashing takes from tens to a few hundred milliseconds on a typical CPU. That delay is intentional and is what makes brute force expensive." },
+    { q: "What does $2a$10$ at the start of a hash mean?", a: "The version marker and the cost factor. $2a$ is the bcrypt variant, and 10 means 2^10, or 1,024 rounds, of key stretching were used." },
+    { q: "Should I use bcrypt or argon2?", a: "Both are secure. Argon2 is newer and memory-hard; bcrypt is more widely supported. Either one beats a fast hash for passwords." },
+    { q: "What is the bcrypt 72-byte limit?", a: "bcrypt only considers the first 72 bytes of input, so longer passwords are truncated. Applications enforce a length limit up front or pre-hash long inputs, which carries its own tradeoffs." },
   ],
   "csv-to-json": [
     { q: "How does the large-file mode work?", a: "If you drop a file larger than 15 MB, the tool switches to a background worker. It reads the file off the main thread, converts it in one pass, and gives you a capped preview in the editor. The full result is always available as a download. Nothing is uploaded. Read the honest limits in our large-file guide →" },
@@ -64,6 +68,10 @@ export const FAQS: Record<string, Faq[]> = {
     { q: "Is my JSON uploaded anywhere?", a: "No. Formatting happens entirely in your browser. Your data never leaves your machine." },
     { q: "What does \"sort keys\" do?", a: "It reorders every object's properties alphabetically for deterministic output, handy for diffing. Array element order is always preserved." },
     { q: "Can it validate JSON too?", a: "Yes. If the input isn't valid JSON, the status bar shows the parse error with its position. A dedicated JSON Validator with richer diagnostics ships in v1.2." },
+    { q: "How do I make minified JSON readable?", a: "Paste the minified JSON here and click Format. To go the other way, from readable to compact, use the JSON Minifier." },
+    { q: "Can I format JSON in Chrome without an extension?", a: "Yes. This tool runs entirely in your browser tab, so there is nothing to install and no extension permissions to grant. Just paste your JSON and format." },
+    { q: "What is JSON mostly used for?", a: "JSON is the standard format for API responses, configuration files, database exports, and data interchange between frontend and backend systems." },
+    { q: "Does formatting change my data?", a: "No. Only whitespace and line breaks change. Keys, values, and array order are preserved exactly." },
   ],
   "json-minifier": [
     { q: "Is my JSON uploaded anywhere?", a: "No. Minification runs entirely in your browser, in a background worker for large files. Your data never leaves your machine." },

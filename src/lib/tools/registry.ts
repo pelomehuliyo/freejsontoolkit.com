@@ -430,7 +430,7 @@ export const tools: ToolManifest[] = [
     family: "security",
     status: "available",
     href: "/tools/bcrypt",
-    keywords: ["bcrypt generator", "bcrypt hash", "password hash generator", "bcrypt online"],
+    keywords: ["bcrypt generator", "bcrypt hash", "password hash generator", "bcrypt online", "bcrypt password generator", "generate bcrypt password", "bcrypt hash generator", "bcrypt js", "bcrypt for password hashing", "password hash", "hash function", "storing passwords securely"],
     addedIn: "v1.7",
   },
 ];

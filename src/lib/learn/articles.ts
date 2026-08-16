@@ -408,6 +408,16 @@ export const ARTICLES: LearnArticle[] = [
                     "A formatter needs valid JSON as input. It cannot repair a missing comma, a trailing comma, or an unquoted key, because those are not formatting problems. When formatting fails, the error is a validation problem. Run the text through a validator first, then format the corrected result.",
             },
             {
+                heading: "Formatter vs. validator vs. minifier",
+                body:
+                    "Three tools with overlapping names do very different jobs. A validator checks whether JSON is syntactically correct and reports the exact location of the first error. A formatter takes valid JSON and adds indentation and line breaks so it is readable. A minifier does the reverse: it strips whitespace to shrink JSON for storage or transfer.",
+                list: [
+                    "Validator: is it correct, and where is the error",
+                    "Formatter: valid JSON made readable",
+                    "Minifier: readable JSON made small",
+                ],
+            },
+            {
                 heading: "Where developers use formatters",
                 body:
                     "Formatting is a daily habit in API debugging, reading config files like package.json, inspecting exported data, and untangling machine-generated JSON before it is committed or shared. Because the task is small and frequent, the fastest path wins.",
@@ -770,6 +780,191 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Is converting JSON safe for sensitive data?",
                 a: "It is safe when the conversion runs locally in your browser. This site's converters never upload your data.",
+            },
+        ],
+        publishedIn: "v1.8",
+    },
+
+    {
+        slug: "what-is-bcrypt",
+        toolId: "bcrypt",
+        relatedToolIds: ["sha-256", "sha-512", "hmac", "md5"],
+        comparisonSlugs: ["sha-256-vs-bcrypt"],
+        eyebrow: "Security · Explainer",
+        title: "What Is bcrypt?",
+        description:
+            "bcrypt is a password-hashing function built to be deliberately slow and salted, so leaked hashes resist brute-force guessing. Learn why it beats fast hashes like SHA-256 for storing passwords.",
+        heroQuestion: "What is bcrypt and why do password hashers use it?",
+        shortAnswer:
+            "bcrypt is a password-hashing algorithm that combines a random salt with an adjustable work factor to make each hash slow to compute. Slow hashing means an attacker who steals your password database cannot quickly guess the original passwords.",
+        sections: [
+            {
+                heading: "Why passwords need a different hash than files",
+                body:
+                    "SHA-256 and friends are fast by design, which is exactly what you want for checking a file or a download. But fast is fatal for passwords: a GPU can try billions of guesses a second. bcrypt flips that by being deliberately slow, so guessing every candidate is expensive.",
+            },
+            {
+                heading: "What bcrypt actually is",
+                body:
+                    "bcrypt is a password-hashing function adapted from the Blowfish cipher. It takes the password plus a random salt and runs a configurable number of rounds of key stretching. The result is a 60-character string that carries everything needed to verify it later.",
+                list: [
+                    "Salt: random per hash, embedded in the output",
+                    "Cost factor: 2^cost rounds of key stretching",
+                    "Output: a 60-character hash string starting with $2a$10$",
+                ],
+            },
+            {
+                heading: "bcrypt vs. SHA-256",
+                body:
+                    "SHA-256 is fast, unsalted, and deterministic: the same input always gives the same hash. bcrypt is slow, salted, and different every run. Reach for SHA-256 when you need integrity checks on data. Reach for bcrypt when the input is a password that must survive a database leak.",
+            },
+            {
+                heading: "Where developers use bcrypt",
+                body:
+                    "bcrypt is the workhorse for storing user credentials in web applications and login systems. Any place a password must be stored and later verified is a place bcrypt belongs. Because it is widely supported in every language, it is a common default choice for new projects.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is bcrypt encryption?",
+                a: "No. Encryption is reversible with a key. bcrypt is a one-way hash, so you cannot decrypt a hash back into the password.",
+            },
+            {
+                q: "Can bcrypt be reversed?",
+                a: "No. It is one-way. Verification works by hashing the candidate password with the stored salt and cost, then comparing the results.",
+            },
+            {
+                q: "What does $2a$10$ at the start of a hash mean?",
+                a: "The version marker and the cost factor. $2a$ is the bcrypt variant, and 10 means 2^10, or 1,024 rounds, of key stretching were used.",
+            },
+            {
+                q: "Why does the same password give a different hash?",
+                a: "A random salt is generated for every hash and stored inside it, so identical passwords produce different outputs and reveal nothing about each other.",
+            },
+        ],
+        publishedIn: "v1.8",
+    },
+
+    {
+        slug: "how-does-bcrypt-work",
+        toolId: "bcrypt",
+        relatedToolIds: ["sha-256", "sha-512"],
+        comparisonSlugs: ["sha-256-vs-bcrypt"],
+        eyebrow: "Security · Under the Hood",
+        title: "How Does bcrypt Work?",
+        description:
+            "A step-by-step look at how bcrypt hashes a password: the random salt, the work factor, the 2^cost rounds of key stretching, and the 60-character hash it produces.",
+        heroQuestion: "How does bcrypt turn a password into a hash?",
+        shortAnswer:
+            "bcrypt takes the password plus a random salt, then runs a key-stretching routine 2^cost times, where cost is normally 10. The result is a 60-character string that stores the version, cost, salt, and hash together.",
+        sections: [
+            {
+                heading: "Step 1: Generate a random salt",
+                body:
+                    "Every hash starts with a fresh random salt, typically 22 characters. Because the salt is different each time, the same password never produces the same hash, and an attacker cannot reuse work across two users or two hashes.",
+            },
+            {
+                heading: "Step 2: Stretch the key 2^cost times",
+                body:
+                    "The password and salt feed a key schedule derived from Blowfish that runs 2^cost times. With the default cost of 10 that is 1,024 iterations. Each iteration is cheap, but the repetition adds up, which is exactly what makes guessing slow.",
+            },
+            {
+                heading: "Step 3: Pack everything into 60 characters",
+                body:
+                    "The final hash string bundles the version, the cost factor, the 22-character salt, and the 31-character hash: $2a$10$ plus salt plus hash. Because all of it travels together, verification needs nothing but the stored string.",
+            },
+            {
+                heading: "The work factor is the dial",
+                body:
+                    "The cost factor is a deliberate tradeoff. Higher values hash slower and resist brute force longer, but tax every login. Ten is the common default; eleven or twelve is reasonable for new systems. This dial is why bcrypt stays useful as hardware gets faster.",
+            },
+            {
+                heading: "Why this defeats common attacks",
+                body:
+                    "The salt defeats precomputed rainbow tables, and the slowness defeats GPU brute force. Since each user's hash carries its own salt, an attacker must pay the full cost for every guess against every account, which is the property that matters when a database leaks.",
+            },
+        ],
+        faq: [
+            {
+                q: "How long does bcrypt take?",
+                a: "With a normal cost factor of 10 to 12, hashing takes from tens to a few hundred milliseconds on a typical CPU. That delay is intentional and is what makes brute force expensive.",
+            },
+            {
+                q: "What does the cost factor mean?",
+                a: "The cost is an exponent: cost 10 means 2^10, or 1,024 rounds. Each step up doubles the work, so cost 11 is twice as slow as cost 10.",
+            },
+            {
+                q: "Does bcrypt use a database?",
+                a: "No. It is pure computation. The salt and cost live inside the hash string, so verification needs no lookup and no stored metadata.",
+            },
+            {
+                q: "Is bcrypt the same as Blowfish?",
+                a: "Not exactly. bcrypt adapts Blowfish's key schedule into a salted, cost-driven hash for passwords. It is not Blowfish encryption.",
+            },
+        ],
+        publishedIn: "v1.8",
+    },
+
+    {
+        slug: "is-bcrypt-secure",
+        toolId: "bcrypt",
+        relatedToolIds: ["sha-256", "hmac", "md5"],
+        comparisonSlugs: ["sha-256-vs-bcrypt"],
+        eyebrow: "Security · Threat Analysis",
+        title: "Is bcrypt Still Secure in 2026?",
+        description:
+            "bcrypt has resisted cracking for over two decades. Here is what it protects against, its known limits like the 72-byte input cap, and when argon2 or scrypt deserve the job instead.",
+        heroQuestion: "Is bcrypt still a safe choice for storing passwords?",
+        shortAnswer:
+            "Yes. With a sensible cost factor of 11 to 12, bcrypt remains a strong password hash in 2026. Its real limits are the 72-byte password cap and the need to raise the cost factor over time. Argon2 is a modern alternative, not a requirement.",
+        sections: [
+            {
+                heading: "What bcrypt is built to resist",
+                body:
+                    "bcrypt targets the three classic password attacks. Its slowness blocks fast offline brute force, the per-hash salt blocks precomputed rainbow tables, and the unique salt hides when two accounts share a password.",
+                list: [
+                    "Slow hashing blocks fast brute force",
+                    "Per-hash salt blocks rainbow tables",
+                    "Unique salts hide duplicate passwords",
+                ],
+            },
+            {
+                heading: "The 72-byte limit",
+                body:
+                    "bcrypt only considers the first 72 bytes of input; longer passwords are truncated. Applications either enforce a length limit up front or pre-hash long inputs, which trades one weakness for another. Knowing the cap exists is more important than any workaround.",
+            },
+            {
+                heading: "The cost factor is a maintenance job",
+                body:
+                    "Hardware gets faster, so the cost factor must rise over time to keep the same margin. New hashes should use the highest cost your server tolerates, commonly 11 or 12. Old hashes stay verifiable and can be upgraded on the next successful login.",
+            },
+            {
+                heading: "bcrypt vs. argon2 and scrypt",
+                body:
+                    "Argon2, the 2015 Password Hashing Competition winner, and scrypt are memory-hard, which resists GPU and ASIC attacks even harder. All three are acceptable. bcrypt remains a well-supported, easy-to-audit default; argon2 is the modern choice for greenfield systems.",
+            },
+            {
+                heading: "When not to use bcrypt",
+                body:
+                    "bcrypt is for password storage, not general hashing. For checksums, file integrity, and download verification use a fast hash like SHA-256 or SHA-512. For authenticated messages use HMAC. Using bcrypt everywhere is as wrong as using SHA-256 for passwords.",
+            },
+        ],
+        faq: [
+            {
+                q: "Can bcrypt be cracked?",
+                a: "The algorithm has no practical break. Attackers can still guess weak passwords against a stolen hash, which is why a high cost factor and strong passwords matter.",
+            },
+            {
+                q: "What is the maximum password length for bcrypt?",
+                a: "72 bytes. Longer input is truncated unless you pre-hash it first, which carries its own tradeoffs.",
+            },
+            {
+                q: "Should I use bcrypt or argon2?",
+                a: "Both are secure. Argon2 is newer and memory-hard; bcrypt is more widely supported. Either one beats a fast hash for passwords.",
+            },
+            {
+                q: "How often should I raise the cost factor?",
+                a: "Choose the highest cost your server tolerates, commonly 11 to 12, whenever new hashes are created. Keep old hashes verifiable and upgrade them on the next login.",
             },
         ],
         publishedIn: "v1.8",

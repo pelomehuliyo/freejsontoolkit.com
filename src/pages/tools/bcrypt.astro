@@ -19,7 +19,7 @@ import { COST_FACTORS } from "../../lib/tools/bcrypt/constants";
 
 <ToolShell
   title="bcrypt Password Hasher — Free, Local, Secure"
-  description="Generate secure bcrypt hashes for passwords with a configurable cost factor. 100% local, no upload. Salted, adaptive, worker-backed."
+  description="Free bcrypt generator. Create secure bcrypt password hashes with a configurable cost factor and salt. Runs 100% locally in your browser, no upload."
   activePath="/tools/bcrypt"
 >
   <ToolHeader
@@ -179,6 +179,36 @@ import { COST_FACTORS } from "../../lib/tools/bcrypt/constants";
             verification use a fast hash like{" "}
             <a href="/tools/sha-256">SHA-256</a> or{" "}
             <a href="/tools/sha-512">SHA-512</a> instead.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">How long does bcrypt hashing take?</summary>
+          <p class="body-md faq-answer">
+            With a normal cost factor of 10 to 12, hashing takes from tens to a few hundred
+            milliseconds on a typical CPU. That delay is intentional and is what makes brute
+            force expensive.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">What does $2a$10$ at the start of a hash mean?</summary>
+          <p class="body-md faq-answer">
+            The version marker and the cost factor. $2a$ is the bcrypt variant, and 10 means
+            2^10, or 1,024 rounds, of key stretching were used.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Should I use bcrypt or argon2?</summary>
+          <p class="body-md faq-answer">
+            Both are secure. Argon2 is newer and memory-hard; bcrypt is more widely supported.
+            Either one beats a fast hash for passwords.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">What is the bcrypt 72-byte limit?</summary>
+          <p class="body-md faq-answer">
+            bcrypt only considers the first 72 bytes of input, so longer passwords are
+            truncated. Applications enforce a length limit up front or pre-hash long inputs,
+            which carries its own tradeoffs.
           </p>
         </details>
       </div>
