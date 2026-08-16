@@ -1168,6 +1168,206 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.9",
     },
+
+    {
+        slug: "how-to-compare-json-files",
+        toolId: "json-diff",
+        relatedToolIds: ["json-formatter", "json-validator", "text-diff"],
+        comparisonSlugs: ["json-diff-vs-json-formatter", "json-diff-vs-text-diff"],
+        eyebrow: "JSON · Guide",
+        title: "How to Compare JSON Files Online",
+        description:
+            "Compare two JSON files online in three steps: paste both documents, read the highlighted differences, and spot regressions fast. This guide covers the color coding, the similarity score, and the JSON-specific view.",
+        heroQuestion: "How do I compare two JSON files?",
+        shortAnswer:
+            "Paste the original JSON in one side and the modified JSON in the other, and the diff highlights every change as you type. Additions, deletions, and modified lines are color coded, with a similarity score that tells you at a glance how much the two documents share.",
+        sections: [
+            {
+                heading: "The three steps",
+                body:
+                    "Open the JSON Diff tool, paste the original document in the A editor and the modified one in the B editor, and the comparison runs live. Toggle unified view for a single column, copy the result as a unified patch, or download it. Nothing is uploaded and large inputs run in a background worker.",
+            },
+            {
+                heading: "What the colors mean",
+                body:
+                    "The diff highlights three kinds of change. Additions are marked in teal, deletions in red, and modified lines are paired onto the same row so you can read the before and after at a glance instead of scrolling a delete block against an insert block.",
+                list: [
+                    "Teal: lines added in the new version",
+                    "Red: lines removed from the old version",
+                    "Paired rows: a removed line replaced by an added one",
+                ],
+            },
+            {
+                heading: "Side-by-side or unified",
+                body:
+                    "The default side-by-side view keeps the old and new documents aligned for scanning. The unified view merges both into a single column, which is closer to a git-style patch and useful when the change is concentrated in a few lines.",
+            },
+            {
+                heading: "Cutting the noise",
+                body:
+                    "JSON that was re-prettified can produce diffs that are mostly whitespace. Ignore whitespace and ignore case options strip that noise so the diff shows real changes only. They never alter the documents; they only change what counts as a difference.",
+            },
+            {
+                heading: "Reading the similarity score",
+                body:
+                    "The similarity score is the share of lines that are identical on both sides, as a percentage of all lines involved. 100% means the documents are identical; 0% means nothing is shared. It is a quick sanity signal, not a semantic guarantee, since identical lines can still sit in different places.",
+            },
+            {
+                heading: "JSON diff versus text diff",
+                body:
+                    "The same diff engine also powers the Text Diff tool for any two text inputs. JSON Diff adds JSON framing so you can drop in raw documents and read the result as code. For logs, config files, or markdown, Text Diff is the right starting point.",
+            },
+        ],
+        faq: [
+            {
+                q: "Can I compare two JSON files online without uploading?",
+                a: "Yes. The comparison runs entirely in your browser, in a background worker for large inputs. Neither document ever leaves your machine.",
+            },
+            {
+                q: "What do the colors mean in the diff?",
+                a: "Additions are teal, deletions are red, and modified lines are paired onto one row so you see the removed line and its replacement side by side.",
+            },
+            {
+                q: "What does the similarity score mean?",
+                a: "It is the share of lines that are identical on both sides, as a percentage of all lines involved. 100% means identical; 0% means nothing in common.",
+            },
+            {
+                q: "JSON diff or text diff, which should I use?",
+                a: "JSON Diff frames the comparison as code for two JSON documents. Text Diff is the same engine with no framing, best for logs, config files, and markdown.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "how-to-convert-tsv-to-csv",
+        toolId: "tsv-to-csv",
+        relatedToolIds: ["csv-to-tsv", "csv-to-json"],
+        comparisonSlugs: ["csv-to-tsv-vs-tsv-to-csv"],
+        eyebrow: "Data · Guide",
+        title: "How to Convert TSV to CSV",
+        description:
+            "Convert TSV to CSV in three steps: paste your tab-separated table, convert, and download the comma-separated result. This guide covers quoting, large tables, and why this direction is lossless.",
+        heroQuestion: "How do I convert TSV to CSV?",
+        shortAnswer:
+            "Paste your tab-separated table into the converter, press Convert, and the tool rewrites it as comma-separated CSV with proper quoting. Fields that contain commas or newlines are wrapped in quotes so every cell survives intact, and large tables run in a background worker.",
+        sections: [
+            {
+                heading: "The three steps",
+                body:
+                    "Open the TSV to CSV converter, paste your tab-separated table or drop a .tsv file, and press Convert, or hit Ctrl/Command + Enter. Big tables switch to a background worker automatically. Copy the result or download it as a .csv file.",
+            },
+            {
+                heading: "Why convert TSV to CSV at all",
+                body:
+                    "TSV and CSV are both plain-text tables, but the tools that consume them differ. Spreadsheet imports, data pipelines, and database loaders more often expect commas. A tab-separated export from one system frequently needs to become comma-separated for the next one to accept it.",
+            },
+            {
+                heading: "What happens to a field with a comma",
+                body:
+                    "In TSV a comma is ordinary data; in CSV it is the delimiter. The converter wraps any field that contains a comma, a double quote, or a newline in double quotes so it stays a single cell. Nothing from a valid TSV row is dropped or merged.",
+            },
+            {
+                heading: "Converting large tables",
+                body:
+                    "Files above about 15 MB switch to a dedicated large-file mode. The table is read and converted in a background worker, you see a capped preview in the editor, and the full CSV is a one-click download. The only ceiling is your device's memory.",
+            },
+            {
+                heading: "Why this direction is lossless",
+                body:
+                    "CSV quoting can represent commas, double quotes, and embedded newlines, so nothing from a valid TSV is lost or refused. The reverse direction, CSV to TSV, is the lossy one: a CSV cell can hold a tab, but a TSV can't, so that tool has to drop or escape it.",
+            },
+            {
+                heading: "Ragged rows fail loudly",
+                body:
+                    "The converter needs a rectangular grid. A row with a different number of fields fails with the exact line number instead of being silently padded or dropped. Better to know where the table breaks than to ship data that shifted columns.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is my TSV uploaded anywhere?",
+                a: "No. Parsing and conversion run entirely in your browser, in a background worker for large tables. Your data never leaves your machine.",
+            },
+            {
+                q: "What happens to a field that contains a comma?",
+                a: "It is preserved and quoted. A comma is ordinary data in TSV but the delimiter in CSV, so the converter wraps that field in double quotes to keep it one cell.",
+            },
+            {
+                q: "Can it handle large TSV files?",
+                a: "Yes. Files above about 15 MB switch to a background worker with a capped preview and a full CSV download.",
+            },
+            {
+                q: "Is this conversion lossless?",
+                a: "Yes. CSV quoting can represent commas, double quotes, and embedded newlines, so nothing from a valid TSV is dropped. The reverse, CSV to TSV, is the lossy direction.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "what-is-base64",
+        toolId: "base64",
+        relatedToolIds: ["url-encode", "jwt-decoder", "json-validator"],
+        comparisonSlugs: ["base64-vs-url-encode"],
+        eyebrow: "Encoding · Guide",
+        title: "What Is Base64 Encoding?",
+        description:
+            "Base64 turns binary data into a safe text string using 64 printable characters. Learn how it works, why encoded output grows by a third, and what URL-safe Base64 is, with a local encoder to try it.",
+        heroQuestion: "What is Base64 encoding?",
+        shortAnswer:
+            "Base64 converts every three bytes of input into four printable characters chosen from a 64-character alphabet. It exists so binary data can travel through systems that only handle text, and it is encoding, not encryption, since anyone can decode it back.",
+        sections: [
+            {
+                heading: "Why Base64 exists",
+                body:
+                    "Email, URLs, JSON, and many APIs were built for text. When you need to move a PNG, a certificate, or any binary payload through them, the bytes must become printable characters first. Base64 is the standard mapping: three bytes in, four characters out.",
+            },
+            {
+                heading: "How the mapping works",
+                body:
+                    "The encoder reads the input in groups of three bytes and splits them into four 6-bit chunks, then maps each chunk to one of 64 characters: A to Z, a to z, 0 to 9, plus two more depending on the alphabet. When the input length is not a multiple of three, the output is padded with = signs.",
+            },
+            {
+                heading: "Why the output is bigger",
+                body:
+                    "Every three bytes become four characters, so encoded text is always at least about a third larger than the raw bytes. Non-ASCII input grows more, because characters like emoji expand to several bytes before they are encoded. The expansion meter on the tool shows the ratio live.",
+            },
+            {
+                heading: "Encode versus decode",
+                body:
+                    "Encoding converts bytes to the safe alphabet; decoding reverses it. The same tool does both. When you decode, it reads the first bytes of the result and names common formats like PNG, JPEG, PDF, or ZIP, or marks it as JSON or plain text, so you know what you recovered.",
+            },
+            {
+                heading: "Standard versus URL-safe",
+                body:
+                    "The standard alphabet includes + and /, which have meaning inside URLs. URL-safe Base64 swaps them for - and _ and drops the = padding, producing strings that can sit in a query parameter without escaping headaches.",
+            },
+            {
+                heading: "Is Base64 encryption?",
+                body:
+                    "No. Encoding has no key and is trivially reversible, so it hides nothing. Base64 is for transport and storage of binary data, not secrecy. Anything you encode in Base64 can be decoded by anyone, which is why a local encoder that never uploads your data is the right way to work with sensitive payloads.",
+            },
+        ],
+        faq: [
+            {
+                q: "Why does the encoded output get bigger?",
+                a: "Base64 represents every three bytes of input as four printable characters, so the result is always at least about 33% larger than the raw bytes.",
+            },
+            {
+                q: "What is URL-safe Base64?",
+                a: "It replaces the + and / characters with - and _ and drops the = padding, so the string is safe inside URLs and query strings.",
+            },
+            {
+                q: "Is Base64 encryption?",
+                a: "No. It is an encoding with no key and no secrecy. Anyone can decode Base64 back to the original bytes.",
+            },
+            {
+                q: "Can I encode a file locally?",
+                a: "Yes. Drop a file and the tool encodes it in your browser, in a background worker for large inputs. Nothing is uploaded.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────
