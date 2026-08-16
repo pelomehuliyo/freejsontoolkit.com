@@ -258,6 +258,120 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.8",
     },
+    {
+        slug: "what-is-sha-256",
+        toolId: "sha-256",
+        relatedToolIds: ["sha-512", "md5", "bcrypt"],
+        comparisonSlugs: ["sha-256-vs-sha-512", "sha-256-vs-bcrypt", "md5-vs-sha-256"],
+        eyebrow: "Security · Explainer",
+        title: "What Is SHA-256?",
+        description:
+            "SHA-256 is a cryptographic hash function that produces a 256-bit fingerprint. It is the backbone of Bitcoin mining, SSL certificates, and file verification. Here is how it works and why it matters.",
+        heroQuestion: "What is SHA-256 and why does every developer need to understand it?",
+        shortAnswer:
+            "SHA-256 is a one-way mathematical algorithm that takes any input (text, files, passwords) and produces a fixed 256-bit output, usually displayed as 64 hexadecimal characters. It is deterministic, irreversible, and highly collision-resistant.",
+        sections: [
+            {
+                heading: "The 64-character fingerprint",
+                body:
+                    "No matter if your input is a single word or a 10-gigabyte video file, SHA-256 will always output exactly 64 hexadecimal characters (like e3b0c44298fc1c14...). This makes it perfect for verifying that a file hasn't been tampered with during download.",
+            },
+            {
+                heading: "Where you use it every day",
+                body:
+                    "You interact with SHA-256 constantly without knowing it. It secures the HTTPS connection to this website (TLS certificates), powers the proof-of-work mining in Bitcoin, tracks every commit in Git, and verifies the integrity of software updates you download.",
+                list: [
+                    "Bitcoin: Used for mining and generating transaction IDs.",
+                    "TLS/SSL: The standard signature algorithm for HTTPS certificates.",
+                    "Git: Used to uniquely identify commits and detect tampering.",
+                    "Software Downloads: Used for checksum verification.",
+                ],
+            },
+            {
+                heading: "SHA-256 vs MD5 and SHA-1",
+                body:
+                    "MD5 (128-bit) and SHA-1 (160-bit) are older, shorter hash functions that have been cryptographically broken. Attackers can easily create 'collisions' (two different files with the same hash). SHA-256's 256-bit output provides a massive security margin that remains unbroken today.",
+            },
+        ],
+        faq: [
+            { q: "Who invented SHA-256?", a: "SHA-256 was designed by the United States National Security Agency (NSA) and published by NIST in 2001 as part of the SHA-2 family." },
+            { q: "Is SHA-256 encryption?", a: "No. Encryption is two-way (you can decrypt it with a key). SHA-256 is a one-way hash function. You cannot reverse it to get the original data back." },
+            { q: "How do I pronounce SHA-256?", a: "It is typically pronounced as 'shah two-fifty-six' or spelled out 'S-H-A two-five-six'." },
+        ],
+        publishedIn: "v1.8",
+    },
+
+    {
+        slug: "how-does-sha-256-work",
+        toolId: "sha-256",
+        relatedToolIds: ["sha-512", "hmac"],
+        comparisonSlugs: ["sha-256-vs-sha-512"],
+        eyebrow: "Security · Under the Hood",
+        title: "How Does SHA-256 Work?",
+        description:
+            "A step-by-step breakdown of how SHA-256 turns any input into a 64-character fingerprint. Learn about padding, 512-bit blocks, and the 64 rounds of compression that make it irreversible.",
+        heroQuestion: "How does SHA-256 actually process data?",
+        shortAnswer:
+            "SHA-256 works by taking your input, adding 'padding' to reach a specific length, breaking it into 512-bit chunks, and running each chunk through 64 rounds of intense mathematical mixing. The final mixed state becomes your 256-bit hash.",
+        sections: [
+            {
+                heading: "Step 1: Padding and Blocking",
+                body:
+                    "First, the algorithm adds bits to your message so its length is exactly 64 bits short of a multiple of 512. Then it appends the original message length as a 64-bit integer. Finally, it chops the padded message into 512-bit blocks.",
+            },
+            {
+                heading: "Step 2: The 64 Rounds of Compression",
+                body:
+                    "Each 512-bit block is fed into a compression function alongside the current 'hash state'. Over 64 rounds, the data is mixed using bitwise operations (AND, OR, XOR), rotations, and modular addition. This destroys any recognizable pattern from the original input.",
+            },
+            {
+                heading: "Step 3: The Avalanche Effect",
+                body:
+                    "Because of the intense mixing in those 64 rounds, changing even a single bit of the input (like changing 'hello' to 'Hello') completely alters the final hash. This is called the avalanche effect, and it's what makes guessing the original input computationally impossible.",
+            },
+        ],
+        faq: [
+            { q: "Why does SHA-256 use 64 rounds?", a: "The 64 rounds provide a massive security margin against cryptanalysis. Fewer rounds (like 46) have been theoretically weakened in academic papers, but the full 64 rounds remain completely secure." },
+            { q: "Does SHA-256 use a database?", a: "No. SHA-256 is a pure mathematical algorithm. It doesn't look up anything in a database; it just calculates the exact same math on the input every time, guaranteeing the same output." },
+        ],
+        publishedIn: "v1.8",
+    },
+
+    {
+        slug: "is-sha-256-secure",
+        toolId: "sha-256",
+        relatedToolIds: ["sha-512", "bcrypt"],
+        comparisonSlugs: ["sha-256-vs-sha-512", "sha-256-vs-bcrypt"],
+        eyebrow: "Security · Threat Analysis",
+        title: "Is SHA-256 Secure in 2026?",
+        description:
+            "After 20+ years of attack attempts, is SHA-256 still safe? We break down its collision resistance, the real threat of quantum computers, and why it fails as a password hasher.",
+        heroQuestion: "Has SHA-256 ever been cracked or broken?",
+        shortAnswer:
+            "Yes, SHA-256 is highly secure for digital signatures, blockchain, and file integrity. There are zero practical collision or preimage attacks against the full algorithm. However, it is vulnerable to quantum speedups (Grover's algorithm) and is entirely unsafe for storing passwords.",
+        sections: [
+            {
+                heading: "Zero practical breaks after 20+ years",
+                body:
+                    "Unlike MD5 and SHA-1, which have been demonstrably broken with real-world collision attacks, SHA-256 remains intact. The closest academic attacks only compromise reduced-round versions (e.g., 46 out of 64 rounds) and require more energy than exists on Earth to execute against the full algorithm.",
+            },
+            {
+                heading: "The Quantum Computing Threat (Grover's Algorithm)",
+                body:
+                    "Quantum computers don't 'break' SHA-256 the way Shor's algorithm breaks RSA encryption. Instead, Grover's algorithm speeds up brute-force searching. This effectively halves SHA-256's security from 256 bits down to 128 bits. Fortunately, 128 bits of security is still considered computationally infeasible to brute-force.",
+            },
+            {
+                heading: "Why SHA-256 is terrible for passwords",
+                body:
+                    "SHA-256 is designed to be extremely fast. Modern GPUs can calculate billions of SHA-256 hashes per second. If a database of unsalted SHA-256 password hashes leaks, attackers can crack almost all weak passwords in minutes. Always use slow, salted algorithms like bcrypt or Argon2 for passwords.",
+            },
+        ],
+        faq: [
+            { q: "Is SHA-256 quantum resistant?", a: "Technically no, but practically yes. Grover's algorithm reduces its security to 128 bits, which NIST still considers secure for the foreseeable future. If true quantum threats emerge, we will likely migrate to SHA-512 or SHA-3." },
+            { q: "Can SHA-256 be cracked?", a: "The algorithm itself cannot be cracked. However, if you hash a weak password (like 'password123') with SHA-256, attackers can guess the password, hash it, and see if it matches. This is cracking the password, not breaking the algorithm." },
+        ],
+        publishedIn: "v1.8",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────

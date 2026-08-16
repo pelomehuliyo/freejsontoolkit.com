@@ -135,27 +135,83 @@ import { ENCODINGS } from "../../lib/tools/sha-256/constants";
         <span class="caption-mono section-eyebrow">FAQ</span>
         <h2 id="faq-title" class="display-lg section-title">Quick answers</h2>
       </div>
+
       <div class="faq-list">
+        <details class="faq-item">
+          <summary class="faq-summary">What is SHA-256 used for?</summary>
+          <p class="body-md faq-answer">
+            It is the backbone of modern digital security. It secures HTTPS connections (SSL/TLS),
+            powers Bitcoin mining, tracks changes in Git repositories, and verifies that downloaded
+            software hasn't been tampered with.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-summary">How do I check a SHA-256 checksum?</summary>
+          <p class="body-md faq-answer">
+            Paste the hash you were given into this tool, or use your terminal. On Mac/Linux use
+            <code>shasum -a 256 filename</code>. On Windows use <code
+              >certutil -hashfile filename SHA256</code
+            >. If the output matches the expected hash, your file is safe.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-summary">Can SHA-256 be decrypted?</summary>
+          <p class="body-md faq-answer">
+            No. SHA-256 is a one-way mathematical function, not encryption. The original data is
+            destroyed during the hashing process. Attackers can only "crack" hashes by guessing
+            millions of inputs and comparing the results.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-summary">Is SHA-256 quantum resistant?</summary>
+          <p class="body-md faq-answer">
+            Mostly. A powerful quantum computer running Grover's algorithm would effectively halve
+            SHA-256's security (from 256 bits to 128 bits). However, 128 bits is still considered
+            computationally infeasible to brute-force, so it remains safe for the foreseeable
+            future.
+          </p>
+        </details>
+
         <details class="faq-item">
           <summary class="faq-summary">Is my text uploaded?</summary>
           <p class="body-md faq-answer">
             No. The hashing happens entirely in your browser using the native Web Crypto API.
           </p>
         </details>
+
         <details class="faq-item">
           <summary class="faq-summary">Can I use this for passwords?</summary>
           <p class="body-md faq-answer">
-            SHA-256 is too fast for password storage. Use a deliberately slow, salted function like{" "}
-            <a href="/tools/bcrypt">bcrypt</a> instead.
-          </p>
-        </details>
-        <details class="faq-item">
-          <summary class="faq-summary">Which encoding should I use?</summary>
-          <p class="body-md faq-answer">
-            Hex is standard for checksums and APIs. Base64 is more compact for URLs or tokens.
+            No. SHA-256 is too fast for password storage. Use the <a href="/tools/bcrypt"
+              >bcrypt generator</a
+            > instead.
           </p>
         </details>
       </div>
+      <details class="faq-item">
+        <summary class="faq-summary">Is my text uploaded?</summary>
+        <p class="body-md faq-answer">
+          No. The hashing happens entirely in your browser using the native Web Crypto API.
+        </p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-summary">Can I use this for passwords?</summary>
+        <p class="body-md faq-answer">
+          SHA-256 is too fast for password storage. Use a deliberately slow, salted function like{
+            " "
+          }
+          <a href="/tools/bcrypt">bcrypt</a> instead.
+        </p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-summary">Which encoding should I use?</summary>
+        <p class="body-md faq-answer">
+          Hex is standard for checksums and APIs. Base64 is more compact for URLs or tokens.
+        </p>
+      </details>
     </Container>
   </section>
 </ToolShell>
