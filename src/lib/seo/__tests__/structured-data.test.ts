@@ -143,8 +143,10 @@ describe("buildFaqJsonLd", () => {
         expect(children(s, "mainEntity")).toHaveLength(FAQS["yaml-to-json"].length);
     });
 
-    it("tool without an FAQ (url-codec) → null", () => {
-        expect(buildFaqJsonLd({ pathname: "/tools/url-codec", site: SITE })).toBeNull();
+    it("tool with a FAQ added later (url-codec) → FAQPage matching its faq.ts entry", () => {
+        const s = node(buildFaqJsonLd({ pathname: "/tools/url-codec", site: SITE }));
+        expect(s["@type"]).toBe("FAQPage");
+        expect(children(s, "mainEntity")).toHaveLength(FAQS["url-encode"].length);
     });
 
     it("non-tool routes → null", () => {

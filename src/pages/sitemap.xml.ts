@@ -23,7 +23,6 @@ const STATIC_ROUTES: SitemapEntry[] = [
   { loc: "/collections/data-formats", priority: "0.6", changefreq: "monthly" },
   { loc: "/collections/developer-utilities", priority: "0.6", changefreq: "monthly" },
   { loc: "/collections/networking", priority: "0.6", changefreq: "monthly" },
-  { loc: "/large-files", priority: "0.7", changefreq: "monthly" },
   { loc: "/compare", priority: "0.7", changefreq: "monthly" },
   { loc: "/learn", priority: "0.7", changefreq: "weekly" },
   { loc: "/why-local", priority: "0.6", changefreq: "monthly" },

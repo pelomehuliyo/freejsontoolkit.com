@@ -102,6 +102,7 @@ export const FAQS: Record<string, Faq[]> = {
     { q: "Is my JSON uploaded anywhere?", a: "No. Conversion runs entirely in your browser, in a background worker for large files. Your data never leaves your machine." },
     { q: "How are arrays represented?", a: "Each entry becomes its own element using the \"Array item tag\" (default item ), wrapped in the array's key. So \"tags\": [\"a\",\"b\"] becomes <tags><item>a</item><item>b</item></tags> ." },
     { q: "Will it round-trip back to identical JSON?", a: "Not always, and we don't pretend otherwise. XML has no native notion of null vs an empty string, or of a number vs the text of that number, so some type information is lost on the way to XML. The mapping is designed to be readable and reversible where it can be." },
+    { q: "Can I convert JSON to XML without uploading?", a: "Yes. The conversion runs entirely in your browser, so your JSON never leaves your machine. Paste your data or drop a file and the XML is produced locally." },
   ],
   "json-to-yaml": [
     { q: "Is my JSON uploaded anywhere?", a: "No. Conversion runs entirely in your browser (in a background worker for large files). Your data never leaves your machine." },
@@ -137,11 +138,6 @@ export const FAQS: Record<string, Faq[]> = {
     { q: "Can I use this for passwords?", a: "SHA-256 is too fast for password storage. Use a deliberately slow, salted function like bcrypt instead." },
     { q: "Which encoding should I use?", a: "Hex is standard for checksums and APIs. Base64 is more compact for URLs or tokens." },
   ],
-  "sha-512": [
-    { q: "Is my text uploaded?", a: "No. The hashing happens entirely in your browser using the native Web Crypto API." },
-    { q: "How is SHA-512 different from SHA-256?", a: "Both belong to the SHA-2 family. SHA-512 produces a 512-bit digest (128 hex chars) vs SHA-256's 256 bits (64 hex chars), and uses 64-bit word operations, which is why it's the natural choice on 64-bit platforms. See the SHA-256 vs SHA-512 comparison ." },
-    { q: "Can I use this for passwords?", a: "SHA-512 is too fast for password storage. Use a deliberately slow, salted function like bcrypt instead." },
-  ],
   "text-diff": [
     { q: "Is either text uploaded?", a: "No. The comparison runs entirely in your browser, in a background worker for large inputs. Neither side ever leaves your machine." },
     { q: "What kind of text can I compare?", a: "Any text: log files, config files, code, markdown, environment files, SQL, CSV. The diff works line by line, so it doesn't matter what the text is . If you're comparing two JSON documents, the dedicated JSON Diff tool has the same engine with JSON framing." },
@@ -168,6 +164,12 @@ export const FAQS: Record<string, Faq[]> = {
     { q: "Is this conversion lossless?", a: "Yes. CSV quoting can represent commas, double quotes, and even embedded newlines, so nothing from a valid TSV is dropped or refused. (The reverse, CSV → TSV, is the lossy direction, and that tool says so.)" },
     { q: "Do ragged rows work?", a: "No. TSV → CSV needs a rectangular grid. Rows with a different number of fields fail with the exact line number instead of being silently padded or dropped, which would change your data." },
   ],
+  "url-encode": [
+    { q: "Is my input sent anywhere?", a: "No. Encoding and decoding run entirely in your browser. Nothing you paste leaves your machine." },
+    { q: "Component vs whole URL: which do I want?", a: "If you're encoding a single value to drop into a query string, use Component. It encodes the reserved characters so they can't break the URL. If you already have a full URL and just want the unsafe characters escaped, use Whole URL, which leaves the structure intact." },
+    { q: "Why is there a plus sign instead of %20?", a: "That's form encoding (and many real query strings), where a space is written as +. The \"decode + as space\" toggle reads it back correctly; turn it off to keep + literal." },
+    { q: "What does the footprint show?", a: "Each teal chip is a character that the current mode encodes, shown as its percent-bytes; plain characters pass through untouched. It's the encoding's effect on your exact string, made visible." },
+  ],
   "uuid-generator": [
     { q: "Which version should I use?", a: "For an opaque id, v4. For a primary key you'll sort or insert in order, v7, whose time prefix keeps inserts sequential. For a stable id derived from a name (a URL, a DNS name), v5." },
     { q: "Are these generated on a server?", a: "No. Every UUID is produced in your browser using the platform's cryptographic RNG (and SHA-1 for v5). Nothing you generate is transmitted or stored." },
@@ -179,6 +181,7 @@ export const FAQS: Record<string, Faq[]> = {
     { q: "How are XML attributes handled?", a: "Attributes are prefixed with @ in the JSON output (e.g., \"@id\": \"1\" ). You can toggle them on/off." },
     { q: "What about CDATA and comments?", a: "CDATA is treated as text. Comments, processing instructions, and DOCTYPE declarations are skipped for clean output." },
     { q: "Why are arrays sometimes single objects?", a: "If \"Preserve arrays\" is off, a single child becomes an object. Turn it on to always get arrays for repeated tags." },
+    { q: "Can I convert XML to JSON without uploading?", a: "Yes. The conversion runs entirely in your browser, in a background worker for large files. Nothing you paste or drop leaves your machine." },
   ],
   "yaml-to-json": [
     { q: "Is my YAML uploaded anywhere?", a: "No. Parsing runs entirely in your browser (in a background worker for large files). Your config never leaves your machine." },

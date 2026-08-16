@@ -22,6 +22,7 @@ const MONO: Record<string, string> = {
 };
 const clip = (s: string, n: number): string =>
   s.length > n ? s.slice(0, n - 1).trimEnd() + "…" : s;
+const siteOrigin = Astro.site?.toString().replace(/\/$/, "") ?? "https://freejsontoolkit.com";
 
 const cards = Object.values(COMPARISONS).map((c) => ({
   slug: c.slug,
@@ -39,6 +40,18 @@ const cards = Object.values(COMPARISONS).map((c) => ({
   description="Side-by-side comparisons to help you pick the right tool or format: Formatter vs Validator, Minifier vs Formatter, Diff vs Formatter, and CSV vs JSON. All local, all free."
   activePath="/compare"
 >
+  <!-- Breadcrumb JSON-LD, mirrors the visible Home / Compare trail -->
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: `${siteOrigin}/` },
+        { "@type": "ListItem", position: 2, name: "Compare", item: `${siteOrigin}/compare` },
+      ],
+    })}
+  />
   <main>
     <section class="cx-hero">
       <Container size="default">

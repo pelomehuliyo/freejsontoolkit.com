@@ -46,9 +46,23 @@ const others = Object.values(COMPARISONS).filter((c) => c.slug !== slug);
 
 const pageTitle = `${comp.title} — Which Should You Use?`;
 const pageDescription = comp.intro.length > 155 ? comp.intro.slice(0, 152) + "…" : comp.intro;
+const siteOrigin = Astro.site?.toString().replace(/\/$/, "") ?? "https://freejsontoolkit.com";
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription} activePath={`/compare/${slug}`}>
+  <!-- Breadcrumb JSON-LD, mirrors the visible Home / Compare / {a} vs {b} trail -->
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: `${siteOrigin}/` },
+        { "@type": "ListItem", position: 2, name: "Compare", item: `${siteOrigin}/compare` },
+        { "@type": "ListItem", position: 3, name: `${aName} vs ${bName}`, item: `${siteOrigin}/compare/${slug}` },
+      ],
+    })}
+  />
   <main>
     {/* hero — the two sides face to face */}
     <section class="cmp-hero">

@@ -14,6 +14,7 @@ export function getStaticPaths() {
 const { article } = Astro.props;
 const tool = getTool(article.toolId);
 const canonicalPath = `/learn/${article.slug}`;
+const siteOrigin = Astro.site?.toString().replace(/\/$/, "") ?? "https://freejsontoolkit.com";
 
 // Build FAQ JSON-LD for this article
 const faqSchema =
@@ -47,6 +48,19 @@ const articleSchema = {
   <!-- Article JSON-LD -->
   <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
   {faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
+  <!-- Breadcrumb JSON-LD, mirrors the visible Home / Learn / {title} trail -->
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: `${siteOrigin}/` },
+        { "@type": "ListItem", position: 2, name: "Learn", item: `${siteOrigin}/learn` },
+        { "@type": "ListItem", position: 3, name: article.title, item: `${siteOrigin}${canonicalPath}` },
+      ],
+    })}
+  />
 
   <article class="learn-article">
     <Container size="narrow">
@@ -95,8 +109,8 @@ const articleSchema = {
         <p class="body-sm cta-text">
           {
             tool
-              ? `Generate hashes instantly with our ${tool.name}. No upload, no server.`
-              : "Try our tool. No upload, no server."
+              ? `Try it in your browser with our ${tool.name}. No upload, no server.`
+              : "Try it in your browser. No upload, no server."
           }
         </p>
         {

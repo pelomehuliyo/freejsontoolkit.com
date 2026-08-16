@@ -969,6 +969,205 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.8",
     },
+
+    {
+        slug: "how-to-convert-json-to-xml",
+        toolId: "json-to-xml",
+        relatedToolIds: ["xml-to-json", "json-formatter", "json-validator"],
+        comparisonSlugs: ["json-xml-vs-xml-json"],
+        eyebrow: "JSON · Guide",
+        title: "How to Convert JSON to XML",
+        description:
+            "Convert JSON to XML in three steps: paste your JSON, choose how arrays and the XML declaration map, and run it locally. This guide explains the mapping, the round-trip limits, and large-file handling.",
+        heroQuestion: "How do I convert JSON to XML?",
+        shortAnswer:
+            "Paste your JSON into a converter, pick how arrays and the XML declaration should map, and run it. A converter that shows its mapping makes it obvious how each JSON value becomes an XML element, and large files are handled in a background worker without leaving your machine.",
+        sections: [
+            {
+                heading: "The three steps",
+                body:
+                    "Open the JSON to XML converter, paste your JSON into the left editor, or drop a .json file, then choose the options you want: pretty-print the output, include the XML declaration, and set the array item tag. Press Convert and the XML appears on the right, ready to copy or download.",
+            },
+            {
+                heading: "How the mapping works",
+                body:
+                    "The converter walks your JSON and builds XML with a straightforward rule set. Every object becomes an element named after its key. Every primitive value, a string, a number, a boolean, or null, becomes the text content of its element. Arrays are the one structure that needs a decision, covered next.",
+                list: [
+                    "Objects become elements named after their key",
+                    "Strings, numbers, booleans, and null become element text",
+                    "Arrays become a wrapper element with repeated children",
+                ],
+            },
+            {
+                heading: "How arrays are represented",
+                body:
+                    "XML has no native array type, so each array becomes a wrapper element, named after the key, containing one child per entry using the array item tag you set. With the default item tag, \"tags\": [\"a\", \"b\"] becomes <tags><item>a</item><item>b</item></tags>.",
+            },
+            {
+                heading: "What XML gains and loses",
+                body:
+                    "XML keeps the structure of your data, but it is a document format, not a typed one. It has no native null, no number versus string distinction, and no arrays. Converting is lossy at the edges: a null can become an empty element, and a number becomes text. The reverse tool, XML to JSON, is just as honest about its limits. Do not expect a byte-identical round trip.",
+            },
+            {
+                heading: "Converting a large JSON file",
+                body:
+                    "Paste a huge JSON blob and the browser can choke. Drop a file instead and the converter switches to a background worker: it reads and converts off the main thread, shows a capped preview in the editor, and offers the full XML as a download. Nothing is uploaded.",
+            },
+            {
+                heading: "Converter versus formatter",
+                body:
+                    "A JSON formatter pretty-prints JSON without changing the format. A converter changes the format entirely, from JSON to XML. If your goal is readable JSON, format it. If an XML consumer is waiting, convert it. Both tools run entirely in your browser.",
+            },
+        ],
+        faq: [
+            {
+                q: "Can I convert JSON to XML without uploading my data?",
+                a: "Yes. The conversion runs entirely in your browser, so your JSON never leaves your machine. Paste or drop a file and the XML is produced locally.",
+            },
+            {
+                q: "Why is every array entry wrapped in an item tag?",
+                a: "XML has no native arrays, so each array becomes a wrapper element with one child per entry. The tag is configurable; the default is item.",
+            },
+            {
+                q: "Will converting lose any information?",
+                a: "Some. XML has no null, no number versus string distinction, and no arrays, so a few JSON types have to be represented as text. The mapping stays readable, but a round trip back to JSON is not always identical.",
+            },
+            {
+                q: "Can this handle a very large JSON file?",
+                a: "Yes. Drop a large file and the conversion runs in a background worker with a capped preview and a full download, rather than freezing the page.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "json-vs-xml",
+        toolId: "json-to-xml",
+        relatedToolIds: ["xml-to-json", "json-to-csv"],
+        comparisonSlugs: ["json-xml-vs-xml-json", "csv-vs-json"],
+        eyebrow: "JSON · Formats",
+        title: "JSON vs XML: Which Format Should You Use?",
+        description:
+            "JSON and XML are both formats for structured data, but they solve different problems. Compare syntax, types, schema options, and when each one is the right choice.",
+        heroQuestion: "What is the difference between JSON and XML?",
+        shortAnswer:
+            "JSON is a lightweight data format with native types like numbers, booleans, and arrays, born from JavaScript. XML is a markup language with attributes, namespaces, and a document model, built for documents as much as data. JSON wins for APIs and configuration. XML still leads where documents, namespaces, or strict schemas matter.",
+        sections: [
+            {
+                heading: "The short version",
+                body:
+                    "Reach for JSON when you are moving data between systems, especially web APIs and configuration. Reach for XML when you are moving documents, or when namespaces, mixed content, or XSD validation are part of the job. Both are widely supported and converting between them is routine.",
+            },
+            {
+                heading: "How they look",
+                body:
+                    "JSON uses braces, brackets, and colons, and a person, a list of names, and a flag read naturally. XML wraps every value in an opening and closing tag, with attributes available for metadata. The same data takes more characters in XML, and that verbosity is the price of being a markup language.",
+                list: [
+                    "JSON: {\"name\": \"Ada\", \"roles\": [\"admin\"]}",
+                    "XML: <person name=\"Ada\"><roles><role>admin</role></roles></person>",
+                ],
+            },
+            {
+                heading: "Data types",
+                body:
+                    "JSON has real types: strings, numbers, booleans, null, arrays, and objects. XML has no types of its own. Everything inside an element is text until a schema or a parser decides otherwise, and XML attributes are always strings too. That makes JSON faster to consume in typed environments and XML more literal about documents.",
+            },
+            {
+                heading: "Schema and validation",
+                body:
+                    "JSON Schema validates structure and types and is widely supported across languages. XML has DTD and XSD, which are older and more verbose but very mature. If your industry already lives on XSD contracts, XML is the pragmatic choice. If you control the contract, JSON Schema is usually simpler to maintain.",
+            },
+            {
+                heading: "Where each format wins",
+                body:
+                    "JSON dominates web APIs, config files, and the JavaScript ecosystem. XML remains entrenched in documents, SOAP web services, publishing, and any stack with a heavy XSD dependency. Neither is going anywhere, and most real systems pass data between both at some boundary.",
+            },
+            {
+                heading: "Converting between them",
+                body:
+                    "When a system hands you XML but your code wants JSON, convert it with a tool that maps attributes and repeated tags predictably. The reverse, JSON to XML, needs a decision about how arrays and types become elements and text. Both converters on this site run entirely in your browser.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is JSON always better than XML?",
+                a: "No. JSON is more compact and typed, but XML handles documents, namespaces, and mixed content better. The right choice depends on the consumer, not fashion.",
+            },
+            {
+                q: "Can XML represent a number or a boolean?",
+                a: "Not natively. Everything in an XML element is text until a schema or parser assigns a type. JSON stores these types directly.",
+            },
+            {
+                q: "Why does older software still use XML?",
+                a: "XML predates JSON and powers a lot of enterprise infrastructure: SOAP services, XSD contracts, and document pipelines. Migration costs keep it in place even where JSON would be lighter.",
+            },
+            {
+                q: "How do I convert between JSON and XML?",
+                a: "Use a converter. JSON to XML maps objects to elements and arrays to repeated tags. XML to JSON maps attributes to @-prefixed keys and repeated tags to arrays. Both directions run locally on this site.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "how-to-convert-xml-to-json",
+        toolId: "xml-to-json",
+        relatedToolIds: ["json-to-xml", "json-formatter", "json-validator"],
+        comparisonSlugs: ["json-xml-vs-xml-json"],
+        eyebrow: "XML · Guide",
+        title: "How to Convert XML to JSON",
+        description:
+            "Convert XML to JSON in three steps: paste your XML, choose how attributes and repeated tags map, and run it locally. This guide covers the @-prefixed attribute keys, array handling, and CDATA.",
+        heroQuestion: "How do I convert XML to JSON?",
+        shortAnswer:
+            "Paste your XML into a converter, decide how attributes and repeated tags should behave, and run it. Attributes become keys prefixed with @, repeated elements become arrays, and the result is valid JSON you can format or validate next. The conversion runs entirely in your browser.",
+        sections: [
+            {
+                heading: "The three steps",
+                body:
+                    "Open the XML to JSON converter, paste your XML into the left editor, or drop a file, then choose the options that match how you want attributes and arrays represented. Press Convert and the JSON appears on the right, ready to copy or download.",
+            },
+            {
+                heading: "How attributes are handled",
+                body:
+                    "XML attributes become keys prefixed with @ so they can never collide with element keys. With attributes on, <person id=\"1\"> becomes \"@id\": \"1\". You can toggle attributes on or off to get the full picture or just the element structure.",
+            },
+            {
+                heading: "Elements, text, and CDATA",
+                body:
+                    "An element's text content becomes the value for its key. CDATA is treated as ordinary text. Comments, processing instructions, and DOCTYPE declarations are skipped so the output stays clean.",
+            },
+            {
+                heading: "Repeated tags and arrays",
+                body:
+                    "XML has no arrays, so repeated sibling tags are the only signal. With \"Preserve arrays\" on, every repeated tag becomes an array even when it appears once. With it off, a single occurrence becomes a plain object or value, which keeps the JSON tidy but loses the array guarantee.",
+            },
+            {
+                heading: "What to do with the result",
+                body:
+                    "The output is plain JSON, so it can be fed straight into a formatter or a validator. If the XML was large, the conversion runs in a background worker with a capped preview and a full download available.",
+            },
+        ],
+        faq: [
+            {
+                q: "Why does my attribute have an @ in front of its key?",
+                a: "Attributes are prefixed with @ so they never collide with element keys. You can toggle attributes off to drop them from the output.",
+            },
+            {
+                q: "Can I convert XML to JSON without uploading?",
+                a: "Yes. The conversion runs entirely in your browser, in a background worker for large files. Nothing you paste or drop leaves your machine.",
+            },
+            {
+                q: "What happens to CDATA and comments?",
+                a: "CDATA becomes plain text. Comments, processing instructions, and DOCTYPE declarations are skipped.",
+            },
+            {
+                q: "Why did a single tag become an object instead of an array?",
+                a: "With \"Preserve arrays\" off, a tag that appears once becomes a single object or value. Turn it on to always emit an array for repeated tags.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────
@@ -1006,6 +1205,10 @@ export function learnSearchEntries(): LearnSearchEntry[] {
             "hashing",
             "security",
             "sha-512",
+            "json",
+            "xml",
+            "converter",
+            "formats",
         ],
     };
     const articles: LearnSearchEntry[] = ARTICLES.map((article) => ({
