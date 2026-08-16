@@ -24,7 +24,7 @@ import { ALGORITHMS, ENCODINGS } from "../../lib/tools/hmac/constants";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "HMAC" }]}
     title="HMAC Generator"
-    subtitle="Generate a keyed HMAC from a message and a secret — entirely in your browser."
+    subtitle="Generate a keyed HMAC from a message and a secret, entirely in your browser."
   />
 
   <section class="dj-stage">
@@ -163,7 +163,7 @@ import { ALGORITHMS, ENCODINGS } from "../../lib/tools/hmac/constants";
     steps={[
       {
         title: "Enter a message",
-        desc: "Type or paste the message you want to authenticate — an API request, a payload, a token.",
+        desc: "Type or paste the message you want to authenticate: an API request, a payload, a token.",
       },
       {
         title: "Add the secret key",
@@ -171,7 +171,7 @@ import { ALGORITHMS, ENCODINGS } from "../../lib/tools/hmac/constants";
       },
       {
         title: "Pick & generate",
-        desc: "Choose SHA-256 or SHA-512, pick an encoding, then copy the MAC — the key never leaves your browser.",
+        desc: "Choose SHA-256 or SHA-512, pick an encoding, then copy the MAC. The key never leaves your browser.",
       },
     ]}
   />
@@ -208,7 +208,7 @@ import { ALGORITHMS, ENCODINGS } from "../../lib/tools/hmac/constants";
           <summary class="faq-summary">Why do I need a secret key?</summary>
           <p class="body-md faq-answer">
             The key is what makes the MAC trustworthy. Anyone can compute SHA-256, but only parties
-            who share the secret can produce or verify an HMAC. Keep the key secret — treat it like
+            who share the secret can produce or verify an HMAC. Keep the key secret. Treat it like
             a password, and never paste real production keys into any tool.
           </p>
         </details>
@@ -223,7 +223,7 @@ import { ALGORITHMS, ENCODINGS } from "../../lib/tools/hmac/constants";
         <details class="faq-item">
           <summary class="faq-summary">Is HMAC the same as a hash?</summary>
           <p class="body-md faq-answer">
-            Not quite. A plain hash like SHA-256 has no secret — anyone can compute it, so it detects
+            Not quite. A plain hash like SHA-256 has no secret. Anyone can compute it, so it detects
             accidental corruption but not forgery. HMAC adds a key, so it also proves authenticity.
             For password storage specifically, use a slow, salted function like{" "}
             <a href="/tools/bcrypt">bcrypt</a> instead.

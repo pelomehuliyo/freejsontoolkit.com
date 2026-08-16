@@ -94,7 +94,7 @@ Ada	Engineer	London`}
     steps={[
       {
         title: "Paste or drop",
-        desc: "Any tab-separated table — the shared RFC 4180 parser reads it with the delimiter pinned to tab.",
+        desc: "Any tab-separated table. The shared RFC 4180 parser reads it with the delimiter pinned to tab.",
       },
       {
         title: "Convert",
@@ -102,7 +102,7 @@ Ada	Engineer	London`}
       },
       {
         title: "Take the CSV",
-        desc: "Copy or download the comma-separated result — fields with commas come out quoted, correctly.",
+        desc: "Copy or download the comma-separated result. Fields with commas come out quoted, correctly.",
       },
     ]}
   />
@@ -140,7 +140,7 @@ Ada	Engineer	London`}
           <p class="body-md faq-answer">
             Yes. Files above about 15 MB switch to a dedicated large-file mode: the file is read and
             converted in a background worker, you see a capped preview in the editor, and the full
-            CSV is a one-click download. Nothing is uploaded — the only ceiling is your device's
+            CSV is a one-click download. Nothing is uploaded. The only ceiling is your device's
             memory. <a href="/large-files">See how large-file mode works →</a>
           </p>
         </details>
@@ -155,14 +155,14 @@ Ada	Engineer	London`}
           <summary class="faq-summary">Is this conversion lossless?</summary>
           <p class="body-md faq-answer">
             Yes. CSV quoting can represent commas, double quotes, and even embedded newlines, so
-            nothing from a valid TSV is dropped or refused. (The reverse — CSV → TSV — is the lossy
+            nothing from a valid TSV is dropped or refused. (The reverse, CSV → TSV, is the lossy
             direction, and that tool says so.)
           </p>
         </details>
         <details class="faq-item">
           <summary class="faq-summary">Do ragged rows work?</summary>
           <p class="body-md faq-answer">
-            No — TSV → CSV needs a rectangular grid. Rows with a different number of fields fail
+            No. TSV → CSV needs a rectangular grid. Rows with a different number of fields fail
             with the exact line number instead of being silently padded or dropped, which would
             change your data.
           </p>

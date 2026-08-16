@@ -154,6 +154,11 @@ stored Blob reference.
 
 ### Non-negotiable house rules
 
+- **Copy:** User-facing prose avoids em dashes. Rewrite with commas, colons,
+  or periods. This rule targets editorial copy (heroes, ledes, subtitles,
+  FAQs, docs, comparisons, articles, marketing/legal pages). It never applies
+  to tool runtime strings ("Output: Preview — first N rows"), placeholder
+  values, aria-labels, meta title/description separators, or code comments.
 - **Privacy:** No data leaves the browser. No backend performs conversions. No
   analytics/tracking is added during quality passes. Large-file mode reads and
   converts files locally. Any copy that mentions privacy stays truthful.

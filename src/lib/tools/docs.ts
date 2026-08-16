@@ -41,7 +41,7 @@ export const DOCS: Record<string, ToolDoc> = {
     eyebrow: "Docs · Validate",
     conceptTitle: "What validation actually checks",
     concept:
-      "Validating JSON means parsing it against the JSON grammar — brackets balanced, strings closed, " +
+      "Validating JSON means parsing it against the JSON grammar: brackets balanced, strings closed, " +
       "commas and colons where they belong, numbers and literals well-formed. It is a syntax check, not a " +
       "meaning check: the validator confirms the document is *shaped* like JSON, not that it matches some " +
       "expected schema (schema validation is a separate, later tool). When something is wrong, the engine " +
@@ -87,7 +87,7 @@ export const DOCS: Record<string, ToolDoc> = {
     examples: [
       {
         title: "Nested object",
-        note: "A valid document with nesting and mixed types — should report Valid.",
+        note: "A valid document with nesting and mixed types. It should report Valid.",
         snippet: `{\n  "user": { "id": 1, "name": "Ada" },\n  "active": true,\n  "score": null\n}`,
       },
       {
@@ -160,13 +160,13 @@ export const DOCS: Record<string, ToolDoc> = {
     eyebrow: "Docs · YAML → JSON",
     conceptTitle: "What the conversion does (and gives up)",
     concept:
-      "YAML is a superset of JSON — every JSON document is already (nearly) valid YAML, so the " +
+      "YAML is a superset of JSON. Every JSON document is already (nearly) valid YAML, so the " +
       "conversion is one-directional by nature. The engine parses your YAML 1.2 and re-serializes " +
       "the result as pretty-printed JSON. Three things change in the crossing: comments are " +
       "dropped because JSON has nowhere to keep them; anchors and aliases are resolved to their " +
       "expanded values; and YAML timestamps become ISO-8601 strings, since JSON has no date type. " +
       "One thing deliberately does not happen: duplicate keys are rejected with an exact line and " +
-      "column instead of being silently collapsed — JSON output would keep only the last value, " +
+      "column instead of being silently collapsed. JSON output would keep only the last value, " +
       "and we'd rather point at the problem than drop your data. Large files convert in a " +
       "background worker so the editor never locks up.",
     lead: "before-after",
@@ -177,7 +177,7 @@ export const DOCS: Record<string, ToolDoc> = {
         title: "Bad indentation",
         body:
           "YAML structure lives in its whitespace. A line that sits one space too deep (or too " +
-          "shallow) breaks the parse — and tabs are forbidden for indentation entirely. Load this " +
+          "shallow) breaks the parse, and tabs are forbidden for indentation entirely. Load this " +
           "and the caret lands on the offending line.",
         snippet: `user:
   name: Ada
@@ -211,7 +211,7 @@ name: Alan`,
         kind: "note",
         title: "Dates become ISO strings",
         body:
-          "A bare YAML date converts to an ISO-8601 string in JSON. Load this and convert — the " +
+          "A bare YAML date converts to an ISO-8601 string in JSON. Load this and convert. The " +
           "output carries the full timestamp as text.",
         snippet: `shipped: 2026-08-02`,
       },
@@ -220,7 +220,7 @@ name: Alan`,
     examples: [
       {
         title: "Simple config",
-        note: "Scalars of every type — string, number, boolean, null.",
+        note: "Scalars of every type: string, number, boolean, null.",
         snippet: `name: Ada
 role: engineer
 level: 7
@@ -240,7 +240,7 @@ alias: null`,
       },
       {
         title: "Anchors and aliases",
-        note: "&base defines an anchor; *base expands it — the JSON contains the full value.",
+        note: "&base defines an anchor; *base expands it, and the JSON contains the full value.",
         snippet: `base: &base
   retries: 3
   timeout: 30
@@ -255,7 +255,7 @@ production:
     conceptTitle: "What decoding is (and what it is not)",
     concept:
       "A JWT is three base64url segments joined by dots: a header, a payload, and a signature. The " +
-      "first two are encoded, not encrypted — anyone holding the token can decode and read them, " +
+      "first two are encoded, not encrypted. Anyone holding the token can decode and read them, " +
       "which is exactly what this tool does, entirely in your browser. The signature is what a " +
       "verifier checks against a key; this page has no key, so it decodes and stops, and says so " +
       "loudly. Reading the payload tells you what the token claims; it never tells you whether " +
@@ -276,7 +276,7 @@ production:
         title: "exp / iat / nbf are time facts",
         body:
           "Numeric date claims are rendered as human dates with an expired / valid-so-far indicator. " +
-          "That's a statement about the clock, not about authenticity — an expired token can still be " +
+          "That's a statement about the clock, not about authenticity. An expired token can still be " +
           "a genuine one, and a valid-looking one can still be forged.",
       },
       {
@@ -291,7 +291,7 @@ production:
         kind: "error",
         title: "alg: none",
         body:
-          "A token declaring alg none with an empty signature is unsigned — anyone could have made " +
+          "A token declaring alg none with an empty signature is unsigned. Anyone could have made " +
           "it. The decoder flags this loudly; servers that accept such tokens are vulnerable.",
       },
     ],
@@ -299,7 +299,7 @@ production:
     examples: [
       {
         title: "The classic sample",
-        note: "The canonical example token — HS256, with an iat claim to interpret.",
+        note: "The canonical example token: HS256, with an iat claim to interpret.",
         snippet:
           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
           "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ." +
@@ -374,11 +374,11 @@ production:
     conceptTitle: "How the tester matches",
     concept:
       "The tester compiles your pattern with the browser's native RegExp engine and runs it against " +
-      "the test string as you type — no server, no upload. Every match highlights in the view, and " +
+      "the test string as you type. No server, no upload. Every match highlights in the view, and " +
       "each match lists its capture groups, numbered ($1, $2…) and named. Flags reshape how the same " +
       "pattern behaves: g returns every match instead of stopping at the first, i ignores case, m " +
       "makes ^ and $ match line boundaries, s lets . cross newlines, u switches on full Unicode, and " +
-      "y pins the match to the current position. Load any snippet below with \"try it\" — the pattern " +
+      "y pins the match to the current position. Load any snippet below with \"try it\". The pattern " +
       "and the test text both fill in, and the matches light up.",
     lead: "before-after",
     itemsLabel: "Things to know",
@@ -389,7 +389,7 @@ production:
         body:
           "Characters like . * + ? ( ) [ ] { } ^ $ | carry meaning. A bare . matches ANY character, " +
           "not a period. Load this, then delete the backslash before the dot and watch file-txt start " +
-          "matching too — backslash a special to match it literally.",
+          "matching too. Backslash a special to match it literally.",
         snippet: `\\.
 file.txt
 file-txt`,
@@ -398,7 +398,7 @@ file-txt`,
         kind: "note",
         title: "Groups capture pieces",
         body:
-          "( ) captures a numbered group — $1, $2…; (?<name> ) captures a named one. Load this and " +
+          "( ) captures a numbered group ($1, $2…); (?<name> ) captures a named one. Load this and " +
           "open a match card to see both the numbered groups and name / role appear by name.",
         snippet: `(?<name>[A-Za-z]+), ([a-z]+)
 Ada, engineer
@@ -417,7 +417,7 @@ Ada and ada and ADA`,
         kind: "note",
         title: "A pattern can hang the tab",
         body:
-          "Nested quantifiers like (a+)+b can backtrack explosively on near-matching text — " +
+          "Nested quantifiers like (a+)+b can backtrack explosively on near-matching text. " +
           "catastrophic backtracking. The test string is capped at 500k characters to bound the blast " +
           "radius, but if a match seems to freeze, simplify the pattern. No runnable snippet here on " +
           "purpose: we won't ship a hang.",
@@ -427,13 +427,13 @@ Ada and ada and ADA`,
     examples: [
       {
         title: "Email addresses",
-        note: "Word boundaries stop it matching inside longer tokens; [A-Za-z]{2,} requires a real TLD — @missing.com stays unmatched.",
+        note: "Word boundaries stop it matching inside longer tokens; [A-Za-z]{2,} requires a real TLD, so @missing.com stays unmatched.",
         snippet: `\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b
-Reach us at support@freejsontoolkit.com or sales@example.org — @missing.com stays unmatched.`,
+Reach us at support@freejsontoolkit.com or sales@example.org, @missing.com stays unmatched.`,
       },
       {
         title: "Dates into named groups",
-        note: "Named groups land in each match card by name — year, month, day.",
+        note: "Named groups land in each match card by name: year, month, day.",
         snippet: `(?<year>\\d{4})-(?<month>\\d{2})-(?<day>\\d{2})
 Shipped 2026-08-03, patched 2025-12-31.`,
       },
@@ -449,13 +449,13 @@ Shipped 2026-08-03, patched 2025-12-31.`,
     eyebrow: "Docs · Timestamp",
     conceptTitle: "Two directions across one instant",
     concept:
-      "A Unix timestamp counts the elapsed time since the epoch — January 1st, 1970, 00:00:00 UTC — " +
+      "A Unix timestamp counts the elapsed time since the epoch (January 1st, 1970, 00:00:00 UTC) " +
       "in a chosen unit: seconds (classic Unix), milliseconds (what JavaScript's Date.now() returns), " +
       "microseconds (Go, Postgres), or nanoseconds (Go, Rust). In the Timestamp → Date direction the " +
       "engine rescales your number to milliseconds, builds a Date, and shows the same instant in your " +
       "local time and UTC, plus a richer breakdown (day of year, ISO week, relative time). In the " +
-      "reverse direction it parses a human-readable date — local ISO, UTC (Z), RFC/HTTP, or a bare " +
-      "date — and reports the equivalent value in every unit at once. All of it runs locally on the " +
+      "reverse direction it parses a human-readable date: local ISO, UTC (Z), RFC/HTTP, or a bare " +
+      "date, and reports the equivalent value in every unit at once. All of it runs locally on the " +
       "browser's native Date engine.",
     lead: "before-after",
     itemsLabel: "Things to know",
@@ -465,7 +465,7 @@ Shipped 2026-08-03, patched 2025-12-31.`,
         title: "Magnitude betrays the unit",
         body:
           "A timestamp's digit count usually tells you its unit: 10 digits is seconds, 13 is " +
-          "milliseconds, 16 is microseconds, 19 is nanoseconds. Load this — it's a seconds value — " +
+          "milliseconds, 16 is microseconds, 19 is nanoseconds. Load this, a seconds value, " +
           "then try switching the unit to milliseconds and watch the date jump to 1970-Jan-01.",
         snippet: `1753862400`,
       },
@@ -484,7 +484,7 @@ Shipped 2026-08-03, patched 2025-12-31.`,
         body:
           "A timestamp is an absolute instant, but the same instant is displayed differently in your " +
           "local timezone versus UTC. The readout shows both side by side, so an 'off by an hour' " +
-          "is your zone's offset — not an error in the conversion.",
+          "is your zone's offset, not an error in the conversion.",
       },
       {
         kind: "note",
@@ -500,7 +500,7 @@ Shipped 2026-08-03, patched 2025-12-31.`,
     examples: [
       {
         title: "The classic epoch",
-        note: "10-digit seconds — the number every Unix reference starts from.",
+        note: "10-digit seconds, the number every Unix reference starts from.",
         snippet: `0`,
       },
       {
@@ -510,7 +510,7 @@ Shipped 2026-08-03, patched 2025-12-31.`,
       },
       {
         title: "Milliseconds",
-        note: "13 digits — what new Date().getTime() returns in JavaScript.",
+        note: "13 digits, what new Date().getTime() returns in JavaScript.",
         snippet: `1753862400000`,
       },
       {
@@ -526,7 +526,7 @@ Shipped 2026-08-03, patched 2025-12-31.`,
     concept:
       "Formatting is parse, then re-serialize: the engine reads your JSON into memory and writes it back out " +
       "with consistent indentation, so a cramped one-liner becomes something a human can scan. Because it " +
-      "parses first, it *cannot* repair broken JSON — if the input is invalid you get the exact error instead " +
+      "parses first, it *cannot* repair broken JSON. If the input is invalid you get the exact error instead " +
       "of a guess, and the right move is to validate and fix it, then format. Minifying is the same operation " +
       "in reverse (indentation set to zero), which is why the two tools share an engine. Large documents " +
       "format in a background worker so the editor never locks up.",
@@ -567,7 +567,7 @@ Shipped 2026-08-03, patched 2025-12-31.`,
     examples: [
       {
         title: "Minified blob",
-        note: "A single cramped line — watch it expand into readable structure.",
+        note: "A single cramped line. Watch it expand into readable structure.",
         snippet: `{"name":"Ada","role":"engineer","tags":["pioneer","writer"],"active":true}`,
       },
       {
@@ -584,7 +584,7 @@ Shipped 2026-08-03, patched 2025-12-31.`,
       "Minifying is the same operation as formatting, done in reverse: the engine parses your JSON " +
       "into memory and writes it back out with every bit of whitespace removed, so a pretty-printed " +
       "document collapses to a single dense line. Because it parses first, it *cannot* repair broken " +
-      "JSON — invalid input reports the exact line and column instead of a guess. Your data is never " +
+      "JSON. Invalid input reports the exact line and column instead of a guess. Your data is never " +
       "altered: only whitespace disappears, and the optional sort-keys reorders object properties " +
       "alphabetically without touching a value. The readout shows the before/after byte counts and " +
       "the percentage you saved, and large files run in a background worker so the editor never locks up.",
@@ -593,10 +593,10 @@ Shipped 2026-08-03, patched 2025-12-31.`,
     items: [
       {
         kind: "note",
-        title: "Smaller is the point — not readable",
+        title: "Smaller is the point, not readable",
         body:
           "Minified JSON is deliberately hard for a human to scan. Use it when size and transfer cost " +
-          "matter more than readability — an API body, a URL, a bundle, storage. For reading or editing, " +
+          "matter more than readability: an API body, a URL, a bundle, storage. For reading or editing, " +
           "reach for the Formatter instead.",
       },
       {
@@ -618,7 +618,7 @@ Shipped 2026-08-03, patched 2025-12-31.`,
         kind: "note",
         title: "Whitespace inside strings is sacred",
         body:
-          "Spaces inside a quoted string are data, not padding — they are preserved exactly. The minifier " +
+          "Spaces inside a quoted string are data, not padding; they are preserved exactly. The minifier " +
           "only strips the whitespace that sits between tokens.",
         snippet: `{\n  "phrase": "hello   world"\n}`,
       },
@@ -627,7 +627,7 @@ Shipped 2026-08-03, patched 2025-12-31.`,
     examples: [
       {
         title: "Cramped one-liner",
-        note: "It's already small — minifying keeps it exact and reports the tiny saving.",
+        note: "It's already small, so minifying keeps it exact and reports the tiny saving.",
         snippet: `{"name":"Ada","role":"engineer","tags":["pioneer","writer"],"active":true}`,
       },
       {
@@ -655,14 +655,14 @@ Shipped 2026-08-03, patched 2025-12-31.`,
         title: "Reformatting is not a change",
         body:
           "Because the diff compares parsed data, adding or removing indentation produces no diff at " +
-          "all. That's the point — you're comparing meaning, not bytes. Text Diff is the tool if you " +
+          "all. That's the point: you're comparing meaning, not bytes. Text Diff is the tool if you " +
           "care about the exact lines as written.",
       },
       {
         kind: "error",
         title: "One side won't parse",
         body:
-          "Both inputs must be valid JSON. If a side has a syntax error, the diff can't compare it — " +
+          "Both inputs must be valid JSON. If a side has a syntax error, the diff can't compare it. " +
           "fix that side (the Validator pinpoints it) or load a corrected version.",
         snippet: `{\n  "name": "Ada",\n  "role": "engineer",\n}`,
       },
@@ -686,17 +686,17 @@ Shipped 2026-08-03, patched 2025-12-31.`,
     examples: [
       {
         title: "A field changed",
-        note: "Paste into A and B — the role value lights up as a changed line facing its pair.",
+        note: "Paste into A and B. The role value lights up as a changed line facing its pair.",
         snippet: `{\n  "name": "Ada",\n  "role": "engineer"\n}`,
       },
       {
         title: "A field added",
-        note: "B gains an active flag — the diff reports it as added.",
+        note: "B gains an active flag. The diff reports it as added.",
         snippet: `{\n  "name": "Ada",\n  "role": "engineer",\n  "active": true\n}`,
       },
       {
         title: "Array element removed",
-        note: "A has three tags, B has two — the missing one shows as removed.",
+        note: "A has three tags, B has two. The missing one shows as removed.",
         snippet: `{\n  "tags": ["pioneer", "writer", "analyst"]\n}`,
       },
     ],
@@ -706,8 +706,8 @@ Shipped 2026-08-03, patched 2025-12-31.`,
     conceptTitle: "A diff sees lines, not structure",
     concept:
       "Text Diff compares two texts line by line and reports which lines were added, removed, " +
-      "or changed. It has no idea what the text means — logs, configs, code, markdown, env " +
-      "files, SQL, CSV — so it is equally at home on all of them. The engine aligns the two " +
+      "or changed. It has no idea what the text means: logs, configs, code, markdown, env " +
+      "files, SQL, CSV, so it is equally at home on all of them. The engine aligns the two " +
       "sides to keep as many unchanged lines matched as possible, pairs a removed line with an " +
       "added line that replaces it, and leaves the rest as pure additions or deletions. You can " +
       "render the result side-by-side (additions teal, removals red) or as a single unified " +
@@ -722,14 +722,14 @@ Shipped 2026-08-03, patched 2025-12-31.`,
         title: "Changed lines face each other",
         body:
           "When a line is removed and another added in the same place, the diff pairs them onto " +
-          "one row so you can read the before/after at a glance — instead of scrolling a delete " +
+          "one row so you can read the before/after at a glance, instead of scrolling a delete " +
           "block against an insert block.",
       },
       {
         kind: "note",
         title: "Reordering is remove + add, not a move",
         body:
-          "The diff aligns identical lines, so it can't see that a line just moved elsewhere — it " +
+          "The diff aligns identical lines, so it can't see that a line just moved elsewhere. It " +
           "reports the old spot as removed and the new spot as added. Text is compared line by " +
           "line; if you need structure-aware moves, JSON Diff compares parsed data instead.",
       },
@@ -738,7 +738,7 @@ Shipped 2026-08-03, patched 2025-12-31.`,
         title: "Ignore whitespace / case for reviews",
         body:
           "Toggling ignore-whitespace or ignore-case silences cosmetic noise so a review reads the " +
-          "real change — trailing spaces, a full file re-indented, or a headline retyped in a " +
+          "real change: trailing spaces, a full file re-indented, or a headline retyped in a " +
           "different case no longer flood the diff.",
       },
       {
@@ -762,7 +762,7 @@ Shipped 2026-08-03, patched 2025-12-31.`,
     examples: [
       {
         title: "A line changed",
-        note: "Two configs where one value differs — the changed line faces its pair.",
+        note: "Two configs where one value differs. The changed line faces its pair.",
         snippet: `env = staging
 replicas = 2
 region = us-east-1
@@ -773,7 +773,7 @@ region = us-east-1`,
       },
       {
         title: "Lines added",
-        note: "B gains a log_level line and a debug flag — both report as added.",
+        note: "B gains a log_level line and a debug flag. Both report as added.",
         snippet: `# service config
 env = staging
 replicas = 2
@@ -786,7 +786,7 @@ debug = true`,
       },
       {
         title: "Line removed",
-        note: "A has a line B dropped — it shows as removed with an empty slot facing it.",
+        note: "A has a line B dropped. It shows as removed with an empty slot facing it.",
         snippet: `name = Ada
 role = engineer
 level = 7
@@ -802,7 +802,7 @@ role = engineer`,
     concept:
       "JSON → CSV turns an array of JSON objects into a flat CSV table. Each object becomes a row and " +
       "its keys become columns. Because CSV is flat, nested objects must be flattened first using dot " +
-      "notation — { \"user\": { \"name\": \"John\" } } becomes a user.name column — and you can choose " +
+      "notation. { \"user\": { \"name\": \"John\" } } becomes a user.name column, and you can choose " +
       "the delimiter (comma, semicolon, or tab), whether to include a header row, and whether to " +
       "flatten nesting at all. Conversion runs in a background worker for large files so the editor " +
       "stays responsive, and the floor is a clean CSV you can open in any spreadsheet.",
@@ -813,7 +813,7 @@ role = engineer`,
         kind: "error",
         title: "Top-level must be an array",
         body:
-          "The converter expects an array of objects — one object per row. A bare object, string, or " +
+          "The converter expects an array of objects, one object per row. A bare object, string, or " +
           "number has no rows to flatten into. Load this and read the message.",
         snippet: `{ "name": "Ada", "role": "engineer" }`,
       },
@@ -846,7 +846,7 @@ role = engineer`,
     examples: [
       {
         title: "Simple records",
-        note: "Three keys, two rows — a textbook array of objects.",
+        note: "Three keys, two rows, a textbook array of objects.",
         snippet: `[\n  { "id": 1, "name": "Ada", "email": "ada@example.com" },\n  { "id": 2, "name": "Alan", "email": "alan@example.com" }\n]`,
       },
       {
@@ -873,7 +873,7 @@ role = engineer`,
         kind: "error",
         title: "Ragged rows break the table",
         body:
-          "A row with a different number of cells than the others is a structural error — the parser " +
+          "A row with a different number of cells than the others is a structural error. The parser " +
           "reports the exact line instead of silently padding or dropping, which would change your data.",
         snippet: `id,name,email\n1,Ada,ada@example.com\n2,Alan`,
       },
@@ -917,12 +917,12 @@ role = engineer`,
   },
   "json-to-yaml": {
     eyebrow: "Docs · Convert",
-    conceptTitle: "JSON is already nearly YAML — this just makes it readable",
+    conceptTitle: "JSON is already nearly YAML. This just makes it readable",
     concept:
       "YAML is a superset of JSON, so JSON → YAML is a re-serialization job: the engine parses your " +
       "JSON and writes it back out as indentation-based YAML. Objects become nested mappings, arrays " +
       "become block sequences (order always preserved), and scalars keep their types. Strings are " +
-      "quoted only when they need to be — special characters, leading/trailing spaces, or empty — " +
+      "quoted only when they need to be (special characters, leading/trailing spaces, or empty), " +
       "and left plain otherwise for readability. You can choose the indentation and optionally sort " +
       "object keys for deterministic output. Null becomes the standard YAML null. Large files run " +
       "in a background worker so the editor stays responsive.",
@@ -950,7 +950,7 @@ role = engineer`,
         title: "Array order is always preserved",
         body:
           "Only object keys can be sorted (optionally). Arrays are always output in the order they " +
-          "appear in the JSON — sorting would change your data.",
+          "appear in the JSON. Sorting would change your data.",
       },
       {
         kind: "note",
@@ -981,7 +981,7 @@ role = engineer`,
     concept:
       "JSON → TOML parses a JSON object and writes it back as TOML: objects become [tables], arrays " +
       "of objects become [[arrays.of.tables]], and scalars keep their types. The one real friction is " +
-      "null — TOML has no null value, so by default the converter refuses and points at the exact " +
+      "null. TOML has no null value, so by default the converter refuses and points at the exact " +
       "path (like limits.timeout or tools[2]); switch to \"Strip nulls\" to drop those keys/elements " +
       "and convert anyway. A top-level JSON array fails too, because TOML's root must be a table. " +
       "Large files run in a background worker, and the output is clean, hand-editable TOML.",
@@ -1001,7 +1001,7 @@ role = engineer`,
         title: "A top-level array has no home",
         body:
           "TOML's root must be a table (an object). A top-level JSON array, or a bare string, number, " +
-          "or boolean, has nowhere to live — the converter explains that instead of wrapping it in a " +
+          "or boolean, has nowhere to live. The converter explains that instead of wrapping it in a " +
           "made-up key.",
         snippet: `[{"name": "Ada"}, {"name": "Alan"}]`,
       },
@@ -1010,7 +1010,7 @@ role = engineer`,
         title: "Numbers keep their shape",
         body:
           "JSON's single number type maps to TOML integers and floats. Very large integers (beyond " +
-          "2^53) can lose precision — that's a JSON limit, not a bug here.",
+          "2^53) can lose precision. That's a JSON limit, not a bug here.",
       },
       {
         kind: "note",
@@ -1059,7 +1059,7 @@ role = engineer`,
         title: "Duplicate keys are refused",
         body:
           "The TOML spec forbids duplicate keys, and the parser refuses rather than silently keeping " +
-          "one — you get an exact line and column so you can fix it.",
+          "one. You get an exact line and column so you can fix it.",
         snippet: `name = "Ada"\nname = "Alan"`,
       },
       {
@@ -1074,7 +1074,7 @@ role = engineer`,
         kind: "note",
         title: "Dates become ISO strings",
         body:
-          "A TOML datetime converts to an ISO-8601 string in JSON — JSON has no date type. Load this " +
+          "A TOML datetime converts to an ISO-8601 string in JSON. JSON has no date type. Load this " +
           "and convert; the output carries the full timestamp as text.",
         snippet: `released = 2026-08-02T12:00:00Z`,
       },
@@ -1114,7 +1114,7 @@ role = engineer`,
       "preserved as ordinary data (the surrounding quotes are dropped, since a tab delimiter no " +
       "longer needs them). Two things are refused rather than silently corrupted: a rectangular " +
       "grid is required (ragged rows fail with the exact line number), and a field containing a " +
-      "newline has no way to stay one cell in TSV — the converter flags it and lets you escape it " +
+      "newline has no way to stay one cell in TSV. The converter flags it and lets you escape it " +
       "to a literal \\n. Large tables run in a background worker.",
     lead: "before-after",
     itemsLabel: "Common issues & tips",
@@ -1123,7 +1123,7 @@ role = engineer`,
         kind: "error",
         title: "A newline can't live in a TSV cell",
         body:
-          "TSV has no way to keep a newline inside one cell — it would split the row. Rather than " +
+          "TSV has no way to keep a newline inside one cell. It would split the row. Rather than " +
           "corrupt your table, the converter refuses and points at the cell, or escapes it to a " +
           "literal \\n if you pick that option.",
         snippet: `name,notes\nAda,"line one\nline two"`,
@@ -1141,7 +1141,7 @@ role = engineer`,
         kind: "note",
         title: "Commas inside quotes survive",
         body:
-          "The parser reads quoted fields, and since TSV uses tabs the comma becomes ordinary text — " +
+          "The parser reads quoted fields, and since TSV uses tabs the comma becomes ordinary text. " +
           "the surrounding quotes are dropped. A comma in a field never splits the row.",
         snippet: `name,city\n"Turing, Alan",London`,
       },
@@ -1174,7 +1174,7 @@ role = engineer`,
       "TSV → CSV parses a tab-separated table and writes it back as comma-separated values. Because " +
       "CSV quoting can represent commas, double quotes, and even embedded newlines, this conversion " +
       "is lossless: every valid TSV cell survives, and nothing is refused for content reasons. A " +
-      "field that contains a comma is wrapped in double quotes so it stays one cell — in TSV a comma " +
+      "field that contains a comma is wrapped in double quotes so it stays one cell. In TSV a comma " +
       "is ordinary data, while in CSV it's the delimiter. A rectangular grid is still required (a " +
       "ragged row fails with the exact line number rather than being padded or dropped). Large " +
       "tables run in a background worker.",
@@ -1186,7 +1186,7 @@ role = engineer`,
         title: "CSV quoting holds anything",
         body:
           "A field with a comma, a double quote, or even a newline is quoted so it stays one cell. " +
-          "Nothing from a valid TSV is dropped or refused — that's what makes this direction lossless.",
+          "Nothing from a valid TSV is dropped or refused. That's what makes this direction lossless.",
         snippet: `name\tcity\n"Turing, Alan"\tLondon`,
       },
       {
@@ -1209,7 +1209,7 @@ role = engineer`,
         title: "Tabs are the only delimiter",
         body:
           "The input is pinned to a tab delimiter. If your file uses spaces or another separator, " +
-          "it's not a TSV — the parser will read it as one broad column and the grid check will catch it.",
+          "it's not a TSV. The parser will read it as one broad column and the grid check will catch it.",
       },
     ],
     examplesLabel: "Try these",
@@ -1228,10 +1228,10 @@ role = engineer`,
   },
   "fake-json": {
     eyebrow: "Docs · Generate",
-    conceptTitle: "A shape in, realistic data out — reproducibly",
+    conceptTitle: "A shape in, realistic data out, reproducibly",
     concept:
       "Fake JSON lets you describe a shape with a normal JSON template and faker tokens placed in " +
-      "string values — {{name}}, {{email}}, {{int:18..65}}, {{enum:admin|editor|viewer}}, and many " +
+      "string values: {{name}}, {{email}}, {{int:18..65}}, {{enum:admin|editor|viewer}}, and many " +
       "more. Put a token in a value that is *only* the token and it keeps its real type, so " +
       "\"{{int}}\" becomes a number, not text. Set a count and an optional seed: the same template, " +
       "count, and seed always produce the same records, which makes the output perfect for test " +
@@ -1244,7 +1244,7 @@ role = engineer`,
         kind: "error",
         title: "An unknown token is left as text",
         body:
-          "A token that doesn't match the legend is treated as a literal string — it won't error, " +
+          "A token that doesn't match the legend is treated as a literal string. It won't error, " +
           "it just won't expand. Load this and check the template status for the exact message.",
         snippet: `{"id": "{{index1}}", "role": "{{unknown}}"}`,
       },
@@ -1253,7 +1253,7 @@ role = engineer`,
         title: "Token-only values keep their type",
         body:
           "\"{{int:18..65}}\" becomes a real JSON number because the value is only the token. Write " +
-          "text around it — \"id-{{int}}\" — and the whole value is a string. The unbox rule is what " +
+          "text around it (\"id-{{int}}\"), and the whole value is a string. The unbox rule is what " +
           "keeps your numbers numeric.",
         snippet: `{"age": "{{int:18..65}}", "label": "id-{{int:1..9}}"}`,
       },
@@ -1261,7 +1261,7 @@ role = engineer`,
         kind: "note",
         title: "Seeds make output reproducible",
         body:
-          "Type any seed and the same template + count + seed always yields the same records — handy " +
+          "Type any seed and the same template + count + seed always yields the same records, handy " +
           "for fixtures and CI. Leave it empty for fresh random data each time.",
         snippet: `{"name": "{{name}}", "email": "{{email}}"}`,
       },
@@ -1269,7 +1269,7 @@ role = engineer`,
         kind: "note",
         title: "Nesting is just JSON",
         body:
-          "The template is real JSON, so tokens expand anywhere — inside nested objects and arrays. " +
+          "The template is real JSON, so tokens expand anywhere, inside nested objects and arrays. " +
           "For a variable-length array, list the tokens you want; a repeat-count token is on the roadmap.",
         snippet: `{"user": {"name": "{{name}}", "tags": ["{{word}}", "{{word}}"]}}`,
       },
@@ -1278,7 +1278,7 @@ role = engineer`,
     examples: [
       {
         title: "A user record",
-        note: "Names, emails, and a bounded integer — all unboxed to real types.",
+        note: "Names, emails, and a bounded integer, all unboxed to real types.",
         snippet: `{"id": "{{index1}}", "name": "{{name}}", "email": "{{email}}", "age": "{{int:18..65}}", "active": "{{bool}}"}`,
       },
       {
@@ -1293,10 +1293,10 @@ role = engineer`,
     conceptTitle: "Not all UUIDs are random",
     concept:
       "A UUID is a 128-bit identifier, and the version you pick decides how those bits are made. " +
-      "v4 is fully random — the default for opaque ids. v7 is time-ordered: it puts the most " +
+      "v4 is fully random, the default for opaque ids. v7 is time-ordered: it puts the most " +
       "significant time bits at the front, so batches come out already sorted and inserts stay " +
       "sequential. v1 is also time-based but stores the low time bits first, so its string order " +
-      "doesn't follow time. v5 is deterministic — the same namespace + name always hashes to the " +
+      "doesn't follow time. v5 is deterministic. The same namespace + name always hashes to the " +
       "same id, on any machine. This tool generates all four in your browser using the platform's " +
       "cryptographic RNG (and SHA-1 for v5), with your choice of format (hyphen, compact, braces, " +
       "urn) and case, in bulk up to 5000 per batch.",
@@ -1307,7 +1307,7 @@ role = engineer`,
         kind: "note",
         title: "v7 batches come out sorted",
         body:
-          "Because v7 leads with the most-significant time bits, a batch is already in time order — " +
+          "Because v7 leads with the most-significant time bits, a batch is already in time order. " +
           "the tool confirms it's monotonic. That's what makes v7 the pick for primary keys you'll " +
           "always insert in order.",
       },
@@ -1338,7 +1338,7 @@ role = engineer`,
     examples: [
       {
         title: "Opaque ids",
-        note: "v4 is fully random — the default for anything that just needs to be unique.",
+        note: "v4 is fully random, the default for anything that just needs to be unique.",
         snippet: `v4 · count 5 · hyphen · lower`,
       },
       {
@@ -1359,11 +1359,11 @@ role = engineer`,
     concept:
       "Base64 encodes data as a compact ASCII alphabet so it survives transports that only carry " +
       "text. Every 3 bytes of input become 4 printable characters, so encoded output is always at " +
-      "least ~33% larger than its byte length — more for non-ASCII, since characters like emoji " +
+      "least ~33% larger than its byte length, more for non-ASCII, since characters like emoji " +
       "expand to several bytes first. The tool encodes and decodes in either the standard alphabet " +
       "(+ /) or the URL-safe one (- _), with optional padding and optional data-URI wrapping. On " +
-      "decode it reads the first bytes of the result and names common formats — PNG, JPEG, PDF, GIF, " +
-      "WebP, ZIP, gzip — or marks it as JSON or plain text, and shows a byte count for binary " +
+      "decode it reads the first bytes of the result and names common formats: PNG, JPEG, PDF, GIF, " +
+      "WebP, ZIP, gzip, or marks it as JSON or plain text, and shows a byte count for binary " +
       "payloads instead of unreadable characters.",
     lead: "before-after",
     itemsLabel: "Things to know",
@@ -1381,7 +1381,7 @@ role = engineer`,
         title: "Standard vs URL-safe",
         body:
           "Standard Base64 uses + and /, which are awkward inside URLs and filenames. URL-safe swaps " +
-          "them for - and _ and usually drops the = padding — it's what JWTs and most tokens use.",
+          "them for - and _ and usually drops the = padding. It's what JWTs and most tokens use.",
         snippet: `a+b/c==`,
       },
       {
@@ -1389,7 +1389,7 @@ role = engineer`,
         title: "Encoding always grows the text",
         body:
           "Every 3 bytes become 4 characters, so encoded output is ~33% larger. The meter shows the " +
-          "ratio live — Base64 is for transport, not compression.",
+          "ratio live. Base64 is for transport, not compression.",
       },
       {
         kind: "note",
@@ -1426,7 +1426,7 @@ role = engineer`,
       "on where the string is going. Component encodes a single query value or path segment, escaping " +
       "reserved characters so they can't break the URL. Whole URL leaves the structure (/, :, ?, &, =) " +
       "intact and only escapes the unsafe characters. Form encoding uses + for spaces and escapes the " +
-      "reserved set — it's what x-www-form-urlencoded bodies use. Non-ASCII always expands to its UTF-8 " +
+      "reserved set. It's what x-www-form-urlencoded bodies use. Non-ASCII always expands to its UTF-8 " +
       "bytes, and the readout reports bytes, not characters, so the expansion number is honest. A " +
       "footprint view shows exactly which characters get encoded, one chip at a time.",
     lead: "before-after",
@@ -1489,12 +1489,12 @@ role = engineer`,
     conceptTitle: "Checking the shape, not just the grammar",
     concept:
       "Schema Lite tells you whether a valid JSON document matches the structure you expect. It " +
-      "covers a clearly-scoped subset of JSON Schema — types, required keys, additionalProperties, " +
-      "enum/const, numeric ranges, string lengths, and array/object size limits — and reports every " +
+      "covers a clearly-scoped subset of JSON Schema: types, required keys, additionalProperties, " +
+      "enum/const, numeric ranges, string lengths, and array/object size limits, and reports every " +
       "violation with its exact path (like /users/2/email) so you can jump straight to the offending " +
       "value. It is deliberately not the full spec: keywords it doesn't support are ignored per the " +
       "JSON Schema rule, and the coverage line above the button states exactly what's active. It " +
-      "assumes its input is already valid JSON — run the Validator first if you're unsure — and " +
+      "assumes its input is already valid JSON (run the Validator first if you're unsure), and " +
       "everything runs locally, in a worker for large inputs.",
     lead: "before-after",
     itemsLabel: "Things to know",
@@ -1512,7 +1512,7 @@ role = engineer`,
         title: "A value has the wrong type",
         body:
           "The schema expects a string but the value is a number. Type checks are the core of the " +
-          "lite subset — load this and the violation points at the value.",
+          "lite subset. Load this and the violation points at the value.",
         snippet: `{"name": 42}`,
       },
       {
@@ -1520,14 +1520,14 @@ role = engineer`,
         title: "Unsupported keywords are ignored",
         body:
           "Per the JSON Schema spec, unknown keywords never fail validation. A schema using $ref or " +
-          "anyOf won't error — it just won't enforce those parts. The coverage line states exactly " +
+          "anyOf won't error. It just won't enforce those parts. The coverage line states exactly " +
           "what's active; $ref and combinators land in a planned v2.0 tool.",
       },
       {
         kind: "note",
         title: "Assumes valid JSON",
         body:
-          "Schema Lite checks shape, not grammar — it expects its input to already parse as JSON. " +
+          "Schema Lite checks shape, not grammar. It expects its input to already parse as JSON. " +
           "If you're unsure, run the syntax Validator first.",
       },
     ],
@@ -1535,7 +1535,7 @@ role = engineer`,
     examples: [
       {
         title: "Valid record",
-        note: "A record that satisfies the schema — should report valid.",
+        note: "A record that satisfies the schema should report valid.",
         snippet: `{"name": "Ada", "role": "engineer"}\n\n{"type": "object", "required": ["name"]}`,
       },
       {
@@ -1555,12 +1555,12 @@ role = engineer`,
     conceptTitle: "The default SHA-2 checksum, computed in your browser",
     concept:
       "SHA-256 is the 32-bit-word member of the SHA-2 family and the default hash across the modern " +
-      "web — TLS certificates, SSH key fingerprints, and most file checksums all use it. Given any " +
-      "message it produces a fixed 256-bit digest — 32 bytes, rendered here as 64 hex characters or 44 " +
-      "base64 characters — and the same input always yields the same digest, while a single changed byte " +
+      "web. TLS certificates, SSH key fingerprints, and most file checksums all use it. Given any " +
+      "message it produces a fixed 256-bit digest (32 bytes, rendered here as 64 hex characters or 44 " +
+      "base64 characters), and the same input always yields the same digest, while a single changed byte " +
       "produces a completely different one. That makes it a strong integrity check: compare digests to " +
       "verify that a file, payload, or message hasn't been altered. The hashing runs entirely in your " +
-      "browser via the native Web Crypto API — nothing is uploaded, and no backend exists to receive it. " +
+      "browser via the native Web Crypto API. Nothing is uploaded, and no backend exists to receive it. " +
       "Note that SHA-256 is a fast checksum, not a password function: use bcrypt for anything meant to " +
       "withstand offline guessing.",
     lead: "before-after",
@@ -1571,13 +1571,13 @@ role = engineer`,
         title: "Empty input hashes nothing",
         body:
           "With nothing to hash the tool reports empty output. Paste or type a message first, then " +
-          "the digest appears — every input, no matter how small, produces a full 256-bit result.",
+          "the digest appears. Every input, no matter how small, produces a full 256-bit result.",
       },
       {
         kind: "note",
         title: "A fixed-length digest",
         body:
-          "The output is always 64 hex chars (32 bytes) regardless of input length — one word in and " +
+          "The output is always 64 hex chars (32 bytes) regardless of input length. One word in and " +
           "a 10 MB file both yield the same digest size. That's why it's handy as a checksum.",
       },
       {
@@ -1592,7 +1592,7 @@ role = engineer`,
     examples: [
       {
         title: "A known vector",
-        note: "SHA-256 of 'abc' — a well-known, verifiable digest.",
+        note: "SHA-256 of 'abc', a well-known, verifiable digest.",
         snippet: `abc`,
       },
       {
@@ -1602,7 +1602,7 @@ role = engineer`,
       },
       {
         title: "Checksum a payload",
-        note: "Paste any text or JSON you need to fingerprint — the digest size stays fixed.",
+        note: "Paste any text or JSON you need to fingerprint. The digest size stays fixed.",
         snippet: `{"id": 42, "status": "ok", "tags": ["ship", "verify"]}`,
       },
     ],
@@ -1654,7 +1654,7 @@ role = engineer`,
         title: "Avalanche effect",
         body:
           "Changing one character completely changes the output. Load both examples below and compare the " +
-          "digests — one capital letter is enough to change the entire hash.",
+          "digests. One capital letter is enough to change the entire hash.",
       },
     ],
     examplesLabel: "Try these",
@@ -1677,10 +1677,10 @@ role = engineer`,
     concept:
       "bcrypt is a password-hashing function built to be deliberately slow and to resist guessing. " +
       "Instead of a fixed-size checksum, it runs the input through many rounds of key stretching (2^cost " +
-      "— with the default cost of 10 that's 1,024 rounds), mixing in a fresh random salt every time. The " +
+      "with the default cost of 10 giving 1,024 rounds), mixing in a fresh random salt every time. The " +
       "result is a 60-character string that embeds the algorithm, cost, salt, and hash, like " +
       "$2b$10$Kixh0btLXwHixE3GB4m3dOGnUjZQ5L6Za3nHfqHXzJLy9gL8Ywym. Because the salt is unique per " +
-      "hash, the same password never produces the same hash twice — which stops precomputed tables and " +
+      "hash, the same password never produces the same hash twice, which stops precomputed tables and " +
       "lets you spot nothing about two users sharing a password. Hashing runs entirely in your browser, " +
       "in a background worker, so nothing is uploaded and the UI stays responsive even at high cost " +
       "factors.",
@@ -1692,21 +1692,21 @@ role = engineer`,
         title: "Empty input hashes nothing",
         body:
           "With nothing to hash the tool reports empty output. Enter a password first, then click " +
-          "Generate — the result always comes back as a 60-char bcrypt string.",
+          "Generate. The result always comes back as a 60-char bcrypt string.",
       },
       {
         kind: "note",
         title: "The same input never hashes twice alike",
         body:
           "Every Generate call draws a fresh random salt, so rerunning the same password gives a " +
-          "different hash — both are valid. Compare by re-hashing, not by string equality.",
+          "different hash. Both are valid. Compare by re-hashing, not by string equality.",
       },
       {
         kind: "note",
         title: "Higher cost, safer hashes",
         body:
           "The cost factor controls the workload (2^cost rounds). Higher values take longer to " +
-          "compute — a fraction of a second for you, months of GPU time for an attacker. 10 is the " +
+          "compute. A fraction of a second for you, months of GPU time for an attacker. 10 is the " +
           "common default; raise it when hardware gets faster.",
       },
       {
@@ -1726,12 +1726,12 @@ role = engineer`,
       },
       {
         title: "An API secret",
-        note: "Longer secrets hash just the same — the output length never changes.",
+        note: "Longer secrets hash just the same. The output length never changes.",
         snippet: `my-secret-api-token`,
       },
       {
         title: "High-cost hardening",
-        note: "Set the cost factor to 12 and re-generate — note the $2b$12$ prefix and the pause.",
+        note: "Set the cost factor to 12 and re-generate. Note the $2b$12$ prefix and the pause.",
         snippet: `my-very-secret-password`,
       },
     ],
@@ -1743,10 +1743,10 @@ role = engineer`,
       "HMAC (Hash-based Message Authentication Code) combines a message with a shared secret key and " +
       "hashes the result. It proves both integrity and authenticity at once: the message hasn't been " +
       "tampered with, and whoever produced the MAC knew the key. Because the key is folded into the " +
-      "hash, an attacker who doesn't have it can't forge a matching MAC — something a plain checksum " +
+      "hash, an attacker who doesn't have it can't forge a matching MAC, something a plain checksum " +
       "like SHA-256 can never promise. The result is the same size as the underlying hash: 64 hex " +
       "chars for HMAC-SHA-256, 128 for HMAC-SHA-512. Signing runs entirely in your browser via the " +
-      "native Web Crypto API — the message and key never leave your machine. The key is a shared " +
+      "native Web Crypto API. The message and key never leave your machine. The key is a shared " +
       "secret, so guard it like a password: whoever holds it can both sign and verify.",
     lead: "before-after",
     itemsLabel: "Things to know",
@@ -1762,7 +1762,7 @@ role = engineer`,
         kind: "note",
         title: "A different key, a different MAC",
         body:
-          "The MAC changes completely if the message or the key changes — even by one character. " +
+          "The MAC changes completely if the message or the key changes, even by one character. " +
           "That's the point: it binds the two together so a tampered message is detected instantly.",
       },
       {
@@ -1770,7 +1770,7 @@ role = engineer`,
         title: "Not a checksum, not a password hash",
         body:
           "A plain checksum has no secret and proves nothing about who made it. HMAC needs a key and " +
-          "proves authenticity. For password storage use a slow, salted function like bcrypt — HMAC " +
+          "proves authenticity. For password storage use a slow, salted function like bcrypt. HMAC " +
           "is for signing messages, not storing secrets.",
       },
       {
@@ -1785,7 +1785,7 @@ role = engineer`,
     examples: [
       {
         title: "A known vector",
-        note: "HMAC-SHA-256 of 'The quick brown fox jumps over the lazy dog' with key 'key' — a well-known, verifiable digest.",
+        note: "HMAC-SHA-256 of 'The quick brown fox jumps over the lazy dog' with key 'key', a well-known, verifiable digest.",
         snippet: `The quick brown fox jumps over the lazy dog`,
       },
       {
@@ -1803,7 +1803,7 @@ role = engineer`,
   },
   md5: {
     eyebrow: "Docs · Security",
-    conceptTitle: "A legacy 128-bit checksum — not for security use",
+    conceptTitle: "A legacy 128-bit checksum, not for security use",
     concept:
       "MD5 produces a fixed 128-bit digest (32 hex chars) from any input. It was once the default " +
       "checksum and still appears in old systems, dedup keys, and legacy conventions. But MD5 is " +
@@ -1811,14 +1811,14 @@ role = engineer`,
       "let an attacker craft two different inputs with the same checksum. That makes it useless for " +
       "passwords, signatures, or integrity that must resist tampering. Keep it for legacy " +
       "compatibility and non-security checksums only; for anything security-sensitive use SHA-256 or " +
-      "SHA-512. The digest is computed entirely in your browser with a local implementation — your " +
+      "SHA-512. The digest is computed entirely in your browser with a local implementation. Your " +
       "text never leaves the machine.",
     lead: "before-after",
     itemsLabel: "Things to know",
     items: [
       {
         kind: "error",
-        title: "Legacy — not for security",
+        title: "Legacy, not for security",
         body:
           "MD5 collisions are practical, so the checksum can't prove a file or message hasn't been " +
           "deliberately forged. If a decision depends on the result, prefer SHA-256 or SHA-512.",
@@ -1835,7 +1835,7 @@ role = engineer`,
         title: "One-way, not reversible",
         body:
           "There is no decryption. Online 'MD5 decrypt' services only look up known inputs in " +
-          "precomputed tables — they can't recover arbitrary text, and collisions mean a match never " +
+          "precomputed tables. They can't recover arbitrary text, and collisions mean a match never " +
           "proves the original input.",
       },
       {
@@ -1843,7 +1843,7 @@ role = engineer`,
         title: "Still used in the wild",
         body:
           "Legacy APIs, database dedup, and old checksum conventions still reference MD5. This tool " +
-          "exists for those cases — it isn't an endorsement of the algorithm.",
+          "exists for those cases. It isn't an endorsement of the algorithm.",
       },
     ],
     examplesLabel: "Try these",
@@ -1855,7 +1855,7 @@ role = engineer`,
       },
       {
         title: "A classic vector",
-        note: "MD5 of 'abc' is 900150983cd24fb0d6963f7d28e17f72 — a widely published test value.",
+        note: "MD5 of 'abc' is 900150983cd24fb0d6963f7d28e17f72, a widely published test value.",
         snippet: `abc`,
       },
       {

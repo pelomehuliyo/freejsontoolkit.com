@@ -133,7 +133,7 @@ Example:
     steps={[
       {
         title: "Paste or upload",
-        desc: "Drop in any JSON — validity is checked as you type, up to 15M characters.",
+        desc: "Drop in any JSON. Validity is checked as you type, up to 15M characters.",
       },
       {
         title: "Read the diagnosis",
@@ -169,7 +169,7 @@ Example:
           <summary class="faq-summary">Why are duplicate keys only a warning?</summary>
           <p class="body-md faq-answer">
             The JSON specification permits repeated keys, and <code>JSON.parse</code> silently keeps the
-            last value — which is usually a bug. We flag them so you can decide, rather than rejecting
+            last value. That is usually a bug. We flag them so you can decide, rather than rejecting
             valid input.
           </p>
         </details>

@@ -21,7 +21,7 @@ const LARGE_TOOLS = ["csv-to-tsv", "tsv-to-csv", "csv-to-json"]
 const failures = [
   {
     tag: "upload wall",
-    text: "“Drop your file to begin” — your data leaves your machine before anything happens.",
+    text: "“Drop your file to begin”. Your data leaves your machine before anything happens.",
   },
   {
     tag: "size cap",
@@ -56,26 +56,26 @@ const mechanics = [
   {
     step: "04",
     title: "Nothing transmitted",
-    text: "There is no endpoint to send it to — none was ever built. Zero bytes uploaded, provably.",
+    text: "There is no endpoint to send it to. None was ever built. Zero bytes uploaded, provably.",
   },
 ];
 
 const limits = [
   "The ceiling is your device's memory, not a quota we set",
-  "The editor shows a capped preview — the full file is always the download",
+  "The editor shows a capped preview. The full file is always the download",
   "CSV → JSON output runs ~2.9× the input size, so it's the tightest fit",
   "CSV ⇄ TSV stays ~1× and handles the largest tables of the three",
-  "No accounts, no upload, no “processing on our servers” — there are no servers",
+  "No accounts, no upload, no “processing on our servers”. There are no servers",
 ];
 
 const faqs = [
   {
     q: "How large a file can I actually convert?",
-    a: "There's no fixed cap — the limit is your device's available memory. Multi-megabyte tables convert comfortably on most machines; the CSV ⇄ TSV pair handles the largest files because its output is roughly the same size as the input.",
+    a: "There's no fixed cap. The limit is your device's available memory. Multi-megabyte tables convert comfortably on most machines; the CSV ⇄ TSV pair handles the largest files because its output is roughly the same size as the input.",
   },
   {
     q: "Does the file get uploaded to check its size?",
-    a: "No. The file is read locally by your browser into a Web Worker. Nothing is transmitted anywhere — there is no backend for it to be transmitted to.",
+    a: "No. The file is read locally by your browser into a Web Worker. Nothing is transmitted anywhere. There is no backend for it to be transmitted to.",
   },
   {
     q: "Why do I get a preview instead of the full result in the editor?",
@@ -83,7 +83,7 @@ const faqs = [
   },
   {
     q: "Which tool should I use for a large file?",
-    a: "CSV → TSV or TSV → CSV for the biggest tables (1× output). CSV → JSON when you need structure — its output is ~2.9× the input, so give it the most headroom.",
+    a: "CSV → TSV or TSV → CSV for the biggest tables (1× output). CSV → JSON when you need structure. Its output is ~2.9× the input, so give it the most headroom.",
   },
 ];
 ---
@@ -108,7 +108,7 @@ const faqs = [
               <span class="lf-accent">other tools refuse.</span>
             </h1>
             <p class="lf-lede body-lg">
-              Most converters cap out at a few megabytes — or make you upload your data to find out.
+              Most converters cap out at a few megabytes, or make you upload your data to find out.
               Ours reads, converts and exports multi‑megabyte tables entirely in your browser, in a
               background worker, with nothing sent anywhere.
             </p>
@@ -165,7 +165,7 @@ const faqs = [
           <h2 class="lf-sec-title display-lg">Why large files break other converters</h2>
           <p class="lf-sec-sub body-sm">
             It's never your file's fault. It's a business model that can't afford to process it for
-            free — or won't risk touching it at all.
+            free, or won't risk touching it at all.
           </p>
         </div>
         <div class="lf-pain-grid">
@@ -242,7 +242,7 @@ const faqs = [
             <h2 class="lf-sec-title display-lg">Where the ceiling really is</h2>
             <p class="lf-limits-text body-md">
               We'd rather tell you the real limit than invent a comfortable one. Because everything
-              runs on your machine, there's no quota we impose and no server to time out — but
+              runs on your machine, there's no quota we impose and no server to time out. But
               there's also no server-grade RAM. The boundary is your device, and we say so up front.
             </p>
             <a class="lf-trust-link body-sm-strong" href="/why-local">

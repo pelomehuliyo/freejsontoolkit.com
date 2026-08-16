@@ -45,12 +45,12 @@ export const COMPARISONS: Record<string, Comparison> = {
       "Both tools parse JSON with the same engine, but they answer different questions. " +
       "The Formatter takes JSON you already trust and makes it readable; the Validator takes " +
       "JSON you don't trust and tells you exactly where it breaks. They're two halves of one " +
-      "workflow, not rivals — and everything runs 100% in your browser.",
+      "workflow, not rivals. Everything runs 100% in your browser.",
     useA: {
       heading: "Use the Formatter when",
       points: [
         "You have valid JSON that's cramped or minified and you need to read or edit it.",
-        "You want consistent indentation — 2-space, 4-space, or tabs — to match a codebase.",
+        "You want consistent indentation (2-space, 4-space, or tabs) to match a codebase.",
         "You want to sort object keys alphabetically so diffs stay stable.",
         "You're preparing JSON to paste into a file, a commit, or a colleague's editor.",
       ],
@@ -68,8 +68,8 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Primary job", a: "Make valid JSON readable", b: "Confirm JSON is valid" },
       {
         label: "Changes your data?",
-        a: "Re-indents only — data untouched",
-        b: "Never — strictly read-only",
+        a: "Re-indents only, data untouched",
+        b: "Never, strictly read-only",
       },
       {
         label: "On invalid input",
@@ -79,7 +79,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Output", a: "Pretty-printed JSON", b: "A diagnostics report" },
       { label: "Sort keys", a: "Yes (optional)", b: "—" },
       { label: "Duplicate-key warnings", a: "—", b: "Yes" },
-      { label: "Structure tally", a: "—", b: "Yes — objects, arrays, depth…" },
+      { label: "Structure tally", a: "—", b: "Yes: objects, arrays, depth…" },
       { label: "Runs 100% locally", a: "Yes", b: "Yes" },
     ],
     verdict:
@@ -87,7 +87,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       "to catch the error, then format to read the result.",
     note:
       "They share an engine. Both parse your JSON with the same grammar walker, so a document the " +
-      "Validator calls valid is one the Formatter can always pretty-print — and a large file runs " +
+      "Validator calls valid is one the Formatter can always pretty-print, and a large file runs " +
       "in a background worker in either tool, so the page never freezes.",
   },
 
@@ -100,7 +100,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       "These two are the same operation run in opposite directions. The Formatter parses your " +
       "JSON and writes it back out with indentation so a human can read it; the Minifier parses " +
       "it and writes it back out with every bit of whitespace removed so it's as small as possible. " +
-      "Same engine, same guarantee that your data is never altered — only the whitespace changes.",
+      "Same engine, same guarantee that your data is never altered. Only the whitespace changes.",
     useA: {
       heading: "Use the Minifier when",
       points: [
@@ -114,7 +114,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       heading: "Use the Formatter when",
       points: [
         "You have minified or cramped JSON and you need to read, review, or edit it.",
-        "You want consistent indentation — 2-space, 4-space, or tabs — to match a codebase.",
+        "You want consistent indentation (2-space, 4-space, or tabs) to match a codebase.",
         "You want to sort object keys alphabetically so diffs stay stable.",
         "You're preparing JSON to paste into a file, a commit, or a colleague's editor.",
       ],
@@ -126,22 +126,22 @@ export const COMPARISONS: Record<string, Comparison> = {
         b: "Add whitespace to make JSON readable",
       },
       { label: "Direction", a: "Compress", b: "Expand" },
-      { label: "Changes your data?", a: "No — whitespace only", b: "No — whitespace only" },
+      { label: "Changes your data?", a: "No, whitespace only", b: "No, whitespace only" },
       { label: "Output size", a: "Smaller", b: "Larger (indented)" },
       {
         label: "Human-readable output",
-        a: "No — deliberately compact",
-        b: "Yes — that's the point",
+        a: "No, deliberately compact",
+        b: "Yes, that's the point",
       },
       { label: "Sort keys", a: "Yes (optional)", b: "Yes (optional)" },
       { label: "Best for", a: "APIs, URLs, bundles, storage", b: "Editing, reviewing, committing" },
       { label: "Runs 100% locally", a: "Yes", b: "Yes" },
     ],
     verdict:
-      "Same engine, opposite directions. Minify to ship it, format to read it — your data is never " +
+      "Same engine, opposite directions. Minify to ship it, format to read it. Your data is never " +
       "altered, only the whitespace. A common rhythm: format while you're debugging, minify when you deploy.",
     note:
-      "Literally the same tool. Minifying is formatting with the indentation set to zero — both parse " +
+      "Literally the same tool. Minifying is formatting with the indentation set to zero. Both parse " +
       "your JSON and re-serialize it, so neither can change your values, and both push large files into " +
       "a background worker so the page never stalls.",
   },
@@ -154,13 +154,13 @@ export const COMPARISONS: Record<string, Comparison> = {
     intro:
       "Different jobs, same language. The Formatter works on one document and changes how it looks; " +
       "the Diff works on two documents and shows you what changed between them. They answer different " +
-      "questions — and in a review workflow you'll often reach for them together.",
+      "questions, and in a review workflow you'll often reach for them together.",
     useA: {
       heading: "Use the Diff when",
       points: [
         "You have two versions of a document and need to know exactly what changed.",
         "You're reviewing a config or payload change before it goes out.",
-        "You're comparing two API responses — before and after a change, or two endpoints.",
+        "You're comparing two API responses, before and after a change, or two endpoints.",
         "You're hunting a regression: something worked before, and you need to see what moved.",
       ],
     },
@@ -168,7 +168,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       heading: "Use the Formatter when",
       points: [
         "You have one document that's cramped or minified and you need to read or edit it.",
-        "You want consistent indentation — 2-space, 4-space, or tabs — to match a codebase.",
+        "You want consistent indentation (2-space, 4-space, or tabs) to match a codebase.",
         "You want to sort object keys alphabetically so future diffs stay stable.",
         "You're preparing JSON to paste into a file, a commit, or a colleague's editor.",
       ],
@@ -187,8 +187,8 @@ export const COMPARISONS: Record<string, Comparison> = {
       },
       {
         label: "Changes your data?",
-        a: "Never — read-only comparison",
-        b: "Re-indents only — data untouched",
+        a: "Never, read-only comparison",
+        b: "Re-indents only, data untouched",
       },
       { label: "Sort keys", a: "—", b: "Yes (optional)" },
       { label: "Typical question", a: "What changed?", b: "How should this look?" },
@@ -199,7 +199,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       "you have two and need to know what changed. A clean review habit: format each version first so " +
       "you're comparing like with like, then diff the two.",
     note:
-      "Complementary, not competing. The Formatter never compares and the Diff never rewrites — so a safe " +
+      "Complementary, not competing. The Formatter never compares and the Diff never rewrites, so a safe " +
       "workflow is to format each version, then diff the two formatted copies and read exactly what moved, " +
       "with no cosmetic noise in the way.",
   },
@@ -216,14 +216,14 @@ export const COMPARISONS: Record<string, Comparison> = {
     bTag: "Nested, typed, API-native",
     title: "CSV vs JSON",
     intro:
-      "CSV and JSON are the two formats you'll move between most. CSV is a flat table — rows and " +
-      "columns, one record per line, right at home in a spreadsheet. JSON is a nested tree — objects " +
+      "CSV and JSON are the two formats you'll move between most. CSV is a flat table (rows and " +
+      "columns, one record per line, right at home in a spreadsheet). JSON is a nested tree (objects " +
       "and arrays, able to represent structure CSV simply can't. Neither is better; they're built for " +
       "different jobs, and you'll often convert one into the other.",
     useA: {
       heading: "Use CSV when",
       points: [
-        "Your data is flat and tabular — one record per row, a fixed set of columns.",
+        "Your data is flat and tabular: one record per row, a fixed set of columns.",
         "It needs to open cleanly in Excel, Google Sheets, or a database import.",
         "You're moving large, simple datasets where compact size and simplicity win.",
         "You're exchanging data with non-technical tools that expect a spreadsheet.",
@@ -232,27 +232,27 @@ export const COMPARISONS: Record<string, Comparison> = {
     useB: {
       heading: "Use JSON when",
       points: [
-        "Your data is nested or hierarchical — objects inside objects, arrays of records.",
+        "Your data is nested or hierarchical: objects inside objects, arrays of records.",
         "It's going to or from an API, a web app, or a config file.",
-        "You need real types — numbers, booleans, and nulls, not just text.",
+        "You need real types: numbers, booleans, and nulls, not just text.",
         "Structure matters more than spreadsheet compatibility.",
       ],
     },
     attributes: [
-      { label: "Structure", a: "Flat table — rows × columns", b: "Nested tree — objects & arrays" },
-      { label: "Represents nesting?", a: "No — a single level", b: "Yes — arbitrarily deep" },
+      { label: "Structure", a: "Flat table (rows × columns)", b: "Nested tree (objects & arrays)" },
+      { label: "Represents nesting?", a: "No, a single level", b: "Yes, arbitrarily deep" },
       {
         label: "Data types",
         a: "All text (types inferred)",
-        b: "Native — string, number, boolean, null",
+        b: "Native: string, number, boolean, null",
       },
       { label: "Schema", a: "Header row defines the columns", b: "Self-describing, per object" },
       {
         label: "Human-readable",
-        a: "Yes — especially in a spreadsheet",
-        b: "Yes — but verbose when nested",
+        a: "Yes, especially in a spreadsheet",
+        b: "Yes, but verbose when nested",
       },
-      { label: "File size", a: "Compact for flat data", b: "Larger — keys repeat per record" },
+      { label: "File size", a: "Compact for flat data", b: "Larger (keys repeat per record)" },
       {
         label: "Native home",
         a: "Spreadsheets, databases, data tools",
@@ -262,11 +262,11 @@ export const COMPARISONS: Record<string, Comparison> = {
     ],
     verdict:
       "Use CSV for flat, tabular data that lives in spreadsheets; use JSON for nested, typed data that " +
-      "lives in APIs and code. When you need to cross over, both directions convert locally — CSV → JSON " +
+      "lives in APIs and code. When you need to cross over, both directions convert locally. CSV → JSON " +
       "to give a table some structure, JSON → CSV to flatten a payload into a spreadsheet.",
     note:
-      "Converting is lossy in one direction. JSON → CSV flattens nested structures — arrays and objects " +
-      "become columns or serialized cells — so a round trip won't always restore the original. Convert " +
+      "Converting is lossy in one direction. JSON → CSV flattens nested structures. Arrays and objects " +
+      "become columns or serialized cells, so a round trip won't always restore the original. Convert " +
       "CSV → JSON when you want to add structure; convert JSON → CSV when you want a flat table you can " +
       "open anywhere.",
   },
@@ -284,7 +284,7 @@ export const COMPARISONS: Record<string, Comparison> = {
     intro:
       "Two sides of the same conversion. JSON → XML takes a JSON object and builds an XML document from it; " +
       "XML → JSON does the reverse, parsing an XML document into a JSON object. Together they let you move " +
-      "data between the two most common structured formats on the web — both run 100% locally.",
+      "data between the two most common structured formats on the web. Both run 100% locally.",
     useA: {
       heading: "Use JSON → XML when",
       points: [
@@ -323,7 +323,7 @@ export const COMPARISONS: Record<string, Comparison> = {
     bId: "json-schema-validator",
     title: "JSON Validator vs JSON Schema Lite",
     intro:
-      "Both look at JSON and tell you if something's wrong — but they're answering different questions. " +
+      "Both look at JSON and tell you if something's wrong, but they're answering different questions. " +
       "The Validator checks the grammar: is this even valid JSON? Schema Lite checks the shape: does this " +
       "valid JSON match the structure I expect? You validate syntax first, then validate against a schema. " +
       "Both run 100% in your browser.",
@@ -342,23 +342,23 @@ export const COMPARISONS: Record<string, Comparison> = {
         "The JSON parses fine, but you need to confirm it has the fields and types you expect.",
         "You're checking an API response or config against a known shape.",
         "You want to require certain keys and validate their types (string, number, object…).",
-        "You're catching 'valid JSON, wrong structure' bugs — the kind a syntax check can't see.",
+        "You're catching 'valid JSON, wrong structure' bugs, the kind a syntax check can't see.",
       ],
     },
     attributes: [
       { label: "Primary job", a: "Confirm JSON is syntactically valid", b: "Confirm JSON matches an expected shape" },
       { label: "Question it answers", a: "'Does this parse?'", b: "'Does this have what I expect?'" },
-      { label: "Needs a schema?", a: "No — one input", b: "Yes — JSON + schema" },
-      { label: "Catches syntax errors", a: "Yes — exact line + column", b: "No — assumes valid JSON" },
+      { label: "Needs a schema?", a: "No, one input", b: "Yes, JSON + schema" },
+      { label: "Catches syntax errors", a: "Yes, exact line + column", b: "No, assumes valid JSON" },
       { label: "Catches missing / wrong-typed fields", a: "No", b: "Yes" },
       { label: "Runs 100% locally", a: "Yes", b: "Yes" },
     ],
     verdict:
       "Validate syntax first, then validate shape. The Validator tells you the JSON parses; Schema Lite " +
-      "tells you it's the JSON you were expecting. A payload can pass one and fail the other — valid syntax " +
+      "tells you it's the JSON you were expecting. A payload can pass one and fail the other. Valid syntax " +
       "with a missing required field, or the right shape that's one brace short.",
     note:
-      "Schema Lite is deliberately a lightweight subset — type checks, required keys, and nested structure — " +
+      "Schema Lite is deliberately a lightweight subset (type checks, required keys, and nested structure), " +
       "not the full JSON Schema spec. It assumes its input is already valid JSON; run the Validator first if " +
       "you're unsure. A full JSON Schema Validator is on the roadmap.",
   },
@@ -370,13 +370,13 @@ export const COMPARISONS: Record<string, Comparison> = {
     title: "JSON Diff vs Text Diff",
     intro:
       "Both show you what changed between two documents, but they 'see' differently. JSON Diff understands " +
-      "structure — it compares keys and values, so a reformatted or re-keyed object doesn't read as a change. " +
+      "structure. It compares keys and values, so a reformatted or re-keyed object doesn't read as a change. " +
       "Text Diff compares line by line, format-agnostic, for any text at all. Pick by what you're comparing: " +
       "structured data or raw text.",
     useA: {
       heading: "Use JSON Diff when",
       points: [
-        "You're comparing two JSON documents — configs, payloads, API responses.",
+        "You're comparing two JSON documents: configs, payloads, API responses.",
         "You want a semantic diff: key/value changes, not whitespace or key-order noise.",
         "The two versions might be formatted differently but you only care about the data.",
         "You need to spot an added, removed, or changed field in a nested structure.",
@@ -385,7 +385,7 @@ export const COMPARISONS: Record<string, Comparison> = {
     useB: {
       heading: "Use Text Diff when",
       points: [
-        "You're comparing non-JSON text — logs, markdown, code, env files, SQL.",
+        "You're comparing non-JSON text: logs, markdown, code, env files, SQL.",
         "You want a line-by-line diff with additions and removals highlighted.",
         "The format isn't JSON, or you care about the exact lines as written.",
         "You want to ignore case or whitespace differences with a toggle.",
@@ -393,14 +393,14 @@ export const COMPARISONS: Record<string, Comparison> = {
     },
     attributes: [
       { label: "Primary job", a: "Semantic diff of two JSON documents", b: "Line-by-line diff of any two texts" },
-      { label: "Understands", a: "JSON structure — keys, values, nesting", b: "Plain lines, any format" },
-      { label: "Whitespace / key-order changes", a: "Ignored — data only", b: "Shown (unless toggled off)" },
-      { label: "Works on non-JSON", a: "No — JSON only", b: "Yes — anything textual" },
+      { label: "Understands", a: "JSON structure: keys, values, nesting", b: "Plain lines, any format" },
+      { label: "Whitespace / key-order changes", a: "Ignored, data only", b: "Shown (unless toggled off)" },
+      { label: "Works on non-JSON", a: "No, JSON only", b: "Yes, anything textual" },
       { label: "Typical input", a: "Configs, payloads, API responses", b: "Logs, code, markdown, env, SQL" },
       { label: "Runs 100% locally", a: "Yes", b: "Yes" },
     ],
     verdict:
-      "If both sides are JSON and you care about the data, use JSON Diff — it won't shout about re-indenting " +
+      "If both sides are JSON and you care about the data, use JSON Diff. It won't shout about re-indenting " +
       "or re-ordering keys. For everything else, or when the exact lines matter, use Text Diff.",
     note:
       "A useful habit: if two JSON files diff 'noisy' as text, run them through the Formatter first, or just " +
@@ -421,7 +421,7 @@ export const COMPARISONS: Record<string, Comparison> = {
     intro:
       "Two sides of the same conversion. TOML → JSON parses a TOML config into a JSON object; JSON → TOML " +
       "does the reverse, serializing JSON into clean TOML. Together they let you move data between the " +
-      "human-friendly config format and the API-native one — both run 100% locally.",
+      "human-friendly config format and the API-native one. Both run 100% locally.",
     useA: {
       heading: "Use TOML → JSON when",
       points: [
@@ -435,7 +435,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       points: [
         "You have JSON data that needs to become a readable TOML config.",
         "You're generating a config file for a TOML-based toolchain.",
-        "You want hand-editable output — TOML is friendlier for humans to tweak.",
+        "You want hand-editable output. TOML is friendlier for humans to tweak.",
       ],
     },
     attributes: [
@@ -443,7 +443,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Input", a: "TOML", b: "JSON" },
       { label: "Output", a: "JSON", b: "TOML" },
       { label: "Handles nested tables?", a: "Yes", b: "Yes" },
-      { label: "Preserves types?", a: "Yes — dates, numbers, booleans", b: "Yes — within TOML's types" },
+      { label: "Preserves types?", a: "Yes, dates, numbers, booleans", b: "Yes, within TOML's types" },
       { label: "Runs 100% locally", a: "Yes", b: "Yes" },
     ],
     verdict:
@@ -468,7 +468,7 @@ export const COMPARISONS: Record<string, Comparison> = {
     intro:
       "Two sides of the same conversion. YAML → JSON parses a YAML document into JSON; JSON → YAML does the " +
       "reverse, serializing JSON into readable YAML. Since YAML is a superset of JSON, the two formats are " +
-      "close cousins — and these tools move you between them, both running 100% locally.",
+      "close cousins, and these tools move you between them, both running 100% locally.",
     useA: {
       heading: "Use YAML → JSON when",
       points: [
@@ -495,10 +495,10 @@ export const COMPARISONS: Record<string, Comparison> = {
     ],
     verdict:
       "Use YAML → JSON when you're consuming a config; use JSON → YAML when you're writing one. They're " +
-      "mirrors — and because YAML is a superset of JSON, the crossing is usually lossless for plain data.",
+      "mirrors, and because YAML is a superset of JSON, the crossing is usually lossless for plain data.",
     note:
       "One honest caveat: YAML comments and some YAML-specific features (anchors, tags) don't survive into " +
-      "JSON, so a round trip may simplify those. Plain data — strings, numbers, booleans, lists, objects — " +
+      "JSON, so a round trip may simplify those. Plain data (strings, numbers, booleans, lists, objects) " +
       "round-trips cleanly.",
   },
 
@@ -515,7 +515,7 @@ export const COMPARISONS: Record<string, Comparison> = {
     title: "CSV → TSV vs TSV → CSV",
     intro:
       "Same tabular data, different delimiter. CSV separates fields with commas; TSV separates them with " +
-      "tabs. These two tools swap one for the other — nothing more, nothing less. Pick by which delimiter " +
+      "tabs. These two tools swap one for the other, nothing more, nothing less. Pick by which delimiter " +
       "your destination expects.",
     useA: {
       heading: "Use CSV → TSV when",
@@ -538,15 +538,15 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Input delimiter", a: "Comma", b: "Tab" },
       { label: "Output delimiter", a: "Tab", b: "Comma" },
       { label: "Header row preserved?", a: "Yes", b: "Yes" },
-      { label: "Quoted fields handled?", a: "Yes — RFC 4180 parsing", b: "Yes — RFC 4180 output" },
+      { label: "Quoted fields handled?", a: "Yes, RFC 4180 parsing", b: "Yes, RFC 4180 output" },
       { label: "Runs 100% locally", a: "Yes", b: "Yes" },
     ],
     verdict:
-      "They're the same operation pointed in opposite directions — use whichever matches the direction you're " +
+      "They're the same operation pointed in opposite directions. Use whichever matches the direction you're " +
       "converting. If your data has commas in fields, TSV is often the calmer format; if you need broad " +
       "compatibility, CSV is the safer destination.",
     note:
-      "One honest caveat: CSV → TSV is the lossy direction if a field contains an embedded newline — TSV " +
+      "One honest caveat: CSV → TSV is the lossy direction if a field contains an embedded newline. TSV " +
       "can't keep it in one cell, so the converter refuses by default (with an escape option). TSV → CSV is " +
       "always lossless because CSV quoting can hold anything.",
   },
@@ -564,7 +564,7 @@ export const COMPARISONS: Record<string, Comparison> = {
     useA: {
       heading: "Use Base64 when",
       points: [
-        "You need to embed binary data (an image, a file) in text — a data URI, a JSON field, an email.",
+        "You need to embed binary data (an image, a file) in text: a data URI, a JSON field, an email.",
         "You're encoding a payload so it survives a text-only transport intact.",
         "You're decoding a Base64 string back to its original bytes or text.",
       ],
@@ -572,7 +572,7 @@ export const COMPARISONS: Record<string, Comparison> = {
     useB: {
       heading: "Use URL Encode when",
       points: [
-        "You're putting a value into a URL — a query string or path segment.",
+        "You're putting a value into a URL: a query string or path segment.",
         "You need to escape spaces, &, ?, =, and other reserved characters.",
         "You're building or reading query parameters and need them to round-trip safely.",
       ],
@@ -581,8 +581,8 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Primary job", a: "Encode binary/text as ASCII text", b: "Escape characters for URLs" },
       { label: "Typical use", a: "Embedding payloads, data URIs", b: "Query strings, URL segments" },
       { label: "Output", a: "Base64 alphabet (A–Z, a–z, 0–9, +, /)", b: "Percent-escaped (%20, %26…)" },
-      { label: "Reversible?", a: "Yes — lossless decode", b: "Yes — lossless decode" },
-      { label: "Handles binary?", a: "Yes — that's the point", b: "Byte-level, but meant for text" },
+      { label: "Reversible?", a: "Yes, lossless decode", b: "Yes, lossless decode" },
+      { label: "Handles binary?", a: "Yes, that's the point", b: "Byte-level, but meant for text" },
       { label: "Runs 100% locally", a: "Yes", b: "Yes" },
     ],
     verdict:
@@ -590,7 +590,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       "text field), Base64 it. They often appear together: a Base64 payload can still need URL-encoding if " +
       "you then put it in a query string.",
     note:
-      "Neither is encryption — both are trivially reversible encodings, not protection. If you're Base64-ing " +
+      "Neither is encryption. Both are trivially reversible encodings, not protection. If you're Base64-ing " +
       "something sensitive, it's still readable to anyone who decodes it.",
   },
 
@@ -602,21 +602,21 @@ export const COMPARISONS: Record<string, Comparison> = {
     intro:
       "SHA-256 and SHA-512 are the two workhorses of the SHA-2 family. They share the same design " +
       "philosophy and both are cryptographically secure, but they produce digests of different sizes and " +
-      "run on different word widths. Neither is 'better' in the abstract — which one fits depends on the " +
+      "run on different word widths. Neither is 'better' in the abstract. Which one fits depends on the " +
       "protocol you're matching and the platform you're on. Both tools run 100% in your browser.",
     useA: {
       heading: "Use SHA-256 when",
       points: [
-        "You need to match an existing spec or protocol — TLS, certificates, and most checksums default to SHA-256.",
+        "You need to match an existing spec or protocol. TLS, certificates, and most checksums default to SHA-256.",
         "You want a compact 32-byte digest (64 hex chars) that's easy to embed, store, and compare.",
         "You're on a 32-bit platform or a constrained device where the smaller word width is a natural fit.",
-        "256 bits of security is already beyond brute-force reach — which it is for all practical purposes today.",
+        "256 bits of security is already beyond brute-force reach, which it is for all practical purposes today.",
       ],
     },
     useB: {
       heading: "Use SHA-512 when",
       points: [
-        "You need the larger 64-byte digest (128 hex chars) — a common choice for integrity checks on large files.",
+        "You need the larger 64-byte digest (128 hex chars), a common choice for integrity checks on large files.",
         "You're on a modern 64-bit processor, where SHA-512's 64-bit operations are typically faster than SHA-256.",
         "Your spec or hash chain explicitly calls for SHA-512, so matching it matters more than the size.",
         "You want the extra headroom for future-proofing against advances in cryptanalysis.",
@@ -633,12 +633,12 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Runs 100% locally", a: "Yes", b: "Yes" },
     ],
     verdict:
-      "Choose SHA-256 when you need to match an existing standard — it's the default everywhere from TLS to " +
+      "Choose SHA-256 when you need to match an existing standard. It's the default everywhere from TLS to " +
       "common checksums. Choose SHA-512 when the protocol calls for it, when you're on 64-bit hardware and want " +
       "the larger digest, or when you want maximum headroom on file-integrity checks. For either, remember: a " +
-      "fast hash is for integrity, not passwords — reach for bcrypt when security against guessing is the job.",
+      "fast hash is for integrity, not passwords. Reach for bcrypt when security against guessing is the job.",
     note:
-      "Both are checksums, not password functions — their speed is a strength for integrity and a weakness " +
+      "Both are checksums, not password functions. Their speed is a strength for integrity and a weakness " +
       "against brute force. Neither tool uploads your input; hashing happens entirely in the browser via the " +
       "Web Crypto API.",
   },
@@ -650,14 +650,14 @@ export const COMPARISONS: Record<string, Comparison> = {
     title: "SHA-256 vs bcrypt",
     intro:
       "SHA-256 and bcrypt are both hash functions, but they solve opposite problems. SHA-256 is a fast " +
-      "checksum — the same input always gives the same digest, which makes it perfect for integrity. " +
-      "bcrypt is a slow, salted password hash — every run gives a different result, which makes it " +
+      "checksum. The same input always gives the same digest, which makes it perfect for integrity. " +
+      "bcrypt is a slow, salted password hash. Every run gives a different result, which makes it " +
       "right for storing secrets. Pick by job: fingerprints and file verification want SHA-256; anything " +
       "meant to resist offline guessing wants bcrypt. Both tools run 100% in your browser.",
     useA: {
       heading: "Use SHA-256 when",
       points: [
-        "You need a checksum or fingerprint — file integrity, content addressing, or verifying a payload wasn't altered.",
+        "You need a checksum or fingerprint: file integrity, content addressing, or verifying a payload wasn't altered.",
         "You must match an existing spec or protocol, where the exact digest format matters.",
         "You want a fast, fixed-size digest (64 hex chars) regardless of input length.",
         "You need to detect accidental corruption, not resist an attacker guessing a password.",
@@ -668,13 +668,13 @@ export const COMPARISONS: Record<string, Comparison> = {
       points: [
         "You're storing passwords or secrets that must survive offline brute-force attacks.",
         "You want per-user random salts so identical passwords never hash alike.",
-        "You can tune the workload — raise the cost factor as hardware gets faster.",
+        "You can tune the workload. Raise the cost factor as hardware gets faster.",
         "You need an adaptive hash you can re-hash and compare by running the check again.",
       ],
     },
     attributes: [
       { label: "Purpose", a: "Fast integrity checksum", b: "Slow password hash" },
-      { label: "Salt", a: "None — deterministic", b: "Random, embedded in every hash" },
+      { label: "Salt", a: "None, deterministic", b: "Random, embedded in every hash" },
       { label: "Same input twice", a: "Identical digest", b: "Different hash each time" },
       { label: "Output", a: "64 hex chars", b: "60-char string ($2b$10$…)" },
       { label: "Speed", a: "Fast by design", b: "Deliberately slow (2^cost rounds)" },
@@ -682,7 +682,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Runs 100% locally", a: "Yes", b: "Yes" },
     ],
     verdict:
-      "Reach for SHA-256 when you need a fast, repeatable checksum — verifying files, payloads, or that " +
+      "Reach for SHA-256 when you need a fast, repeatable checksum: verifying files, payloads, or that " +
       "nothing changed in transit. Reach for bcrypt when the input is a password or secret that an attacker " +
       "might try to guess: its salt defeats precomputed tables, and its tunable cost makes each guess " +
       "expensive. When in doubt, integrity work → SHA-256, credential storage → bcrypt.",
@@ -699,15 +699,15 @@ export const COMPARISONS: Record<string, Comparison> = {
     title: "SHA-256 vs HMAC",
     intro:
       "SHA-256 and HMAC both produce a fixed-size digest, but they answer different questions. SHA-256 " +
-      "is an unkeyed checksum — anyone can compute it, so it detects accidental corruption but says " +
-      "nothing about who made the data. HMAC is the same hash family wrapped in a secret key — only " +
+      "is an unkeyed checksum. Anyone can compute it, so it detects accidental corruption but says " +
+      "nothing about who made the data. HMAC is the same hash family wrapped in a secret key. Only " +
       "parties who share the key can produce or verify it, so it proves authenticity as well as " +
       "integrity. Both tools run 100% in your browser.",
     useA: {
       heading: "Use SHA-256 when",
       points: [
-        "You need a checksum or fingerprint — file integrity, content addressing, or verifying a payload wasn't altered.",
-        "There is no shared secret — e.g. public downloads, cache keys, dedup, or matching an existing spec.",
+        "You need a checksum or fingerprint: file integrity, content addressing, or verifying a payload wasn't altered.",
+        "There is no shared secret, e.g. public downloads, cache keys, dedup, or matching an existing spec.",
         "Anyone should be able to recompute and verify the digest, not just key holders.",
         "You want the simplest possible hash with no key to manage.",
       ],
@@ -715,7 +715,7 @@ export const COMPARISONS: Record<string, Comparison> = {
     useB: {
       heading: "Use HMAC when",
       points: [
-        "You must prove the data came from someone who knows the secret — API signing, webhooks, auth tokens.",
+        "You must prove the data came from someone who knows the secret: API signing, webhooks, auth tokens.",
         "The message or payload could be tampered with by an attacker, not just corrupted by accident.",
         "You and the receiver already share a secret key you can keep out of the message itself.",
         "You need to detect forgery, not just accidental damage.",
@@ -723,19 +723,19 @@ export const COMPARISONS: Record<string, Comparison> = {
     },
     attributes: [
       { label: "Purpose", a: "Unkeyed checksum", b: "Keyed authentication code" },
-      { label: "Secret key", a: "None", b: "Required — shared between parties" },
+      { label: "Secret key", a: "None", b: "Required, shared between parties" },
       { label: "Proves", a: "Integrity (not tampered)", b: "Integrity + authenticity (from the key holder)" },
       { label: "Who can verify", a: "Anyone", b: "Anyone with the key" },
       { label: "Output (SHA-256)", a: "64 hex chars", b: "64 hex chars" },
       { label: "Runs 100% locally", a: "Yes", b: "Yes" },
     ],
     verdict:
-      "Use SHA-256 when there's no secret and you just need to detect corruption — file checksums, " +
+      "Use SHA-256 when there's no secret and you just need to detect corruption: file checksums, " +
       "cache keys, content addressing. Reach for HMAC when authenticity matters: if an attacker could " +
       "forge the data, an unkeyed hash proves nothing. When in doubt, integrity-only work → SHA-256, " +
       "signed or authenticated exchanges → HMAC.",
     note:
-      "HMAC is not a substitute for password hashing — it's for signing messages. For password storage " +
+      "HMAC is not a substitute for password hashing. It's for signing messages. For password storage " +
       "use a slow, salted function like bcrypt. Neither tool uploads your input; both run entirely in " +
       "the browser.",
   },
@@ -747,7 +747,7 @@ export const COMPARISONS: Record<string, Comparison> = {
     title: "MD5 vs SHA-256",
     intro:
       "MD5 and SHA-256 are both one-way hashes, but they live in different eras. MD5 is a legacy " +
-      "128-bit checksum that has been cryptographically broken since 2004 — collisions are practical, " +
+      "128-bit checksum that has been cryptographically broken since 2004. Collisions are practical, " +
       "so it can't resist tampering. SHA-256 is a modern 256-bit hash from the SHA-2 family with no " +
       "known practical collision attacks. If you're starting anything new, SHA-256 is the obvious " +
       "choice; MD5 survives only in legacy systems and non-security checksums. Both tools run 100% in " +
@@ -756,7 +756,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       heading: "Use MD5 when",
       points: [
         "You must match an existing legacy system, old checksum convention, or database dedup key that hard-codes MD5.",
-        "Collisions are harmless — the checksum isn't defending anything, it's just a fingerprint.",
+        "Collisions are harmless. The checksum isn't defending anything, it's just a fingerprint.",
         "You only need a compact 32-char digest and speed over security.",
         "Interoperability with an old spec outweighs the cryptographic weakness.",
       ],
@@ -764,7 +764,7 @@ export const COMPARISONS: Record<string, Comparison> = {
     useB: {
       heading: "Use SHA-256 when",
       points: [
-        "The checksum protects something — file integrity, downloads, or any data that could be tampered with.",
+        "The checksum protects something: file integrity, downloads, or any data that could be tampered with.",
         "You're starting a new project or spec with no legacy constraint.",
         "You want collision resistance: no practical way to craft two inputs that hash the same.",
         "There's any chance the digest will be used in a security-sensitive decision.",
@@ -779,12 +779,12 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Runs 100% locally", a: "Yes", b: "Yes" },
     ],
     verdict:
-      "Reach for SHA-256 by default — it's stronger, current, and just as easy to compute. Reserve " +
+      "Reach for SHA-256 by default. It's stronger, current, and just as easy to compute. Reserve " +
       "MD5 for the rare legacy case where you must interoperate with an old system or convention. If " +
-      "a collision would matter — for signatures, passwords, or tamper-prone data — MD5 is simply not " +
+      "a collision would matter (for signatures, passwords, or tamper-prone data). MD5 is simply not " +
       "an option.",
     note:
-      "Neither MD5 nor SHA-256 is suitable for password storage — both are far too fast. For " +
+      "Neither MD5 nor SHA-256 is suitable for password storage. Both are far too fast. For " +
       "passwords use a slow, salted function like bcrypt. Neither tool uploads your input; both run " +
       "entirely in the browser.",
   },

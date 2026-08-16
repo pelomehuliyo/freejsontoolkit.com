@@ -104,7 +104,7 @@ tags:
     steps={[
       {
         title: "Paste or drop",
-        desc: "Any .yaml / .yml config — validity reads as you type, up to 15M characters.",
+        desc: "Any .yaml / .yml config. Validity reads as you type, up to 15M characters.",
       },
       {
         title: "Convert",
@@ -112,7 +112,7 @@ tags:
       },
       {
         title: "Take the JSON",
-        desc: "Copy or download pretty-printed JSON — 2-space, 4-space, or tabs.",
+        desc: "Copy or download pretty-printed JSON, with 2-space, 4-space, or tab indentation.",
       },
     ]}
   />
@@ -137,7 +137,7 @@ tags:
         <details class="faq-item">
           <summary class="faq-summary">Why does my file fail on tabs?</summary>
           <p class="body-md faq-answer">
-            YAML forbids tab characters for indentation — spaces only. The error points to the exact
+            YAML forbids tab characters for indentation. Spaces only. The error points to the exact
             line; replace the tabs with spaces and convert again.
           </p>
         </details>
@@ -145,7 +145,7 @@ tags:
           <summary class="faq-summary">What happens to duplicate keys?</summary>
           <p class="body-md faq-answer">
             They fail the conversion with an exact line and column, on purpose. JSON output would
-            have to silently keep only the last value — we'd rather point at the problem than drop
+            have to silently keep only the last value. We'd rather point at the problem than drop
             your data without telling you.
           </p>
         </details>
@@ -160,7 +160,7 @@ tags:
         <details class="faq-item">
           <summary class="faq-summary">Which YAML version is supported?</summary>
           <p class="body-md faq-answer">
-            YAML 1.2 with the core schema — the modern spec, and the same parser the JSON → YAML
+            YAML 1.2 with the core schema, the modern spec, and the same parser the JSON → YAML
             tool uses, so a round trip stays consistent in both directions.
           </p>
         </details>

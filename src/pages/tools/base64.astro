@@ -27,7 +27,7 @@ import "../../styles/tool-options.css";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "Base64" }]}
     title="Base64 Encode / Decode"
-    subtitle="Encode text to Base64 or decode it back — with URL-safe, padding, and data-URI options."
+    subtitle="Encode text to Base64 or decode it back, with URL-safe, padding, and data-URI options."
   />
 
   <ToolWorkspace slot="workspace" layout="3-col">
@@ -217,23 +217,23 @@ import "../../styles/tool-options.css";
           <p class="body-md faq-answer">
             Standard Base64 uses <code>+</code> and <code>/</code>, which are awkward inside URLs
             and filenames. URL-safe swaps them for <code>-</code> and <code>_</code> and usually drops
-            the <code>=</code> padding — it's what JWTs and most tokens use.
+            the <code>=</code> padding. It's what JWTs and most tokens use.
           </p>
         </details>
         <details class="faq-item">
           <summary class="faq-summary">Why does the output get bigger when I encode?</summary>
           <p class="body-md faq-answer">
             Base64 represents every 3 bytes of input as 4 printable characters, so encoded text is
-            always at least ~33% larger than its byte length — more for non-ASCII, since characters
-            like emoji expand to several bytes first. The meter shows that ratio live.
+            always at least ~33% larger than its byte length. It's more for non-ASCII, since
+            characters like emoji expand to several bytes first. The meter shows that ratio live.
           </p>
         </details>
         <details class="faq-item">
           <summary class="faq-summary">What does the tag on decode mean?</summary>
           <p class="body-md faq-answer">
-            When you decode, the tool reads the first bytes of the result and names common formats —
-            PNG, JPEG, PDF, GIF, WebP, ZIP, gzip — or marks it as JSON or plain text. If the payload
-            is binary, you get a clean byte count instead of unreadable characters.
+            When you decode, the tool reads the first bytes of the result and names common formats:
+            PNG, JPEG, PDF, GIF, WebP, ZIP, gzip. Or it marks the payload as JSON or plain text. If
+            the payload is binary, you get a clean byte count instead of unreadable characters.
           </p>
         </details>
       </div>

@@ -102,7 +102,7 @@ role = "engineer"`}
     steps={[
       {
         title: "Paste or drop",
-        desc: "Any .toml config — validity reads as you type, up to 15M characters.",
+        desc: "Any .toml config. Validity reads as you type, up to 15M characters.",
       },
       {
         title: "Convert",
@@ -110,7 +110,7 @@ role = "engineer"`}
       },
       {
         title: "Take the JSON",
-        desc: "Copy or download pretty-printed JSON — 2-space, 4-space, or tabs.",
+        desc: "Copy or download pretty-printed JSON, with 2-space, 4-space, or tab indentation.",
       },
     ]}
   />
@@ -143,15 +143,15 @@ role = "engineer"`}
           <summary class="faq-summary">Do integers stay integers?</summary>
           <p class="body-md faq-answer">
             JSON has one number type, so TOML's integer/float distinction flattens into numbers.
-            Very large integers (beyond 2<sup>53</sup>) can lose precision — that's a JSON limit,
+            Very large integers (beyond 2<sup>53</sup>) can lose precision. That's a JSON limit,
             not a bug here. <code>inf</code> and <code>nan</code> become <code>null</code>.
           </p>
         </details>
         <details class="faq-item">
           <summary class="faq-summary">What about duplicate keys?</summary>
           <p class="body-md faq-answer">
-            The TOML spec forbids them, and the parser refuses rather than silently keeping one —
-            you'll get an exact line and column so you can fix it.
+            The TOML spec forbids them, and the parser refuses rather than silently keeping one.
+            You'll get an exact line and column so you can fix it.
           </p>
         </details>
       </div>

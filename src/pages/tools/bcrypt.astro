@@ -25,7 +25,7 @@ import { COST_FACTORS } from "../../lib/tools/bcrypt/constants";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "bcrypt" }]}
     title="bcrypt Password Hasher"
-    subtitle="Generate a salted, adaptive bcrypt hash for any password — locally in your browser."
+    subtitle="Generate a salted, adaptive bcrypt hash for any password, locally in your browser."
   />
 
   <ToolWorkspace slot="workspace" layout="3-col">
@@ -121,11 +121,11 @@ import { COST_FACTORS } from "../../lib/tools/bcrypt/constants";
     steps={[
       {
         title: "Enter a password",
-        desc: "Type or paste the secret you want to hash — a password, a recovery code, an API secret.",
+        desc: "Type or paste the secret you want to hash: a password, a recovery code, an API secret.",
       },
       {
         title: "Pick the cost factor",
-        desc: "Choose how expensive the hash should be. Higher cost means slower, safer hashing — 10 is the recommended default.",
+        desc: "Choose how expensive the hash should be. Higher cost means slower, safer hashing; 10 is the recommended default.",
       },
       {
         title: "Generate & store",
@@ -157,14 +157,14 @@ import { COST_FACTORS } from "../../lib/tools/bcrypt/constants";
           <summary class="faq-summary">Why does the same password give a different hash?</summary>
           <p class="body-md faq-answer">
             bcrypt embeds a random salt in every hash, so identical passwords produce different
-            hashes. That's intentional — it stops attackers from precomputing tables or spotting
+            hashes. That's intentional: it stops attackers from precomputing tables or spotting
             duplicate passwords in a database.
           </p>
         </details>
         <details class="faq-item">
           <summary class="faq-summary">What does the cost factor do?</summary>
           <p class="body-md faq-answer">
-            The cost factor controls how many rounds of key stretching bcrypt runs — 2^cost. Higher
+            The cost factor controls how many rounds of key stretching bcrypt runs: 2^cost. Higher
             values take longer to compute but make brute-forcing far more expensive. 10 is the
             common default; use 11–12 for new systems. See the{" "}
             <a href="/compare/sha-256-vs-bcrypt">SHA-256 vs bcrypt comparison</a>.

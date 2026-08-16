@@ -26,7 +26,7 @@ import "../../styles/tool-options.css";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "URL Encode / Decode" }]}
     title="URL Encode / Decode"
-    subtitle="Percent-encode a value, a whole URL, or a form body — and see exactly what changes."
+    subtitle="Percent-encode a value, a whole URL, or a form body, and see exactly what changes."
   />
 
   <ToolWorkspace slot="workspace" layout="3-col">
@@ -179,7 +179,7 @@ import "../../styles/tool-options.css";
       },
       {
         title: "Pick a mode",
-        desc: "Choose Encode or Decode, then match the target — component, whole URL, or form encoding.",
+        desc: "Choose Encode or Decode, then match the target: component, whole URL, or form encoding.",
       },
       {
         title: "Read & copy",
@@ -239,7 +239,7 @@ import "../../styles/tool-options.css";
         </table>
       </div>
       <p class="caption url-ref-note">
-        Non-ASCII always expands to its UTF-8 bytes — <code>é</code> is two (<code>%C3%A9</code>),
+        Non-ASCII always expands to its UTF-8 bytes. <code>é</code> is two (<code>%C3%A9</code>),
         an emoji is four. The readout reports bytes, not characters, so the expansion number is
         honest.
       </p>
@@ -266,9 +266,9 @@ import "../../styles/tool-options.css";
           </p>
         </details>
         <details class="faq-item">
-          <summary class="faq-summary">Component vs whole URL — which do I want?</summary>
+          <summary class="faq-summary">Component vs whole URL: which do I want?</summary>
           <p class="body-md faq-answer">
-            If you're encoding a single value to drop into a query string, use Component — it
+            If you're encoding a single value to drop into a query string, use Component. It
             encodes the reserved characters so they can't break the URL. If you already have a full
             URL and just want the unsafe characters escaped, use Whole URL, which leaves the
             structure intact.
@@ -289,7 +289,7 @@ import "../../styles/tool-options.css";
           <p class="body-md faq-answer">
             Each teal chip is a character that the current mode encodes, shown as its percent-bytes;
             plain characters pass through untouched. It's the encoding's effect on your exact
-            string, made visible — and in decode mode it shows the encoded structure you're
+            string, made visible. In decode mode it shows the encoded structure you're
             unpacking.
           </p>
         </details>

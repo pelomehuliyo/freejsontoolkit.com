@@ -43,7 +43,7 @@ import "../../styles/tool-options.css";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "UUID Generator" }]}
     title="UUID Generator"
-    subtitle="Generate v1, v4, v5 or v7 identifiers in bulk — sortable, random, or name-based."
+    subtitle="Generate v1, v4, v5 or v7 identifiers in bulk: sortable, random, or name-based."
   />
 
   <section class="uu-stage">
@@ -279,7 +279,7 @@ import "../../styles/tool-options.css";
       },
       {
         title: "Generate & export",
-        desc: "Click Generate — v7 batches come out already sorted — then copy or download the entire list.",
+        desc: "Click Generate. V7 batches come out already sorted, then copy or download the entire list.",
       },
     ]}
   />
@@ -298,7 +298,7 @@ import "../../styles/tool-options.css";
         <details class="faq-item">
           <summary class="faq-summary">Which version should I use?</summary>
           <p class="body-md faq-answer">
-            For an opaque id, v4. For a primary key you'll sort or insert in order, v7 — its time
+            For an opaque id, v4. For a primary key you'll sort or insert in order, v7. Its time
             prefix keeps inserts sequential. For a stable id derived from a name (a URL, a DNS
             name), v5.
           </p>
@@ -314,7 +314,7 @@ import "../../styles/tool-options.css";
           <summary class="faq-summary">Why aren't v1 UUIDs sortable as strings?</summary>
           <p class="body-md faq-answer">
             v1 stores the low 32 bits of the timestamp first, so the string order doesn't follow
-            time. That limitation is exactly what v7 was designed to fix — it puts the
+            time. That limitation is exactly what v7 was designed to fix. It puts the
             most-significant time bits at the front.
           </p>
         </details>

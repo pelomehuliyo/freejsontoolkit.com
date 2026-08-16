@@ -24,7 +24,7 @@ import { LITE_SUPPORTED, LITE_UNSUPPORTED } from "../../lib/tools/json-schema-li
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "JSON Schema Lite" }]}
     title="JSON Schema Lite"
-    subtitle="Validate JSON against a schema — violations point at the exact value."
+    subtitle="Validate JSON against a schema. Violations point at the exact value."
   />
 
   <section class="dj-stage">
@@ -117,7 +117,7 @@ import { LITE_SUPPORTED, LITE_UNSUPPORTED } from "../../lib/tools/json-schema-li
         <div class="dj-idle" id="dj-idle">
           <p class="dj-idle-cmd caption-mono">$ schema --check instance.json</p>
           <p class="body-sm dj-idle-msg">
-            Paste JSON and a schema above — or load the sample — and every violation lands here with
+            Paste JSON and a schema above, or load the sample, and every violation lands here with
             its exact path, the instant it changes.
           </p>
         </div>
@@ -139,7 +139,7 @@ import { LITE_SUPPORTED, LITE_UNSUPPORTED } from "../../lib/tools/json-schema-li
       },
       {
         title: "Read the violations",
-        desc: "Every problem carries its exact path — /users/2/email — so you can jump straight to the offending value.",
+        desc: "Every problem carries its exact path, like /users/2/email, so you can jump straight to the offending value.",
       },
       {
         title: "Fix & re-run",
@@ -172,7 +172,7 @@ import { LITE_SUPPORTED, LITE_UNSUPPORTED } from "../../lib/tools/json-schema-li
           <p class="body-md faq-answer">
             A clearly-scoped subset of JSON Schema: types, required keys, additionalProperties,
             enum/const, numeric ranges, string lengths, and array/object size limits. Keywords we
-            don't support yet are listed openly in the panel — we'd rather tell you what's out than
+            don't support yet are listed openly in the panel. We'd rather tell you what's out than
             pretend otherwise. The full validator (with <code>$ref</code> and combinators) is a planned
             v2.0 tool.
           </p>
@@ -180,7 +180,7 @@ import { LITE_SUPPORTED, LITE_UNSUPPORTED } from "../../lib/tools/json-schema-li
         <details class="faq-item">
           <summary class="faq-summary">What happens to keywords you don't support?</summary>
           <p class="body-md faq-answer">
-            They're ignored, per the JSON Schema spec — unknown keywords never fail validation. So a
+            They're ignored, per the JSON Schema spec. Unknown keywords never fail validation. So a
             schema using <code>$ref</code> or <code>anyOf</code> won't error; it just won't enforce those
             parts. The coverage line above the button states exactly what's active.
           </p>
@@ -188,7 +188,7 @@ import { LITE_SUPPORTED, LITE_UNSUPPORTED } from "../../lib/tools/json-schema-li
         <details class="faq-item">
           <summary class="faq-summary">Why don't you just use Ajv?</summary>
           <p class="body-md faq-answer">
-            Ajv is excellent but ~150KB gzipped — heavier than this entire site's philosophy allows
+            Ajv is excellent but ~150KB gzipped, heavier than this entire site's philosophy allows
             for one tool. So the engine is hand-rolled on the same JSON grammar walker that powers
             the JSON Validator: zero dependencies, identical coordinates everywhere.
           </p>

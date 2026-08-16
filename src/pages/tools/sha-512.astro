@@ -26,7 +26,7 @@ import { ENCODINGS } from "../../lib/tools/sha-512/constants";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "SHA-512" }]}
     title="SHA-512 Hash Generator"
-    subtitle="Generate a 512-bit SHA-512 hash from any text — instantly, in your browser."
+    subtitle="Generate a 512-bit SHA-512 hash from any text, instantly, in your browser."
   />
 
   <ToolWorkspace slot="workspace" layout="3-col">
@@ -132,7 +132,7 @@ import { ENCODINGS } from "../../lib/tools/sha-512/constants";
     steps={[
       {
         title: "Paste your text",
-        desc: "Type or paste the message you want to hash — a password, a payload, a file checksum, anything.",
+        desc: "Type or paste the message you want to hash: a password, a payload, a file checksum, anything.",
       },
       {
         title: "Pick an encoding",
@@ -140,7 +140,7 @@ import { ENCODINGS } from "../../lib/tools/sha-512/constants";
       },
       {
         title: "Hash & export",
-        desc: "Click Hash, then copy the digest or download it — the hashing never leaves your browser.",
+        desc: "Click Hash, then copy the digest or download it. The hashing never leaves your browser.",
       },
     ]}
   />
@@ -217,31 +217,17 @@ import { ENCODINGS } from "../../lib/tools/sha-512/constants";
             <a href="/tools/bcrypt">bcrypt</a> with a unique salt.
           </p>
         </details>
+
+        <details class="faq-item">
+          <summary class="faq-summary">How is SHA-512 different from SHA-256?</summary>
+          <p class="body-md faq-answer">
+            Both belong to the SHA-2 family. SHA-512 produces a 512-bit digest (128 hex chars) vs
+            SHA-256's 256 bits (64 hex chars), and uses 64-bit word operations. That is why it's the
+            natural choice on 64-bit platforms. See the{" "}
+            <a href="/compare/sha-256-vs-sha-512">SHA-256 vs SHA-512 comparison</a>.
+          </p>
+        </details>
       </div>
-      <details class="faq-item">
-        <summary class="faq-summary">Is my text uploaded?</summary>
-        <p class="body-md faq-answer">
-          No. The hashing happens entirely in your browser using the native Web Crypto API.
-        </p>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-summary">How is SHA-512 different from SHA-256?</summary>
-        <p class="body-md faq-answer">
-          Both belong to the SHA-2 family. SHA-512 produces a 512-bit digest (128 hex chars) vs
-          SHA-256's 256 bits (64 hex chars), and uses 64-bit word operations — which is why it's the
-          natural choice on 64-bit platforms. See the{" "}
-          <a href="/compare/sha-256-vs-sha-512">SHA-256 vs SHA-512 comparison</a>.
-        </p>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-summary">Can I use this for passwords?</summary>
-        <p class="body-md faq-answer">
-          SHA-512 is too fast for password storage. Use a deliberately slow, salted function like{
-            " "
-          }
-          <a href="/tools/bcrypt">bcrypt</a> instead.
-        </p>
-      </details>
     </Container>
   </section>
 </ToolShell>

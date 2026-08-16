@@ -30,7 +30,7 @@ import "../../styles/tool-options.css";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "CSV → TSV" }]}
     title="CSV → TSV"
-    subtitle="Turn comma tables into tab-separated values — commas in fields handled for you."
+    subtitle="Turn comma tables into tab-separated values. Commas in fields handled for you."
   />
   <ToolWorkspace slot="workspace" layout="3-col">
     <div slot="input" class="ws-fill">
@@ -116,7 +116,7 @@ Ada,Engineer,7`}
     steps={[
       {
         title: "Paste or drop",
-        desc: "Any CSV table — the shared RFC 4180 parser handles quoted fields and commas inside them.",
+        desc: "Any CSV table. The shared RFC 4180 parser handles quoted fields and commas inside them.",
       },
       {
         title: "Convert",
@@ -124,7 +124,7 @@ Ada,Engineer,7`}
       },
       {
         title: "Take the TSV",
-        desc: "Copy or download the tab-separated result — ready for a spreadsheet or a pipeline.",
+        desc: "Copy or download the tab-separated result, ready for a spreadsheet or a pipeline.",
       },
     ]}
   />
@@ -162,7 +162,7 @@ Ada,Engineer,7`}
           <p class="body-md faq-answer">
             Yes. Files above about 15 MB switch to a dedicated large-file mode: the file is read and
             converted in a background worker, you see a capped preview in the editor, and the full
-            TSV is a one-click download. Nothing is uploaded — the only ceiling is your device's
+            TSV is a one-click download. Nothing is uploaded. The only ceiling is your device's
             memory. <a href="/large-files">See how large-file mode works →</a>
           </p>
         </details>
@@ -170,14 +170,14 @@ Ada,Engineer,7`}
           <summary class="faq-summary">What happens to commas inside quoted fields?</summary>
           <p class="body-md faq-answer">
             They're preserved. The parser reads quoted fields correctly, and since TSV uses tabs,
-            the comma becomes ordinary text — the surrounding quotes are dropped.
+            the comma becomes ordinary text. The surrounding quotes are dropped.
           </p>
         </details>
         <details class="faq-item">
           <summary class="faq-summary">Why does a field with a newline fail the conversion?</summary
           >
           <p class="body-md faq-answer">
-            TSV has no way to keep a newline inside a single cell — it would split the row. Rather
+            TSV has no way to keep a newline inside a single cell. It would split the row. Rather
             than silently corrupt your table, we refuse and point at the cell, or escape it to a
             literal <code>\n</code> if you choose that option.
           </p>
@@ -185,7 +185,7 @@ Ada,Engineer,7`}
         <details class="faq-item">
           <summary class="faq-summary">Do ragged rows work?</summary>
           <p class="body-md faq-answer">
-            No — CSV → TSV needs a rectangular grid. Rows with a different number of fields fail
+            No. CSV → TSV needs a rectangular grid. Rows with a different number of fields fail
             with the exact line number instead of being silently padded or dropped, which would
             change your data.
           </p>

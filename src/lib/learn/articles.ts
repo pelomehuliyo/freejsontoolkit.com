@@ -44,7 +44,7 @@ export const ARTICLES: LearnArticle[] = [
             "SHA-512 remains cryptographically secure for integrity checks and digital signatures. No practical collision attack exists. Here's what the research says, where the real risks are, and when to use something else.",
         heroQuestion: "Is SHA-512 still secure?",
         shortAnswer:
-            "Yes — for hashing, integrity checks, and digital signatures. SHA-512 has no known practical collision attack. It is not quantum-proof, and it is not suitable for password storage. The real risk is almost always implementation mistakes, not the algorithm itself.",
+            "Yes. For hashing, integrity checks, and digital signatures. SHA-512 has no known practical collision attack. It is not quantum-proof, and it is not suitable for password storage. The real risk is almost always implementation mistakes, not the algorithm itself.",
         sections: [
             {
                 heading: "What 'secure' means for a hash function",
@@ -59,7 +59,7 @@ export const ARTICLES: LearnArticle[] = [
             {
                 heading: "The quantum computing question",
                 body:
-                    "Grover's algorithm, running on a sufficiently powerful quantum computer, would reduce the effective security of a hash function by half. For SHA-512, that means 256 bits of security — still beyond brute-force reach. For SHA-256, it drops to 128 bits, which is still considered secure but with less margin. This is one reason SHA-512 provides extra future-proofing.",
+                    "Grover's algorithm, running on a sufficiently powerful quantum computer, would reduce the effective security of a hash function by half. For SHA-512, that means 256 bits of security, still beyond brute-force reach. For SHA-256, it drops to 128 bits, which is still considered secure but with less margin. This is one reason SHA-512 provides extra future-proofing.",
                 list: [
                     "SHA-512 with Grover: ~256 bits of security",
                     "SHA-256 with Grover: ~128 bits of security",
@@ -121,7 +121,7 @@ export const ARTICLES: LearnArticle[] = [
         eyebrow: "Security · Myth Busting",
         title: "Can SHA-512 Be Decrypted?",
         description:
-            "No. SHA-512 is a one-way function — it cannot be decrypted. But weak inputs can still be guessed. Here's why hashing is not encryption, what attackers actually do, and how to protect your data.",
+            "No. SHA-512 is a one-way function; it cannot be decrypted. But weak inputs can still be guessed. Here's why hashing is not encryption, what attackers actually do, and how to protect your data.",
         heroQuestion: "Can SHA-512 be decrypted?",
         shortAnswer:
             "No. SHA-512 is a one-way function. The hash cannot be reversed back to the original input. However, weak inputs like short passwords can still be discovered by hashing many guesses and comparing the results.",
@@ -129,17 +129,17 @@ export const ARTICLES: LearnArticle[] = [
             {
                 heading: "Hashing is not encryption",
                 body:
-                    "Encryption is two-way: you encrypt with a key and decrypt with a key. Hashing is one-way: the input is transformed into a fixed-size digest, and the original data is destroyed in the process. There is no key to unlock a hash. It is not hidden — it is gone.",
+                    "Encryption is two-way: you encrypt with a key and decrypt with a key. Hashing is one-way: the input is transformed into a fixed-size digest, and the original data is destroyed in the process. There is no key to unlock a hash. It is not hidden; it is gone.",
             },
             {
                 heading: "Why it's mathematically one-way",
                 body:
-                    "SHA-512 takes any input — from a single character to a 100 GB file — and compresses it into 512 bits. This is a lossy transformation: infinitely many inputs map to the same output space. There is simply not enough information in the hash to reconstruct the original.",
+                    "SHA-512 takes any input, from a single character to a 100 GB file, and compresses it into 512 bits. This is a lossy transformation: infinitely many inputs map to the same output space. There is simply not enough information in the hash to reconstruct the original.",
             },
             {
                 heading: "What attackers actually do",
                 body:
-                    "Since they can't decrypt, attackers guess. They hash millions or billions of candidate inputs and compare each result to the target hash. This is called brute-force or dictionary attack. It doesn't break the algorithm — it exploits weak inputs.",
+                    "Since they can't decrypt, attackers guess. They hash millions or billions of candidate inputs and compare each result to the target hash. This is called brute-force or dictionary attack. It doesn't break the algorithm; it exploits weak inputs.",
                 list: [
                     "Dictionary attacks: try every word in a list",
                     "Brute-force: try every combination of characters",
@@ -175,11 +175,11 @@ export const ARTICLES: LearnArticle[] = [
             },
             {
                 q: "Why do some sites show the 'original' of a hash?",
-                a: "They maintain a database of previously computed hashes. If your input is common enough to be in their database, they look it up. This is not decryption — it's a precomputed dictionary.",
+                a: "They maintain a database of previously computed hashes. If your input is common enough to be in their database, they look it up. This is not decryption; it's a precomputed dictionary.",
             },
             {
                 q: "Is Base64 the same as hashing?",
-                a: "No. Base64 is an encoding — it's fully reversible and provides no security. Anyone can decode Base64. Hashing is one-way and irreversible.",
+                a: "No. Base64 is an encoding; it's fully reversible and provides no security. Anyone can decode Base64. Hashing is one-way and irreversible.",
             },
         ],
         publishedIn: "v1.8",

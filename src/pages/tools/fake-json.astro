@@ -26,7 +26,7 @@ import "../../styles/tool-options.css";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "Fake JSON" }]}
     title="Fake JSON Generator"
-    subtitle="Describe a shape, get realistic mock data — seeded and reproducible."
+    subtitle="Describe a shape, get realistic mock data. Seeded and reproducible."
   />
 
   <ToolWorkspace slot="workspace" layout="3-col">
@@ -170,15 +170,15 @@ import "../../styles/tool-options.css";
     steps={[
       {
         title: "Write a template",
-        desc: "Start with any JSON shape and drop in tokens like {{name}} or {{email}} — a value that is only a token keeps its real type.",
+        desc: "Start with any JSON shape and drop in tokens like {{name}} or {{email}}. A value that is only a token keeps its real type.",
       },
       {
         title: "Tune the batch",
-        desc: "Set the record count and let nested arrays grow the data to the size you need — thousands of rows, still typed.",
+        desc: "Set the record count and let nested arrays grow the data to the size you need: thousands of rows, still typed.",
       },
       {
         title: "Generate & export",
-        desc: "Click Generate, then copy the JSON or download it as a file — all processed in your browser.",
+        desc: "Click Generate, then copy the JSON or download it as a file. All processing happens in your browser.",
       },
     ]}
   />
@@ -190,7 +190,7 @@ import "../../styles/tool-options.css";
         <span class="caption-mono section-eyebrow">THE TOKENS</span>
         <h2 class="display-md fj-ref-title">Write a shape, get the data</h2>
         <p class="body-sm fj-ref-sub">
-          The template is ordinary JSON. Put a faker token in any string value — a value that is
+          The template is ordinary JSON. Put a faker token in any string value. A value that is
           <em> only </em> a token keeps its real type, so <code>"{"{{int:1..9}}"}</code> becomes a number.
         </p>
       </div>
@@ -237,7 +237,7 @@ import "../../styles/tool-options.css";
           <summary class="faq-summary">What does the seed do?</summary>
           <p class="body-md faq-answer">
             It makes the output reproducible. Type any word and the same template + count + seed
-            always yields the same records — handy for fixtures and CI. Leave it empty for fresh
+            always yields the same records. Handy for fixtures and CI. Leave it empty for fresh
             random data each time.
           </p>
         </details>
@@ -246,14 +246,14 @@ import "../../styles/tool-options.css";
           <p class="body-md faq-answer">
             It didn't, if the value was only the token. The unbox rule keeps <code
               >"{"{{int}}"}</code
-            > as a number. If you write text around a token — <code>"id-{"{{int}}"}</code> — the whole
-            value is text, so you get a string.
+            > as a number. If you write text around a token, like <code>"id-{"{{int}}"}</code>, the
+            whole value is text, so you get a string.
           </p>
         </details>
         <details class="faq-item">
           <summary class="faq-summary">Can I nest objects and arrays?</summary>
           <p class="body-md faq-answer">
-            Yes. The template is real JSON, so any structure works — tokens expand wherever they
+            Yes. The template is real JSON, so any structure works. Tokens expand wherever they
             appear, including inside nested objects and arrays. For a variable-length array, list
             the tokens you want; a repeat-count token is on the roadmap.
           </p>

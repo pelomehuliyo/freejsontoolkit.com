@@ -26,7 +26,7 @@ import "../../styles/tool-options.css";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "Timestamp Converter" }]}
     title="Timestamp Converter"
-    subtitle="Unix time to a human date, and any date back to Unix time — in seconds, ms, µs or ns."
+    subtitle="Unix time to a human date, and any date back to Unix time, in seconds, ms, µs or ns."
   />
 
   <ToolWorkspace slot="workspace" layout="3-col">
@@ -160,7 +160,7 @@ import "../../styles/tool-options.css";
 
   <HowItWorks
     heading="Two directions, one moment in time"
-    description="A Unix timestamp counts seconds (or milliseconds, microseconds, nanoseconds) since January 1st, 1970 UTC. This tool reads that number and shows you the instant it names — then it can go the other way and turn any date you type back into the numbers."
+    description="A Unix timestamp counts seconds (or milliseconds, microseconds, nanoseconds) since January 1st, 1970 UTC. This tool reads that number and shows you the instant it names. Then it can go the other way and turn any date you type back into the numbers."
     steps={[
       {
         title: "Pick a direction",
@@ -172,7 +172,7 @@ import "../../styles/tool-options.css";
       },
       {
         title: 'Paste or use "now"',
-        desc: "Type or paste a value and it converts live — or grab the exact current time with one click.",
+        desc: "Type or paste a value and it converts live, or grab the exact current time with one click.",
       },
     ]}
   />
@@ -199,8 +199,8 @@ import "../../styles/tool-options.css";
         <details class="faq-item">
           <summary class="faq-summary">Which unit should I pick?</summary>
           <p class="body-md faq-answer">
-            If the number is 10 digits long, it's seconds. 13 digits → milliseconds. 16 digits →
-            microseconds. 19 digits → nanoseconds. When in doubt, try seconds first — the readout
+            If the number is 10 digits long, it's seconds. 13 digits means milliseconds. 16 digits means
+            microseconds. 19 digits means nanoseconds. When in doubt, try seconds first. The readout
             makes it obvious if the value looks wrong.
           </p>
         </details>
@@ -209,7 +209,7 @@ import "../../styles/tool-options.css";
           <p class="body-md faq-answer">
             A timestamp is an absolute instant; the same instant reads differently in UTC and in
             your local timezone. The readout shows both, side by side, so the "off by an hour" is
-            just your zone's offset — not a bug.
+            just your zone's offset, not a bug.
           </p>
         </details>
         <details class="faq-item">

@@ -57,7 +57,7 @@ header.payload.signature`}
           <div class="jwt-warning-text">
             <strong class="jwt-warning-title">Decoded, not verified.</strong>
             <span class="jwt-warning-body">
-              We have no key — this token's signature is not checked here. Never treat a decoded
+              We have no key. This token's signature is not checked here. Never treat a decoded
               payload as trustworthy.
             </span>
           </div>
@@ -109,7 +109,7 @@ header.payload.signature`}
     steps={[
       {
         title: "Paste the token",
-        desc: 'A full header.payload.signature string — a leading "Bearer " is stripped for you.',
+        desc: 'A full header.payload.signature string. A leading "Bearer " is stripped for you.',
       },
       {
         title: "Decode",
@@ -135,7 +135,7 @@ header.payload.signature`}
         <details class="faq-item">
           <summary class="faq-summary">Does this verify my token's signature?</summary>
           <p class="body-md faq-answer">
-            No — and it can't. Verification needs the signing key (a secret or a public key), which
+            No, and it can't. Verification needs the signing key (a secret or a public key), which
             only the issuer holds. This tool decodes the visible parts and tells you plainly that
             the signature was not checked. Anyone who warns you otherwise is guessing.
           </p>
@@ -144,7 +144,7 @@ header.payload.signature`}
           <summary class="faq-summary">Is my token uploaded anywhere?</summary>
           <p class="body-md faq-answer">
             No. Decoding is base64url + JSON.parse, done entirely in your browser. Tokens are
-            credentials — pasting one into a site that uploads it is how they get stolen. This one
+            credentials. Pasting one into a site that uploads it is how they get stolen. This one
             has no network path for it to travel.
           </p>
         </details>
@@ -152,14 +152,14 @@ header.payload.signature`}
           <summary class="faq-summary">What does "expired" mean here?</summary>
           <p class="body-md faq-answer">
             It's a <em>time</em> fact, not a signature fact. If the <code>exp</code> claim is in the past,
-            the token is expired by its own terms — but that says nothing about whether it was ever legitimately
+            the token is expired by its own terms, but that says nothing about whether it was ever legitimately
             signed.
           </p>
         </details>
         <details class="faq-item">
           <summary class="faq-summary">What about <code>alg: "none"</code>?</summary>
           <p class="body-md faq-answer">
-            A token with <code>alg: "none"</code> and no signature is unsigned — anyone could have created
+            A token with <code>alg: "none"</code> and no signature is unsigned. Anyone could have created
             it. The decoder calls this out loudly. Servers that accept such tokens have a serious vulnerability.
           </p>
         </details>

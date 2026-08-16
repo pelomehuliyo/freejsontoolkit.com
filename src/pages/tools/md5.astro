@@ -25,7 +25,7 @@ import { ENCODINGS } from "../../lib/tools/md5/constants";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "MD5" }]}
     title="MD5 Hash Generator"
-    subtitle="Generate a 128-bit MD5 checksum from any text — instantly, in your browser."
+    subtitle="Generate a 128-bit MD5 checksum from any text, instantly, in your browser."
   />
 
   <ToolWorkspace slot="workspace" layout="3-col">
@@ -56,7 +56,7 @@ import { ENCODINGS } from "../../lib/tools/md5/constants";
         <div class="md5-warning" role="note">
           <span class="md5-warning-icon" aria-hidden="true">⚠</span>
           <div class="md5-warning-text">
-            <strong class="md5-warning-title">Legacy — not for security use.</strong>
+            <strong class="md5-warning-title">Legacy. Not for security use.</strong>
             <span class="md5-warning-body">
               MD5 collisions are practical, so it can't protect passwords or data integrity. Use{" "}
               <a href="/tools/sha-256">SHA-256</a> or <a href="/tools/sha-512">SHA-512</a> for
@@ -143,7 +143,7 @@ import { ENCODINGS } from "../../lib/tools/md5/constants";
     steps={[
       {
         title: "Paste your text",
-        desc: "Type or paste the data you want to checksum — for legacy workflows, dedup keys, or old checksums.",
+        desc: "Type or paste the data you want to checksum: for legacy workflows, dedup keys, or old checksums.",
       },
       {
         title: "Pick an encoding",
@@ -151,7 +151,7 @@ import { ENCODINGS } from "../../lib/tools/md5/constants";
       },
       {
         title: "Hash & export",
-        desc: "Click Hash, then copy the checksum or download it — everything runs in your browser.",
+        desc: "Click Hash, then copy the checksum or download it. Everything runs in your browser.",
       },
     ]}
   />
@@ -171,7 +171,7 @@ import { ENCODINGS } from "../../lib/tools/md5/constants";
         <details class="faq-item">
           <summary class="faq-summary">Is MD5 secure?</summary>
           <p class="body-md faq-answer">
-            No. MD5 has known collision attacks since 2004 — attackers can craft two different inputs
+            No. MD5 has known collision attacks since 2004. Attackers can craft two different inputs
             with the same checksum. It's fine for legacy compatibility, dedup keys, or non-security
             checksums, but never for passwords, signatures, or integrity that must resist tampering.
             Use <a href="/tools/sha-256">SHA-256</a> or <a href="/tools/sha-512">SHA-512</a> instead.
@@ -180,7 +180,7 @@ import { ENCODINGS } from "../../lib/tools/md5/constants";
         <details class="faq-item">
           <summary class="faq-summary">Can I reverse or "decrypt" an MD5 hash?</summary>
           <p class="body-md faq-answer">
-            No — MD5 is one-way. What you see online are rainbow tables or dictionary lookups, which
+            No. MD5 is one-way. What you see online are rainbow tables or dictionary lookups, which
             only match known inputs. Two different inputs can also share an MD5, so a match never
             proves the original text.
           </p>
@@ -189,7 +189,7 @@ import { ENCODINGS } from "../../lib/tools/md5/constants";
           <summary class="faq-summary">Why is MD5 still around?</summary>
           <p class="body-md faq-answer">
             Legacy systems, old checksum conventions, and non-security dedup still reference it. This
-            tool exists for those cases — it's not an endorsement.
+            tool exists for those cases. It's not an endorsement.
           </p>
         </details>
         <details class="faq-item">

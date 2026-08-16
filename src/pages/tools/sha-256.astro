@@ -12,6 +12,8 @@ import RelatedTools from "../../components/tools/RelatedTools.astro";
 import ToolDocs from "../../components/tools/ToolDocs.astro";
 import CompareLinks from "../../components/tools/CompareLinks.astro";
 import ToolNudge from "../../components/tools/ToolNudge.astro";
+import HowItWorks from "../../components/tools/HowItWorks.astro";
+import LearnLinks from "../../components/tools/LearnLinks.astro";
 import { ENCODINGS } from "../../lib/tools/sha-256/constants";
 ---
 
@@ -24,7 +26,7 @@ import { ENCODINGS } from "../../lib/tools/sha-256/constants";
     slot="header"
     breadcrumbs={[{ label: "Home", href: "/" }, { label: "SHA-256" }]}
     title="SHA-256 Hash Generator"
-    subtitle="Generate secure SHA-256 hashes from text — instantly, locally, and without uploading."
+    subtitle="Generate secure SHA-256 hashes from text, instantly, locally, and without uploading."
   />
 
   <ToolWorkspace slot="workspace" layout="3-col">
@@ -128,6 +130,25 @@ import { ENCODINGS } from "../../lib/tools/sha-256/constants";
   <CompareLinks />
   <RelatedTools />
   <ToolNudge />
+  <LearnLinks toolId="sha-256" />
+
+  <HowItWorks
+    heading="Generate a SHA-256 hash in three steps"
+    steps={[
+      {
+        title: "Paste your text",
+        desc: "Type or paste the message you want to hash: a password, a payload, a file checksum, anything.",
+      },
+      {
+        title: "Pick an encoding",
+        desc: "Hex is the standard for checksums and APIs; Base64 is more compact for tokens and URLs.",
+      },
+      {
+        title: "Hash & export",
+        desc: "Click Hash, then copy the digest or download it. The hashing never leaves your browser.",
+      },
+    ]}
+  />
 
   <section class="faq-section" aria-labelledby="faq-title">
     <Container size="narrow">
@@ -190,28 +211,14 @@ import { ENCODINGS } from "../../lib/tools/sha-256/constants";
             > instead.
           </p>
         </details>
+
+        <details class="faq-item">
+          <summary class="faq-summary">Which encoding should I use?</summary>
+          <p class="body-md faq-answer">
+            Hex is standard for checksums and APIs. Base64 is more compact for URLs or tokens.
+          </p>
+        </details>
       </div>
-      <details class="faq-item">
-        <summary class="faq-summary">Is my text uploaded?</summary>
-        <p class="body-md faq-answer">
-          No. The hashing happens entirely in your browser using the native Web Crypto API.
-        </p>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-summary">Can I use this for passwords?</summary>
-        <p class="body-md faq-answer">
-          SHA-256 is too fast for password storage. Use a deliberately slow, salted function like{
-            " "
-          }
-          <a href="/tools/bcrypt">bcrypt</a> instead.
-        </p>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-summary">Which encoding should I use?</summary>
-        <p class="body-md faq-answer">
-          Hex is standard for checksums and APIs. Base64 is more compact for URLs or tokens.
-        </p>
-      </details>
     </Container>
   </section>
 </ToolShell>
