@@ -7,6 +7,7 @@ import DragDropZone from "../../components/tools/DragDropZone.astro";
 import ToolActions from "../../components/tools/ToolActions.astro";
 import ErrorBanner from "../../components/tools/ErrorBanner.astro";
 import HowItWorks from "../../components/tools/HowItWorks.astro";
+import LearnLinks from "../../components/tools/LearnLinks.astro";
 import Card from "../../components/Card.astro";
 import Button from "../../components/Button.astro";
 import Container from "../../components/Container.astro";
@@ -20,7 +21,7 @@ import "../../styles/tool-options.css";
 
 <ToolShell
   title="JSON Formatter — Beautify & Pretty-Print JSON Online (Free, Local)"
-  description="Free online JSON formatter. Beautify, pretty-print, and sort JSON keys with 2-space, 4-space, or tab indentation — 100% local, no upload, no server."
+  description="Free JSON formatter online. Prettify or beautify JSON with 2-space, 4-space, or tab indentation, sort keys, and keep data local: no upload, no server."
   activePath="/tools/json-formatter"
 >
   <ToolHeader
@@ -138,6 +139,7 @@ Example:
   <CompareLinks />
   <RelatedTools />
   <ToolNudge />
+  <LearnLinks toolId="json-formatter" />
 
   <section class="faq-section" aria-labelledby="faq-title">
     <Container size="narrow">

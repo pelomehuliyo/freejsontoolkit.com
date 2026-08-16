@@ -224,7 +224,7 @@ export const tools: ToolManifest[] = [
     status: "available",
     href: "/tools/json-formatter",
     // captures formatter / beautifier / pretty-print intent in one tool
-    keywords: ["json formatter", "json beautifier", "json pretty print", "prettify json", "json indent", "format json online"],
+    keywords: ["json formatter", "json beautifier", "json pretty print", "prettify json", "json indent", "format json online", "json formatter online", "online json beautifier", "json prettify"],
     addedIn: "v1.1",
   },
   {

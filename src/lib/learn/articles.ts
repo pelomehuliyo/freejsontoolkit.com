@@ -372,6 +372,408 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.8",
     },
+
+    {
+        slug: "what-is-json-formatter",
+        toolId: "json-formatter",
+        relatedToolIds: ["json-validator", "json-minifier", "json-diff"],
+        comparisonSlugs: ["json-formatter-vs-json-validator", "json-minifier-vs-json-formatter"],
+        eyebrow: "JSON · Explainer",
+        title: "What Is a JSON Formatter?",
+        description:
+            "A JSON formatter takes raw, minified JSON and pretty-prints it with clean indentation so humans can read it. Learn how formatters work, what they do and don't fix, and when you need one.",
+        heroQuestion: "What is a JSON formatter?",
+        shortAnswer:
+            "A JSON formatter takes raw JSON, usually compressed onto a single line, and rewrites it with consistent indentation, line breaks, and spacing. The data itself is unchanged; only the presentation becomes readable.",
+        sections: [
+            {
+                heading: "Why JSON arrives unreadable",
+                body:
+                    "APIs, logs, and databases return JSON in its most compact form: one long line with no spaces, so it travels and stores efficiently. That is great for machines and terrible for people. A developer pasting a response into an editor is staring at a wall of text with no visible structure.",
+            },
+            {
+                heading: "What a formatter actually does",
+                body:
+                    "A formatter parses the JSON and writes it back out with structure: each nesting level indented, every object and array on its own set of lines, and keys aligned. It can also sort keys alphabetically if you ask. The values are preserved exactly. It is the difference between scanning and reading.",
+                list: [
+                    "Indentation: 2 spaces, 4 spaces, or tabs",
+                    "Line breaks: one line per key and value",
+                    "Optional key sorting: A to Z",
+                    "No data change: values and order are preserved",
+                ],
+            },
+            {
+                heading: "What a formatter does not fix",
+                body:
+                    "A formatter needs valid JSON as input. It cannot repair a missing comma, a trailing comma, or an unquoted key, because those are not formatting problems. When formatting fails, the error is a validation problem. Run the text through a validator first, then format the corrected result.",
+            },
+            {
+                heading: "Where developers use formatters",
+                body:
+                    "Formatting is a daily habit in API debugging, reading config files like package.json, inspecting exported data, and untangling machine-generated JSON before it is committed or shared. Because the task is small and frequent, the fastest path wins.",
+            },
+            {
+                heading: "How to format JSON in seconds",
+                body:
+                    "Paste the raw JSON into a formatter, pick an indentation, and run it. On this site the whole process happens in your browser, so nothing is uploaded and it keeps working offline.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is a JSON formatter the same as a beautifier or pretty-printer?",
+                a: "Yes. Beautify, pretty-print, and format all mean the same thing here: adding indentation and line breaks so JSON is readable.",
+            },
+            {
+                q: "Does formatting change my data?",
+                a: "No. The keys, values, and their order are preserved. Formatting only changes whitespace and line layout.",
+            },
+            {
+                q: "Can a formatter fix broken JSON?",
+                a: "No. Formatting needs valid JSON. If your text is invalid, use a validator to find the exact line and column of the error first.",
+            },
+            {
+                q: "Is it safe to paste sensitive JSON into a formatter?",
+                a: "It depends on where the formatter runs. A client-side tool processes the JSON in your browser and never uploads it. This one is fully local.",
+            },
+        ],
+        publishedIn: "v1.8",
+    },
+
+    {
+        slug: "is-json-formatter-safe",
+        toolId: "json-formatter",
+        relatedToolIds: ["json-validator", "json-minifier"],
+        comparisonSlugs: ["json-formatter-vs-json-validator"],
+        eyebrow: "JSON · Privacy",
+        title: "Is It Safe to Paste JSON Into an Online Formatter?",
+        description:
+            "Pasting JSON that contains API keys or personal data into an online tool is a real risk. Learn the difference between client-side and server-side formatters, and how to tell which one you are using.",
+        heroQuestion: "Is it safe to paste JSON into an online formatter?",
+        shortAnswer:
+            "It depends on where the formatting runs. A tool that processes JSON entirely in your browser never transmits your data. A tool that sends it to a server can store or log it, and then your JSON is effectively in the open. Check before you paste.",
+        sections: [
+            {
+                heading: "Where the formatting actually runs",
+                body:
+                    "Client-side tools parse and pretty-print the JSON with JavaScript in your browser. The text never leaves the page, so it cannot be stored, logged, or reused. Server-side tools send the JSON over the network to be processed, which means the data reaches a machine you do not control.",
+            },
+            {
+                heading: "What is at risk",
+                body:
+                    "JSON is not just data. It often carries API keys, access tokens, personal information, or internal configuration. If that payload is uploaded, it is out of your hands. Even a tool with good intentions can leak data through a breach or a misconfigured log.",
+                list: [
+                    "API keys and tokens embedded in configs",
+                    "Personal data inside exported records",
+                    "Internal service URLs and credentials",
+                    "Anything you would not post publicly",
+                ],
+            },
+            {
+                heading: "How to tell if a formatter uploads your data",
+                body:
+                    "You can test a tool in seconds. Open its page, disconnect your network, and try to format something. A client-side tool still works. A server-side tool fails. You can also open the developer tools Network tab and check whether any request fires when you format.",
+            },
+            {
+                heading: "How this tool handles your JSON",
+                body:
+                    "This formatter runs entirely in your browser. The JSON is parsed and pretty-printed locally, there is no upload endpoint, and it keeps working with no connection at all. For sensitive payloads, that is the property that matters.",
+            },
+            {
+                heading: "Safe habits regardless of the tool",
+                body:
+                    "Treat any paste target with suspicion when the data is sensitive. Redact secrets before pasting, prefer tools that state how they process data, and keep the truly private material on a local formatter.",
+            },
+        ],
+        faq: [
+            {
+                q: "Do online formatters upload my data?",
+                a: "Some do. Server-side tools receive the JSON over the network. Client-side tools never transmit it. The two are easy to confuse, so check the Network tab or test offline.",
+            },
+            {
+                q: "Can I use an online formatter for API keys?",
+                a: "Only if it processes data locally and never sends it anywhere. A local formatter like this one is the safe choice for keys and tokens.",
+            },
+            {
+                q: "Is a browser extension safer than a website?",
+                a: "Not automatically. An extension can read the pages you visit and send data somewhere too. Read the permissions it requests before installing.",
+            },
+            {
+                q: "Does this formatter work offline?",
+                a: "Yes. It processes everything in your browser, so it formats JSON with no internet connection. That is also the reason nothing you paste is ever uploaded.",
+            },
+            {
+                q: "What is the safest way to format JSON with secrets?",
+                a: "A tool that runs fully in your browser with no network path, so the data never leaves your machine. This formatter works exactly that way.",
+            },
+        ],
+        publishedIn: "v1.8",
+    },
+
+    {
+        slug: "best-json-formatter",
+        toolId: "json-formatter",
+        relatedToolIds: ["json-validator", "json-minifier", "json-diff"],
+        comparisonSlugs: ["json-formatter-vs-json-validator", "json-minifier-vs-json-formatter", "json-diff-vs-json-formatter"],
+        eyebrow: "JSON · Toolbox",
+        title: "Best JSON Formatter: How to Pick the Right One",
+        description:
+            "There is no single best JSON formatter for everyone. Compare online versus offline, upload versus local, and the features that matter, so you can choose the tool that fits your workflow and your data.",
+        heroQuestion: "What is the best JSON formatter tool?",
+        shortAnswer:
+            "The best formatter depends on your workflow and, critically, on whether it handles your data locally. For sensitive data, choose a no-upload tool. For features, look for indentation options, key sorting, and validation.",
+        sections: [
+            {
+                heading: "What best means for different jobs",
+                body:
+                    "A quick debug while reading an API response has different needs than formatting a large config or a team-wide data migration. The best tool is the one that fits the job: fast for a one-off paste, robust for a big file, and private when the data is sensitive.",
+            },
+            {
+                heading: "Online versus offline",
+                body:
+                    "An online JSON beautifier is convenient because there is nothing to install, and it is always up to date. An offline or local tool processes the JSON in your browser or on your machine, so it works without a connection and never exposes your data to a server.",
+                list: [
+                    "A website you open in the browser: nothing to install, always current",
+                    "A browser extension: handy for a quick format, but check the permissions it requests",
+                    "A desktop app you download: runs fully offline, but you manage updates yourself",
+                ],
+            },
+            {
+                heading: "The privacy filter",
+                body:
+                    "The single most important question is where the JSON is processed. If a formatter sends your payload to a server, the data is out of your control. If it runs locally, nothing leaves your machine. Filter candidates by this first, then compare features.",
+            },
+            {
+                heading: "Feature checklist",
+                body:
+                    "Once the privacy question is settled, compare the practical features: multiple indentation styles, optional key sorting, large-file handling, and whether the tool validates as well as formats.",
+                list: [
+                    "Indentation options: 2 spaces, 4 spaces, or tabs",
+                    "Key sorting that is optional, not forced",
+                    "Comfort with large files without freezing",
+                    "Built-in validation for clear error messages",
+                ],
+            },
+            {
+                heading: "How this formatter fits",
+                body:
+                    "This formatter processes JSON entirely in your browser, with indentation options, optional key sorting, and a 15 MB ceiling. It is free, needs no account, and does not upload your data. It is not the only good option, but it checks the boxes that matter for most developers.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is the best JSON formatter free?",
+                a: "The strong local formatters are free. There is no reason to pay for formatting; the value is in privacy and convenience, not price.",
+            },
+            {
+                q: "What is the difference between a formatter and a beautifier?",
+                a: "Nothing functional. Beautify, pretty-print, and format all describe the same operation: adding indentation and line breaks to readable JSON.",
+            },
+            {
+                q: "Can a formatter handle very large JSON files?",
+                a: "Some can. Check the tool's limits up front. Large files need a formatter that does not freeze the page, which usually means it works in a background process.",
+            },
+            {
+                q: "Can I download a JSON formatter?",
+                a: "Yes. Desktop apps and command-line tools such as jq download and run locally. A browser-based formatter like this one needs no download at all, and it still keeps your JSON on your machine.",
+            },
+            {
+                q: "Why does privacy matter for a JSON formatter?",
+                a: "Because JSON frequently contains keys, tokens, and personal data. A formatter that uploads that payload puts your data in someone else's hands.",
+            },
+        ],
+        publishedIn: "v1.8",
+    },
+
+    {
+        slug: "how-to-format-json-file",
+        toolId: "json-formatter",
+        relatedToolIds: ["json-validator", "json-to-csv"],
+        comparisonSlugs: ["json-formatter-vs-json-validator"],
+        eyebrow: "JSON · How-To",
+        title: "How to Format a JSON File",
+        description:
+            "Four ways to format a JSON file: a web formatter, a code editor, the command line, and a script. Each takes seconds, and each keeps your data local when done right.",
+        heroQuestion: "How do I format a JSON file?",
+        shortAnswer:
+            "Open the file in any JSON formatter and run it. On this site, drop the file or paste its contents, then click Format. Code editors, jq, and Python's json module are the common alternatives.",
+        sections: [
+            {
+                heading: "The quickest way: a web formatter",
+                body:
+                    "Open the formatter, drop the JSON file onto the page or paste its contents, pick an indentation, and click Format. The result is ready to copy or download. Because the tool runs in your browser, the file never leaves your machine.",
+            },
+            {
+                heading: "In your code editor",
+                body:
+                    "Most editors can format JSON without a plugin. In VS Code, select the content and run Format Document, or use the format-on-save setting. Editors read the file locally, which makes this a natural choice when you are already working on it.",
+            },
+            {
+                heading: "From the command line",
+                body:
+                    "For a quick, scriptable format, jq can pretty-print with `jq . file.json`, and Python's standard library can too with `python -m json.tool file.json`. Both read the file locally and write readable output to your terminal.",
+            },
+            {
+                heading: "Formatting many files at once",
+                body:
+                    "For a directory of JSON files, loop over the files with jq or a small script and write each formatted result back. This is the right approach for migrations and bulk cleanups, where a manual paste does not scale.",
+            },
+            {
+                heading: "What to watch after formatting",
+                body:
+                    "Formatting succeeds only on valid JSON. Trailing commas and comments are invalid in standard JSON and will cause the tool to error. If a file will not format, validate it first, then format the corrected version.",
+            },
+        ],
+        faq: [
+            {
+                q: "How do I format JSON in VS Code?",
+                a: "Open the file, then run Format Document, or enable format-on-save. VS Code formats JSON natively with your configured indentation.",
+            },
+            {
+                q: "Can I format JSON in Notepad++?",
+                a: "Yes, with a plugin such as JSTool. Without a plugin, Notepad++ has no built-in JSON formatting.",
+            },
+            {
+                q: "What is a quick command-line way to format JSON?",
+                a: "`jq . file.json` pretty-prints a file, and `python -m json.tool file.json` does the same with Python's standard library.",
+            },
+            {
+                q: "Does formatting a JSON file change the data?",
+                a: "No. Formatting changes whitespace and line layout only. Keys, values, and order are preserved exactly.",
+            },
+        ],
+        publishedIn: "v1.8",
+    },
+
+    {
+        slug: "what-is-json-used-for",
+        toolId: "json-formatter",
+        relatedToolIds: ["json-validator", "json-minifier", "json-to-csv"],
+        comparisonSlugs: ["json-formatter-vs-json-validator"],
+        eyebrow: "JSON · Explainer",
+        title: "What Is JSON Used For?",
+        description:
+            "JSON is the default format for APIs, config files, and data exchange between systems. See the places developers hit it every day, and why it became the standard.",
+        heroQuestion: "What is JSON mostly used for?",
+        shortAnswer:
+            "JSON is used to move data between servers and clients over APIs, store configuration, export and import structured data, and pass data between programs. It won because it is plain text, human-readable, and every language parses it.",
+        sections: [
+            {
+                heading: "Web APIs, the biggest use",
+                body:
+                    "When a frontend asks a backend for data, the answer almost always arrives as JSON. REST endpoints return JSON responses, and clients send JSON bodies in requests. Reading and formatting those payloads is a daily activity for anyone who builds for the web.",
+            },
+            {
+                heading: "Configuration files",
+                body:
+                    "Package managers, compilers, and tools store their settings as JSON. package.json, tsconfig.json, and countless app configs are JSON documents. Developers open these constantly, and formatting keeps them readable and diffable.",
+            },
+            {
+                heading: "Data exchange and exports",
+                body:
+                    "Databases, analytics platforms, and migration tools export records as JSON because it maps naturally to objects and arrays. That exported data is easy to transform, convert, and load back into another system.",
+                list: [
+                    "Database exports and backups",
+                    "Analytics event payloads",
+                    "Migration files between systems",
+                    "Spreadsheet and data-tool round trips",
+                ],
+            },
+            {
+                heading: "Browser storage and local state",
+                body:
+                    "Browsers store structured data in localStorage and IndexedDB as JSON. Application state, feature flags, and cached settings all live as JSON under the hood, ready to be serialized and restored.",
+            },
+            {
+                heading: "Structured logging",
+                body:
+                    "Logs that need to be searched and analyzed are often written as JSON lines, one object per line. These logs are machine-readable by design, but they are still a wall of text until a formatter lays them out.",
+            },
+            {
+                heading: "Why JSON beat the alternatives",
+                body:
+                    "JSON is smaller than XML, native to JavaScript, and close enough to the data structures programmers already use that no ceremony is required. That combination made it the default everywhere.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is JSON only for JavaScript?",
+                a: "No. Every major programming language has a JSON parser. It is a language-independent data format.",
+            },
+            {
+                q: "Is JSON a programming language?",
+                a: "No. JSON is a data format for representing structured information. It has no logic, functions, or execution.",
+            },
+            {
+                q: "Why is JSON preferred over XML?",
+                a: "JSON is more compact, maps directly to objects and arrays, and needs no closing tags or schemas. For most data exchange it is simpler to write and parse.",
+            },
+            {
+                q: "Where do I see JSON outside APIs?",
+                a: "Config files, browser storage, structured logs, database exports, and data migration files all use JSON every day.",
+            },
+        ],
+        publishedIn: "v1.8",
+    },
+
+    {
+        slug: "how-to-convert-json-to-readable",
+        toolId: "json-formatter",
+        relatedToolIds: ["json-to-csv", "csv-to-json"],
+        comparisonSlugs: ["json-formatter-vs-json-validator"],
+        eyebrow: "JSON · How-To",
+        title: "How to Make Minified JSON Readable",
+        description:
+            "Minified JSON from an API response is hard to read. Learn three ways to make it readable: pretty-print it, view it as a table, or convert it to a spreadsheet.",
+        heroQuestion: "How do I convert JSON to a readable format?",
+        shortAnswer:
+            "Paste the minified JSON into a formatter to pretty-print it, or convert it to CSV and open it in a spreadsheet for a table view. Both are quick and can be done entirely on your own machine.",
+        sections: [
+            {
+                heading: "Why API responses arrive minified",
+                body:
+                    "Servers strip whitespace from JSON before sending it so payloads travel faster and take less bandwidth. The result is a single dense line. Machines love it; a human trying to read it is squinting.",
+            },
+            {
+                heading: "Pretty-print it with a formatter",
+                body:
+                    "The direct fix is formatting. Paste the minified JSON into a formatter and the same data comes back indented, line by line, instantly readable. This works for any JSON, no matter how deeply nested.",
+            },
+            {
+                heading: "Turn it into a table",
+                body:
+                    "If the JSON is an array of records, a table can be easier to scan than a pretty-print. Converting JSON to CSV gives you columns and rows that open cleanly in Excel, Sheets, or Numbers, where you can sort and filter.",
+            },
+            {
+                heading: "When a table beats a pretty-print",
+                body:
+                    "For lists of similar records, like users or orders, a table shows all rows at once and lets you compare values across columns. Pretty-printing still wins for deeply nested or single-object JSON, where a table would flatten the meaning.",
+            },
+            {
+                heading: "Keep the data local while converting",
+                body:
+                    "Both conversions are safe to run locally. A formatter or converter that works in your browser never uploads the JSON, so even sensitive API responses can be made readable without exposing them.",
+            },
+        ],
+        faq: [
+            {
+                q: "What is the fastest way to make JSON readable?",
+                a: "Pretty-print it in a formatter. Paste, click Format, and the indented result is ready in seconds.",
+            },
+            {
+                q: "How do I open JSON in Excel?",
+                a: "Excel does not open JSON directly. Convert the JSON to CSV first, then open the CSV in Excel or Google Sheets.",
+            },
+            {
+                q: "Can I read JSON without a tool?",
+                a: "You can, but it is slow and error-prone. A formatter or CSV conversion turns it into something you can scan quickly.",
+            },
+            {
+                q: "Is converting JSON safe for sensitive data?",
+                a: "It is safe when the conversion runs locally in your browser. This site's converters never upload your data.",
+            },
+        ],
+        publishedIn: "v1.8",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────
