@@ -280,6 +280,14 @@ Example:
   import { copyToClipboard } from "../../shared/clipboard";
   import { downloadFile } from "../../shared/download";
 
+  // Test hook (dev only): lets Playwright wait deterministically on store state.
+  // E2E runs against `astro dev`, so it is present there and absent from the
+  // built site. Do not point e2e at a production preview without this.
+  if (import.meta.env.DEV) {
+    (window as unknown as { __jsonToCsvStore: typeof jsonToCsvStore }).__jsonToCsvStore =
+      jsonToCsvStore;
+  }
+
   // â”€â”€ DOM refs â”€â”€
   const jsonTextarea = document.getElementById("json-input-textarea") as HTMLTextAreaElement | null;
   const csvTextarea = document.getElementById("csv-output-textarea") as HTMLTextAreaElement | null;
@@ -312,11 +320,21 @@ Example:
   let rafId = 0;
   let announceTimer: number | null = null;
 
+  /**
+   * Coalesce rapid store→DOM updates to one write per animation frame,
+   * ALWAYS running every distinct pending update. (A naive "skip if pending"
+   * throttler drops the final state when two updates land in one frame,
+   * leaving stale statuses like "Output: Empty" on screen.)
+   */
+  const pendingDomUpdates = new Set<() => void>();
   function throttleDomUpdate(fn: () => void): void {
+    pendingDomUpdates.add(fn);
     if (rafId) return;
     rafId = requestAnimationFrame(() => {
       rafId = 0;
-      fn();
+      const batch = Array.from(pendingDomUpdates);
+      pendingDomUpdates.clear();
+      for (const run of batch) run();
     });
   }
 
@@ -629,6 +647,14 @@ Example:
       lastAnnouncedPreview = null;
     }
     if (state.outputStatus === "generated" && !state.isConverting) {
+      // The worker's trailing "complete" progress stage arms announceProgressStage's
+      // 300ms timer, which would otherwise fire AFTER this done announce and
+      // overwrite it (masking e.g. the empty-array notice). Cancel it so the
+      // done announce is the final word.
+      if (announceTimer) {
+        clearTimeout(announceTimer);
+        announceTimer = null;
+      }
       if (state.isPreview && state.outputNotice && state.outputNotice !== lastAnnouncedPreview) {
         lastAnnouncedPreview = state.outputNotice;
         announce("Conversion complete. " + state.outputNotice + ".");

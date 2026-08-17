@@ -70,22 +70,15 @@ async function handleConvert(request: WorkerRequest & { type: "convert" }): Prom
       return;
     }
 
-    if (!Array.isArray(parsed)) {
-      sendError(requestId, "JSON must be an array of objects");
-      return;
-    }
+    // Single objects and primitives are handled by the shared engine
+    // (convertJsonToCsv wraps non-arrays), so no shape check here — the sync
+    // and worker paths must behave identically for the same input.
 
-    if (parsed.length === 0) {
-      // Empty array: send an empty CSV with headers if requested
-      if (options.includeHeaders) {
-        // If there are no objects, we can't determine columns — output is truly empty
-        sendProgress(requestId, "complete");
-        sendDone(requestId, "");
-      } else {
-        sendProgress(requestId, "complete");
-        sendDone(requestId, "");
-      }
-      // Use a progress note to indicate empty result — see actions.ts for the notice
+    if (Array.isArray(parsed) && parsed.length === 0) {
+      // Empty array: no rows can be derived, so the output is truly empty.
+      // (actions.ts turns this into the "array was empty" notice.)
+      sendProgress(requestId, "complete");
+      sendDone(requestId, "");
       return;
     }
 

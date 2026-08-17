@@ -78,6 +78,20 @@ export function flattenJson(obj: unknown, prefix = "", res: FlattenedRecord = {}
         if (val !== null && typeof val === "object") {
           flattenJson(val, propName, res);
         } else {
+          // Two distinct paths can flatten to the same dot-notation key
+          // (e.g. a literal "a.b" key colliding with nested a → b). When the
+          // values differ this silently destroys one of them, so fail loudly
+          // instead of shipping lossy output.
+          const existing = res[propName];
+          if (
+            propName in res &&
+            String(existing ?? "") !== String(val ?? "")
+          ) {
+            throw new Error(
+              `Flattening produced two different values for the same column "${propName}". ` +
+                `Rename one of the keys to keep both values.`,
+            );
+          }
           res[propName] = val;
         }
       }

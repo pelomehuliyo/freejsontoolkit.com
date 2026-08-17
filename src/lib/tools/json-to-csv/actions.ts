@@ -63,6 +63,12 @@ const CANCEL_TIMEOUT_MS = 2000;
  * Handles large file detection, preview truncation, and validation.
  */
 export function handleInput(store: Store<JsonToCsvState>, text: string): void {
+  // New input invalidates any in-flight conversion: kill its worker and claim
+  // a fresh run so late writes (progress / result) from the old conversion can
+  // never clobber the state we're about to set below.
+  cancelCurrentConversion();
+  conversionRunId++;
+
   const state = store.get();
 
   // Clear previous output on new input.
@@ -78,6 +84,8 @@ export function handleInput(store: Store<JsonToCsvState>, text: string): void {
     error: null,
     conversionProgress: null,
     staleOptions: false,
+    isConverting: false,
+    isCancelling: false,
   };
 
   if (!text.trim()) {

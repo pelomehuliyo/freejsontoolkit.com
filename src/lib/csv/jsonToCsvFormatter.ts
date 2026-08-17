@@ -55,7 +55,19 @@ export function formatJsonAsCsv(
   const resolvedHeaders = headers ?? collectHeaders(processedItems);
 
   if (resolvedHeaders.length === 0) {
-    return "";
+    // No object keys were found. If the records are bare primitives we can
+    // still produce a meaningful single-column CSV (one cell per value).
+    // If they are objects with no keys (e.g. [{}]), the input is genuinely
+    // unshaped — fail loudly instead of silently emitting an empty file.
+    const allPrimitive = data.every(
+      (item) => item === null || typeof item !== "object",
+    );
+    if (allPrimitive) {
+      return data.map((item) => escapeCsvCell(item, delimiter)).join("\r\n");
+    }
+    throw new Error(
+      "Could not derive CSV columns from the input. Use an array of objects.",
+    );
   }
 
   const csvRows: string[] = [];
