@@ -1368,6 +1368,276 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.9",
     },
+
+    {
+        slug: "what-is-md5",
+        toolId: "md5",
+        relatedToolIds: ["sha-256", "sha-512", "bcrypt", "hmac"],
+        comparisonSlugs: ["md5-vs-sha-256"],
+        eyebrow: "Explainer · Guide",
+        title: "What Is MD5?",
+        description:
+            "MD5 turns any text or file into a fixed 32-character hash. Learn how the algorithm works, why the output is always 128 bits, and what MD5 checksums and MD5 files are for.",
+        heroQuestion: "What is MD5?",
+        shortAnswer:
+            "MD5 is a hash function that converts any input, text or binary, into a fixed 128-bit value shown as 32 hexadecimal characters. The same input always produces the same hash, and the process is one-way, so you cannot recover the original data from the hash. It was designed in 1991 for integrity checking and is now only safe for non-security uses.",
+        sections: [
+            {
+                heading: "What MD5 stands for",
+                body:
+                    "MD5 means Message Digest 5. Ronald Rivest designed it in 1991 as the successor to MD4, and it was published as RFC 1321 in 1992. A message digest is a short fingerprint of a larger piece of data, which is exactly what MD5 produces.",
+            },
+            {
+                heading: "The 32-character output",
+                body:
+                    "No matter how large the input, an MD5 hash is always 128 bits long, which is 16 bytes, usually written as 32 hexadecimal characters. The word \"hello\" hashes to 5d41402abc4b2a76b9719d911017c592, and a 10 gigabyte video file still produces a 32-character hash. That fixed size is why hashes are useful for fingerprinting data.",
+            },
+            {
+                heading: "How the algorithm works",
+                body:
+                    "MD5 processes data in 512-bit blocks. The input is padded so its length is a multiple of 512 bits, with the original length recorded at the end. Each block passes through four rounds of 16 operations that mix the data with bitwise operations, modular addition, and nonlinear functions, updating a running 128-bit state. The final state is the hash.",
+            },
+            {
+                heading: "Deterministic and one-way",
+                body:
+                    "Two properties define a hash like MD5. It is deterministic, so the same bytes always produce the same hash, and it is one-way, so you cannot work backward from the hash to the input. Because 128 bits cannot represent every possible input, different inputs can share a hash, which is a collision, and for MD5 those collisions became practical to find in 2004.",
+            },
+            {
+                heading: "What MD5 checksums and MD5 files are",
+                body:
+                    "A checksum is the hash of a file, used to confirm a download arrived intact. Publishers often release a hash next to a download, and some ship a .md5 file, which is a plain text file containing that hash. You compute the checksum of your file, compare it to the published value, and matching hashes mean the data is unchanged.",
+            },
+            {
+                heading: "The empty string hash",
+                body:
+                    "The value d41d8cd98f00b204e9800998ecf8427e is the MD5 hash of an empty string. It appears all over the web because it is the classic example of the algorithm and a quick way to confirm a tool is working. If you see it as a result, the input really was empty.",
+            },
+            {
+                heading: "Is MD5 secure?",
+                body:
+                    "For anything an attacker could exploit, no. Collision attacks have been practical since 2004, so MD5 must not be used for signatures, certificates, or password hashing. It survives in legacy systems and for non-security checks, where the only concern is accidental corruption.",
+            },
+        ],
+        faq: [
+            {
+                q: "How long is an MD5 hash?",
+                a: "An MD5 hash is always 128 bits, which is 32 hexadecimal characters, regardless of the input size.",
+            },
+            {
+                q: "Does the same input always give the same MD5?",
+                a: "Yes. MD5 is deterministic, so identical bytes always produce an identical 32-character hash.",
+            },
+            {
+                q: "Can an MD5 hash be reversed?",
+                a: "No. MD5 is one-way. Online lookup tools only match inputs that are already known, such as common passwords in rainbow tables.",
+            },
+            {
+                q: "What is an MD5 file?",
+                a: "A .md5 file is a plain text file that contains the MD5 checksum of a download, used to verify the file was not corrupted.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "is-md5-secure",
+        toolId: "md5",
+        relatedToolIds: ["sha-256", "sha-512", "hmac", "base64"],
+        comparisonSlugs: ["md5-vs-sha-256"],
+        eyebrow: "Security · Explainer",
+        title: "Is MD5 Secure?",
+        description:
+            "MD5 has been cryptographically broken for years. Learn exactly when it is unsafe, why the 2004 collision attack matters, and what to use instead.",
+        heroQuestion: "Is MD5 secure?",
+        shortAnswer:
+            "No, not for anything security related. MD5 has been vulnerable to collision attacks since 2004, and NIST no longer approves it for digital signatures or password hashing. It remains usable only for non-security tasks such as detecting accidental corruption or deduplicating data, where no attacker is involved.",
+        sections: [
+            {
+                heading: "The short answer",
+                body:
+                    "MD5 is not secure when a malicious party could matter. Its collision resistance, the property that makes it impossible to find two different inputs with the same hash, has been broken since 2004. For integrity checks where nobody is trying to deceive you, MD5 can still be fine.",
+            },
+            {
+                heading: "The 2004 collision attack",
+                body:
+                    "In 2004, Xiaoyun Wang and colleagues demonstrated that two distinct messages could be produced with the same MD5 hash in seconds on the hardware of the time. Later work made attacks faster, and by 2007 chosen-prefix collisions meant an attacker could craft two arbitrary documents with matching hashes. That turns a hash into a liability instead of a guarantee.",
+            },
+            {
+                heading: "Why collisions break signatures and passwords",
+                body:
+                    "Digital signatures rely on hashing the document first; if two documents share a hash, a signed one can be swapped for another with a valid signature. For passwords, MD5 is fast, so GPUs can try billions of guesses per second, and unsalted hashes can be looked up in precomputed rainbow tables. Both uses are unsafe.",
+            },
+            {
+                heading: "Where MD5 is still acceptable",
+                body:
+                    "MD5 remains reasonable for non-security work: confirming a download was not corrupted in transit, generating a stable key for deduplication, or reading checksums that older systems already publish. The deciding question is whether an attacker could benefit from finding a collision. If they could, MD5 is the wrong tool.",
+            },
+            {
+                heading: "What to use instead",
+                body:
+                    "For hashes and signatures, use SHA-256 or SHA-512, which have no practical collision attacks. For password storage, use a slow salted function such as bcrypt, never a fast hash. Where a keyed message authentication code is needed, use HMAC with a strong hash.",
+            },
+            {
+                heading: "A simple decision rule",
+                body:
+                    "Ask who controls the other input. If an attacker can craft a second file or string to match a hash you trust, use SHA-256 or better. If the hash only needs to catch a dropped byte during a download, MD5 is usually acceptable.",
+            },
+        ],
+        faq: [
+            {
+                q: "Has MD5 been cracked?",
+                a: "Yes. Collision resistance, the ability to find two inputs with the same hash, has been practically broken since 2004.",
+            },
+            {
+                q: "Can MD5 be used for passwords?",
+                a: "No. MD5 is fast and unsalted hashes are easily reversed with rainbow tables. Use a slow salted function such as bcrypt.",
+            },
+            {
+                q: "Is MD5 still fine for checksums?",
+                a: "For catching accidental corruption, yes. For resisting tampering by an attacker, no, because collisions are easy to produce.",
+            },
+            {
+                q: "What should I use instead of MD5?",
+                a: "SHA-256 or SHA-512 for hashes and signatures, and bcrypt for passwords. Both have no practical collision attacks.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "how-to-check-md5-checksum",
+        toolId: "md5",
+        relatedToolIds: ["sha-256", "sha-512", "base64"],
+        comparisonSlugs: ["md5-vs-sha-256"],
+        eyebrow: "How To · Guide",
+        title: "How to Check an MD5 Checksum",
+        description:
+            "Verify a download by comparing its MD5 checksum against the publisher's value. Step-by-step commands for Windows, macOS, and Linux, plus what a mismatch means.",
+        heroQuestion: "How do I check an MD5 checksum?",
+        shortAnswer:
+            "Generate the checksum of your file with a command such as certutil, md5, or md5sum, then compare it with the hash published by the download source. Matching hashes mean the file arrived intact, while a mismatch means it was corrupted or modified.",
+        sections: [
+            {
+                heading: "What you need",
+                body:
+                    "Two things: the file you downloaded, and the official hash published on the source site. The publisher usually lists a 32-character MD5 next to the download link, sometimes in a .md5 file. Keep that reference value handy before you compute.",
+            },
+            {
+                heading: "Windows: certutil",
+                body:
+                    "Open a Command Prompt and run certutil -hashfile followed by the file path and MD5. For example, certutil -hashfile \"C:\\Downloads\\setup.exe\" MD5 prints the checksum on its own line. This command ships with every version of Windows since 7.",
+            },
+            {
+                heading: "Windows: PowerShell",
+                body:
+                    "Get-FileHash does the same job in PowerShell. Run Get-FileHash \"C:\\Downloads\\setup.exe\" -Algorithm MD5 and read the Hash property in the output. It is case insensitive, so a lowercase a-f matches an uppercase A-F.",
+            },
+            {
+                heading: "macOS: md5",
+                body:
+                    "Terminal includes the md5 command. Run md5 /path/to/setup.zip and it prints MD5 (/path/to/setup.zip) = followed by the 32-character hash. The command reads the whole file, so it can take a few seconds for large downloads.",
+            },
+            {
+                heading: "Linux: md5sum",
+                body:
+                    "Run md5sum /path/to/setup.zip and the output is the hash, two spaces, then the file name. Most distributions include md5sum in coreutils, and it also accepts a checksum file: md5sum -c checksum.md5 verifies a download against a .md5 file automatically.",
+            },
+            {
+                heading: "Compare the hashes",
+                body:
+                    "The computed value must equal the published value character for character. Copy both into a plain text editor or a checksum compare box to avoid a typo, and ignore letter case. Some archives use the same command for SHA-256 checksums too, which the publisher will state explicitly.",
+            },
+            {
+                heading: "If the hashes do not match",
+                body:
+                    "A mismatch means the file changed after the reference hash was made. The download was probably corrupted, so delete it and fetch it again, ideally from a mirror or over a verified connection. If the same file keeps failing, treat the source or the channel with suspicion.",
+            },
+        ],
+        faq: [
+            {
+                q: "What command checks an MD5 on Windows?",
+                a: "certutil -hashfile \"path\\to\\file\" MD5 in Command Prompt, or Get-FileHash \"path\\to\\file\" -Algorithm MD5 in PowerShell.",
+            },
+            {
+                q: "Are MD5 checksums case sensitive?",
+                a: "No. Hexadecimal digits are compared case insensitively, so 5d41 and 5D41 are the same value.",
+            },
+            {
+                q: "Why do my two hashes not match?",
+                a: "The file changed since the reference hash was published, the download was corrupted, or you hashed the wrong file. Re-download and try again.",
+            },
+            {
+                q: "Is checking an MD5 still worthwhile?",
+                a: "For catching accidental corruption during a download, yes. For proving a file was not tampered with, use SHA-256 instead.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "can-md5-be-decrypted",
+        toolId: "md5",
+        relatedToolIds: ["sha-256", "bcrypt", "sha-512", "hmac"],
+        comparisonSlugs: ["md5-vs-sha-256"],
+        eyebrow: "Security · Mythbusting",
+        title: "Can MD5 Be Decrypted?",
+        description:
+            "MD5 hashes cannot be decrypted, because hashing is one-way. Here is what rainbow tables and brute force actually do, and why passwords should never use MD5.",
+        heroQuestion: "Can MD5 be decrypted?",
+        shortAnswer:
+            "No. MD5 is a hash, not encryption, so there is nothing to decrypt. Online decrypt tools work by looking up known inputs in precomputed rainbow tables or by guessing, which only succeeds for weak or already-known values, and a match never proves the original text.",
+        sections: [
+            {
+                heading: "Hash versus encryption",
+                body:
+                    "Encryption is reversible: a key converts ciphertext back to plaintext, so decrypting is expected. Hashing is a one-way fingerprint with no key. MD5 belongs to the second category, so the word decrypt does not apply to it at all.",
+            },
+            {
+                heading: "Why the math cannot be reversed",
+                body:
+                    "An MD5 output is 128 bits, while the inputs can be any length. Many inputs map to the same output, so the hash does not contain enough information to identify the original input. Reversing it is impossible by design.",
+            },
+            {
+                heading: "What rainbow tables do",
+                body:
+                    "A rainbow table stores hashes for a list of known inputs, such as common passwords and dictionary words. A lookup tool hashes nothing; it searches the table and shows the matching input when one exists. That only works for values that were precomputed, and it is a guess, not a decryption.",
+            },
+            {
+                heading: "What brute force does",
+                body:
+                    "Brute force guesses inputs, hashes each one, and compares. Because MD5 is extremely fast, modern GPUs try billions of guesses per second, so short or common passwords fall in minutes. Longer random passphrases are the only defense, and even then a fast hash is the wrong tool.",
+            },
+            {
+                heading: "Why MD5 passwords were cracked",
+                body:
+                    "Major breaches such as RockYou and LinkedIn leaked unsalted MD5 password hashes, and large fractions were reversed within days. Unsalting means identical passwords hash identically, so one lookup recovers every account that used the same password.",
+            },
+            {
+                heading: "Use bcrypt instead",
+                body:
+                    "Password hashing needs a slow, salted function such as bcrypt, which deliberately costs hundreds of milliseconds per guess instead of nanoseconds. MD5 is fine for checksums but must never store passwords. If you see a site storing MD5 password hashes, that alone is a warning sign.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is MD5 encryption?",
+                a: "No. MD5 is a hash function with no key and no way back to the input. Encryption, unlike hashing, is reversible with a key.",
+            },
+            {
+                q: "Why do MD5 decrypt sites sometimes return a value?",
+                a: "They look up the hash in precomputed rainbow tables and dictionary lists. A result is a known match, not a decryption, and it cannot be verified as the true input.",
+            },
+            {
+                q: "Can a collision prove the original text?",
+                a: "No. Two different inputs can share the same MD5 hash, so a match never proves which input produced it.",
+            },
+            {
+                q: "How should passwords be stored?",
+                a: "With a slow salted function such as bcrypt. MD5 and other fast hashes are trivially reversible in practice for common passwords.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────

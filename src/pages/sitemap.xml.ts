@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { tools } from "../lib/tools/registry";
+import { tools, familiesWithAvailableTools } from "../lib/tools/registry";
 import { COMPARISONS } from "../lib/tools/comparisons";
 import { ARTICLES } from "../lib/learn/articles";
 
@@ -11,18 +11,15 @@ interface SitemapEntry {
 
 // Priority tiers: homepage + catalog lead (they change as tools ship and are
 // the entry points), individual tools next, comparisons + the trust page
-// after, legal/contact pages last. changefreq/priority are crawler hints,
-// not commands — but they cost nothing and help smaller engines.
+// after, legal/contact pages last. Collection family pages derive from the
+// registry below — only families with at least one live tool get pushed, so
+// placeholder routes never waste crawl budget. changefreq/priority are
+// crawler hints, not commands — but they cost nothing and help smaller engines.
 const STATIC_ROUTES: SitemapEntry[] = [
   { loc: "", priority: "1.0", changefreq: "weekly" },
   { loc: "/tools", priority: "0.9", changefreq: "weekly" },
   { loc: "/large-files", priority: "0.7", changefreq: "weekly" },
   { loc: "/collections", priority: "0.7", changefreq: "weekly" },
-  { loc: "/collections/json", priority: "0.6", changefreq: "monthly" },
-  { loc: "/collections/encoding", priority: "0.6", changefreq: "monthly" },
-  { loc: "/collections/data-formats", priority: "0.6", changefreq: "monthly" },
-  { loc: "/collections/developer-utilities", priority: "0.6", changefreq: "monthly" },
-  { loc: "/collections/networking", priority: "0.6", changefreq: "monthly" },
   { loc: "/compare", priority: "0.7", changefreq: "monthly" },
   { loc: "/learn", priority: "0.7", changefreq: "weekly" },
   { loc: "/why-local", priority: "0.6", changefreq: "monthly" },
@@ -41,6 +38,11 @@ export const GET: APIRoute = async ({ site }) => {
   const toolEntries: SitemapEntry[] = tools
     .filter((t) => t.status === "available" && t.href)
     .map((t) => ({ loc: t.href as string, priority: "0.8", changefreq: "monthly" }));
+  const collectionEntries: SitemapEntry[] = familiesWithAvailableTools().map((g) => ({
+    loc: `/collections/${g.meta.id}`,
+    priority: "0.6",
+    changefreq: "monthly",
+  }));
   const compareEntries: SitemapEntry[] = Object.values(COMPARISONS).map((c) => ({
     loc: `/compare/${c.slug}`,
     priority: "0.6",
@@ -54,7 +56,7 @@ export const GET: APIRoute = async ({ site }) => {
 
   // Dedupe by loc (first wins) so the spines can never double-emit a route.
   const seen = new Set<string>();
-  const entries = [...STATIC_ROUTES, ...toolEntries, ...compareEntries, ...learnEntries].filter((e) => {
+  const entries = [...STATIC_ROUTES, ...toolEntries, ...collectionEntries, ...compareEntries, ...learnEntries].filter((e) => {
     if (seen.has(e.loc)) return false;
     seen.add(e.loc);
     return true;
