@@ -169,6 +169,80 @@ stored Blob reference.
   explicitly instructed. Do not remove the related rail, docs, compare links,
   nudge, or FAQ sections.
 
+## Hardcore e2e testing
+
+Every tool page is covered by Playwright end-to-end specs in `tests/`.
+This is a working contract, not a wishlist: it must be green before the
+corresponding work is done.
+
+### When it applies
+
+A per-tool spec is **required** whenever a tool page or its runtime
+behavior changes: new tool, new option, layout change, keyboard handler,
+large-file mode, or a fix to conversion logic. Pure content changes
+(learn articles, docs, copy) are covered by the smoke suite and do not
+require a new spec.
+
+### The mandate
+
+- One spec file per tool: `tests/<tool-id>.spec.ts`.
+- The spec is written in the same change as the tool work and is green
+  before the change is considered done.
+- Reuse helpers in `tests/helpers.ts`. If one does not exist yet, extract
+  the shared logic there when the first spec needs it.
+- The smoke suite in `tests/smoke.spec.ts` stays: every tool page loads
+  with breadcrumbs, title, subtitle, workspace, and the six required
+  sections.
+
+### The eight suites
+
+Cover each tool spec with these suites:
+
+1. **Load**: page renders, sections in order, no console errors.
+2. **Load Sample**: fills input, never auto-runs, primary verb shown.
+3. **Primary action**: real verb triggers, output status moves
+   `Empty → Ready`, busy state shows verb plus ellipsis.
+4. **Clear**: removes input, output, error, and large-file state;
+   preserves mode, units, and options.
+5. **Keyboard**: `Ctrl/Cmd + Enter` runs the primary action; skipped on
+   a focused `SELECT`.
+6. **Copy/Download**: copy writes the output to the clipboard; download
+   produces a file. Large-file preview mode warns that copy is preview-only.
+7. **Invalid input**: error banner shows `<id>-message`, status reads
+   `Invalid` or `Output: Error`, and no fake output is produced.
+8. **Large file** (where supported): drag-drop and file input both drive
+   preview + download, cancel aborts, and Blob URLs are revoked on Clear.
+
+### Selectors
+
+Specs use the stable DOM contract, never class names or snapshot
+positions: `<id>-textarea`, `<id>-gutter`, `<id>-dropzone`,
+`<id>-file-input`, `<id>-status`, `<id>-message`, `<id>-close`,
+`<x>-announce`, `[data-action="sample|clear|copy|download"]`, and the
+primary button `#<verb>-btn`.
+
+### Test hooks
+
+State stores may expose a dev-only hook (the `window.__jsonToCsvStore`
+pattern) so specs can await a known state instead of sleeping. The hook
+is gated behind an `import.meta.env.DEV` check and never ships in
+production builds.
+
+### The gate
+
+A tool change ships only when all of these pass locally:
+
+```
+npm run e2e
+npm test
+npx astro check
+npm run lint
+npm run build
+```
+
+CI (`.github/workflows/playwright.yml`) re-runs the same e2e suite on
+every push, so a green local run plus a push is the full proof.
+
 ## Documentation
 
 Full documentation: https://docs.astro.build

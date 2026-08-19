@@ -1638,6 +1638,1188 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.9",
     },
+
+    {
+        slug: "what-is-json-validation",
+        toolId: "json-validator",
+        relatedToolIds: ["json-schema-validator", "json-formatter", "json-minifier"],
+        comparisonSlugs: ["json-formatter-vs-json-validator"],
+        eyebrow: "Explainer · Guide",
+        title: "What Is JSON Validation?",
+        description:
+            "JSON validation checks that text is well-formed JSON and, with a schema, that it has the expected structure. Learn what validation catches and what it cannot catch.",
+        heroQuestion: "What is JSON validation?",
+        shortAnswer:
+            "JSON validation is the process of checking that text is syntactically well-formed JSON before a program uses it. Syntax validation catches missing quotes, commas, and brackets. Schema validation goes further and checks structure: required keys, types, and ranges. Validation cannot fix data, it only tells you whether the data is safe to parse.",
+        sections: [
+            {
+                heading: "Validation is a syntax check",
+                body:
+                    "A JSON parser such as JSON.parse or json.loads returns an error if the text is not well-formed JSON. A validator reports the exact line and position so you can fix it. A trailing comma or a missing closing brace is the kind of thing validation catches.",
+            },
+            {
+                heading: "Syntax versus schema",
+                body:
+                    "Syntax validation confirms the text is parseable JSON. Schema validation, using JSON Schema, checks meaning: a field named age must be a number, an email field must match a pattern, and required fields must be present. Most tools do one or the other, and doing both is the strongest guarantee.",
+            },
+            {
+                heading: "What validation cannot do",
+                body:
+                    "Validation never fixes your data, and it cannot verify semantics such as whether an ID exists in the database or whether a number is the correct price. It only guarantees that a program can read the text without crashing.",
+            },
+            {
+                heading: "Where validation fits",
+                body:
+                    "A solid pipeline formats JSON for readability, validates it for correctness, then transforms it. Validating right after an API response, a file import, or a config edit catches errors while they are still easy to locate.",
+                list: [
+                    "Syntax: is it well-formed JSON?",
+                    "Schema: does it have the right shape?",
+                    "Semantics: only your application can answer this",
+                ],
+            },
+        ],
+        faq: [
+            {
+                q: "Does validation fix my JSON?",
+                a: "No. Validation reports problems and pinpoints the error. You fix the input and validate again.",
+            },
+            {
+                q: "Is validation the same as formatting?",
+                a: "No. Formatting adds indentation for readability. Validation checks that the JSON is correct. A formatter usually validates as a side effect.",
+            },
+            {
+                q: "What is JSON Schema?",
+                a: "A declarative format that describes the expected structure of a document: types, required fields, and value constraints. Validators can check a document against it.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "how-to-validate-json",
+        toolId: "json-validator",
+        relatedToolIds: ["json-schema-validator", "json-formatter"],
+        comparisonSlugs: ["json-formatter-vs-json-validator"],
+        eyebrow: "How To · Guide",
+        title: "How to Validate JSON",
+        description:
+            "Validate JSON in the browser, in JavaScript, in Python, and on the command line. Step-by-step commands that report the exact error when JSON is invalid.",
+        heroQuestion: "How do I validate JSON?",
+        shortAnswer:
+            "The fastest path is to paste the text into an online JSON validator, which parses it and points to the exact error. In code, JavaScript can run JSON.parse(text) inside a try/catch, and Python can call json.loads(text). On the command line, jq and python3 -m json.tool exit with a nonzero status when the input is invalid.",
+        sections: [
+            {
+                heading: "Validate in the browser",
+                body:
+                    "Paste your JSON into the JSON Validator and it reports a valid status or an error with the line and character. This is ideal for quick sanity checks of API responses and config snippets.",
+            },
+            {
+                heading: "Validate in JavaScript",
+                body:
+                    "Run JSON.parse(text) inside a try/catch. JSON.parse throws a SyntaxError whose message includes the character position when the text is not well-formed. In Node.js you can validate a file directly: node -e \"JSON.parse(require('fs').readFileSync('data.json','utf8')); console.log('valid')\".",
+            },
+            {
+                heading: "Validate in Python",
+                body:
+                    "json.loads(text) raises a JSONDecodeError with line and column numbers on invalid input. On the command line, python3 -m json.tool data.json prints formatted output and exits with a nonzero status for invalid JSON. Add --compact for minified output.",
+            },
+            {
+                heading: "Validate on the command line",
+                body:
+                    "jq -c . data.json > /dev/null && echo valid || echo invalid prints a parse error with line and column for malformed input. The same trick validates responses piped straight from curl.",
+            },
+            {
+                heading: "Validate before you transform",
+                body:
+                    "Format the JSON first to make errors visible, validate to catch problems, then convert. A missing comma is far easier to spot in pretty-printed text than in a single dense line.",
+            },
+        ],
+        faq: [
+            {
+                q: "What is the quickest way to check JSON?",
+                a: "Paste it into an online validator. It parses the text and reports the exact line and column of the first error.",
+            },
+            {
+                q: "Does JSON.parse tell me where the error is?",
+                a: "Yes. It throws a SyntaxError whose message includes the character position. Format the text first to map that position back to a line.",
+            },
+            {
+                q: "Is a tool that exits nonzero on invalid JSON useful?",
+                a: "Yes. It makes validation scriptable, so a CI step can fail on malformed config or test fixtures.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "common-json-validation-errors",
+        toolId: "json-validator",
+        relatedToolIds: ["json-formatter", "json-schema-validator"],
+        comparisonSlugs: ["json-formatter-vs-json-validator"],
+        eyebrow: "Troubleshooting · Guide",
+        title: "Common JSON Validation Errors and How to Fix Them",
+        description:
+            "Trailing commas, missing quotes, mismatched brackets, and duplicate keys. The JSON errors people hit most, with quick fixes for each one.",
+        heroQuestion: "Why is my JSON invalid?",
+        shortAnswer:
+            "Almost all invalid JSON comes from a small set of mistakes: trailing commas, unquoted or single-quoted keys, missing commas, mismatched or missing brackets, and stray control characters. JSON is strict by design, so one misplaced character anywhere makes the whole document invalid. A validator that reports the line and column turns each case into a quick fix.",
+        sections: [
+            {
+                heading: "Trailing commas",
+                body:
+                    "{\"a\":1,\"b\":2,} is invalid. JSON does not allow a comma after the last item, so remove the final comma. This is the most common mistake because many languages permit it.",
+            },
+            {
+                heading: "Unquoted or single-quoted keys",
+                body:
+                    "Both {name:\"Alice\"} and {'name':'Alice'} are invalid. JSON requires double-quoted keys and double-quoted string values.",
+            },
+            {
+                heading: "Missing commas",
+                body:
+                    "An object where values are separated by whitespace or a newline instead of a comma fails validation. Every key-value pair must be followed by a comma except the last one.",
+            },
+            {
+                heading: "Mismatched brackets",
+                body:
+                    "An opening brace or bracket closed with the wrong character fails at parse time. Count the nesting; a validator points at the offending character so you can find the imbalance.",
+            },
+            {
+                heading: "Comments are not allowed",
+                body:
+                    "// and /* */ are invalid in strict JSON. Use a JSONC-capable parser or strip comments before validation. JSON5 and YAML allow comments, but the JSON standard does not.",
+            },
+            {
+                heading: "Duplicate keys and number formats",
+                body:
+                    "Duplicate keys such as {\"a\":1,\"a\":2} are technically valid, but most parsers keep the last value, which hides bugs. Watch for leading zeros, because 01 is invalid while 1 is fine, and for bare values such as undefined, which are not JSON at all.",
+            },
+        ],
+        faq: [
+            {
+                q: "Why does one tiny comma break all my JSON?",
+                a: "JSON parsers require exact syntax. There is no lenient mode in the standard, so a single stray character anywhere invalidates the whole document.",
+            },
+            {
+                q: "Can I have comments in JSON?",
+                a: "Not in strict JSON. Some tools and languages support JSONC with comments or JSON5, but standard parsers reject comments.",
+            },
+            {
+                q: "Are duplicate keys allowed?",
+                a: "The spec allows them, but most parsers silently keep the last value, which can hide bugs. Avoid them.",
+            },
+            {
+                q: "Why do leading zeros break JSON?",
+                a: "JSON numbers cannot have leading zeros. 01 is invalid, so write 1.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "json-schema-vs-json-validator",
+        toolId: "json-validator",
+        relatedToolIds: ["json-schema-validator", "json-formatter"],
+        comparisonSlugs: ["json-formatter-vs-json-validator", "json-validator-vs-json-schema-lite"],
+        eyebrow: "Explainer · Guide",
+        title: "JSON Schema vs JSON Validator",
+        description:
+            "A JSON validator checks syntax. JSON Schema checks structure and types. Both are needed in production. See how they differ and when each one matters.",
+        heroQuestion: "What is the difference between JSON Schema and a JSON validator?",
+        shortAnswer:
+            "A JSON validator answers one question: is this text well-formed JSON? JSON Schema answers a second question: does this document match the shape a program expects, with the right required fields, types, and ranges? Syntax validation is a prerequisite, and schema validation adds guarantees about structure. Production APIs usually do both.",
+        sections: [
+            {
+                heading: "What a validator checks",
+                body:
+                    "A syntax validator checks whether the text parses. It never judges whether the fields make sense for your application, so deeply wrong data can still be perfectly valid JSON.",
+            },
+            {
+                heading: "What JSON Schema checks",
+                body:
+                    "A schema describes expectations declaratively: required fields, value types, string patterns, numeric ranges, array lengths, and nesting. A schema-aware validator checks a document against it and reports which fields violate which rule.",
+            },
+            {
+                heading: "A concrete difference",
+                body:
+                    "{\"name\":42} is perfectly valid JSON, and a syntax validator passes it. A schema that declares name must be a string fails it. The value is parseable but wrong for the contract.",
+            },
+            {
+                heading: "When you need each one",
+                body:
+                    "Validate syntax for anything a human might have edited by hand: configs, payloads, and fixtures. Add schema validation for API boundaries, webhook payloads, and any data a program depends on.",
+            },
+            {
+                heading: "How they work together",
+                body:
+                    "Check syntax first so the parser does not crash, then validate the schema so the shape is correct, then process. A tool such as JSON Schema Lite combines a syntax check with schema rules in a single pass.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is JSON Schema required for JSON?",
+                a: "No. JSON works without it. Schema is an optional standard that adds structural guarantees for contracts and validation.",
+            },
+            {
+                q: "Does validating syntax validate a schema?",
+                a: "No. Syntax validation only confirms the document is parseable JSON. Schema validation checks the document against a set of rules.",
+            },
+            {
+                q: "Can a schema replace tests?",
+                a: "No, but it covers a large class of contract bugs at the boundary, which lets your tests focus on behavior.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "what-is-hmac",
+        toolId: "hmac",
+        relatedToolIds: ["sha-256", "md5", "bcrypt"],
+        comparisonSlugs: ["sha-256-vs-hmac"],
+        eyebrow: "Explainer · Guide",
+        title: "What Is HMAC?",
+        description:
+            "HMAC is a keyed hash that proves a message is authentic and unmodified. How it works under the hood, what the acronym means, and where it is used.",
+        heroQuestion: "What is HMAC?",
+        shortAnswer:
+            "HMAC, Hash-based Message Authentication Code, is a construction that combines a cryptographic hash function with a secret key. It produces a fixed-size code that proves the message came from someone who knows the key and that the message was not altered in transit. Webhook signatures, API request signing, and JWT with HS256 all rely on it.",
+        sections: [
+            {
+                heading: "What HMAC stands for",
+                body:
+                    "HMAC means Hash-based Message Authentication Code. It is not a hash function or an encryption algorithm. It is a recipe, defined in RFC 2104 in 1997, that turns any hash function such as SHA-256 into a keyed authenticator.",
+            },
+            {
+                heading: "The two inputs",
+                body:
+                    "HMAC takes a message and a secret key, and both sender and receiver share the key. Because the key is mixed into the computation, a valid code can only be produced by someone holding the key.",
+            },
+            {
+                heading: "What a valid code proves",
+                body:
+                    "Integrity and authenticity. Integrity means the message has not been changed, because any change alters the code. Authenticity means whoever computed the code knows the key, so the message did not come from a random third party.",
+            },
+            {
+                heading: "How it is computed",
+                body:
+                    "The message is combined with the key using two passes of the hash, with an inner and an outer padding known as ipad and opad. That double hashing prevents the length-extension tricks that can break a naive keyed hash.",
+            },
+            {
+                heading: "Where HMAC is used",
+                body:
+                    "Webhook payload signatures, API request signing, and cookie and token integrity. If a system signs messages to prove they came from it, it almost always uses HMAC or an asymmetric signature.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is HMAC encryption?",
+                a: "No. HMAC is authentication, not encryption. It proves who signed a message and that it was not changed, but it does not hide the content.",
+            },
+            {
+                q: "Can HMAC be reversed?",
+                a: "No. The code is a hash-based value, so you cannot recover the message or the key from it. Verification recomputes the code and compares it.",
+            },
+            {
+                q: "What hash does HMAC use?",
+                a: "Any hash you choose. HMAC-SHA-256 is the most common. The strength depends on the underlying hash and on keeping the key secret.",
+            },
+            {
+                q: "Why not just hash the key and message together?",
+                a: "A naive concatenation such as hash(key + message) is vulnerable to length-extension attacks for some hashes. HMAC's two-pass structure closes that hole.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "hmac-vs-sha-256",
+        toolId: "hmac",
+        relatedToolIds: ["sha-256", "sha-512", "md5"],
+        comparisonSlugs: ["sha-256-vs-hmac", "md5-vs-sha-256"],
+        eyebrow: "Explainer · Guide",
+        title: "HMAC vs SHA-256",
+        description:
+            "SHA-256 hashes a message with no key. HMAC-SHA-256 hashes it with a secret key and proves authenticity. Understand the difference and when to use which.",
+        heroQuestion: "What is the difference between HMAC and SHA-256?",
+        shortAnswer:
+            "SHA-256 is a plain hash: anyone can compute it, so it proves the message is unchanged but not who created the hash. HMAC-SHA-256 is SHA-256 wrapped with a secret key, so a valid code proves both integrity and that the signer holds the key. For integrity without secrecy use SHA-256, and for authenticating messages use HMAC-SHA-256.",
+        sections: [
+            {
+                heading: "A plain hash has no key",
+                body:
+                    "SHA-256 turns any message into a fixed 256-bit digest, and anyone can compute it. A digest alone proves nothing about the author. It only catches accidental changes.",
+            },
+            {
+                heading: "HMAC adds a shared secret",
+                body:
+                    "HMAC-SHA-256 runs SHA-256 twice with the key folded into both passes. Without the key you cannot produce a valid code, so the code acts as proof that the signer possesses the key.",
+            },
+            {
+                heading: "The attacker story",
+                body:
+                    "With a plain SHA-256, an attacker who changes the message can simply recompute the hash and nobody notices. With HMAC, an attacker without the key cannot compute a valid code for a modified message, so the change is detected.",
+            },
+            {
+                heading: "Common confusions",
+                body:
+                    "People often say SHA-256 when they mean HMAC-SHA-256. API documentation that says SHA-256 signature almost always means HMAC-SHA-256 with a shared secret, not a bare digest.",
+            },
+            {
+                heading: "When to use which",
+                body:
+                    "Use plain SHA-256 for checksums, deduplication, and download verification. Use HMAC-SHA-256 for webhook verification, API signing, and any message that needs to prove who signed it.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is HMAC stronger than SHA-256?",
+                a: "They answer different questions. SHA-256 provides integrity, while HMAC provides integrity plus authenticity. For verifying a signer, HMAC is the right tool.",
+            },
+            {
+                q: "Can an attacker fake an HMAC?",
+                a: "Only if they know the secret key. With a strong key and HMAC-SHA-256, forgery is considered infeasible.",
+            },
+            {
+                q: "Why does my API use SHA-256 for signing?",
+                a: "It almost certainly uses HMAC-SHA-256. Many providers shorten the name to SHA-256 in their docs, but the signing scheme is a keyed MAC.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "how-to-generate-hmac-sha256",
+        toolId: "hmac",
+        relatedToolIds: ["sha-256", "sha-512"],
+        comparisonSlugs: ["sha-256-vs-hmac"],
+        eyebrow: "How To · Guide",
+        title: "How to Generate an HMAC-SHA-256 Signature",
+        description:
+            "Compute HMAC-SHA-256 in JavaScript, in Python, and with OpenSSL on the command line. Copy the exact code, in hex or base64, and see a worked example.",
+        heroQuestion: "How do I generate an HMAC-SHA-256 signature?",
+        shortAnswer:
+            "Pick the tool for your stack. In Node.js use crypto.createHmac(\"sha256\", secret).update(message).digest(\"hex\"). In Python use hmac.new(key, msg, hashlib.sha256).hexdigest(). On the command line use openssl dgst -sha256 -hmac <secret>. All three produce the same value for the same message and key.",
+        sections: [
+            {
+                heading: "The inputs",
+                body:
+                    "An HMAC signature needs exactly three things: the message, the shared secret key, and the hash algorithm, SHA-256 here. The output format matters too: hex is 64 characters and base64 is shorter. The receiver must use the same format you do.",
+            },
+            {
+                heading: "Node.js",
+                body:
+                    "const crypto = require(\"crypto\"); const sig = crypto.createHmac(\"sha256\", secret).update(message).digest(\"hex\");. Swap \"hex\" for \"base64\" when the receiver expects base64.",
+            },
+            {
+                heading: "Python",
+                body:
+                    "import hashlib, hmac; sig = hmac.new(key.encode(), msg.encode(), hashlib.sha256).hexdigest(). The hmac module ships with Python, so there is nothing to install.",
+            },
+            {
+                heading: "OpenSSL on the command line",
+                body:
+                    "printf '%s' \"$message\" | openssl dgst -sha256 -hmac \"$secret\" -hex prints the hex signature. Append -binary | base64 for base64 output. This is convenient in shell scripts and CI pipelines.",
+            },
+            {
+                heading: "A worked example",
+                body:
+                    "With the message The quick brown fox jumps over the lazy dog and the key key, HMAC-SHA-256 in hex is f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8. Use a known vector like this to confirm a library is producing correct output.",
+            },
+            {
+                heading: "Verify with constant time",
+                body:
+                    "Never compare signatures with a plain equality check. Use timingSafeEqual in Node or hmac.compare_digest in Python so the comparison time does not leak information about the key.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is hex or base64 better?",
+                a: "Both are fine as long as sender and receiver agree. Hex is longer and convenient for logs, while base64 is more compact for headers.",
+            },
+            {
+                q: "Can I generate HMAC without a library?",
+                a: "Yes, but do not. OpenSSL covers it from the command line, and Node.js and Python have it built in. Hand-rolled HMAC is a common source of subtle bugs.",
+            },
+            {
+                q: "How do I verify an incoming signature?",
+                a: "Recompute HMAC with your secret key and the exact received message, then compare in constant time with timingSafeEqual or compare_digest.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "is-hmac-secure",
+        toolId: "hmac",
+        relatedToolIds: ["sha-256", "sha-512", "bcrypt"],
+        comparisonSlugs: ["sha-256-vs-hmac"],
+        eyebrow: "Security · Explainer",
+        title: "Is HMAC Secure?",
+        description:
+            "HMAC is secure when the key is strong and the comparison is constant time. See what actually breaks HMAC implementations, from weak keys to timing leaks.",
+        heroQuestion: "Is HMAC secure?",
+        shortAnswer:
+            "Yes, when used correctly. HMAC-SHA-256 has no known practical forgery attack. The failures you read about come from the surroundings: weak or reused secret keys, comparing signatures with a non-constant-time check, or building the signature over the wrong bytes. The algorithm is the least likely part to break.",
+        sections: [
+            {
+                heading: "The algorithm is sound",
+                body:
+                    "HMAC-SHA-256 remains a NIST-approved construction with no practical forgery attack. The two-pass keyed structure has held up against decades of analysis, so the math is not where implementations fail.",
+            },
+            {
+                heading: "The secret key decides everything",
+                body:
+                    "A short, guessable, or leaked key makes any signature forgeable. Generate keys with a cryptographically secure random source and keep them out of client-side code entirely.",
+            },
+            {
+                heading: "Constant-time comparison",
+                body:
+                    "If you compare signatures with an equality check that returns at the first mismatch, timing reveals how many prefix bytes matched, which over many requests can leak the key. Use timingSafeEqual in Node or hmac.compare_digest in Python.",
+            },
+            {
+                heading: "Sign the right bytes",
+                body:
+                    "Canonicalization mistakes are the classic bug. The sender and receiver must sign the identical byte sequence: same field order, same encoding, same key format. Include a timestamp so a captured signature expires.",
+            },
+            {
+                heading: "HMAC is not encryption",
+                body:
+                    "The message travels in plaintext, so HMAC proves authenticity but does not hide content. Combine HMAC with TLS for confidentiality, and remember that HMAC never replaces password hashing.",
+            },
+        ],
+        faq: [
+            {
+                q: "Can HMAC be hacked?",
+                a: "Not the construction itself. Practical breaks come from weak keys, timing-leaking comparisons, or signing mismatched byte sequences.",
+            },
+            {
+                q: "Is HMAC-MD5 ever acceptable?",
+                a: "Only in legacy systems with a strict compatibility need. Prefer HMAC-SHA-256 everywhere you control the protocol.",
+            },
+            {
+                q: "Does HMAC encrypt the message?",
+                a: "No. The message stays readable. HMAC only proves integrity and authenticity, and transport security such as TLS provides confidentiality.",
+            },
+            {
+                q: "How long should the HMAC key be?",
+                a: "At least as long as the hash output, 32 bytes for SHA-256, and generated randomly. Longer keys add no security beyond that.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "what-is-a-uuid",
+        toolId: "uuid-generator",
+        relatedToolIds: ["timestamp-converter", "base64"],
+        comparisonSlugs: [],
+        eyebrow: "Explainer · Guide",
+        title: "What Is a UUID?",
+        description:
+            "A UUID is a 128-bit identifier that can be generated anywhere without coordination. How the format works, what the version digit means, and where UUIDs are used.",
+        heroQuestion: "What is a UUID?",
+        shortAnswer:
+            "A UUID, Universally Unique Identifier, is a 128-bit value shown as 36 characters in the form 8-4-4-12, for example 550e8400-e29b-41d4-a716-446655440000. It is designed so any machine can generate identifiers that will not collide with identifiers from other machines, with no central registry, as defined by RFC 9562.",
+        sections: [
+            {
+                heading: "The format",
+                body:
+                    "A UUID is 32 hexadecimal digits grouped 8-4-4-12 and separated by hyphens, for a total of 36 characters. The 13th hex digit encodes the version, so in 550e8400-e29b-41d4-a716-446655440000 the 4 marks a version 4 UUID.",
+            },
+            {
+                heading: "What 128 bits give you",
+                body:
+                    "There are 2 to the power of 128 possible values, which is more than enough that generating a UUID needs no server, no counter, and no coordination. That property is why distributed systems use them.",
+            },
+            {
+                heading: "Versions 1 to 8",
+                body:
+                    "v1 uses a timestamp and MAC address, which leaks hardware information. v4 is pure random and is the default for most work. v5 hashes a namespace and a name into a deterministic value. v7, new in RFC 9562 in 2024, embeds a millisecond timestamp so IDs sort by creation time. The version digit tells you the strategy.",
+            },
+            {
+                heading: "UUID vs GUID",
+                body:
+                    "They are the same thing. GUID is Microsoft's term for the same 128-bit format, used interchangeably across platforms.",
+            },
+            {
+                heading: "Where UUIDs are used",
+                body:
+                    "Database primary keys, API resource IDs, session and token identifiers, and any record that must be unique across multiple systems without asking a central server for a number.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is a UUID unique forever?",
+                a: "In practical terms yes. The probability of a random v4 collision is negligible, and deterministic versions avoid chance entirely by design.",
+            },
+            {
+                q: "Are UUIDs the same as GUIDs?",
+                a: "Yes. GUID is just Microsoft's name for a UUID.",
+            },
+            {
+                q: "Can a UUID be read back to find its creation time?",
+                a: "For v1 and v7 yes, because they embed a timestamp. For v4 no, the bits are random by design.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "uuid-v4-vs-v5",
+        toolId: "uuid-generator",
+        relatedToolIds: ["timestamp-converter", "base64"],
+        comparisonSlugs: [],
+        eyebrow: "Explainer · Guide",
+        title: "UUID v4 vs v5",
+        description:
+            "v4 is random, v5 is deterministic. Same input always yields the same v5 UUID, which makes v5 right for deduplication and v4 right for everyday IDs.",
+        heroQuestion: "What is the difference between UUID v4 and v5?",
+        shortAnswer:
+            "UUID v4 is generated from 122 random bits, so every call produces a new unpredictable value. UUID v5 hashes a namespace plus a name with SHA-1, so the same namespace and name always produce the same UUID. Use v4 for IDs that must look random and unique, and v5 when you need a stable identifier derived from a known input such as a URL or email.",
+        sections: [
+            {
+                heading: "v4 is random",
+                body:
+                    "In a v4 UUID, 122 of the 128 bits come from a random source. Nothing about the input is recoverable, and each generation is independent. It is the default choice for most identifiers.",
+            },
+            {
+                heading: "v5 is deterministic",
+                body:
+                    "You feed a namespace UUID and a name string, and the generator hashes them with SHA-1 and shapes the result into a UUID. The same pair always yields the same UUID, on any machine, forever.",
+            },
+            {
+                heading: "Why determinism matters",
+                body:
+                    "v5 lets you derive an ID from data you already have: a URL, an email, or a product code, without storing a mapping. That property is the basis for deduplication and idempotent operations.",
+            },
+            {
+                heading: "The collision story",
+                body:
+                    "v4 collisions are astronomically unlikely, while v5 collisions are intentional: identical inputs map to the same value by design, and the namespace prevents different applications from interfering with each other.",
+            },
+            {
+                heading: "Which to use",
+                body:
+                    "When in doubt, use v4. Choose v5 when the same entity must resolve to the same ID across systems, such as content-addressable storage or migrating keys. v3 is the older MD5-based twin of v5 and is best avoided in new work.",
+            },
+        ],
+        faq: [
+            {
+                q: "Does v5 produce the same UUID every time?",
+                a: "Yes. The same namespace and name always produce the same v5 UUID, which is exactly why it is used for stable identifiers.",
+            },
+            {
+                q: "Can two different names give the same v5 UUID?",
+                a: "With overwhelming probability no, within a namespace. The SHA-1 hash maps distinct names to distinct values in practice.",
+            },
+            {
+                q: "Is v4 better than v5?",
+                a: "For random, opaque, per-use IDs yes. For reproducible IDs from known inputs, v5 is the correct choice. They solve different problems.",
+            },
+            {
+                q: "What is a namespace in v5?",
+                a: "A fixed UUID that scopes the hash. RFC 9562 defines standard namespaces for DNS names and URLs, and using one prevents your v5 IDs from colliding with another application's.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "can-uuids-collide",
+        toolId: "uuid-generator",
+        relatedToolIds: ["base64", "timestamp-converter"],
+        comparisonSlugs: [],
+        eyebrow: "Security · Mythbusting",
+        title: "Can Two UUIDs Ever Be the Same?",
+        description:
+            "Yes, technically, but the odds are so small they are negligible. Here is the actual collision math, the birthday paradox, and the one real risk: a weak random source.",
+        heroQuestion: "Can UUIDs collide?",
+        shortAnswer:
+            "Yes, but only with a probability so small it is irrelevant for real applications. For random v4 UUIDs you would need to generate roughly 2.71 quintillion values, 2.71 x 10^18, before a 50 percent chance of a single collision, per the birthday paradox. The practical risk is not the math but a weak random source generating predictable IDs.",
+        sections: [
+            {
+                heading: "The birthday paradox",
+                body:
+                    "Collisions among random IDs grow faster than intuition suggests. With 2 to the power of 122 random values available, a 50 percent collision chance needs about 2.71 x 10^18 UUIDs, not the full 2^122.",
+            },
+            {
+                heading: "Putting the number in perspective",
+                body:
+                    "Generating 1 billion UUIDs per second for every second of a year, about 3.15 x 10^16 values, still leaves you far below the collision threshold. A duplicate is more likely to be a bug than luck.",
+            },
+            {
+                heading: "Deterministic versions never collide by design",
+                body:
+                    "v1 uses time, clock sequence, and MAC address, so collisions require a clock reset or identical node state. v3 and v5 are deterministic, so identical inputs intentionally share a UUID.",
+            },
+            {
+                heading: "The real risk is a weak random source",
+                body:
+                    "v4 is only as strong as the random source that feeds it. A predictable or badly seeded generator can produce repeats, and browser randomness bugs have caused real collisions. Use crypto.randomUUID or another cryptographically secure generator.",
+            },
+            {
+                heading: "Defensive database practice",
+                body:
+                    "Because collisions are theoretically possible, mission-critical tables often add a uniqueness constraint or primary key, so a collision would error loudly instead of silently merging rows.",
+            },
+        ],
+        faq: [
+            {
+                q: "What are the actual odds of a v4 collision?",
+                a: "The birthday bound puts a 50 percent collision chance at about 2.71 x 10^18 UUIDs, and a 1 percent chance at roughly 2.6 x 10^18.",
+            },
+            {
+                q: "Has a UUID collision ever happened?",
+                a: "There are no confirmed cases from proper random generation. Recorded duplicates trace to bugs, weak random sources, or copied IDs.",
+            },
+            {
+                q: "Do UUIDs guarantee uniqueness?",
+                a: "No absolute guarantee. They provide statistical uniqueness that is effectively absolute, and deterministic versions avoid chance entirely by construction.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "how-to-generate-a-uuid",
+        toolId: "uuid-generator",
+        relatedToolIds: ["base64", "timestamp-converter"],
+        comparisonSlugs: [],
+        eyebrow: "How To · Guide",
+        title: "How to Generate a UUID",
+        description:
+            "Generate v4 UUIDs in the browser, in JavaScript, Python, and Java, and in databases. Copy the exact code and know which versions to use.",
+        heroQuestion: "How do I generate a UUID?",
+        shortAnswer:
+            "In the browser or Node.js, crypto.randomUUID() returns a v4 UUID with no dependencies. Python has uuid.uuid4(), Java has UUID.randomUUID(), and PostgreSQL has gen_random_uuid(). For bulk or zero-code generation, an online UUID generator produces as many as you need in one click.",
+        sections: [
+            {
+                heading: "Browser and Node.js",
+                body:
+                    "crypto.randomUUID() is built in and uses a cryptographically secure source, so there is nothing to install. For bulk generation, loop over it. The uuid npm package adds v1, v3, v5, and v7 support when you need other versions.",
+            },
+            {
+                heading: "Python",
+                body:
+                    "import uuid; uuid.uuid4() produces a random v4 value. uuid.uuid5(uuid.NAMESPACE_URL, \"https://example.com\") produces a deterministic name-based ID. Avoid uuid.uuid1() in new code because it embeds the MAC address.",
+            },
+            {
+                heading: "Java",
+                body:
+                    "UUID.randomUUID() from java.util gives a v4 value. For name-based UUIDs, hash a namespace and name with SHA-1 and set the version bits yourself, which is a small, well-documented routine.",
+            },
+            {
+                heading: "Databases",
+                body:
+                    "PostgreSQL has gen_random_uuid() for v4 values. MySQL and MariaDB support UUID() with a generated counter. Most ORMs expose these as column defaults so you never manage IDs in application code.",
+            },
+            {
+                heading: "Which version",
+                body:
+                    "Use v4 for almost everything. Use v7 for database primary keys that should sort by creation time. Use v5 for deterministic IDs from known names. Avoid v1 in new code because it leaks hardware information.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is crypto.randomUUID available everywhere?",
+                a: "It is in all modern browsers over secure contexts and in Node.js 14.17 and later. For older environments, the uuid npm package or a polyfill works.",
+            },
+            {
+                q: "Can I generate UUIDs without internet?",
+                a: "Yes. UUID generation is local by design, so an offline or in-browser generator works fine.",
+            },
+            {
+                q: "How many UUIDs can I generate?",
+                a: "As many as you need. Because generation requires no coordination, you can create millions without any risk of running out.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "what-is-json-minification",
+        toolId: "json-minifier",
+        relatedToolIds: ["json-formatter", "json-validator"],
+        comparisonSlugs: ["json-minifier-vs-json-formatter"],
+        eyebrow: "Explainer · Guide",
+        title: "What Is JSON Minification?",
+        description:
+            "JSON minification removes all optional whitespace without changing the data. What gets stripped, what stays, and why the result is still 100 percent valid JSON.",
+        heroQuestion: "What is JSON minification?",
+        shortAnswer:
+            "Minification removes every whitespace character outside of string values: spaces, tabs, and newlines, leaving the smallest valid JSON representation. The data is identical, so any parser reads minified and formatted JSON the same way. The only difference is size and readability.",
+        sections: [
+            {
+                heading: "What gets removed",
+                body:
+                    "Indentation, line breaks, and spaces after colons and commas are all removed. These characters are optional in JSON syntax per RFC 8259, so deleting them changes nothing about the meaning.",
+            },
+            {
+                heading: "What stays",
+                body:
+                    "Every key, value, and structural character stays, plus all whitespace inside strings. The space in \"hello world\" is part of the value, not formatting, so it is preserved exactly.",
+            },
+            {
+                heading: "Lossless by design",
+                body:
+                    "Minified and pretty-printed versions parse to the exact same structure. No information is lost, so you can format, minify, and format again without changing the data.",
+            },
+            {
+                heading: "How much smaller",
+                body:
+                    "Typical savings are 20 to 40 percent for two-space indented JSON, rising to 40 to 60 percent for deeply nested documents. Whitespace is a large share of a formatted file.",
+            },
+            {
+                heading: "Minify vs compress",
+                body:
+                    "Minification removes characters from the text, while compression such as gzip re-encodes the byte stream. They are separate operations and they stack: minify first, then gzip.",
+            },
+        ],
+        faq: [
+            {
+                q: "Does minifying JSON change the data?",
+                a: "No. Only optional whitespace is removed. The parsed structure is byte-for-byte equivalent.",
+            },
+            {
+                q: "Are spaces inside strings removed?",
+                a: "No. Whitespace inside a quoted string is part of the value and is preserved exactly.",
+            },
+            {
+                q: "Is minified JSON still valid?",
+                a: "Yes. Whitespace between tokens is insignificant in the spec, so minified JSON parses identically to formatted JSON.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "why-minify-json",
+        toolId: "json-minifier",
+        relatedToolIds: ["json-formatter", "json-to-csv"],
+        comparisonSlugs: ["json-minifier-vs-json-formatter"],
+        eyebrow: "Explainer · Guide",
+        title: "Why Minify JSON (and When Not To)",
+        description:
+            "Minified JSON ships faster over the network and uses less storage, but readability has value. Learn the decision rule for when minification actually helps.",
+        heroQuestion: "Why should I minify JSON?",
+        shortAnswer:
+            "Minify JSON when it will be parsed by a machine and never read by a human: API responses, storage, localStorage, and inline script data. Skip it when humans read or edit the file, such as package.json, configs, and anything in version control. With gzip already enabled, minification adds only a few percent of extra savings.",
+        sections: [
+            {
+                heading: "The network case",
+                body:
+                    "Smaller payloads mean faster loads and lower bandwidth costs, especially for mobile clients and high-traffic APIs. A 40 percent smaller response is real money at scale.",
+            },
+            {
+                heading: "The storage case",
+                body:
+                    "Databases, caches, and message queues charge per byte. Minified JSON in a text column, in Redis, or in a queue message uses less space and fits more data per message.",
+            },
+            {
+                heading: "Embedded JSON",
+                body:
+                    "JSON inlined into HTML script tags, localStorage, cookies, or URLs has strict size limits. Minifying keeps more room for real data and keeps URLs within safe length limits.",
+            },
+            {
+                heading: "When not to minify",
+                body:
+                    "Config files developers edit, files in version control, logs you might read during an incident, and documentation examples should stay formatted. A minified config turns every diff into one giant line and makes review painful.",
+            },
+            {
+                heading: "The gzip reality",
+                body:
+                    "Most servers compress JSON with gzip or Brotli, which squeezes whitespace aggressively. On top of compression, minification saves only 3 to 8 percent more, so it matters most where compression is absent.",
+            },
+            {
+                heading: "The decision rule",
+                body:
+                    "If a machine reads it, nobody ever looks at it, and size counts, minify it. If a human will open it in the next month, leave it formatted.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is minifying worth it if my server uses gzip?",
+                a: "Marginally. gzip compresses whitespace anyway, so minification adds only a few percent on top. It matters more for storage and for channels that do not compress.",
+            },
+            {
+                q: "Should package.json be minified?",
+                a: "No. It is edited by humans and tracked in version control. Formatting it keeps diffs reviewable.",
+            },
+            {
+                q: "Does minification help small payloads?",
+                a: "Barely. Under a few kilobytes the request overhead dominates. Minification pays off on large responses and at scale.",
+            },
+            {
+                q: "Do minified files work in Excel or a database?",
+                a: "For JSON consumed by code, yes. If the file is meant to be read or edited by people, keep it formatted.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "how-to-minify-json",
+        toolId: "json-minifier",
+        relatedToolIds: ["json-formatter", "json-validator"],
+        comparisonSlugs: ["json-minifier-vs-json-formatter"],
+        eyebrow: "How To · Guide",
+        title: "How to Minify JSON",
+        description:
+            "Minify JSON with one command or one function in JavaScript, Python, jq, and PowerShell. Copy the exact code, including how to minify a file in Node.",
+        heroQuestion: "How do I minify JSON?",
+        shortAnswer:
+            "In JavaScript, JSON.stringify(value) with no spacing argument produces minified output, and JSON.stringify(JSON.parse(text)) minifies an existing string. In Python, json.dumps(data, separators=(\",\", \":\")) does it. On the command line, jq -c . file.json is the fastest option.",
+        sections: [
+            {
+                heading: "JavaScript",
+                body:
+                    "const minified = JSON.stringify(JSON.parse(text));. The parse step also validates, so invalid JSON throws before you can transmit it, which makes minification a useful safety net.",
+            },
+            {
+                heading: "Node.js file handling",
+                body:
+                    "Read the file, parse it, stringify it without spacing, and write the result. The same short script minifies a whole directory of JSON config files in a build step.",
+            },
+            {
+                heading: "Python",
+                body:
+                    "json.dumps(data, separators=(\",\", \":\")) removes the spaces that the default separators add. Without the separators argument, json.dumps keeps a space after each comma and colon.",
+            },
+            {
+                heading: "jq on the command line",
+                body:
+                    "jq -c . data.json outputs compact JSON and exits with a nonzero status on invalid input, so it doubles as a validator. Redirect to a file with jq -c . data.json > data.min.json.",
+            },
+            {
+                heading: "PowerShell",
+                body:
+                    "Get-Content data.json -Raw | ConvertFrom-Json | ConvertTo-Json -Compress -Depth 100. The -Depth 100 argument is essential because the default depth truncates nested objects silently.",
+            },
+            {
+                heading: "Online tools",
+                body:
+                    "Paste formatted JSON into a minifier to get the compact version plus a before and after byte count. This is ideal for one-off tasks with nothing to install.",
+            },
+        ],
+        faq: [
+            {
+                q: "What does jq -c mean?",
+                a: "The -c flag means compact output, one line with no whitespace. It is the standard jq flag for minified JSON.",
+            },
+            {
+                q: "Why does Python need separators?",
+                a: "json.dumps defaults to ', ' and ': ', which add spaces. Passing separators=(',', ':') strips them.",
+            },
+            {
+                q: "Can minification fail on invalid JSON?",
+                a: "Yes, and that is useful. jq, JSON.parse, and json.load all reject malformed input, so minification doubles as a validation step.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "json-minify-vs-format",
+        toolId: "json-minifier",
+        relatedToolIds: ["json-formatter", "json-validator"],
+        comparisonSlugs: ["json-minifier-vs-json-formatter"],
+        eyebrow: "Explainer · Guide",
+        title: "Minify vs Format JSON",
+        description:
+            "Minify and format are opposite operations on the same data. One shrinks JSON for machines, the other expands it for humans. Here is when to use each.",
+        heroQuestion: "What is the difference between minifying and formatting JSON?",
+        shortAnswer:
+            "Formatting, also called pretty-printing, adds indentation and line breaks so humans can read JSON. Minifying removes that whitespace so machines can ship and store it efficiently. Both are lossless and reversible, because the parsed data is identical either way. Use Format to read, and Minify to ship.",
+        sections: [
+            {
+                heading: "The same data, two spellings",
+                body:
+                    "The compact form {\"a\":1} and the pretty version with newlines and indentation parse to the same object. JSON ignores whitespace between tokens, so the two spellings are interchangeable.",
+            },
+            {
+                heading: "Format is for reading",
+                body:
+                    "Pretty-printed JSON is scannable, foldable, and produces clean diffs. It belongs in configs, logs, examples, and anything a developer opens by hand.",
+            },
+            {
+                heading: "Minify is for shipping",
+                body:
+                    "Compact JSON belongs in API responses, storage, and bundles. It carries no indentation weight across the wire or on disk.",
+            },
+            {
+                heading: "The workflow",
+                body:
+                    "Format first to review and validate, then minify for production. Many pipelines keep pretty JSON in the repository and emit minified JSON at build time.",
+            },
+            {
+                heading: "In version control",
+                body:
+                    "Never commit minified JSON that you will keep editing. A single-line change rewrites the whole file in a diff, which makes review painful. Format at rest, and minify on the way out.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is minified JSON harder to read?",
+                a: "Yes, it is a single dense line. That is the tradeoff for smaller size. Format the same data when a human needs to inspect it.",
+            },
+            {
+                q: "Do minify and format ever lose data?",
+                a: "No. Both operations only move whitespace. Keys, values, and structure are preserved exactly.",
+            },
+            {
+                q: "Which should I use for my API?",
+                a: "Minify responses for speed, and format the same data for debugging. Dev tools usually prettify minified responses automatically.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "how-to-convert-json-to-csv",
+        toolId: "json-to-csv",
+        relatedToolIds: ["csv-to-json", "json-formatter", "json-validator"],
+        comparisonSlugs: ["csv-vs-json"],
+        eyebrow: "How To · Guide",
+        title: "How to Convert JSON to CSV",
+        description:
+            "Turn an array of JSON objects into a CSV table with one row per record. The exact steps, what a clean conversion needs, and when the result needs a flatten step.",
+        heroQuestion: "How do I convert JSON to CSV?",
+        shortAnswer:
+            "Paste an array of JSON objects into a converter and it emits one CSV row per object, with the keys as the header. The ideal input is a flat array such as [{\"id\":1,\"name\":\"Alice\"},{\"id\":2,\"name\":\"Bob\"}], which maps to two rows and two columns. Nested objects and arrays need a flatten step first.",
+        sections: [
+            {
+                heading: "The ideal input",
+                body:
+                    "A JSON array of flat objects with the same keys. Each object becomes a row, each key a column, and the keys of the first object become the header row.",
+            },
+            {
+                heading: "What a converter does",
+                body:
+                    "It parses the JSON, collects the keys as columns, then writes one line per object. Values are quoted and escaped so that commas and newlines inside a value do not break the table.",
+            },
+            {
+                heading: "Single object input",
+                body:
+                    "A single object such as {\"name\":\"Alice\",\"age\":30} becomes one row. If your file wraps an array under a key such as {\"data\":[...]}, select that array as the row source.",
+            },
+            {
+                heading: "When you need flattening",
+                body:
+                    "A value that is an object, like an address, or an array, like hobbies, does not fit a flat cell cleanly. Converters handle this with dot-notation columns or by stringifying the nested value, which the nested JSON guide covers in detail.",
+            },
+            {
+                heading: "Common pitfalls",
+                body:
+                    "Invalid JSON fails before conversion, so validate first. Mixed keys across records produce empty cells for missing fields. Large files are best handled by a converter that processes them locally in the browser.",
+            },
+        ],
+        faq: [
+            {
+                q: "What JSON converts cleanly to CSV?",
+                a: "An array of flat objects with consistent keys. Each object maps to a row and each key to a column.",
+            },
+            {
+                q: "What happens to missing fields?",
+                a: "Records that lack a key that other records have get an empty cell for that column.",
+            },
+            {
+                q: "Does the conversion run on my machine?",
+                a: "On this site yes, the conversion happens locally in your browser and nothing is uploaded.",
+            },
+            {
+                q: "Can I convert a JSON file with a wrapper object?",
+                a: "Yes. Most converters let you select the array that holds the rows, such as the value of a data or results key.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "flatten-nested-json-to-csv",
+        toolId: "json-to-csv",
+        relatedToolIds: ["json-formatter", "csv-to-json"],
+        comparisonSlugs: ["csv-vs-json"],
+        eyebrow: "How To · Guide",
+        title: "Flatten Nested JSON to CSV",
+        description:
+            "CSV is a flat table but JSON is deeply nested. Learn dot-notation columns for objects and the three array strategies: join, explode, and index.",
+        heroQuestion: "How do I flatten nested JSON into CSV?",
+        shortAnswer:
+            "Turn nested objects into columns with dot notation, so address.city becomes the column address.city, and choose a strategy for arrays. Join merges array elements into one cell, explode duplicates the row once per element, and index expands arrays into numbered columns such as tags.0 and tags.1. The right choice depends on how you will use the data downstream.",
+        sections: [
+            {
+                heading: "Why nested JSON is hard",
+                body:
+                    "CSV is two-dimensional, with one row per record and one value per cell. JSON can nest objects and arrays at any depth, so something must give when you flatten it.",
+            },
+            {
+                heading: "Nested objects become dot columns",
+                body:
+                    "{\"user\":{\"name\":\"Alice\",\"id\":7}} flattens to the columns user.name and user.id. This is unambiguous because objects have exactly one path to each value.",
+            },
+            {
+                heading: "Array strategy 1: join",
+                body:
+                    "[\"a\",\"b\",\"c\"] becomes a single cell such as a;b;c. This is best for tag lists where the elements are only listed, not counted or filtered individually.",
+            },
+            {
+                heading: "Array strategy 2: explode",
+                body:
+                    "One record with three tags becomes three rows, each carrying one tag and a copy of the parent fields. This is best for arrays of objects such as line items, because analytics tools can then filter and pivot on each element.",
+            },
+            {
+                heading: "Array strategy 3: index",
+                body:
+                    "tags.0, tags.1, and tags.2 become separate columns. This is best when array position matters and lengths are consistent, such as coordinates.",
+            },
+            {
+                heading: "A worked example",
+                body:
+                    "Take an API response where each employee has a nested location and an array of projects. Flatten the location into location.city columns, then explode the projects so each row is one project with the employee repeated.",
+            },
+        ],
+        faq: [
+            {
+                q: "What does dot notation mean in CSV headers?",
+                a: "Nested object keys are joined with dots, so user.address.city becomes one column named user.address.city.",
+            },
+            {
+                q: "Should I join or explode arrays?",
+                a: "Join when you only need to list the values. Explode when you need one row per element, such as for filtering, pivoting, or one-to-many relationships.",
+            },
+            {
+                q: "Can flattened CSV be converted back to JSON?",
+                a: "Yes. Dot-notation headers and index columns are reversible, which is why this shape is standard for round-tripping.",
+            },
+            {
+                q: "What if my JSON is nested ten levels deep?",
+                a: "The flatten walker visits every leaf path and creates a column per path, so ten levels become long dot-notation headers. You can cap the depth to leave deeper objects as JSON strings.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "json-to-csv-in-python-javascript-jq",
+        toolId: "json-to-csv",
+        relatedToolIds: ["csv-to-json", "json-formatter"],
+        comparisonSlugs: ["csv-vs-json"],
+        eyebrow: "How To · Guide",
+        title: "Convert JSON to CSV in Python, JavaScript, and jq",
+        description:
+            "Programmatic JSON to CSV with pandas json_normalize, the json2csv npm package, and jq @csv. Copy the exact scripts for flat and nested data.",
+        heroQuestion: "How do I convert JSON to CSV in code?",
+        shortAnswer:
+            "In Python use pandas.json_normalize(data).to_csv(\"out.csv\", index=False), which flattens nested objects into dot-notation columns automatically. In Node.js use the json2csv package. On the command line use jq -r '.[] | [.id, .name] | @csv' data.json with the -r flag.",
+        sections: [
+            {
+                heading: "Python with pandas",
+                body:
+                    "json_normalize flattens nested dicts into dot-notation columns in one call. Pass record_path to explode an array of objects into rows and meta to carry parent fields down onto each row.",
+            },
+            {
+                heading: "Python one-liner",
+                body:
+                    "import json, csv, sys; data = json.load(open(\"data.json\")); w = csv.DictWriter(sys.stdout, fieldnames=data[0].keys()); w.writeheader(); w.writerows(data). This works for flat arrays with no pandas install.",
+            },
+            {
+                heading: "Node.js with json2csv",
+                body:
+                    "npm install json2csv, then const { parse } = require(\"json2csv\"); const csv = parse(data, { flatten: true });. The package handles escaping, headers, and RFC 4180 quoting.",
+            },
+            {
+                heading: "jq on the command line",
+                body:
+                    "The @csv filter takes an array and produces a comma-separated row. Always pair it with -r so the output is raw text instead of JSON-quoted, and name each nested path explicitly such as .user.name, because jq does not auto-flatten.",
+            },
+            {
+                heading: "Handling nested objects in jq",
+                body:
+                    "Build each row as an array of paths, .[].user.name and .address.city, then pass the whole array to @csv. For a sub-array such as orders, iterate both levels and repeat the parent fields on each row.",
+            },
+            {
+                heading: "Large files",
+                body:
+                    "pandas and json2csv process files in memory, which is fine up to hundreds of MB. For very large data, stream records or use a tool with streaming support.",
+            },
+        ],
+        faq: [
+            {
+                q: "Does pandas need json_normalize for flat data?",
+                a: "No. json_normalize is for nested dicts. Flat arrays convert fine with pd.read_json and to_csv directly.",
+            },
+            {
+                q: "Why does jq need the -r flag?",
+                a: "Without it, jq outputs the CSV as a JSON string, with quotes and escapes. The -r flag prints the raw CSV text.",
+            },
+            {
+                q: "Which method handles nested arrays best?",
+                a: "pandas json_normalize with record_path and meta is the most convenient for arrays of objects. jq gives you full control for custom shapes.",
+            },
+            {
+                q: "Is there a no-install option?",
+                a: "Yes. An online converter runs in the browser and handles the same cases with no setup, which is ideal for one-off files.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "why-convert-json-to-csv",
+        toolId: "json-to-csv",
+        relatedToolIds: ["csv-to-json", "json-formatter"],
+        comparisonSlugs: ["csv-vs-json"],
+        eyebrow: "Explainer · Guide",
+        title: "Why Convert JSON to CSV?",
+        description:
+            "CSV opens in Excel, loads into SQL, and feeds analytics tools that will not read JSON. Learn what CSV is good at and when conversion loses information.",
+        heroQuestion: "Why should I convert JSON to CSV?",
+        shortAnswer:
+            "CSV is the lingua franca of tabular data: Excel, Google Sheets, SQL importers, Pandas, and BI tools all open it directly, while most of them have awkward JSON support. Converting an array of JSON records to CSV turns program data into a table you can sort, filter, and load anywhere. The cost is that nested structure is flattened, so know the shape before you convert.",
+        sections: [
+            {
+                heading: "CSV is everywhere",
+                body:
+                    "Every spreadsheet, almost every database import, and every analytics tool accepts CSV. If your data must leave a program and land in a spreadsheet, CSV is the lowest-friction path.",
+            },
+            {
+                heading: "JSON stays inside programs",
+                body:
+                    "JSON is great for APIs and configs, but a spreadsheet or a SQL loader will not accept a nested object. Conversion bridges the two worlds.",
+            },
+            {
+                heading: "The flat table constraint",
+                body:
+                    "CSV has two dimensions, rows and columns. Objects flatten to dot-notation columns and arrays need a strategy, so some structure is always translated rather than preserved.",
+            },
+            {
+                heading: "What you can do with the CSV",
+                body:
+                    "Sort and filter in a spreadsheet, import into a database table, feed charts and dashboards, or hand it to a data analyst who works in Excel.",
+            },
+            {
+                heading: "The reverse path",
+                body:
+                    "A CSV can be converted back to JSON, which is what the CSV to JSON tool does. Flattened headers with dot notation round-trip cleanly when you need the JSON again.",
+            },
+        ],
+        faq: [
+            {
+                q: "What is CSV best used for?",
+                a: "Tabular data that needs spreadsheets, databases, or analytics. It is the most portable table format in existence.",
+            },
+            {
+                q: "Does converting JSON to CSV lose data?",
+                a: "Only shape. Flattening nested objects and choosing an array strategy changes how the data is laid out, so pick the strategy that matches your use.",
+            },
+            {
+                q: "When should I keep JSON instead?",
+                a: "When the data is deeply nested, irregular, or will be consumed by programs. CSV suits regular, tabular records destined for a spreadsheet or database.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────
