@@ -219,7 +219,20 @@ Specs use the stable DOM contract, never class names or snapshot
 positions: `<id>-textarea`, `<id>-gutter`, `<id>-dropzone`,
 `<id>-file-input`, `<id>-status`, `<id>-message`, `<id>-close`,
 `<x>-announce`, `[data-action="sample|clear|copy|download"]`, and the
-primary button `#<verb>-btn`.
+tool's actual primary-button id. The contract must match the DOM, so
+specs target the id each page really ships:
+
+| Tool                | Primary button id |
+| ------------------- | ----------------- |
+| JSON Formatter      | `#format-btn`     |
+| JSON Minifier       | `#minify-btn`     |
+| JSON Validator      | `#validate-btn`   |
+| JSON to CSV         | `#convert-btn`    |
+| UUID Generator      | `#uu-generate`    |
+| HMAC Generator      | `#hmac-run`       |
+
+If a new tool page does not follow the `#<verb>-btn` shape used by the
+converters, document its real id here instead of pretending otherwise.
 
 ### Test hooks
 

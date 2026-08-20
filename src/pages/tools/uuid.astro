@@ -165,6 +165,7 @@ import "../../styles/tool-options.css";
         </div>
 
         <ErrorBanner id="uu-error" />
+        <span class="sr-only" id="uu-announce" aria-live="polite"></span>
       </Card>
 
       {/* ── Session readout ── */}
@@ -384,7 +385,7 @@ import "../../styles/tool-options.css";
     document.querySelectorAll<HTMLButtonElement>("[data-uu-copymode]"),
   );
 
-  initAnnounce("uu-error");
+  initAnnounce("uu-announce");
 
   let copyMode: "lines" | "json" = "lines";
   let currentUpper = false;
@@ -508,6 +509,7 @@ import "../../styles/tool-options.css";
     // cap hint
     if (capEl) capEl.textContent = `max ${maxCount(state.version).toLocaleString()} / batch`;
     if (countInput && document.activeElement !== countInput) countInput.value = String(state.count);
+    if (nameInput && document.activeElement !== nameInput) nameInput.value = state.name;
 
     // button state
     if (genBtn) {
@@ -550,15 +552,20 @@ import "../../styles/tool-options.css";
     ),
   );
   if (upperCb) upperCb.addEventListener("change", () => setUpper(uuidStore, upperCb.checked));
-  if (countInput)
+  if (countInput) {
     countInput.addEventListener("input", () =>
       setCount(uuidStore, parseInt(countInput.value, 10) || 1),
     );
+    countInput.addEventListener("change", () => {
+      setCount(uuidStore, parseInt(countInput.value, 10) || 1);
+      countInput.value = String(uuidStore.get().count);
+    });
+  }
   countChips.forEach((b) =>
     b.addEventListener("click", () => {
       const n = parseInt(b.getAttribute("data-uu-count") || "1", 10);
       setCount(uuidStore, n);
-      if (countInput) countInput.value = String(n);
+      if (countInput) countInput.value = String(uuidStore.get().count);
     }),
   );
   if (nsSel)
@@ -836,7 +843,7 @@ import "../../styles/tool-options.css";
   }
 
   /* session readout */
-  .uu-stats {
+  .uu-stats:not([hidden]) {
     display: flex;
     flex-wrap: wrap;
     align-items: center;

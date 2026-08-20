@@ -1,13 +1,21 @@
 import type { Store } from "../../state/toolStore";
 import type { UuidFormat, UuidGenerateResult, UuidState, UuidVersion } from "./types";
 import { generate } from "./engine";
-import { NAMESPACE_PRESETS } from "./constants";
+import { maxCount, NAMESPACE_PRESETS } from "./constants";
 
 export function setVersion(store: Store<UuidState>, version: UuidVersion): void {
-  store.update((s) => ({ ...s, version, error: null }));
+  store.update((s) => ({
+    ...s,
+    version,
+    count: Math.min(maxCount(version), s.count),
+    error: null,
+  }));
 }
 export function setCount(store: Store<UuidState>, count: number): void {
-  store.update((s) => ({ ...s, count: Math.max(1, count | 0) }));
+  store.update((s) => ({
+    ...s,
+    count: Math.min(maxCount(s.version), Math.max(1, count | 0)),
+  }));
 }
 export function setFormat(store: Store<UuidState>, format: UuidFormat): void {
   store.update((s) => ({ ...s, format }));

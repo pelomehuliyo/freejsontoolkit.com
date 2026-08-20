@@ -20,6 +20,9 @@ pnpm-debug.log*
 .env
 .env.production
 
+# local opencode config (contains local MCP API keys)
+opencode.json
+
 # macOS-specific files
 .DS_Store
 
@@ -35,3 +38,7 @@ pnpm-debug.log*
 
 # local scratch / temp working files
 /research/
+
+# terminal / build log dumps
+astro-check-out.txt
+build.log

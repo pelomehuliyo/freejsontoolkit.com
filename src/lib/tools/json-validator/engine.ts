@@ -14,7 +14,7 @@
  */
 import type { ValidationError, ValidationResult, ValidatorOptions, ValidatorStats } from "./types";
 
-const MAX_DEPTH = 4096;
+const MAX_DEPTH = 1024;
 
 type TokType =
   | "lbrace"

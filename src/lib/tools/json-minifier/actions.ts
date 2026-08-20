@@ -60,6 +60,9 @@ export function handleInput(store: Store<JsonMinifierState>, text: string): void
   store.set({
     ...state,
     jsonInput: text,
+    result: null,
+    outputStatus: "empty",
+    isMinifying: false,
     inputStatus: v.valid ? "ready" : "invalid",
     error: null,
   });

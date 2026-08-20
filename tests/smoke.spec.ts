@@ -4,6 +4,8 @@ const EDITOR_TOOLS = [
   '/tools/json-formatter/',
   '/tools/json-minifier/',
   '/tools/json-validator/',
+  '/tools/json-to-csv/',
+  '/tools/hmac/',
   '/tools/base64/',
   '/tools/csv-to-json/',
   '/tools/jwt-decoder/',
