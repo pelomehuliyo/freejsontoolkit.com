@@ -273,6 +273,12 @@ Example:
   import { copyToClipboard } from "../../shared/clipboard";
   import { downloadFile } from "../../shared/download";
 
+  // Test hook (dev only): lets Playwright wait deterministically on store state.
+  if (import.meta.env.DEV) {
+    (window as unknown as { __jsonToXmlStore: typeof jsonToXmlStore }).__jsonToXmlStore =
+      jsonToXmlStore;
+  }
+
   const jsonTextarea = document.getElementById("json-input-textarea") as HTMLTextAreaElement | null;
   const outTextarea = document.getElementById("xml-output-textarea") as HTMLTextAreaElement | null;
   const inputStatus = document.getElementById("json-validation-status") as HTMLElement | null;
@@ -431,7 +437,8 @@ Example:
       const detail = (e as CustomEvent).detail;
       if (detail?.text) {
         handleInput(jsonToXmlStore, detail.text);
-        convert(jsonToXmlStore);
+        const s = jsonToXmlStore.get();
+        if (s.inputStatus !== "invalid") convert(jsonToXmlStore);
         announce("File loaded: " + (detail.name || "file"));
       }
     });

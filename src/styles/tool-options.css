@@ -169,6 +169,7 @@
   width: 0;
 }
 
+.opt-check .box,
 .opt-check .opt-box {
   position: absolute;
   top: 50%;
