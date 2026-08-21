@@ -101,58 +101,69 @@ export const DOCS: Record<string, ToolDoc> = {
     eyebrow: "Docs · JSON → XML",
     conceptTitle: "Generating XML from JSON",
     concept:
-      "JSON → XML takes a JSON object or array and builds a well-formed XML document from it. " +
-      "Every property becomes an element; nested objects become nested elements; arrays become repeated elements. " +
-      "You can control how attributes are handled (prefixing keys with `@`), how empty elements are treated, and whether to pretty‑print the output. " +
-      "The conversion runs locally, with no external dependencies.",
-    lead: "before-after", // we'll reuse the before/after pattern
+      "JSON → XML takes any JSON value and builds a well-formed XML document from it. " +
+      "Every object key becomes an element name sanitized to valid XML, nested objects become nested elements, arrays become a wrapper element with repeated children using the Array item tag, null becomes a self-closed element, numbers and booleans become text, and special characters are escaped. " +
+      "You control the root element name, the array item tag, indentation, and whether to include the XML declaration. The conversion runs locally, with no external dependencies.",
+    lead: "before-after",
     itemsLabel: "Things to know",
     items: [
       {
         kind: "note",
         title: "Root element",
         body:
-          "The root of your JSON must be an object with a single key that becomes the root element name. " +
-          "If your JSON is an array, the root element name must be specified via the 'rootName' option (we can add that later).",
+          "Every conversion is wrapped in a root element whose name you choose, default root, sanitized to a valid XML name. " +
+          "A JSON object like { \"book\": { \"title\": \"Dune\" } } nests under that root.",
       },
       {
         kind: "note",
-        title: "Attributes",
+        title: "Arrays need an item tag",
         body:
-          'Keys starting with `@` are treated as attributes. For example, `{ "@id": "123" }` becomes `<element id="123"/>`. ' +
-          "Enable or disable this with the 'Include attributes' option.",
+          "XML has no native arrays, so each array becomes a wrapper element named after its key with one child per entry using the Array item tag you set, default item. " +
+          "With that default, \"tags\": [\"a\", \"b\"] becomes <tags><item>a</item><item>b</item></tags>.",
       },
       {
         kind: "note",
-        title: "Empty elements",
+        title: "Null becomes self-closed",
         body:
-          "An empty object or a null value becomes an empty element (e.g., `<tag></tag>`). " +
-          "The 'Include empty elements' option can suppress them.",
+          "A null value becomes a self-closed element like <note/>. An empty object becomes an empty pair <tag></tag>. " +
+          "This keeps the output well-formed without inventing a type.",
       },
       {
         kind: "note",
-        title: "Arrays",
+        title: "Key sanitization",
         body:
-          "An array of objects becomes repeated elements with the same name. " +
-          "If you want a single element to contain multiple children, use an array.",
+          "XML element names cannot start with a digit or contain spaces. Keys are sanitized to valid names, with illegal characters replaced by underscore and a leading underscore added when needed. " +
+          "If the receiving system expects exact names, rename the keys in JSON first.",
+      },
+      {
+        kind: "note",
+        title: "XML declaration toggle",
+        body:
+          "Include <?xml version=\"1.0\" encoding=\"UTF-8\"?> when the consumer expects a full document, turn it off for fragments or embedded parsers that reject it.",
+      },
+      {
+        kind: "note",
+        title: "Escaping",
+        body:
+          "Ampersands, angle brackets, and quotes are escaped to &amp;, &lt;, &gt;, and &quot; so the output stays well-formed. A single unescaped &amp; in a URL is the most common way hand-built XML breaks.",
       },
     ],
     examplesLabel: "Try these",
     examples: [
       {
         title: "Simple object",
-        note: "A basic JSON object with a root element.",
+        note: "A basic JSON object wrapped in the root you choose.",
         snippet: `{ "book": { "title": "The Hobbit", "author": "J.R.R. Tolkien" } }`,
       },
       {
-        title: "With attributes",
-        note: "Attributes are marked with @ prefix.",
-        snippet: `{ "book": { "@id": "978-0-547-92522-8", "title": "The Hobbit" } }`,
+        title: "Arrays and nesting",
+        note: "Arrays become repeated item elements inside their wrapper.",
+        snippet: `{ "tags": ["a", "b"], "book": { "title": "Dune" } }`,
       },
       {
-        title: "Arrays and nesting",
-        note: "Arrays become repeated elements.",
-        snippet: `{ "books": [ { "title": "The Hobbit" }, { "title": "The Lord of the Rings" } ] }`,
+        title: "Null and empty",
+        note: "Null becomes a self-closed element, empty objects become empty pairs.",
+        snippet: `{ "note": null, "empty": {} }`,
       },
     ],
   },

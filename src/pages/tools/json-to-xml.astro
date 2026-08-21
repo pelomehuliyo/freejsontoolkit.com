@@ -211,6 +211,45 @@ Example:
             can be.
           </p>
         </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Can I convert JSON to XML without uploading?</summary>
+          <p class="body-md faq-answer">
+            Yes. The conversion runs entirely in your browser, so your JSON never leaves your machine.
+            Paste your data or drop a file and the XML is produced locally.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">How do I convert JSON to XML online?</summary>
+          <p class="body-md faq-answer">
+            Paste your JSON into the converter, choose the root name and array item tag if needed, and
+            press Convert. You can then copy the XML or download it as a .xml file. Everything runs
+            locally, so no signup is needed.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Does the converter add an XML declaration?</summary>
+          <p class="body-md faq-answer">
+            It can. Turn on Include <code>&lt;?xml …?&gt;</code> to add <code
+              >&lt;?xml version="1.0" encoding="UTF-8"?&gt;</code
+            > for a full document, or turn it off for fragments and embedded parsers that reject it.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">What happens to null values?</summary>
+          <p class="body-md faq-answer">
+            A <code>null</code> becomes a self-closed element like <code>&lt;note/&gt;</code>. An empty
+            object becomes <code>&lt;tag&gt;&lt;/tag&gt;</code>. This keeps the output well-formed
+            without inventing a type for null.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">What if my JSON key is not a valid XML name?</summary>
+          <p class="body-md faq-answer">
+            Keys are sanitized to valid XML names: illegal characters become underscores and a leading
+            underscore is added when a name starts with a digit. If the receiver expects exact names,
+            rename the keys in JSON first.
+          </p>
+        </details>
       </div>
     </Container>
   </section>

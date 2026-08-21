@@ -103,6 +103,10 @@ export const FAQS: Record<string, Faq[]> = {
     { q: "How are arrays represented?", a: "Each entry becomes its own element using the \"Array item tag\" (default item ), wrapped in the array's key. So \"tags\": [\"a\",\"b\"] becomes <tags><item>a</item><item>b</item></tags> ." },
     { q: "Will it round-trip back to identical JSON?", a: "Not always, and we don't pretend otherwise. XML has no native notion of null vs an empty string, or of a number vs the text of that number, so some type information is lost on the way to XML. The mapping is designed to be readable and reversible where it can be." },
     { q: "Can I convert JSON to XML without uploading?", a: "Yes. The conversion runs entirely in your browser, so your JSON never leaves your machine. Paste your data or drop a file and the XML is produced locally." },
+    { q: "How do I convert JSON to XML online?", a: "Paste your JSON into the converter, choose the root name and array item tag if needed, and press Convert. You can then copy the XML or download it as a .xml file. Everything runs locally, so no signup is needed." },
+    { q: "Does the converter add an XML declaration?", a: "It can. Turn on Include <?xml …?> to add <?xml version=\"1.0\" encoding=\"UTF-8\"?> for a full document, or turn it off for fragments and embedded parsers that reject it." },
+    { q: "What happens to null values?", a: "A null becomes a self-closed element like <note/>. An empty object becomes <tag></tag>. This keeps the output well-formed without inventing a type for null." },
+    { q: "What if my JSON key is not a valid XML name?", a: "Keys are sanitized to valid XML names: illegal characters become underscores and a leading underscore is added when a name starts with a digit. If the receiver expects exact names, rename the keys in JSON first." },
   ],
   "json-to-yaml": [
     { q: "Is my JSON uploaded anywhere?", a: "No. Conversion runs entirely in your browser (in a background worker for large files). Your data never leaves your machine." },

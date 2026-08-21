@@ -147,7 +147,15 @@ export const tools: ToolManifest[] = [
     family: "json",
     status: "available",
     href: "/tools/json-to-xml",
-    keywords: ["json to xml", "convert json to xml"],
+    keywords: [
+      "json to xml",
+      "convert json to xml",
+      "json to xml converter",
+      "json to xml online",
+      "convert json to xml online",
+      "json to xml converter online",
+      "json to xml conversion",
+    ],
     addedIn: "v1.4",
   },
   {
