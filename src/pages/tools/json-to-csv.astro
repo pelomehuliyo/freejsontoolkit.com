@@ -709,14 +709,16 @@ Example:
     // Error display
     if (errorBanner) {
       if (state.error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (errorBanner as any).show?.(state.error);
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (errorBanner as any).hide?.();
       }
     }
   });
 
-  // â”€â”€ DragDropZone: file upload â”€â”€
+  // ── DragDropZone: file upload ──
   const dropZone = document.getElementById("json-input-dropzone");
   if (dropZone) {
     dropZone.addEventListener("file-dropped", (e: Event) => {

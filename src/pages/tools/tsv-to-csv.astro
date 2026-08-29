@@ -318,7 +318,9 @@ Ada	Engineer	London`}
       convertBtn.disabled = state.isConverting;
     }
     if (errorBanner) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (state.error) (errorBanner as any).show?.(state.error);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       else (errorBanner as any).hide?.();
     }
     if (state.error) announce("Error: " + state.error);
@@ -343,6 +345,8 @@ Ada	Engineer	London`}
       if (action === "clear") {
         clearAll(tsvToCsvStore);
         clearLargeFile(tsvToCsvStore);
+        document.getElementById("tsv-input-dropzone")?.dispatchEvent(new CustomEvent("dropzone:clear", { bubbles: true }));
+        (document.getElementById("tsv-input-file-input") as HTMLInputElement | null)!.value = "";
         announce("Input cleared");
       }
     });

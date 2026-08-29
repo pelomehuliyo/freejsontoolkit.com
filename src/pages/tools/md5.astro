@@ -311,7 +311,9 @@ import { ENCODINGS } from "../../lib/tools/md5/constants";
 
     // Error banner
     if (errorBanner) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (state.error) (errorBanner as any).show?.(state.error);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       else (errorBanner as any).hide?.();
     }
   });

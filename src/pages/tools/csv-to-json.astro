@@ -390,7 +390,9 @@ id,name,email
     }
 
     if (errorBanner) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (state.error) (errorBanner as any).show?.(state.error);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       else (errorBanner as any).hide?.();
     }
     if (state.error) announce("Error: " + state.error);
@@ -432,6 +434,8 @@ id,name,email
       if (action === "clear") {
         clearAll(csvToJsonStore);
         clearLargeFile(csvToJsonStore);
+        document.getElementById("csv-input-dropzone")?.dispatchEvent(new CustomEvent("dropzone:clear", { bubbles: true }));
+        (document.getElementById("csv-input-file-input") as HTMLInputElement | null)!.value = "";
         announce("Input cleared");
       }
     });

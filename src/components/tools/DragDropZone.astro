@@ -104,6 +104,11 @@ const statusId = id + "-status";
           statusEl!.textContent = msg;
         }
 
+        // F5: allow parent to reset live region on Clear
+        dropZone.addEventListener("dropzone:clear", () => {
+          statusEl.textContent = "";
+        });
+
         function readFileAsText(file: File): Promise<string> {
           return new Promise(function (resolve, reject) {
             const reader = new FileReader();

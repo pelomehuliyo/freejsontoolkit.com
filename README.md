@@ -10,30 +10,45 @@ Convert, validate, format, and manipulate JSON without uploading your data to an
 
 ## Features
 
-### Available
+### Available (28 tools)
 
-- JSON → CSV Converter
-- CSV → JSON Converter
-- JSON Formatter
-- Drag & Drop file support
-- Large file support
-- Web Worker processing
-- Offline processing
-- Copy / Download output
-- Mobile responsive
-- Accessible interface
-- Zero tracking of your data
+**Convert**
+- JSON → CSV Converter (`/tools/json-to-csv`)
+- CSV → JSON Converter (`/tools/csv-to-json`)
+- CSV → TSV (`/tools/csv-to-tsv`)
+- TSV → CSV (`/tools/tsv-to-csv`)
+- JSON → XML (`/tools/json-to-xml`)
+- XML → JSON (`/tools/xml-to-json`)
+- JSON → YAML (`/tools/json-to-yaml`)
+- YAML → JSON (`/tools/yaml-to-json`)
+- JSON → TOML (`/tools/json-to-toml`)
+- TOML → JSON (`/tools/toml-to-json`)
 
-### Coming Soon
+**Format & Validate**
+- JSON Formatter (`/tools/json-formatter`) — also covers beautify / pretty-print
+- JSON Minifier (`/tools/json-minifier`)
+- JSON Validator (`/tools/json-validator`)
+- JSON Schema Lite (`/tools/json-schema-lite`)
 
-- JSON Validator
-- JSON Compare
-- JSON Minify
-- JSON Beautify
-- JSON Schema Viewer
-- XML ↔ JSON
-- YAML ↔ JSON
-- SQL ↔ JSON
+**Compare**
+- JSON Diff (`/tools/json-diff`)
+- Text Diff (`/tools/text-diff`)
+
+**Generate & Utilities**
+- Fake JSON Generator (`/tools/fake-json`)
+- UUID Generator (`/tools/uuid`)
+- Base64 Encode / Decode (`/tools/base64`)
+- URL Encode / Decode (`/tools/url-codec`)
+- JWT Decoder (`/tools/jwt-decoder`)
+- Timestamp Converter (`/tools/timestamp-converter`)
+- Regex Tester (`/tools/regex-tester`)
+- SHA-256 (`/tools/sha-256`)
+- SHA-512 (`/tools/sha-512`)
+- MD5 (`/tools/md5`)
+- HMAC Generator (`/tools/hmac`)
+- bcrypt Hasher (`/tools/bcrypt`)
+
+Plus: Drag & Drop file support, Large file support (worker-based), Offline processing, Copy / Download output, Mobile responsive, Accessible interface, Zero tracking of your data
 
 ---
 
@@ -180,9 +195,44 @@ Free JSON Toolkit follows a few simple principles.
 - Registry-driven sitemap
 - Trust & architecture page (/why-local)
 
-### Version 1.2
+### Version 1.2 ✓ Shipped
 
 - JSON Validator
+
+### Version 1.3 ✓ Shipped
+
+- JSON Minifier
+- Base64 Encode / Decode
+- UUID Generator
+- Fake JSON Generator
+- URL Encode / Decode
+
+### Version 1.4 ✓ Shipped
+
+- YAML ↔ JSON
+- XML ↔ JSON
+- Relations fix, registry `available` flag
+
+### Version 1.5 ✓ Shipped
+
+- Collections / families (`/collections`)
+- Regex Tester
+- CSV ⇄ TSV
+- TOML ↔ JSON
+- Text Diff
+- JSON Schema Lite
+
+### Version 1.6 ✓ Shipped
+
+- Timestamp Converter (with BigInt fix)
+- Large-file mode + `/large-files` guide
+- Compare pages
+
+### Version 1.7 ✓ Shipped
+
+- SHA-256, SHA-512, MD5
+- HMAC Generator
+- bcrypt Hasher
 
 ### Future
 

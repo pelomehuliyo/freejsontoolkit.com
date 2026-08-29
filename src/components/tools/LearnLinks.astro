@@ -92,7 +92,8 @@ const articles = articlesByTool(toolId);
   .learn-link-cta {
     margin-top: auto;
     padding-top: var(--spacing-sm);
-    color: var(--color-accent);
+    /* AA 4.5:1 — --color-accent (#21a78a) is 3.01:1 on white, so CTA uses --color-accent-active */
+    color: var(--color-accent-active);
   }
   @media (max-width: 720px) {
     .learn-links-list {

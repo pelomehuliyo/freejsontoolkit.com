@@ -509,7 +509,9 @@ Live diff is on. Differences appear as you type.
     showPane(state.mode, !!state.result);
 
     if (errorBanner) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (state.error) (errorBanner as any).show?.(state.error);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       else (errorBanner as any).hide?.();
     }
   });

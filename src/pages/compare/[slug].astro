@@ -75,6 +75,8 @@ const siteOrigin = Astro.site?.toString().replace(/\/$/, "") ?? "https://freejso
           <span class="cmp-crumb-here">{aName} vs {bName}</span>
         </nav>
 
+        <h1 class="cmp-title display-xl">{comp.title} — Which Should You Use?</h1>
+
         <div class="cmp-versus">
           <a class="cmp-side" href={a.href}>
             <span class="cmp-badge" aria-hidden="true">{aBadge}</span>
@@ -239,6 +241,13 @@ const siteOrigin = Astro.site?.toString().replace(/\/$/, "") ?? "https://freejso
   }
   .cmp-crumb-here {
     color: var(--color-ink);
+  }
+
+  .cmp-title {
+    color: var(--color-ink);
+    margin: 0 0 var(--spacing-md);
+    text-align: center;
+    letter-spacing: -0.02em;
   }
 
   .cmp-versus {
