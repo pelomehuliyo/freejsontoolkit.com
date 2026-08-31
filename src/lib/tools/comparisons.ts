@@ -887,4 +887,113 @@ export const COMPARISONS: Record<string, Comparison> = {
       "bcrypt's cost and per-hash salt make each guess expensive. Neither tool uploads your input; both " +
       "run entirely in the browser.",
   },
+
+  "uuid-v4-vs-v7": {
+    slug: "uuid-v4-vs-v7",
+    aId: "uuid-generator",
+    bId: "uuid-generator",
+    aLabel: "UUID v4",
+    bLabel: "UUID v7",
+    aBadge: "v4",
+    bBadge: "v7",
+    aTag: "Random",
+    bTag: "Time-ordered",
+    title: "UUID v4 vs v7",
+    intro:
+      "v4 and v7 are the two UUIDs you will reach for most, but they solve different problems. v4 is " +
+      "122 bits of cryptographic randomness: opaque, unpredictable, and private. v7 puts a 48-bit Unix " +
+      "millisecond timestamp first, then fills the rest with randomness, so IDs sort chronologically. " +
+      "Random where ordering must stay hidden, time-ordered where insertion order and locality matter. " +
+      "Both generate 100% in your browser.",
+    useA: {
+      heading: "Use v4 when",
+      points: [
+        "You need an opaque identifier where creation time must not leak: tokens, session IDs, and public-facing keys.",
+        "Every caller can generate independently and you do not need sortable order in the database.",
+        "You want the widest tool support available everywhere with zero debate.",
+        "Privacy over locality: the bits reveal nothing about when the ID was made.",
+      ],
+    },
+    useB: {
+      heading: "Use v7 when",
+      points: [
+        "The ID is a primary key and you want sequential inserts: B-tree indexes stay dense and recent rows stay adjacent.",
+        "You want natural chronological order by sorting the string itself, with no separate created_at column.",
+        "You generate IDs at high volume and monotonic ordering helps downstream sorting, partitioning, or pagination.",
+        "You are starting a new system on RFC 9562 and want the modern time-ordered recommendation.",
+      ],
+    },
+    attributes: [
+      { label: "Core property", a: "122 bits random", b: "48 bits time + 74 bits random" },
+      { label: "String sort", a: "Random order", b: "Chronological order" },
+      { label: "Time visible?", a: "No", b: "Yes, first 12 hex chars" },
+      { label: "DB insert pattern", a: "Random throughout index", b: "Sequential at the end" },
+      { label: "Spec", a: "RFC 9562 v4", b: "RFC 9562 v7 (2024)" },
+      { label: "Collision risk", a: "Negligible, pure random", b: "Negligible, time plus random" },
+      { label: "Leaks MAC?", a: "No", b: "No" },
+      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+    ],
+    verdict:
+      "Pick v7 for database keys and any ID where order matters. Its timestamp prefix makes inserts " +
+      "sequential and keeps sorting free. Stick to v4 for opaque public IDs where you do not want the " +
+      "creation time visible. They coexist fine in the same system: v7 inside, v4 at the boundary. " +
+      "Use What Is UUID v7 to see the layout and UUID Format and Examples to identify each version at a glance.",
+    note:
+      "Neither tool uploads what you generate. v4 uses crypto.getRandomValues, v7 uses the same RNG plus " +
+      "Date.now() for the time prefix. Both produce RFC 9562 compliant IDs entirely in the browser.",
+  },
+
+  "uuid-v1-vs-v4": {
+    slug: "uuid-v1-vs-v4",
+    aId: "uuid-generator",
+    bId: "uuid-generator",
+    aLabel: "UUID v1",
+    bLabel: "UUID v4",
+    aBadge: "v1",
+    bBadge: "v4",
+    aTag: "Time-based, not lex-sorted",
+    bTag: "Random",
+    title: "UUID v1 vs v4",
+    intro:
+      "v1 and v4 look identical on the surface, both are 36-character strings, but they generate those " +
+      "bits very differently. v1 embeds a timestamp, clock sequence, and MAC-derived node, so time is in " +
+      "the bits but not in sort order. v4 is pure randomness, opaque and private. One leaks hardware " +
+      "identity and arrival order, the other hides it. Both generate 100% in your browser.",
+    useA: {
+      heading: "Use v1 when",
+      points: [
+        "You must interoperate with a legacy system that already stores v1 and expects it.",
+        "You need to extract a creation timestamp from an old v1 value for auditing.",
+        "You are reading existing data, not designing a new ID scheme.",
+        "You have no choice: the spec or database already hard-codes v1.",
+      ],
+    },
+    useB: {
+      heading: "Use v4 when",
+      points: [
+        "You are generating new IDs and want no time or hardware leakage.",
+        "You want the simplest secure default with the widest library support.",
+        "You need opaque IDs for tokens, sessions, or public keys.",
+        "You do not need sortability. If you do, v7 is the modern time-ordered choice, not v1.",
+      ],
+    },
+    attributes: [
+      { label: "Time basis", a: "100 ns timestamp + clock seq", b: "No time, 122 random bits" },
+      { label: "String sort follows time?", a: "No, low bits first", b: "No, random order" },
+      { label: "Contains MAC?", a: "Traditionally yes", b: "Never" },
+      { label: "Privacy", a: "Leaks time and node", b: "Opaque, nothing leaks" },
+      { label: "Modern replacement", a: "v7 for sortable time", b: "Still the default random choice" },
+      { label: "Collision source", a: "Clock or node reuse", b: "Random chance only (negligible)" },
+      { label: "Spec", a: "RFC 9562 v1 legacy", b: "RFC 9562 v4 current" },
+      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+    ],
+    verdict:
+      "For new work, v4 is the conservative random choice and v7 is the sortable time-based choice. " +
+      "Reserve v1 for legacy reads where you already have v1 values. If a legacy system emits v1 but " +
+      "you need chronological string sorting, migrate new columns to v7 rather than staying on v1.",
+    note:
+      "This generator supports v1 for completeness, but new projects should prefer v7 when they want " +
+      "time ordering and v4 when they want opaque randomness. Neither tool uploads your IDs; both run " +
+      "entirely in the browser.",
+  },
 };

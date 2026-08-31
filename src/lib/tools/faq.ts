@@ -177,10 +177,12 @@ export const FAQS: Record<string, Faq[]> = {
     { q: "What does the footprint show?", a: "Each teal chip is a character that the current mode encodes, shown as its percent-bytes; plain characters pass through untouched. It's the encoding's effect on your exact string, made visible." },
   ],
   "uuid-generator": [
-    { q: "Which version should I use?", a: "For an opaque id, v4. For a primary key you'll sort or insert in order, v7, whose time prefix keeps inserts sequential. For a stable id derived from a name (a URL, a DNS name), v5." },
+    { q: "Which version should I use?", a: "For an opaque id, v4. For a primary key you'll sort or insert in order, v7, whose time prefix keeps inserts sequential. For a stable id derived from a name (a URL, a DNS name), v5. See What Is UUID v7 → for why v7 sorts chronologically." },
     { q: "Are these generated on a server?", a: "No. Every UUID is produced in your browser using the platform's cryptographic RNG (and SHA-1 for v5). Nothing you generate is transmitted or stored." },
     { q: "Why aren't v1 UUIDs sortable as strings?", a: "v1 stores the low 32 bits of the timestamp first, so the string order doesn't follow time. That limitation is exactly what v7 was designed to fix: it puts the most-significant time bits at the front." },
     { q: "What does \"deterministic\" mean for v5?", a: "The same namespace + name always hashes to the same UUID, on any machine. Generating a batch appends an index to the name so you get distinct ids; remove the index logic and you'd get the same id repeated." },
+    { q: "What does a UUID look like?", a: "A UUID looks like 550e8400-e29b-41d4-a716-446655440000: 32 hex digits in 8-4-4-4-12, 36 characters with hyphens. The 13th digit is the version, so a 4 marks v4 and a 7 marks v7. See UUID Format and Examples → for v1, v4, v5 and v7 samples." },
+    { q: "Is UUID v7 better than v4?", a: "For database primary keys and any ID where chronological order matters, yes: v7 sorts by creation time and inserts sequentially. For opaque public tokens where you do not want time visible, stick to v4." },
   ],
   "xml-to-json": [
     { q: "Is my XML uploaded anywhere?", a: "No. Conversion runs entirely in your browser (in a background worker). Your data never leaves your machine." },

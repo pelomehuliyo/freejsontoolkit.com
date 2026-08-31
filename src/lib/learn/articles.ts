@@ -2954,6 +2954,154 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.9",
     },
+
+    {
+        slug: "what-is-uuid-v7",
+        toolId: "uuid-generator",
+        relatedToolIds: ["timestamp-converter", "base64", "sha-256"],
+        comparisonSlugs: ["uuid-v4-vs-v7"],
+        eyebrow: "Explainer · Guide",
+        title: "What Is UUID v7? The Time-Ordered, Sortable UUID",
+        description:
+            "UUID v7 embeds a 48-bit millisecond timestamp so IDs sort chronologically, solving the database primary key problem. Learn how v7 is laid out, how it stays monotonic, and when to pick v7 over v4 or v1.",
+        heroQuestion: "What is UUID v7 and why is it sortable?",
+        shortAnswer:
+            "UUID v7 is a 128-bit identifier defined in RFC 9562 in 2024 that puts a Unix millisecond timestamp in the first 48 bits, followed by randomness. Because time is the most significant field, string sorting equals time sorting, so database inserts stay sequential without a central counter.",
+        sections: [
+            {
+                heading: "The 48-bit timestamp at the front",
+                body:
+                    "A v7 UUID starts with 48 bits of Unix time in milliseconds, precisely the same clock behind Date.now(). That timestamp occupies the first 12 hex characters, so 0191a2b3-c4d5-7e6f-... already encodes when it was created. The remaining bits are filled with cryptographic randomness, version and variant flags included.",
+            },
+            {
+                heading: "Randomness after time",
+                body:
+                    "After the timestamp and the 4-bit version field (0111 for 7), about 74 bits remain random. That balance gives sortable time ordering without sacrificing uniqueness. Two IDs generated in the same millisecond differ only in their random tail, so they stay unique even under high throughput.",
+                list: [
+                    "48 bits: Unix milliseconds since 1970",
+                    "4 bits: version 7",
+                    "12 bits: random with variant",
+                    "62 bits: additional randomness",
+                ],
+            },
+            {
+                heading: "Monotonic and sequential inserts",
+                body:
+                    "Because the most significant bits are time, sorting v7 values as strings is the same as sorting by creation time. Databases that use B-trees, such as PostgreSQL and MySQL with InnoDB, insert new rows at the end of the index instead of randomly throughout it. That keeps writes fast, reduces page splits, and keeps recent rows physically adjacent on disk.",
+            },
+            {
+                heading: "v7 vs v4 vs v1 at a glance",
+                body:
+                    "v4 is 122 bits of pure randomness, so string order is random. v1 also embeds time, but it stores the low 32 bits first and includes a MAC address, so lexicographic order does not follow time and it leaks hardware identity. v7 fixes both: timestamp first, no MAC, random tail, and monotonic ordering by design.",
+                list: [
+                    "v4: random, not sortable, private",
+                    "v1: time-based but not lex-sorted, leaks MAC",
+                    "v7: time-ordered, lex-sorted, private",
+                ],
+            },
+            {
+                heading: "When to pick v7",
+                body:
+                    "Choose v7 for primary keys, event IDs, or any record where creation order matters and you insert at high volume. Choose v4 for opaque tokens where ordering must not be visible, and v5 for deterministic IDs derived from a name. If you must match a legacy system that expects v1, keep v1 only for compatibility.",
+            },
+            {
+                heading: "How to generate a v7 UUID",
+                body:
+                    "This generator produces v7 entirely in your browser with no upload. In code, the uuid npm package exposes v7 as uuidv7(), Python has uuid7 via third-party libraries, and Java adds UUID v7 in JDK 21 with random plus time construction. Until browsers ship native v7, these local tools are the practical path.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is UUID v7 part of the official spec?",
+                a: "Yes. UUID v7 was added in RFC 9562 in May 2024, alongside the clarification of existing versions. It is the recommended time-ordered UUID going forward.",
+            },
+            {
+                q: "Is UUID v7 sortable as a string?",
+                a: "Yes. The Unix millisecond timestamp is the most significant field, so lexical sorting equals chronological sorting. That is the core design goal of v7.",
+            },
+            {
+                q: "Is UUID v7 better than v4?",
+                a: "For database keys and any ID where order matters, yes. For opaque random tokens where you do not want time visible, v4 is still the better choice.",
+            },
+            {
+                q: "Does v7 leak the exact creation time?",
+                a: "Yes, the first 12 hex characters are the timestamp. If that matters for privacy, use v4 where the bits are random.",
+            },
+        ],
+        publishedIn: "v1.10",
+    },
+
+    {
+        slug: "uuid-format-and-examples",
+        toolId: "uuid-generator",
+        relatedToolIds: ["base64", "timestamp-converter"],
+        comparisonSlugs: ["uuid-v4-vs-v7"],
+        eyebrow: "Explainer · Guide",
+        title: "UUID Format and Examples: What Each Character Means",
+        description:
+            "A UUID is 32 hex digits grouped 8-4-4-12. See real v4, v7, v1 and v5 examples, where the version digit lives, and how to recognize each version at a glance.",
+        heroQuestion: "What does a UUID look like?",
+        shortAnswer:
+            "A UUID looks like 550e8400-e29b-41d4-a716-446655440000: 36 characters, 32 hex digits and 4 hyphens in 8-4-4-12. The 13th hex digit is the version, so a 4 in that position marks v4, a 7 marks v7, a 1 marks v1, and a 5 marks v5.",
+        sections: [
+            {
+                heading: "The 36-character shape",
+                body:
+                    "A canonical UUID is 128 bits shown as 32 hex digits with hyphens after 8, 12, 16 and 20 characters, producing 8-4-4-4-12. That is 36 characters with hyphens, 32 without. Tools also emit compact (no hyphens), braces ({...}), and URN (urn:uuid:...) variants, which are the same bits with different wrapping.",
+                list: [
+                    "8-4-4-12 hyphenated: 550e8400-e29b-41d4-a716-446655440000",
+                    "compact: 550e8400e29b41d4a716446655440000",
+                    "braces: {550e8400-e29b-41d4-a716-446655440000}",
+                    "urn: urn:uuid:550e8400-e29b-41d4-a716-446655440000",
+                ],
+            },
+            {
+                heading: "Where the version digit lives",
+                body:
+                    "Count 13 hex digits from the start, or look right after the second hyphen. That character tells the generation strategy. It is always 1 to 8. Immediately after it, the variant bits (8, 9, a, b) mark the RFC 9562 family. Everything else is time, randomness, or a hash-derived value.",
+            },
+            {
+                heading: "Examples by version",
+                body:
+                    "Each version leaves a telltale mark in the same position, even though the rest looks random. Use these as a mental cheat sheet when you see a UUID in a log or a database.",
+                list: [
+                    "v4 random: 550e8400-e29b-41d4-a716-446655440000 (13th digit is 4, fully random tail)",
+                    "v7 time-ordered: 0191f3b8-7a2c-7f3a-9b1d-3e5a6c7d8e9f (leading 0191... is time, 13th digit is 7, sorts chronologically)",
+                    "v1 time-based: 6ba7b810-9dad-11d1-80b4-00c04fd430c8 (DNS namespace, 13th digit is 1, low bits of time first)",
+                    "v5 name-based: 21f7f8de-8051-5b89-8680-0195ef798b6a (13th digit is 5, SHA-1 of namespace plus name)",
+                ],
+            },
+            {
+                heading: "What the groups encode",
+                body:
+                    "In v4 they encode nothing but randomness. In v7 the first group is mostly time, so leading groups increase monotonically. In v1 the time is split across the first three groups with the low bits first, which is why string sorting fails. In v5 the entire value is a SHA-1 hash of namespace plus name shaped into UUID fields.",
+            },
+            {
+                heading: "How to validate a UUID",
+                body:
+                    "A valid RFC 9562 UUID matches 8-4-4-4-12 hex, version 1 to 8, and variant 8 to b. Many parsers accept lowercase or uppercase, and some accept compact form. If your input misses hyphens, has the wrong version digit, or uses characters outside a-f, 0-9, it is not a well-formed UUID.",
+            },
+        ],
+        faq: [
+            {
+                q: "What is a sample UUID value?",
+                a: "A typical v4 sample is 550e8400-e29b-41d4-a716-446655440000. For v7 a sample is 0191f3b8-7a2c-7f3a-9b1d-3e5a6c7d8e9f, where the leading time portion increases with creation time.",
+            },
+            {
+                q: "How do I tell which version a UUID is?",
+                a: "Look at the 13th hex digit, right after the second hyphen. 1 is v1, 4 is v4, 5 is v5, 7 is v7. That single character reveals the generation method.",
+            },
+            {
+                q: "Are UUIDs case sensitive?",
+                a: "No. UUIDs are hex, so uppercase and lowercase are identical. Tools emit lowercase by convention, and parsers accept either.",
+            },
+            {
+                q: "Can I generate UUIDs without hyphens?",
+                a: "Yes. The compact format removes hyphens, producing 32 hex digits. The bits are identical, only the presentation differs.",
+            },
+        ],
+        publishedIn: "v1.10",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────

@@ -329,6 +329,23 @@ import "../../styles/tool-options.css";
             you'd get the same id repeated.
           </p>
         </details>
+        <details class="faq-item">
+          <summary class="faq-summary">What does a UUID look like?</summary>
+          <p class="body-md faq-answer">
+            A UUID looks like 550e8400-e29b-41d4-a716-446655440000: 32 hex digits in 8-4-4-4-12, 36
+            characters with hyphens. The 13th digit is the version, so a 4 marks v4 and a 7 marks
+            v7. See <a href="/learn/uuid-format-and-examples">UUID Format and Examples</a> for v1,
+            v4, v5 and v7 samples.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Is UUID v7 better than v4?</summary>
+          <p class="body-md faq-answer">
+            For database primary keys and any ID where chronological order matters, yes: v7 sorts by
+            creation time and inserts sequentially. For opaque public tokens where you do not want
+            time visible, stick to v4.
+          </p>
+        </details>
       </div>
     </Container>
   </section>
