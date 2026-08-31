@@ -3102,6 +3102,88 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.10",
     },
+
+    {
+        slug: "how-to-hash-password-with-bcrypt",
+        toolId: "bcrypt",
+        relatedToolIds: ["sha-256", "hmac", "sha-512"],
+        comparisonSlugs: ["sha-256-vs-bcrypt"],
+        eyebrow: "How To · Guide",
+        title: "How to Hash a Password with bcrypt",
+        description:
+            "Hash a password with bcrypt in Node.js, Python and Java. Generate a salted bcrypt hash with cost 10 to 12, verify it, and handle the 72-byte limit, all locally in your browser.",
+        heroQuestion: "How do I hash a password with bcrypt?",
+        shortAnswer:
+            "Use a bcrypt library in your language, generate a hash with a cost factor like 10 to 12, and store the 60-character string it returns. That string already contains the salt and cost, so verification is a single compare call. The same hash can be produced locally with the bcrypt tool without uploading anything.",
+        sections: [
+            {
+                heading: "The three steps",
+                body:
+                    "Every bcrypt integration follows the same flow: generate a hash from the password plus a random salt and a cost factor, store the 60-character result exactly as returned, and verify later by comparing the candidate password against the stored hash. The salt and cost travel inside the hash, so you store nothing extra.",
+            },
+            {
+                heading: "Node.js: bcrypt and bcryptjs",
+                body:
+                    "Install bcrypt or the pure JavaScript bcryptjs, then call the async hash function. The library generates a random salt automatically, applies 2^cost rounds, and returns a string like $2b$10$ plus salt plus hash. Verification is compare or compareSync against the stored string.",
+                list: [
+                    "npm install bcrypt or bcryptjs",
+                    "const hash = await bcrypt.hash(password, 10)",
+                    "const ok = await bcrypt.compare(candidate, hash)",
+                    "Use 10 as default, 11 to 12 for new systems",
+                ],
+            },
+            {
+                heading: "Python: bcrypt and passlib",
+                body:
+                    "In Python, pip install bcrypt gives a direct binding, and passlib wraps it with a friendlier API. Both generate a random salt per hash and return the same 60-character modular crypt format. Verify by hashing the candidate with the stored salt and cost and comparing.",
+                list: [
+                    "pip install bcrypt",
+                    "hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=10))",
+                    "bcrypt.checkpw(candidate.encode(), hash) returns true or false",
+                    "passlib alternative: CryptContext(schemes=[\"bcrypt\"]).hash(password)",
+                ],
+            },
+            {
+                heading: "Java: jBCrypt and Spring Security",
+                body:
+                    "Java projects commonly use jBCrypt or Spring Security Crypto. Both expose a hashpw and checkpw pair that mirrors the Node and Python APIs. Spring Security also offers BCryptPasswordEncoder with strength 10 to 12, which is the same cost factor under a different name.",
+                list: [
+                    "jBCrypt: BCrypt.hashpw(password, BCrypt.gensalt(10))",
+                    "Spring: new BCryptPasswordEncoder(10).encode(password)",
+                    "Verify with BCrypt.checkpw(candidate, stored) or encoder.matches(candidate, stored)",
+                ],
+            },
+            {
+                heading: "Verifying a password",
+                body:
+                    "Never compare hashes with string equality. Use the library compare function, which extracts the salt and cost from the stored hash, repeats the key stretching with the candidate password, and does a constant-time equality check. That is the only correct verification path.",
+            },
+            {
+                heading: "Cost factor and the 72-byte limit",
+                body:
+                    "The cost factor is the dial: each increment doubles the work, so cost 11 is twice as slow as cost 10. Choose the highest your login latency tolerates, typically 11 or 12. Also remember bcrypt only considers the first 72 bytes of input, so longer passwords are truncated unless you enforce a length limit or pre-hash. For file checksums or tamper detection, use a fast hash like SHA-256 instead.",
+            },
+        ],
+        faq: [
+            {
+                q: "What bcrypt cost should I use?",
+                a: "10 is the common default, 11 to 12 is recommended for new systems. Pick the highest cost your server tolerates without hurting login latency.",
+            },
+            {
+                q: "How do I verify a bcrypt hash?",
+                a: "Use the library compare function with the candidate password and the stored hash. It extracts the salt and cost, re-hashes the candidate, and checks equality. Do not use string comparison.",
+            },
+            {
+                q: "Does bcrypt work in the browser without a server?",
+                a: "Yes. Libraries like bcryptjs run entirely in the browser, and the tool on this site does the same in a Web Worker. Nothing is uploaded.",
+            },
+            {
+                q: "What about Python bcrypt vs Node bcrypt?",
+                a: "Both produce the same 60-character format and are interchangeable. A hash generated in Python verifies correctly in Node and vice versa, because the format stores version, cost, salt and hash together.",
+            },
+        ],
+        publishedIn: "v1.10",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────
