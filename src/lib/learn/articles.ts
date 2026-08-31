@@ -3331,6 +3331,71 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.10",
     },
+
+    {
+        slug: "how-to-convert-csv-to-json",
+        toolId: "csv-to-json",
+        relatedToolIds: ["json-to-csv", "json-formatter", "json-validator"],
+        comparisonSlugs: ["csv-vs-json"],
+        eyebrow: "How To · Guide",
+        title: "How to Convert CSV to JSON",
+        description:
+            "Convert CSV to JSON in three steps: paste your table, choose header and delimiter, and get structured JSON. Handles quoted fields, type inference, and large files locally.",
+        heroQuestion: "How do I convert CSV to JSON?",
+        shortAnswer:
+            "Paste your CSV into a converter, confirm the first row is a header, pick the delimiter, and convert. Each row becomes an object with header keys, quoted fields are handled, and large files convert in a background worker with a capped preview.",
+        sections: [
+            {
+                heading: "The three steps",
+                body:
+                    "Open the CSV to JSON converter, paste your table or drop a .csv file, check First row is header, pick the delimiter or keep Auto, and press Convert. The JSON array appears on the right ready to copy or download. Nothing is uploaded.",
+            },
+            {
+                heading: "Delimiter and quoted fields",
+                body:
+                    "CSV can use comma, semicolon, tab, or pipe. Auto detection picks the most likely one, and quoted fields that contain delimiters or newlines are handled per RFC 4180 so commas inside quotes stay in one cell. Switch delimiters if the header looks wrong.",
+            },
+            {
+                heading: "Headers become keys",
+                body:
+                    "With First row is header on, the first row supplies the object keys. With it off, columns become column1, column2, and every row is data. Duplicate headers are flagged so you can fix them instead of silently losing a value.",
+            },
+            {
+                heading: "Type inference versus strings",
+                body:
+                    "The converter can keep every value as a string or infer types: numbers become numbers, true and false become booleans, null becomes null. Choose strings when you need exact preservation, and types when the JSON will feed code that expects numbers and booleans.",
+            },
+            {
+                heading: "Large files",
+                body:
+                    "Files above about 15 MB switch to a background worker. The file is read off the main thread, you see a capped preview in the editor, and the full JSON is a one-click download. The only ceiling is device memory.",
+            },
+            {
+                heading: "What to do with the result",
+                body:
+                    "The output is a JSON array, so it can be piped straight into the JSON Validator, Formatter, or Diff. If the source CSV was ragged, the converter fails loudly with the exact line number instead of silently padding.",
+            },
+        ],
+        faq: [
+            {
+                q: "Does the conversion run locally?",
+                a: "Yes. Parsing and converting run entirely in your browser, in a background worker for large tables. Your CSV never leaves your machine.",
+            },
+            {
+                q: "Which delimiters are supported?",
+                a: "Comma, semicolon, tab, and pipe, with auto detection. Quoted fields that contain delimiters and newlines are handled correctly.",
+            },
+            {
+                q: "What happens to missing fields?",
+                a: "Rows with fewer fields get empty strings for the missing columns so the shape stays consistent. Ragged rows that would break the table fail with the line number.",
+            },
+            {
+                q: "Can I keep every value as a string?",
+                a: "Yes. Turn off type inference and every cell stays a string. With it on, numbers, booleans, and null are typed.",
+            },
+        ],
+        publishedIn: "v1.10",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────
