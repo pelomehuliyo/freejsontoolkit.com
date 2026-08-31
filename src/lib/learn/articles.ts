@@ -3261,6 +3261,76 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.10",
     },
+
+    {
+        slug: "how-to-compare-two-text-files",
+        toolId: "text-diff",
+        relatedToolIds: ["json-diff", "json-formatter"],
+        comparisonSlugs: ["json-diff-vs-text-diff"],
+        eyebrow: "How To · Guide",
+        title: "How to Compare Two Text Files Online",
+        description:
+            "Compare two text files online line by line, see added and removed lines highlighted, and get a similarity score. Works for logs, code, configs and plain text, locally.",
+        heroQuestion: "How do I compare two text files?",
+        shortAnswer:
+            "Paste the original text on the left and the modified text on the right, and the diff highlights added, removed, and changed lines as you type. A similarity score shows what share is identical, and the check runs 100 percent locally so nothing is uploaded.",
+        sections: [
+            {
+                heading: "The three steps",
+                body:
+                    "Open the Text Diff tool, paste the original document in the left editor and the modified one in the right editor, and the comparison runs live. Added lines are highlighted in teal, removed lines in red, and modified lines are paired so you can read before and after together. No upload is involved and large inputs run in a background worker.",
+            },
+            {
+                heading: "What the colors mean",
+                body:
+                    "The diff uses three visual signals. Additions are marked teal, deletions red, and lines that were replaced are shown as a paired row with the old line and the new line side by side instead of as two separate blocks.",
+                list: [
+                    "Teal: lines added in the new version",
+                    "Red: lines removed from the old version",
+                    "Paired rows: a removed line replaced by an added one",
+                ],
+            },
+            {
+                heading: "Side by side or unified",
+                body:
+                    "Side by side keeps the old and new documents aligned for scanning. Unified merges both into a single column with diff markers, which is closer to a git patch and useful when the change is concentrated in a few lines.",
+            },
+            {
+                heading: "Cutting the noise",
+                body:
+                    "Reformatted text can produce diffs that are mostly whitespace. Ignore whitespace and ignore case options strip that noise so the diff shows real changes only. They never alter the documents, they only change what counts as a difference.",
+            },
+            {
+                heading: "Reading the similarity score",
+                body:
+                    "The similarity score is the share of lines that are identical on both sides, as a percentage of all lines involved. 100 percent means identical, 0 percent means nothing in common. It is a quick sanity signal, not a semantic guarantee, since identical lines can sit in different places.",
+            },
+            {
+                heading: "Text Diff versus JSON Diff",
+                body:
+                    "The same diff engine also powers JSON Diff for structured data. Text Diff is the line based version for any plain text: logs, code, markdown, environment files, and SQL. For two JSON documents, JSON Diff ignores whitespace and key order and compares meaning instead of lines.",
+            },
+        ],
+        faq: [
+            {
+                q: "Can I compare two text files online without uploading?",
+                a: "Yes. The comparison runs entirely in your browser, in a background worker for large inputs. Neither document ever leaves your machine.",
+            },
+            {
+                q: "What do the colors mean?",
+                a: "Additions are teal, deletions are red, and modified lines are paired so you see the old and new together.",
+            },
+            {
+                q: "What does the similarity score mean?",
+                a: "It is the share of lines that are identical on both sides, as a percentage of all lines involved. 100 percent means identical, 0 percent means nothing in common.",
+            },
+            {
+                q: "Should I use Text Diff or JSON Diff?",
+                a: "For any plain text use Text Diff. For two JSON documents use JSON Diff, which compares keys and values and ignores whitespace and key ordering.",
+            },
+        ],
+        publishedIn: "v1.10",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────
