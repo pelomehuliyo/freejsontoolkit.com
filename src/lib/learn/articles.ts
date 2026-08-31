@@ -3184,6 +3184,83 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.10",
     },
+
+    {
+        slug: "what-is-unix-timestamp",
+        toolId: "timestamp-converter",
+        relatedToolIds: ["uuid-generator", "json-formatter"],
+        comparisonSlugs: [],
+        eyebrow: "Explainer · Guide",
+        title: "What Is a Unix Timestamp?",
+        description:
+            "A Unix timestamp counts seconds since 1970-01-01. Learn how it works, seconds versus milliseconds, the 2038 problem, and how to convert between a timestamp and a human date, locally.",
+        heroQuestion: "What is a Unix timestamp?",
+        shortAnswer:
+            "A Unix timestamp is the number of seconds, or milliseconds, since 1970-01-01 00:00:00 UTC, the Unix epoch. It is a single integer that represents one moment in time, so you can compare, sort, and store dates without formats or time zones. The same converter runs 100 percent locally.",
+        sections: [
+            {
+                heading: "The epoch: 1970-01-01 00:00:00 UTC",
+                body:
+                    "The Unix epoch is an arbitrary starting point chosen when Unix was designed. Every timestamp is the elapsed time since that moment. 0 is the epoch itself, 86400 is one day later, and 1700000000 is in late 2023. Negative values represent dates before 1970, which some systems support and others do not.",
+            },
+            {
+                heading: "Seconds, milliseconds, microseconds",
+                body:
+                    "The classic Unix timestamp counts seconds, 10 digits today. JavaScript Date.now() counts milliseconds, 13 digits, and some databases count microseconds or nanoseconds. The digits tell you the unit, and mixing them shifts a date by a factor of 1000.",
+                list: [
+                    "10 digits: seconds since epoch (Unix time, epoch time)",
+                    "13 digits: milliseconds (JavaScript, Java)",
+                    "16 digits: microseconds",
+                    "19 digits: nanoseconds",
+                ],
+            },
+            {
+                heading: "Why timestamps exist",
+                body:
+                    "A timestamp is timezone-free and format-free. An ISO string like 2026-08-31T12:00:00Z and 08/31/2026 08:00 EDT are the same moment, but they parse differently. As an integer 1725105600, that moment has exactly one representation, which is why logs, databases, and APIs pass dates as timestamps.",
+            },
+            {
+                heading: "The 2038 problem",
+                body:
+                    "Signed 32-bit seconds overflow on 2038-01-19 03:14:07 UTC, when the value reaches 2,147,483,647. Systems that still store time in 32 bits will wrap to a negative number. Modern systems use 64 bits, which pushes the limit billions of years out, and many counters already use milliseconds in 64 bits.",
+            },
+            {
+                heading: "How to convert a timestamp and a date",
+                body:
+                    "To go from a timestamp to a date, multiply or divide to reach seconds, then create a Date from the epoch. To go from a date to a timestamp, parse the date as an instant and divide its millisecond value. Always decide whether the human date is in UTC or in local time, since the same timestamp reads differently in each zone.",
+                list: [
+                    "Timestamp to date: new Date(timestamp * 1000) in JavaScript for seconds",
+                    "Date to timestamp: Math.floor(date.getTime() / 1000) for seconds",
+                    "Use Date.now() for the current timestamp, not a formatted string",
+                    "Show both UTC and local time when you convert, to catch off-by-hour errors",
+                ],
+            },
+            {
+                heading: "When to use a timestamp",
+                body:
+                    "Use a timestamp for storage, sorting, and APIs where an unambiguous integer wins, and use a formatted date for display where a human reads it. Store as a timestamp, render as a readable string, and convert locally so the data never leaves your browser.",
+            },
+        ],
+        faq: [
+            {
+                q: "How many digits is a Unix timestamp?",
+                a: "10 digits today for seconds. 13 digits means milliseconds, 16 means microseconds. The same moment is 1725105600 in seconds and 1725105600000 in milliseconds.",
+            },
+            {
+                q: "Is a Unix timestamp always in UTC?",
+                a: "Yes. It counts from the UTC epoch, so it has no timezone. When you display it as a date you choose a timezone, which is why the same timestamp can show different wall times.",
+            },
+            {
+                q: "What happens in 2038?",
+                a: "Signed 32-bit seconds overflow on 2038-01-19. Modern systems store timestamps in 64 bits, which avoids the wrap. Using 64-bit integers or millisecond timestamps already solves it.",
+            },
+            {
+                q: "Can I convert a timestamp without uploading?",
+                a: "Yes. The conversion is pure arithmetic in your browser. The timestamp converter on this site does it locally, including pasting a date like 2026-08-31 or a number like 1725105600.",
+            },
+        ],
+        publishedIn: "v1.10",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────
