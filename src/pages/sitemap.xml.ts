@@ -31,7 +31,7 @@ const STATIC_ROUTES: SitemapEntry[] = [
 ];
 
 export const GET: APIRoute = async ({ site }) => {
-  const base = (site ?? new URL("https://freejsontoolkit.com")).toString().replace(/\/$/, "");
+  const base = (site ?? new URL("https://www.freejsontoolkit.com")).toString().replace(/\/$/, "");
 
   // Tools + comparisons derive from the spines — a new registry entry or a new
   // comparison lands here automatically, in the right tier, forever.

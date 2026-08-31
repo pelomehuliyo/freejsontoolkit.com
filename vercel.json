@@ -1,0 +1,10 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "freejsontoolkit.com" }],
+      "destination": "https://www.freejsontoolkit.com/$1",
+      "permanent": true
+    }
+  ]
+}

@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /sandbox
 
-Sitemap: https://freejsontoolkit.com/sitemap.xml
+Sitemap: https://www.freejsontoolkit.com/sitemap.xml

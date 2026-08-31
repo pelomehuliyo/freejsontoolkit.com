@@ -2820,6 +2820,140 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.9",
     },
+
+    {
+        slug: "how-does-md5-work",
+        toolId: "md5",
+        relatedToolIds: ["sha-256", "sha-512", "hmac"],
+        comparisonSlugs: ["md5-vs-sha-256"],
+        eyebrow: "Security · Under the Hood",
+        title: "How Does MD5 Work?",
+        description:
+            "Step-by-step inside MD5: padding, 512-bit blocks, four rounds of 16 operations, and why the 128-bit output is one-way. With a worked example and the 2004 collision story.",
+        heroQuestion: "How does MD5 actually process data?",
+        shortAnswer:
+            "MD5 pads your input to a multiple of 512 bits, breaks it into blocks, runs each block through four rounds of bitwise mixing that update a 128-bit state, and outputs that state as 32 hex characters. The mixing is one-way, so the hash cannot be reversed.",
+        sections: [
+            {
+                heading: "Step 1: Padding and length",
+                body:
+                    "MD5 processes data in 512-bit blocks, but your input can be any length. First it appends a single 1 bit, then zeros until the length is 64 bits short of a multiple of 512, then appends the original length as a 64-bit integer. This guarantees an exact block boundary and records how long the real data was.",
+            },
+            {
+                heading: "Step 2: Four rounds per block",
+                body:
+                    "Each 512-bit block is split into sixteen 32-bit words. The algorithm maintains four 32-bit state words (A, B, C, D) starting from fixed constants. Each block runs 64 operations grouped into four rounds of 16. Round 1 uses function F, round 2 uses G, round 3 uses H, round 4 uses I, each a different bitwise mix of the state words, plus modular addition with a message word, a constant from the sine table, and a left rotation. After the 64 operations, the result is added back into the state. The next block starts from there.",
+            },
+            {
+                heading: "Step 3: The 32-character output",
+                body:
+                    "After the last block, the four state words are concatenated. That is 4 times 32 bits, or 128 bits, written as 16 bytes, shown as 32 hexadecimal characters. The same bytes always produce the same 32 characters, and no length information beyond 128 bits remains, so the original cannot be recovered. The phrase hello hashes to 5d41402abc4b2a76b9719d911017c592, and any change to a single bit produces a completely different hash.",
+            },
+            {
+                heading: "Why MD5 collisions became practical",
+                body:
+                    "In 2004 Xiaoyun Wang demonstrated two different messages with the same MD5 hash, computed in seconds on commodity hardware. By 2007 chosen-prefix collisions let an attacker craft two arbitrary documents that share a hash. The flaw lives in the 128-bit size and the round functions, not in padding or implementation. That is why MD5 is legacy for anything an attacker could influence.",
+            },
+            {
+                heading: "MD5 versus modern hashes",
+                body:
+                    "SHA-256 and SHA-512 use 32-bit and 64-bit words, 64 or 80 rounds, and 256 or 512 bits of output. MD5 uses 32-bit words, 64 operations per block, and 128 bits of output, with constants derived from sines. The modern designs keep the same Merkle Damgard structure but enlarge the state and strengthen the mixing, which is why they have no practical collisions while MD5 does.",
+            },
+        ],
+        faq: [
+            {
+                q: "What are the four rounds of MD5 called?",
+                a: "Round 1 uses function F, round 2 uses G, round 3 uses H, round 4 uses I, each a different bitwise combination of the state words. Each round runs 16 operations with its own message schedule and rotation constants.",
+            },
+            {
+                q: "Why is MD5 always 32 characters?",
+                a: "The output is fixed at 128 bits. Four 32-bit words become 16 bytes, which is 32 hex digits. Input length does not change output length.",
+            },
+            {
+                q: "Can you reverse the 64 operations?",
+                a: "No. Each operation mixes with modular addition and nonlinear functions, discarding information. Even knowing the final 128 bits, there are infinitely many inputs that could map to it, so reversal is impossible by design. Attackers guess inputs instead.",
+            },
+            {
+                q: "How is MD5 different from SHA-256 inside?",
+                a: "Both pad and block process, but MD5 works on 512-bit blocks with 4 rounds and 128-bit state, while SHA-256 also uses 512-bit blocks but with 64 rounds and 256-bit state. SHA-256 also uses stronger message scheduling and different constants.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
+
+    {
+        slug: "how-to-get-md5-hash-of-file",
+        toolId: "md5",
+        relatedToolIds: ["sha-256", "sha-512", "base64"],
+        comparisonSlugs: ["md5-vs-sha-256"],
+        eyebrow: "How To · Guide",
+        title: "How to Get the MD5 Hash of a File",
+        description:
+            "Generate MD5 hashes for any file on Windows, macOS, and Linux, and verify them against a published .md5. Commands for certutil, Get-FileHash, md5, md5sum, plus verification and mismatch diagnosis.",
+        heroQuestion: "How do I get the MD5 hash of a file?",
+        shortAnswer:
+            "Use the built-in command for your platform: certutil -hashfile path MD5 or Get-FileHash path -Algorithm MD5 on Windows, md5 /path on macOS, md5sum /path on Linux. The tool prints 32 hex characters. Compare that string character for character with the published hash, or verify a .md5 sidecar file automatically.",
+        sections: [
+            {
+                heading: "What you need",
+                body:
+                    "The file you downloaded and the official hash published beside the download link. Publishers often list 32 hex characters next to the file, or ship a .md5 file, which is a plain text file containing that hash and sometimes the filename. Keep that reference value before you compute.",
+            },
+            {
+                heading: "Windows: PowerShell Get-FileHash",
+                body:
+                    "Open PowerShell and run Get-FileHash \"C:\\Downloads\\setup.exe\" -Algorithm MD5. The Hash property is the 32-character result. It works on Windows 10 and 11 without installing anything, reads large files in streaming fashion, and is case insensitive when you compare.",
+            },
+            {
+                heading: "Windows: certutil",
+                body:
+                    "On any Windows since 7, run certutil -hashfile \"C:\\Downloads\\setup.exe\" MD5 in Command Prompt. The checksum appears on its own line after a short processing pause. This is the widest compatible option for enterprise and legacy scripts.",
+            },
+            {
+                heading: "macOS: md5",
+                body:
+                    "Run md5 /path/to/file.zip in Terminal. The output is MD5 (/path/to/file.zip) = followed by 32 hex characters. Append -q for the hash alone, useful in scripts. The command reads the entire file, so large files take a few seconds.",
+            },
+            {
+                heading: "Linux: md5sum",
+                body:
+                    "Run md5sum /path/to/file.zip. The output is the hash, two spaces, then the filename. Verify against a sidecar file with md5sum -c file.md5, which reads each line of the .md5 file and prints OK or FAILED per entry. Most distributions include this in coreutils.",
+            },
+            {
+                heading: "Online and programmatic",
+                body:
+                    "For text or small files you can compute MD5 in the browser with the MD5 Hash Generator, which runs locally. In code use hashlib.md5 in Python, crypto.createHash(\"md5\") in Node.js, or MessageDigest MD5 in Java. These produce the same 32 characters for the same bytes.",
+            },
+            {
+                heading: "Compare and diagnose mismatches",
+                body:
+                    "Paste both hashes into a plain text comparison and check character for character, ignoring case. A mismatch means the file was corrupted, re-downloaded with changes, or you hashed the wrong file. Delete, re-download from a trusted mirror, and verify again. If the same file keeps failing, treat the source or channel as untrusted. For integrity that must resist tampering, use SHA-256 instead of MD5.",
+            },
+        ],
+        faq: [
+            {
+                q: "What command gets an MD5 on Windows?",
+                a: "Get-FileHash \"path\\to\\file\" -Algorithm MD5 in PowerShell, or certutil -hashfile \"path\\to\\file\" MD5 in Command Prompt.",
+            },
+            {
+                q: "How do I verify a .md5 file on Linux?",
+                a: "Run md5sum -c archive.md5 in the same directory. The tool reads each hash and filename from the .md5 file and reports OK or FAILED for each entry.",
+            },
+            {
+                q: "Are MD5 hashes case sensitive?",
+                a: "No. Hex digits match case insensitively, so 5d41402abc and 5D41402ABC are identical.",
+            },
+            {
+                q: "Can I get an MD5 without installing anything?",
+                a: "Yes. certutil and Get-FileHash ship with Windows, md5 ships with macOS, and md5sum ships with Linux coreutils. All three read the whole file locally.",
+            },
+            {
+                q: "Why do my hashes not match?",
+                a: "The file changed since the reference was published, the download was corrupted, or you hashed a different file. Re-download and compare again character for character.",
+            },
+        ],
+        publishedIn: "v1.9",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────

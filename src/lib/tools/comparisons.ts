@@ -788,4 +788,103 @@ export const COMPARISONS: Record<string, Comparison> = {
       "passwords use a slow, salted function like bcrypt. Neither tool uploads your input; both run " +
       "entirely in the browser.",
   },
+
+  "md5-vs-sha-512": {
+    slug: "md5-vs-sha-512",
+    aId: "md5",
+    bId: "sha-512",
+    title: "MD5 vs SHA-512",
+    intro:
+      "MD5 and SHA-512 both produce a one-way digest, but they belong to different security eras and " +
+      "operational tiers. MD5 is a 128-bit legacy checksum broken since 2004, kept alive only for " +
+      "compatibility and non-security deduplication. SHA-512 is a 512-bit member of the SHA-2 family, " +
+      "built for collision resistance on 64-bit hardware with a much larger output. If a hash protects " +
+      "anything that could be tampered with, SHA-512 is the safe default. Both tools run 100% in your browser.",
+    useA: {
+      heading: "Use MD5 when",
+      points: [
+        "You must interoperate with an existing system that hard-codes a 32-char MD5, such as an old dedup key or legacy checksum column.",
+        "The value is a non-security fingerprint where a collision would be meaningless, not a forgery.",
+        "Storage is constrained and a 32-char hex string is required by an old spec.",
+        "You are reading or verifying hashes, not creating a new integrity design.",
+      ],
+    },
+    useB: {
+      heading: "Use SHA-512 when",
+      points: [
+        "File integrity, download verification, or signed data must resist tampering or forgery.",
+        "You are starting a new design with no legacy constraint and want the largest SHA-2 digest.",
+        "You run on 64-bit hardware where SHA-512 is typically faster than SHA-256.",
+        "You need future-proofing with 512 bits of digest against advances in cryptanalysis.",
+      ],
+    },
+    attributes: [
+      { label: "Digest size", a: "128 bits", b: "512 bits" },
+      { label: "Hex length", a: "32 chars", b: "128 chars" },
+      { label: "Base64 length", a: "24 chars", b: "88 chars" },
+      { label: "Released", a: "1992", b: "2001" },
+      { label: "Word width", a: "32-bit", b: "64-bit" },
+      { label: "Collision resistance", a: "Broken (practical attacks)", b: "Strong" },
+      { label: "Speed bias", a: "Fast, but irrelevant", b: "Fast on 64-bit, still safe" },
+      { label: "Status", a: "Legacy", b: "Current best practice" },
+      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+    ],
+    verdict:
+      "Choose SHA-512 for anything that must survive tampering, and reserve MD5 for legacy reads. " +
+      "The 32-char vs 128-char gap is the price of collision resistance, and on modern hardware that price " +
+      "is trivial. If forgery could matter, MD5 is not an option.",
+    note:
+      "Neither is for passwords. Both are fast checksums, so attackers can brute-force guesses per second. " +
+      "For credential storage use bcrypt. Neither tool uploads your input; both hash entirely in the browser.",
+  },
+
+  "md5-vs-bcrypt": {
+    slug: "md5-vs-bcrypt",
+    aId: "md5",
+    bId: "bcrypt",
+    title: "MD5 vs bcrypt",
+    intro:
+      "MD5 and bcrypt both produce a string from your input, but they solve opposite problems. MD5 " +
+      "is a fast, deterministic checksum: the same input always yields the same 32-char digest, which " +
+      "is perfect for legacy deduplication and terrible for passwords. bcrypt is a slow, salted password " +
+      "hash: every call yields a different 60-char hash thanks to a random salt and tunable cost. " +
+      "Fast integrity work wants MD5 or SHA-256; anything that must resist offline guessing wants bcrypt. " +
+      "Both tools run 100% in your browser.",
+    useA: {
+      heading: "Use MD5 when",
+      points: [
+        "You must match an existing legacy checksum, dedup column, or non-security fingerprint that hard-codes MD5.",
+        "The hash is not protecting a secret. A collision would be harmless noise, not a forgery.",
+        "Every caller must produce the same digest for the same bytes, deterministically.",
+        "You are verifying past data, not designing a new integrity system.",
+      ],
+    },
+    useB: {
+      heading: "Use bcrypt when",
+      points: [
+        "You are storing passwords or secrets that must survive offline brute-force after a leak.",
+        "You need per-record random salts so identical passwords never look alike in the database.",
+        "You want a tunable cost factor to keep pace as hardware gets faster, unlike a fixed fast hash.",
+        "You need an adaptive hash you can verify by re-hashing, not by string comparison of digests.",
+      ],
+    },
+    attributes: [
+      { label: "Purpose", a: "Fast legacy checksum", b: "Slow password hash" },
+      { label: "Salt", a: "None, deterministic", b: "Random per hash, embedded in output" },
+      { label: "Same input twice", a: "Identical 32-char digest", b: "Different 60-char hash each time" },
+      { label: "Output", a: "32 hex chars", b: "60 chars ($2b$10$...)" },
+      { label: "Speed", a: "Fast by design", b: "Deliberately slow (2^cost rounds)" },
+      { label: "Collision resistance", a: "Broken", b: "Not applicable, brute force is the threat" },
+      { label: "Best for", a: "Legacy fingerprints", b: "Passwords and secrets" },
+      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+    ],
+    verdict:
+      "If an attacker guessing the input could matter, MD5 is the wrong tool. Use bcrypt for any secret " +
+      "that must survive a leak, and reserve MD5 for legacy reads where a collision would not help an " +
+      "attacker. Fast hashes are for fingerprints, slow hashes are for credentials.",
+    note:
+      "Putting a fast hash on passwords lets attackers test billions of guesses per second per GPU. " +
+      "bcrypt's cost and per-hash salt make each guess expensive. Neither tool uploads your input; both " +
+      "run entirely in the browser.",
+  },
 };

@@ -130,6 +130,8 @@ export const FAQS: Record<string, Faq[]> = {
     { q: "Can I reverse or \"decrypt\" an MD5 hash?", a: "No. MD5 is one-way. What you see online are rainbow tables or dictionary lookups, which only match known inputs. Two different inputs can also share an MD5, so a match never proves the original text." },
     { q: "Why is MD5 still around?", a: "Legacy systems, old checksum conventions, and non-security dedup still reference it. This tool exists for those cases. It's not an endorsement." },
     { q: "Is my text uploaded?", a: "No. The hashing happens entirely in your browser with a local implementation. Nothing is sent anywhere." },
+    { q: "How long is an MD5 hash?", a: "Always 128 bits, shown as 32 hexadecimal characters. The length never changes with input size. Use How Does MD5 Work → to see why." },
+    { q: "How do I get the MD5 of a file?", a: "Use the built-in command for your platform: Get-FileHash on Windows, md5 on macOS, md5sum on Linux. See How to Get the MD5 Hash of a File → for exact commands and .md5 verification." },
   ],
   "regex-tester": [
     { q: "Is my text uploaded anywhere?", a: "No. Matching runs entirely in your browser using the native RegExp engine. Your pattern and text never leave your machine." },

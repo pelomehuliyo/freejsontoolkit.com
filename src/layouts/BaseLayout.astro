@@ -29,12 +29,12 @@ const {
 // Determine Canonical URL
 const canonicalURL = new URL(
   Astro.url.pathname,
-  Astro.site || "https://freejsontoolkit.com",
+  Astro.site || "https://www.freejsontoolkit.com",
 );
 
 // Set up JSON-LD structured data — route-aware, built from the tool registry
 // (see lib/seo/structured-data.ts). Skipped entirely for noindex pages.
-const siteBaseUrl = Astro.site?.toString() || "https://freejsontoolkit.com";
+const siteBaseUrl = Astro.site?.toString() || "https://www.freejsontoolkit.com";
 const jsonLd = noindex
   ? null
   : buildJsonLd({ pathname: Astro.url.pathname, site: siteBaseUrl, title, description });
@@ -125,7 +125,7 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
       import.meta.env.PROD && (
         <script is:inline>
           (function () {
-            var gtmLoaded = false;
+            let gtmLoaded = false;
             function loadGA() {
               if (gtmLoaded) return;
               gtmLoaded = true;
@@ -134,7 +134,7 @@ const registryJson = JSON.stringify(registryPayload).replace(/</g, "\\u003c");
               window.gtag = gtag;
               gtag("js", new Date());
               gtag("config", "G-PYSH78FPX0");
-              var s = document.createElement("script");
+              const s = document.createElement("script");
               s.async = true;
               s.src = "https://www.googletagmanager.com/gtag/js?id=G-PYSH78FPX0";
               document.head.appendChild(s);
