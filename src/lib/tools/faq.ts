@@ -21,6 +21,8 @@ export const FAQS: Record<string, Faq[]> = {
     { q: "Is my input uploaded anywhere?", a: "No. Encoding and decoding run entirely in your browser, in a background worker for large inputs. Nothing you paste leaves your machine." },
     { q: "Why does the output get bigger when I encode?", a: "Base64 represents every 3 bytes of input as 4 printable characters, so encoded text is always at least ~33% larger than its byte length, more for non-ASCII since characters like emoji expand to several bytes first. The meter shows that ratio live." },
     { q: "What does the tag on decode mean?", a: "When you decode, the tool reads the first bytes of the result and names common formats (PNG, JPEG, PDF, GIF, WebP, ZIP, gzip) or marks it as JSON or plain text. If the payload is binary, you get a clean byte count instead of unreadable characters." },
+    { q: "Is Base64 encryption?", a: "No. Base64 is an encoding with no key, anyone can decode it. Use it for transport, not secrecy. See What Is Base64 Encoding → for why it hides nothing." },
+    { q: "How do I decode Base64 in Python or JavaScript?", a: "Python: base64.b64decode('SGVsbG8=').decode(). JavaScript: atob('SGVsbG8=') in the browser or Buffer.from('SGVsbG8=', 'base64').toString() in Node. See Base64 Decode in Python, JavaScript, and Java → for padding and URL-safe fixes." },
   ],
   "bcrypt": [
     { q: "Is my password uploaded?", a: "No. Hashing runs entirely in your browser, in a background worker. Nothing you enter leaves your machine." },
@@ -58,6 +60,8 @@ export const FAQS: Record<string, Faq[]> = {
     { q: "Why do I need a secret key?", a: "The key is what makes the MAC trustworthy. Anyone can compute SHA-256, but only parties who share the secret can produce or verify an HMAC. Keep the key secret. Treat it like a password, and never paste real production keys into any tool." },
     { q: "Which algorithm should I use?", a: "SHA-256 is the common default and matches most APIs and protocols. SHA-512 gives a larger 512-bit MAC and is a good choice for high-security or high-throughput setups. See the SHA-256 vs HMAC comparison ." },
     { q: "Is HMAC the same as a hash?", a: "Not quite. A plain hash like SHA-256 has no secret. Anyone can compute it, so it detects accidental corruption but not forgery. HMAC adds a key, so it also proves authenticity. For password storage specifically, use a slow, salted function like bcrypt instead." },
+    { q: "Is HMAC encryption?", a: "No. HMAC is authentication, not encryption. It proves integrity and authenticity but does not hide content. See What Is HMAC →." },
+    { q: "How do I generate HMAC-SHA256 in Python or JavaScript?", a: "Node: crypto.createHmac('sha256', key).update(msg).digest('hex'). Python: hmac.new(key, msg, hashlib.sha256).hexdigest(). See How to Generate an HMAC-SHA-256 Signature →." },
   ],
   "json-diff": [
     { q: "Is either document uploaded?", a: "No. The comparison runs entirely in your browser, in a background worker for large inputs. Neither side ever leaves your machine." },
@@ -72,6 +76,7 @@ export const FAQS: Record<string, Faq[]> = {
     { q: "Can I format JSON in Chrome without an extension?", a: "Yes. This tool runs entirely in your browser tab, so there is nothing to install and no extension permissions to grant. Just paste your JSON and format." },
     { q: "What is JSON mostly used for?", a: "JSON is the standard format for API responses, configuration files, database exports, and data interchange between frontend and backend systems." },
     { q: "Does formatting change my data?", a: "No. Only whitespace and line breaks change. Keys, values, and array order are preserved exactly." },
+    { q: "How do I format a JSON file?", a: "Drop the file or paste its contents and click Format. In VS Code use Format Document or jq . file.json. See How to Format a JSON File →." },
   ],
   "json-minifier": [
     { q: "Is my JSON uploaded anywhere?", a: "No. Minification runs entirely in your browser, in a background worker for large files. Your data never leaves your machine." },
@@ -132,6 +137,8 @@ export const FAQS: Record<string, Faq[]> = {
     { q: "Is my text uploaded?", a: "No. The hashing happens entirely in your browser with a local implementation. Nothing is sent anywhere." },
     { q: "How long is an MD5 hash?", a: "Always 128 bits, shown as 32 hexadecimal characters. The length never changes with input size. Use How Does MD5 Work → to see why." },
     { q: "How do I get the MD5 of a file?", a: "Use the built-in command for your platform: Get-FileHash on Windows, md5 on macOS, md5sum on Linux. See How to Get the MD5 Hash of a File → for exact commands and .md5 verification." },
+    { q: "What is MD5 used for?", a: "MD5 is a 128-bit fingerprint for checksums and dedup. A .md5 file is plain text with that hash. See What Is MD5 →." },
+    { q: "Has MD5 been cracked?", a: "Yes, collisions since 2004. For tamper resistance use SHA-256/SHA-512, for passwords use bcrypt. See Is MD5 Secure →." },
   ],
   "regex-tester": [
     { q: "Is my text uploaded anywhere?", a: "No. Matching runs entirely in your browser using the native RegExp engine. Your pattern and text never leave your machine." },
@@ -155,6 +162,7 @@ export const FAQS: Record<string, Faq[]> = {
     { q: "Which unit should I pick?", a: "If the number is 10 digits long, it's seconds. 13 digits → milliseconds. 16 digits → microseconds. 19 digits → nanoseconds. When in doubt, try seconds first. The readout makes it obvious if the value looks wrong." },
     { q: "Why does the date look off by an hour?", a: "A timestamp is an absolute instant; the same instant reads differently in UTC and in your local timezone. The readout shows both, side by side, so the \"off by an hour\" is just your zone's offset, not a bug." },
     { q: "What date formats can I paste?", a: "Local ISO like 2026-08-05T12:00:00 (treated as your local time), UTC ISO ending in Z , RFC/HTTP dates like Wed, 05 Aug 2026 12:00:00 GMT , and bare dates like 2026-08-05 (local midnight)." },
+    { q: "What is a Unix timestamp?", a: "Seconds since 1970-01-01 UTC. 10 digits is seconds, 13 is milliseconds. See What Is a Unix Timestamp →." },
   ],
   "toml-to-json": [
     { q: "Is my TOML uploaded anywhere?", a: "No. Parsing runs entirely in your browser (in a background worker for large files). Your config never leaves your machine." },
@@ -183,6 +191,8 @@ export const FAQS: Record<string, Faq[]> = {
     { q: "What does \"deterministic\" mean for v5?", a: "The same namespace + name always hashes to the same UUID, on any machine. Generating a batch appends an index to the name so you get distinct ids; remove the index logic and you'd get the same id repeated." },
     { q: "What does a UUID look like?", a: "A UUID looks like 550e8400-e29b-41d4-a716-446655440000: 32 hex digits in 8-4-4-4-12, 36 characters with hyphens. The 13th digit is the version, so a 4 marks v4 and a 7 marks v7. See UUID Format and Examples → for v1, v4, v5 and v7 samples." },
     { q: "Is UUID v7 better than v4?", a: "For database primary keys and any ID where chronological order matters, yes: v7 sorts by creation time and inserts sequentially. For opaque public tokens where you do not want time visible, stick to v4." },
+    { q: "Can UUIDs collide?", a: "Yes, but a v4 collision needs ~2.71 quintillion IDs for 50% chance. Use crypto RNG. See Can Two UUIDs Ever Be the Same →." },
+    { q: "How do I generate a UUID in Python or JavaScript?", a: "Python: uuid.uuid4(). JavaScript: crypto.randomUUID() or Buffer. See How to Generate a UUID →." },
   ],
   "xml-to-json": [
     { q: "Is my XML uploaded anywhere?", a: "No. Conversion runs entirely in your browser (in a background worker). Your data never leaves your machine." },

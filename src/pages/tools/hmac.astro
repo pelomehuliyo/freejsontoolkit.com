@@ -231,6 +231,23 @@ import { ALGORITHMS, ENCODINGS } from "../../lib/tools/hmac/constants";
             <a href="/tools/bcrypt">bcrypt</a> instead.
           </p>
         </details>
+        <details class="faq-item">
+          <summary class="faq-summary">Is HMAC encryption?</summary>
+          <p class="body-md faq-answer">
+            No. HMAC is authentication, not encryption. It proves integrity and authenticity but does
+            not hide content. See <a href="/learn/what-is-hmac">What Is HMAC</a>.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-summary">How do I generate HMAC-SHA256 in Python or JavaScript?</summary>
+          <p class="body-md faq-answer">
+            Node: <code>crypto.createHmac('sha256', key).update(msg).digest('hex')</code>. Python:
+            <code>hmac.new(key, msg, hashlib.sha256).hexdigest()</code>. See <a
+              href="/learn/how-to-generate-hmac-sha256"
+              >How to Generate an HMAC-SHA-256 Signature</a
+            >.
+          </p>
+        </details>
       </div>
     </Container>
   </section>
