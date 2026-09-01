@@ -342,7 +342,7 @@ export const tools: ToolManifest[] = [
     family: "json",
     status: "available",
     href: "/tools/json-minifier",
-    keywords: ["json minifier", "minify json", "compress json"],
+    keywords: ["json minifier", "minify json", "compress json", "remove whitespace from json", "reduce json size", "minify json for api", "minify json for localStorage", "minify json for bundling", "compress json for transmission", "jq minify json", "python minify json", "python json.tool minify", "javascript minify json", "node minify json file", "powershell minify json", "minify json online", "compress json online", "json minifier online", "json minifier tool", "minify json file", "minify json file online" ],
     addedIn: "v1.3",
   },
 
