@@ -3613,6 +3613,85 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.10",
     },
+
+    {
+        slug: "base64-decode-in-python-javascript",
+        toolId: "base64",
+        relatedToolIds: ["base64", "url-encode", "jwt-decoder"],
+        comparisonSlugs: ["base64-vs-url-encode"],
+        eyebrow: "Code · Guide",
+        title: "Base64 Decode in Python, JavaScript, and Java",
+        description:
+            "One-line Base64 decode and encode in Python, JavaScript, Java, PHP, and OpenSSL, with fixes for padding and URL-safe strings.",
+        heroQuestion: "How do I decode Base64 in code?",
+        shortAnswer:
+            "In Python use base64.b64decode, in JavaScript use atob or Buffer.from, in Java use Base64.getDecoder(). All three handle standard and URL-safe alphabets when you normalize padding first. The same online tool does it locally without code.",
+        sections: [
+            {
+                heading: "Python",
+                body:
+                    "Use the standard base64 module. It handles both standard and URL-safe when you add padding, and it can decode bytes or strings.",
+                list: [
+                    "import base64",
+                    "base64.b64decode('SGVsbG8=').decode() for standard",
+                    "base64.urlsafe_b64decode('SGVsbG8' + '==') for URL-safe with padding fix",
+                    "base64.b64encode(b'Hello').decode() to encode",
+                ],
+            },
+            {
+                heading: "JavaScript and Node.js",
+                body:
+                    "Browsers have atob and btoa for text, Node has Buffer for binary. Both need padding fixed first.",
+                list: [
+                    "Browser decode: atob('SGVsbG8=')",
+                    "Browser encode: btoa('Hello')",
+                    "Node decode: Buffer.from('SGVsbG8=', 'base64').toString()",
+                    "Node encode: Buffer.from('Hello').toString('base64')",
+                    "URL-safe fix: str.replace(/-/g, '+').replace(/_/g, '/') then pad with =",
+                ],
+            },
+            {
+                heading: "Java, PHP, and OpenSSL",
+                body:
+                    "Every major stack has a one-liner. The only gotcha is URL-safe and missing padding, which you fix the same way in each language.",
+                list: [
+                    "Java decode: new String(Base64.getDecoder().decode('SGVsbG8='))",
+                    "Java URL-safe: Base64.getUrlDecoder().decode('SGVsbG8')",
+                    "PHP decode: base64_decode('SGVsbG8=')",
+                    "OpenSSL decode: echo SGVsbG8= | base64 -d",
+                ],
+            },
+            {
+                heading: "Padding and URL-safe fix",
+                body:
+                    "Base64 length must be a multiple of four. When a string comes from a URL or JSON the trailing equals signs are stripped. Count the length, add missing equals signs until it divides by four, and swap dash and underscore back to plus and slash before decoding. This single fix solves most invalid Base64 errors.",
+            },
+            {
+                heading: "Try it without code",
+                body:
+                    "If you just need one value, paste it into the Base64 tool on this site and press Decode or Encode. It runs 100 percent locally, fixes padding, handles both alphabets, and shows the format tag for images and PDFs. Use code when you need to automate, and the tool when you need one answer quickly.",
+            },
+        ],
+        faq: [
+            {
+                q: "How do I decode Base64 in Python?",
+                a: "import base64; base64.b64decode('SGVsbG8=').decode() for standard, or base64.urlsafe_b64decode with padding fixed for URL-safe.",
+            },
+            {
+                q: "How do I decode Base64 in JavaScript?",
+                a: "In the browser use atob('SGVsbG8='), in Node use Buffer.from('SGVsbG8=', 'base64').toString(). Fix padding and URL-safe characters first.",
+            },
+            {
+                q: "Why does my string say incorrect padding?",
+                a: "The trailing equals signs were stripped. Add equals signs until the length is a multiple of four, and replace dash and underscore with plus and slash.",
+            },
+            {
+                q: "Can I encode without code?",
+                a: "Yes. Paste text or drop a file into the Base64 tool and press Encode. It handles both alphabets and offers a data URI for files.",
+            },
+        ],
+        publishedIn: "v1.10",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────
