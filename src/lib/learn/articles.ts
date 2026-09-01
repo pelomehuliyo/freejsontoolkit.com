@@ -3548,6 +3548,71 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.10",
     },
+
+    {
+        slug: "how-to-encode-base64",
+        toolId: "base64",
+        relatedToolIds: ["base64", "url-encode", "jwt-decoder"],
+        comparisonSlugs: ["base64-vs-url-encode"],
+        eyebrow: "How To · Guide",
+        title: "How to Encode Base64 Online",
+        description:
+            "Encode any text or file to Base64 in three steps: paste or drop the file, pick standard or URL-safe, and copy the result locally. See why the output grows by one third.",
+        heroQuestion: "How do I encode data to Base64?",
+        shortAnswer:
+            "Paste your text into an encoder, or drop a file, choose standard or URL-safe Base64, and encode. The output is one third larger than the input and the tool does it 100 percent locally with a background worker for large files.",
+        sections: [
+            {
+                heading: "The three steps",
+                body:
+                    "Open the Base64 encoder, paste your text into the left editor, or drop a file such as a PNG, a PDF, or a JSON file, choose standard or URL-safe, and press Encode or hit Ctrl or Command plus Enter. The Base64 appears on the right ready to copy as a plain string or as a data URI. Nothing is uploaded.",
+            },
+            {
+                heading: "Text versus file",
+                body:
+                    "For text the tool reads the characters as UTF-8 bytes and encodes them. For a file it reads the raw bytes, so an image becomes a Base64 string that can be pasted into a data URI like data:image/png;base64, followed by the encoded data. Drop an image and the preview shows a data URI you can use directly in HTML or CSS.",
+            },
+            {
+                heading: "Why the output is bigger",
+                body:
+                    "Every three bytes become four Base64 characters, so the result is always at least one third larger than the input. Text with non ASCII characters like emoji expands a bit more because each character is several bytes in UTF-8. The meter on the tool shows the ratio live so you can see the cost before you copy.",
+            },
+            {
+                heading: "Standard versus URL-safe",
+                body:
+                    "Standard uses plus and slash, URL-safe replaces them with dash and underscore and drops padding. Use standard for data URIs, email, and JSON fields. Use URL-safe when the string will sit in a URL, a query parameter, or a JWT, because plus and slash would need escaping there.",
+            },
+            {
+                heading: "Copy as data URI",
+                body:
+                    "When you encode a file the tool can wrap the result as a data URI with the correct MIME type detected from the first bytes. That string can be pasted directly into an img src or a CSS url, which is how small images are inlined without a separate request. For a plain text encode the data URI toggle is off by default.",
+            },
+            {
+                heading: "Is encoding safe for secrets",
+                body:
+                    "No. Base64 is an encoding, not encryption. Anyone can decode it, so it hides nothing. Encode only for transport, such as embedding binary in JSON or a data URI, and never rely on Base64 for secrecy. For sensitive data use a local encoder that never uploads the bytes.",
+            },
+        ],
+        faq: [
+            {
+                q: "Can I encode Base64 without uploading?",
+                a: "Yes. Paste your text or drop a file and it encodes entirely in your browser, in a background worker for large files. Nothing leaves your machine.",
+            },
+            {
+                q: "Why does Base64 make my file bigger?",
+                a: "Three bytes become four characters, so the result is at least one third larger. Non ASCII text expands a bit more because characters like emoji are several bytes in UTF-8.",
+            },
+            {
+                q: "What is the difference between standard and URL-safe Base64?",
+                a: "Standard uses plus and slash, URL-safe uses dash and underscore and omits padding so the string is safe in URLs and query strings.",
+            },
+            {
+                q: "Can this encode an image to Base64?",
+                a: "Yes. Drop an image file and the tool encodes the raw bytes and offers a data URI like data:image/png;base64, that you can paste into HTML or CSS.",
+            },
+        ],
+        publishedIn: "v1.10",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────
