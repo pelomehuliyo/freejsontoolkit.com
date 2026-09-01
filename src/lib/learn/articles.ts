@@ -3692,6 +3692,93 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.10",
     },
+
+    {
+        slug: "csv-to-json-in-python-javascript",
+        toolId: "csv-to-json",
+        relatedToolIds: ["json-to-csv", "csv-to-json", "json-formatter"],
+        comparisonSlugs: ["csv-vs-json"],
+        eyebrow: "Code · Guide",
+        title: "Convert CSV to JSON in Python, JavaScript, and jq",
+        description:
+            "Programmatic CSV to JSON with Python csv and pandas, Node csvtojson, and jq, handling headers, delimiters, and large files.",
+        heroQuestion: "How do I convert CSV to JSON in code?",
+        shortAnswer:
+            "In Python use csv.DictReader or pandas.read_csv, in Node use csvtojson or csv-parse, in jq use CSV inputs. All three map header row to keys and handle quoted fields. The same online tool does it locally without code.",
+        sections: [
+            {
+                heading: "Python: csv module",
+                body:
+                    "The standard csv module handles RFC 4180 correctly, including quoted fields with delimiters and newlines. DictReader uses the first row as keys by default.",
+                list: [
+                    "import csv, json",
+                    "with open('data.csv') as f: rows = list(csv.DictReader(f))",
+                    "json.dumps(rows, indent=2) for pretty output",
+                    "Use delimiter=';' for semicolon files",
+                ],
+            },
+            {
+                heading: "Python: pandas",
+                body:
+                    "For large or messy tables pandas infers types and handles headers automatically. It is the common choice for data work.",
+                list: [
+                    "import pandas as pd",
+                    "df = pd.read_csv('data.csv')",
+                    "df.to_json(orient='records', indent=2)",
+                    "df.to_json('data.json') to write a file",
+                ],
+            },
+            {
+                heading: "JavaScript and Node.js",
+                body:
+                    "Browsers have no built-in CSV parser, so use a library. csvtojson and PapaParse both handle headers, delimiters, and quoted fields.",
+                list: [
+                    "npm install csvtojson",
+                    "const rows = await csv().fromFile('data.csv')",
+                    "PapaParse alternative: Papa.parse(csvText, {header:true})",
+                ],
+            },
+            {
+                heading: "jq",
+                body:
+                    "For command-line conversion use Miller or jq with CSV input. jq can read CSV and emit JSON with a single filter.",
+                list: [
+                    "jq -R 'split(\",\")' for simple split (no quotes)",
+                    "Use mlr --icsv --ojson cat data.csv for robust RFC 4180",
+                    "xsv or csvkit also handle large files",
+                ],
+            },
+            {
+                heading: "Headers, delimiters, and types",
+                body:
+                    "The first row usually supplies keys, but some files have no header. Quoted fields that contain commas or newlines must stay in one cell, which DictReader and csvtojson handle. Large files are best streamed, and type inference can be toggled where needed.",
+            },
+            {
+                heading: "Try it without code",
+                body:
+                    "If you just need one conversion, paste the CSV into the CSV to JSON tool on this site and press Convert. It handles delimiter auto detection, quoted fields, and large files in a background worker, 100 percent locally. Use code when you need to automate, and the tool when you need one answer quickly.",
+            },
+        ],
+        faq: [
+            {
+                q: "How do I convert CSV to JSON in Python?",
+                a: "import csv; rows = list(csv.DictReader(open('data.csv'))); json.dumps(rows). For pandas: pd.read_csv('data.csv').to_json(orient='records').",
+            },
+            {
+                q: "How do I convert CSV to JSON in JavaScript?",
+                a: "Use csvtojson: await csv().fromFile('data.csv'), or Papaparse: Papa.parse(csvText, {header:true}).data.",
+            },
+            {
+                q: "Does CSV to JSON keep numbers as strings?",
+                a: "By default yes, but pandas and type inference can turn numbers and booleans into typed values. The online tool lets you choose.",
+            },
+            {
+                q: "Can I convert without code?",
+                a: "Yes. Paste the CSV into the CSV to JSON tool and press Convert. It handles headers, delimiters, and large files locally without uploading.",
+            },
+        ],
+        publishedIn: "v1.10",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────
