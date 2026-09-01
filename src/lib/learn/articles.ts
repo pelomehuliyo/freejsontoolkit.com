@@ -3779,6 +3779,142 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.10",
     },
+
+    {
+        slug: "what-is-text-diff",
+        toolId: "text-diff",
+        relatedToolIds: ["json-diff", "text-diff", "json-formatter"],
+        comparisonSlugs: ["json-diff-vs-text-diff"],
+        eyebrow: "Explainer · Guide",
+        title: "What Is Text Diff?",
+        description:
+            "Text diff compares two texts line by line and highlights what changed. Learn the unified and side-by-side views, the similarity score, and when to use Text Diff versus JSON Diff, locally.",
+        heroQuestion: "What is text diff?",
+        shortAnswer:
+            "Text diff is a line-by-line comparison of two texts. Added lines are marked, removed lines are marked, and changed lines are paired so you can read before and after together. A similarity score shows what share is identical. The same engine powers JSON Diff for structured data, and everything runs locally.",
+        sections: [
+            {
+                heading: "The basic idea",
+                body:
+                    "Take two versions of a document and place them side by side. Text diff walks both line by line, finds the longest common sequence, and marks every line that appears only on one side. The result is not a merge, it is a map of what moved.",
+            },
+            {
+                heading: "Line by line",
+                body:
+                    "Diff works on lines, not characters. Splitting on newlines keeps the operation fast and the result readable, even for large files. Within a changed line some tools highlight character differences, but the primary signal is line existence.",
+            },
+            {
+                heading: "The three kinds of change",
+                body:
+                    "Every line is either identical on both sides, added on the right, removed on the left, or replaced. Replacements are the most useful signal: the diff pairs the removed line with the added line that took its place so you can read the edit as a single change.",
+                list: [
+                    "Identical: present on both sides, dimmed or unmarked",
+                    "Added: only in the new version, highlighted teal",
+                    "Removed: only in the old version, highlighted red",
+                    "Paired: a removed line replaced by an added one, shown together",
+                ],
+            },
+            {
+                heading: "Similarity score",
+                body:
+                    "The score is the share of lines that are identical, as a percentage of all lines involved. 100 percent means identical, 0 percent means nothing in common. It is a quick sanity check, not a proof of meaning, since two texts can share lines in different places.",
+            },
+            {
+                heading: "Unified versus side by side",
+                body:
+                    "Unified merges both into one column with markers, close to a git patch. Side by side keeps the old and new documents aligned for scanning. The data is the same, only the presentation differs, so pick the view that fits the size of the change.",
+            },
+            {
+                heading: "When to use which diff",
+                body:
+                    "Use Text Diff for any plain text: logs, code, markdown, environment files, and SQL. Use JSON Diff for two JSON documents, where whitespace and key order should be ignored and comparison is by meaning, not by lines. Both run locally and use the same background worker for large inputs.",
+            },
+        ],
+        faq: [
+            {
+                q: "What is text diff?",
+                a: "A line-by-line comparison that marks added, removed, and replaced lines and shows a similarity score. Identical lines are dimmed, changes are highlighted.",
+            },
+            {
+                q: "What is the difference between unified and side by side?",
+                a: "Unified merges both into one column with markers, like a git patch. Side by side keeps old and new aligned for scanning. The data is the same.",
+            },
+            {
+                q: "What does the similarity score mean?",
+                a: "The share of lines that are identical on both sides, as a percentage of all lines involved. 100 percent is identical, 0 percent is nothing in common.",
+            },
+            {
+                q: "Should I use Text Diff or JSON Diff?",
+                a: "Text Diff for any plain text. JSON Diff for two JSON documents, where it compares keys and values and ignores whitespace and key ordering.",
+            },
+        ],
+        publishedIn: "v1.10",
+    },
+
+    {
+        slug: "how-to-convert-csv-to-tsv",
+        toolId: "csv-to-tsv",
+        relatedToolIds: ["csv-to-tsv", "tsv-to-csv", "csv-to-json"],
+        comparisonSlugs: ["csv-to-tsv-vs-tsv-to-csv"],
+        eyebrow: "How To · Guide",
+        title: "How to Convert CSV to TSV",
+        description:
+            "Convert CSV to TSV in three steps: paste your comma-separated table, pick the delimiter, and get a tab-separated result. Handles quoted fields and large files locally.",
+        heroQuestion: "How do I convert CSV to TSV?",
+        shortAnswer:
+            "Paste your CSV into a converter, confirm the delimiter, and convert. Each comma-separated field becomes a tab-separated field, quoted fields that contain commas stay intact, and large files convert in a background worker with a capped preview.",
+        sections: [
+            {
+                heading: "The three steps",
+                body:
+                    "Open the CSV to TSV converter, paste your table or drop a .csv file, check the delimiter or keep Auto, and press Convert. The tab-separated result appears on the right ready to copy or download. Nothing is uploaded.",
+            },
+            {
+                heading: "Comma versus tab",
+                body:
+                    "CSV separates fields with commas, TSV with tabs. Tabs rarely appear inside data, so TSV avoids the quoting headaches that commas cause. Converting is simply re-serializing the same rows with a different delimiter, with quoting adjusted to the target format.",
+            },
+            {
+                heading: "Quoted fields",
+                body:
+                    "A CSV field that contains a comma is wrapped in quotes, and quotes inside are doubled. The parser reads those correctly, then writes the same field for TSV without needing quotes unless the field itself contains a tab or newline. This keeps the data intact across the conversion.",
+            },
+            {
+                heading: "Ragged rows",
+                body:
+                    "CSV to TSV needs a rectangular grid. Rows with a different number of fields fail loudly with the exact line number instead of being silently padded or dropped, which would shift columns. Fix the source row and convert again.",
+            },
+            {
+                heading: "Large files",
+                body:
+                    "Files above about 15 MB switch to a background worker. The file is read off the main thread, you see a capped preview in the editor, and the full TSV is a one-click download. The only ceiling is device memory.",
+            },
+            {
+                heading: "What to do with the result",
+                body:
+                    "TSV opens cleanly in spreadsheets, databases, and data tools that expect tabs. If the consumer needs commas again, use the reverse tool TSV to CSV. Both directions run locally and use the same RFC 4180 parser.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is my data uploaded?",
+                a: "No. Parsing and conversion run entirely in your browser, in a background worker for large tables. Nothing leaves your machine.",
+            },
+            {
+                q: "What happens to commas inside a field?",
+                a: "They are preserved. The parser reads quoted CSV fields correctly, and since TSV uses tabs the comma becomes ordinary text without quotes.",
+            },
+            {
+                q: "Can it handle large files?",
+                a: "Yes. Files above about 15 MB switch to a background worker with a capped preview and a full TSV download.",
+            },
+            {
+                q: "Do ragged rows work?",
+                a: "No. Rows with differing field counts fail with the exact line number instead of being silently padded.",
+            },
+        ],
+        publishedIn: "v1.10",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────
