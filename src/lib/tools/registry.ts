@@ -366,7 +366,7 @@ export const tools: ToolManifest[] = [
     family: "json",
     status: "available",
     href: "/tools/json-schema-lite",
-    keywords: ["json schema validator", "validate json against schema", "json schema checker", "json schema validation online", "validate json with schema online", "json schema validation python", "validate json schema python", "jsonschema python" ],
+    keywords: ["json schema validator", "validate json against schema", "json schema checker", "json schema validation online", "validate json with schema online", "json schema validation python", "validate json schema python", "jsonschema python", "check json schema", "jsonschema validator", "json schema validator online", "json validator schema online", "online json schema validation", "validate a json schema", "json schema online validator", "java json schema validation", "javascript json schema validator", "c# json schema validation", "ajv json schema validator", "json schema validator maven", "javascript validate json schema" ],
     addedIn: "v1.5",
   },
   // ── Compare ──────────────────────────────────────────────────────────

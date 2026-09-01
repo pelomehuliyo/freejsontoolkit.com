@@ -3915,6 +3915,181 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.10",
     },
+
+    {
+        slug: "what-is-json-schema-validation",
+        toolId: "json-schema-validator",
+        relatedToolIds: ["json-validator", "json-formatter"],
+        comparisonSlugs: ["json-validator-vs-json-schema-lite"],
+        eyebrow: "JSON · Explainer",
+        title: "What Is JSON Schema Validation?",
+        description:
+            "JSON Schema validation checks whether JSON has the shape you expect: required keys, correct types, and allowed ranges. Learn what validation checks, what Lite covers, and how to read violation paths like /users/2/email.",
+        heroQuestion: "What is JSON Schema validation?",
+        shortAnswer:
+            "JSON Schema validation checks a JSON instance against a schema that describes the expected shape. The schema lists required keys, value types, and bounds, and the validator reports every violation with its JSON Pointer path. The same check runs locally in your browser.",
+        sections: [
+            {
+                heading: "Syntax versus shape",
+                body:
+                    "JSON validation has two layers. Syntax asks is this well-formed JSON with correct brackets and commas. Schema validation asks does this valid JSON have the required fields, correct types, and allowed values. An instance can pass syntax and still fail a schema, for example {\"name\": 42} when name must be a string.",
+            },
+            {
+                heading: "What Lite covers",
+                body:
+                    "JSON Schema Lite covers 18 keywords: type, properties, required, additionalProperties, items, enum, const, minimum, maximum, exclusiveMinimum, exclusiveMaximum, multipleOf, minLength, maxLength, minItems, maxItems, minProperties, and maxProperties. It ignores $ref, $defs, allOf, anyOf, oneOf, not, if, then, else, patternProperties, pattern, and format per the Lite contract, which is shown above the Validate button.",
+            },
+            {
+                heading: "Violation paths",
+                body:
+                    "Every failure is reported at a JSON Pointer path like /users/2/email. The empty string means the root, /name means the top-level name key, and /users/0/age means the age of the first user in an array. Fix the value at that path and validate again.",
+            },
+            {
+                heading: "Where schemas are used",
+                body:
+                    "API request and response contracts, configuration files, and webhook payloads all use schemas to guard against drift. A schema turns an implicit agreement into an explicit contract that both sides can test.",
+            },
+            {
+                heading: "Try it locally",
+                body:
+                    "Paste your JSON on the left and your schema on the right, then press Validate. Violations appear with exact paths, and the check runs 100 percent locally without uploading either document.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is JSON Schema required to use JSON?",
+                a: "No. JSON works without a schema. A schema adds a guardrail when you need to enforce shape, types, and ranges.",
+            },
+            {
+                q: "Does a passing syntax check mean my data is correct?",
+                a: "No. Syntax only checks brackets and commas. Schema checks whether required keys and types are correct, which syntax cannot see.",
+            },
+            {
+                q: "What does Lite ignore?",
+                a: "Lite ignores $ref, $defs, allOf, anyOf, oneOf, not, if, then, else, patternProperties, pattern, and format. Those land in v2.0.",
+            },
+            {
+                q: "Can I validate without uploading?",
+                a: "Yes. Paste both documents and press Validate. The check runs entirely in your browser.",
+            },
+        ],
+        publishedIn: "v1.10",
+    },
+
+    {
+        slug: "json-schema-ajv-vs-online-validator",
+        toolId: "json-schema-validator",
+        relatedToolIds: ["json-validator", "json-formatter", "fake-json"],
+        comparisonSlugs: ["json-validator-vs-json-schema-lite"],
+        eyebrow: "JSON · Tooling",
+        title: "Ajv vs Online JSON Schema Validator",
+        description:
+            "Ajv is the npm JavaScript validator with full spec support, the online validator is Lite and offline for quick checks. Compare supported keywords, when to use each, and how to run Ajv locally.",
+        heroQuestion: "What is the difference between Ajv and an online JSON schema validator?",
+        shortAnswer:
+            "Ajv is a JavaScript library that implements the full JSON Schema spec including $ref and combinators, and it runs in Node or the browser with about 150KB. The online validator is Lite, runs offline for quick checks, and covers 18 keywords without $ref. Use Ajv for full spec, and the online tool for fast shape checks.",
+        sections: [
+            {
+                heading: "What Ajv is",
+                body:
+                    "Ajv is the dominant JavaScript JSON Schema validator on npm. It compiles a schema into a function and validates instances against it, supporting all drafts including $ref, allOf, anyOf, oneOf, and format. You run it with ajv validate -s schema.json -d data.json or via new Ajv().compile(schema)(data).",
+            },
+            {
+                heading: "What Lite is",
+                body:
+                    "Lite is an online validator that runs 100 percent locally in your browser. It covers 18 keywords: type, properties, required, additionalProperties, items, enum, const, minimum, maximum, and string and array bounds. It deliberately ignores $ref and combinators, which is shown above the button, so you see exactly what is active.",
+            },
+            {
+                heading: "Supported versus unsupported",
+                body:
+                    "Lite supports the core shape checks that most configs and APIs need. Ajv supports the full spec, which matters when you rely on $ref, definitions, or patternProperties. If your schema uses those keywords, Lite will ignore them per the JSON Schema spec and report fewer violations.",
+            },
+            {
+                heading: "When to use each",
+                body:
+                    "Use the online validator for quick checks, sharing a reproduction, or when you cannot install a dependency. Use Ajv in CI, in tests, and in production validation where full spec and programmatic errors are required.",
+            },
+            {
+                heading: "How to run Ajv locally",
+                body:
+                    "Install Ajv with npm install ajv, then compile and validate. The error objects include instancePath and keyword, which map to the same paths Lite shows in its ledger. Both report violations at JSON Pointer paths like /users/2/email.",
+            },
+        ],
+        faq: [
+            {
+                q: "Is Ajv the same as JSON Schema?",
+                a: "No. JSON Schema is the spec, Ajv is a JavaScript implementation of it. The online validator is another implementation with a Lite subset.",
+            },
+            {
+                q: "Does Lite support $ref?",
+                a: "No. $ref and related combinators are ignored in Lite and land in v2.0. Ajv supports them fully.",
+            },
+            {
+                q: "Can I use Lite offline?",
+                a: "Yes. Once the page loads the validator works without a connection. Ajv works offline after npm install.",
+            },
+            {
+                q: "Which is faster for quick checks?",
+                a: "Lite is instant for paste and validate. Ajv is faster for automated tests and large batches.",
+            },
+        ],
+        publishedIn: "v1.10",
+    },
+
+    {
+        slug: "json-schema-draft-7-vs-2020-12",
+        toolId: "json-schema-validator",
+        relatedToolIds: ["json-schema-validator", "json-validator"],
+        comparisonSlugs: ["json-validator-vs-json-schema-lite"],
+        eyebrow: "JSON · Spec",
+        title: "JSON Schema Draft 7 vs 2020-12",
+        description:
+            "Draft 7 uses definitions, draft 2020-12 uses $defs, and $ref handling changed. Learn the differences, which draft Lite targets, and how to pick one.",
+        heroQuestion: "What is the difference between JSON Schema draft 7 and 2020-12?",
+        shortAnswer:
+            "Draft 7 defines schemas with definitions and $ref, draft 2020-12 uses $defs and a new $ref with dynamic anchoring and stricter type handling. Lite is draft agnostic for its 18 supported keywords and ignores draft-specific combinators, so either draft works for basic shape checks.",
+        sections: [
+            {
+                heading: "Definitions versus $defs",
+                body:
+                    "Draft 7 stores reusable schemas under definitions, draft 2020-12 under $defs. Both are objects of named schemas, but the keyword name changed. Lite ignores both, so neither affects validation in Lite, but Ajv respects the change.",
+            },
+            {
+                heading: "$ref changes",
+                body:
+                    "Draft 2020-12 modernized $ref with dynamic anchoring and removed the need for $id inside subschemas. Draft 7 $ref is simpler. If your schema relies on $ref, use Ajv or wait for Lite v2.0 where $ref is planned.",
+            },
+            {
+                heading: "What Lite does",
+                body:
+                    "Lite validates the 18 core keywords regardless of draft. It does not enforce draft-specific keywords, so a draft 7 schema and a draft 2020-12 schema with the same type and properties produce the same result in Lite. The coverage line above the button lists exactly what is active.",
+            },
+            {
+                heading: "Which draft to pick",
+                body:
+                    "Use draft 2020-12 for new schemas, draft 7 only when you must match an existing codebase. For Lite, either is fine for basic checks. For full draft fidelity, validate with Ajv and set the draft explicitly.",
+            },
+        ],
+        faq: [
+            {
+                q: "Does Lite care which draft I use?",
+                a: "No. Lite is draft agnostic for its 18 keywords. Draft-specific combinators are ignored in both.",
+            },
+            {
+                q: "What happened to definitions?",
+                a: "Draft 7 uses definitions, draft 2020-12 uses $defs. Lite ignores both, Ajv supports both.",
+            },
+            {
+                q: "Should I use draft 7 or 2020-12?",
+                a: "Use 2020-12 for new work. Use draft 7 only to match an existing system.",
+            },
+            {
+                q: "Will Lite ever support $ref?",
+                a: "Yes, $ref and combinators are planned for v2.0. Until then use Ajv for schemas that need them.",
+            },
+        ],
+        publishedIn: "v1.10",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────
