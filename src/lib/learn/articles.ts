@@ -3396,6 +3396,71 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.10",
     },
+
+    {
+        slug: "how-to-decode-base64",
+        toolId: "base64",
+        relatedToolIds: ["url-encode", "jwt-decoder", "base64"],
+        comparisonSlugs: ["base64-vs-url-encode"],
+        eyebrow: "How To · Guide",
+        title: "How to Decode Base64 Online",
+        description:
+            "Decode any Base64 string to text or file in your browser: paste, fix padding, handle URL-safe vs standard, detect the format, and download the result locally.",
+        heroQuestion: "How do I decode Base64?",
+        shortAnswer:
+            "Paste the Base64 string into a decoder, fix any missing padding, choose standard or URL-safe, and decode. The tool does it 100 percent locally, shows the text if it is readable, or names the file type like PNG, PDF, or ZIP and lets you download the bytes.",
+        sections: [
+            {
+                heading: "The three steps",
+                body:
+                    "Open the Base64 decoder, paste the Base64 text into the left editor, or drop a .b64 file, and press Decode or hit Ctrl or Command plus Enter. If the content is text you see it on the right, if it is binary you get a file type badge and a download button. Nothing is uploaded and large inputs run in a background worker.",
+            },
+            {
+                heading: "Standard versus URL-safe",
+                body:
+                    "Standard Base64 uses plus and slash, URL-safe replaces them with dash and underscore and drops padding. If a string fails to decode, try the other alphabet. This site handles both and auto fixes missing padding characters so a truncated copy still decodes.",
+            },
+            {
+                heading: "Fixing padding",
+                body:
+                    "Valid Base64 length is a multiple of four. When you copy from an email or a JSON field the trailing equals signs are sometimes stripped. The decoder counts the length, adds the missing equals signs, and decodes, so you do not need to edit the string by hand.",
+            },
+            {
+                heading: "What the tag means",
+                body:
+                    "After decoding the tool reads the first bytes and names common formats: PNG, JPEG, GIF, WebP, PDF, ZIP, gzip, or marks it as JSON or plain text. If the result is binary you see a clean byte count instead of unreadable characters, which is the honest signal that you recovered a file.",
+            },
+            {
+                heading: "Text versus file",
+                body:
+                    "Not every Base64 string is text. A data URI like data:image/png;base64,iVBORw0KGgo already contains the type, and the decoder strips the prefix and decodes the payload. For a plain string the decoder tries UTF-8 first, and only falls back to a byte view when the bytes are not valid text.",
+            },
+            {
+                heading: "Is decoding safe for secrets",
+                body:
+                    "Base64 is an encoding, not encryption. Anyone can decode it, so it hides nothing. Decode only where transport required it, such as an Authorization header or a data URI, and never rely on Base64 for secrecy. For sensitive payloads use a local decoder that never uploads the data.",
+            },
+        ],
+        faq: [
+            {
+                q: "Can I decode Base64 without uploading?",
+                a: "Yes. Paste the string here and it decodes entirely in your browser, in a background worker for large inputs. Nothing leaves your machine.",
+            },
+            {
+                q: "Why does my string say invalid Base64?",
+                a: "The length is not a multiple of four, it contains characters outside the alphabet, or it mixes standard and URL-safe alphabets. Add missing padding, remove whitespace, and pick the correct alphabet.",
+            },
+            {
+                q: "What is the difference between standard and URL-safe Base64?",
+                a: "Standard uses plus and slash, URL-safe uses dash and underscore and omits padding so the string can sit in a URL or query parameter without escaping.",
+            },
+            {
+                q: "Can this decode an image or a PDF",
+                a: "Yes. Paste the Base64 for an image, a PDF, or a ZIP and the tool detects the format from the decoded bytes and offers a download. A data URI prefix is handled automatically.",
+            },
+        ],
+        publishedIn: "v1.10",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────
