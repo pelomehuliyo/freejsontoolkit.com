@@ -3461,6 +3461,93 @@ export const ARTICLES: LearnArticle[] = [
         ],
         publishedIn: "v1.10",
     },
+
+    {
+        slug: "how-to-convert-unix-timestamp-to-date",
+        toolId: "timestamp-converter",
+        relatedToolIds: ["timestamp-converter", "uuid-generator", "json-formatter"],
+        comparisonSlugs: [],
+        eyebrow: "How To · Guide",
+        title: "How to Convert a Unix Timestamp to a Date",
+        description:
+            "Turn a 10-digit seconds or 13-digit milliseconds timestamp into a readable date in JavaScript, Python, Excel, and SQL, and back again, handling UTC versus local time and the 2038 limit.",
+        heroQuestion: "How do I convert a Unix timestamp to a date?",
+        shortAnswer:
+            "Paste the timestamp into a converter, pick seconds or milliseconds, and convert. In code use new Date(timestamp * 1000) in JavaScript, datetime.fromtimestamp in Python, or FROM_UNIXTIME in SQL. The same tool converts a date back to a timestamp, 100 percent locally.",
+        sections: [
+            {
+                heading: "The three steps in the tool",
+                body:
+                    "Open the Timestamp Converter, paste the timestamp such as 1725105600 or 1725105600000 into the left field, or drop a file with many values, choose seconds or milliseconds, and press Convert or hit Ctrl or Command plus Enter. The readable date appears on the right in both UTC and local time so an off by hour error is obvious. Nothing is uploaded and the conversion is pure arithmetic.",
+            },
+            {
+                heading: "Seconds versus milliseconds",
+                body:
+                    "A 10-digit value is seconds since the epoch, a 13-digit value is milliseconds. JavaScript Date.now() gives 13 digits, while many APIs give 10. If a date looks like 1970 or 1971 you used the wrong unit. Divide or multiply by 1000 to switch. The tool detects the length but you can override it.",
+                list: [
+                    "10 digits: seconds (1725105600)",
+                    "13 digits: milliseconds (1725105600000)",
+                    "16 digits: microseconds, 19 digits: nanoseconds",
+                ],
+            },
+            {
+                heading: "JavaScript",
+                body:
+                    "Use the built-in Date. For seconds multiply by 1000 first because the constructor expects milliseconds. For the reverse take a Date and divide by 1000.",
+                list: [
+                    "Timestamp to date: new Date(1725105600 * 1000).toISOString()",
+                    "Milliseconds to date: new Date(1725105600000).toISOString()",
+                    "Date to timestamp: Math.floor(new Date('2026-08-31T00:00:00Z').getTime() / 1000)",
+                    "Current: Math.floor(Date.now() / 1000)",
+                ],
+            },
+            {
+                heading: "Python",
+                body:
+                    "Use datetime. fromtimestamp expects seconds, so divide milliseconds first. For UTC be explicit, otherwise the result uses local time.",
+                list: [
+                    "import datetime",
+                    "datetime.datetime.fromtimestamp(1725105600)",
+                    "datetime.datetime.utcfromtimestamp(1725105600)",
+                    "datetime.datetime.now().timestamp() for current",
+                ],
+            },
+            {
+                heading: "Excel and SQL",
+                body:
+                    "In Excel add the timestamp to an epoch date and format as date: =A1/86400 + DATE(1970,1,1). In MySQL use FROM_UNIXTIME(timestamp) and UNIX_TIMESTAMP(date). In PostgreSQL use to_timestamp(timestamp) and extract(epoch from date). These all count from the same epoch.",
+            },
+            {
+                heading: "UTC versus local time",
+                body:
+                    "A timestamp has no timezone, it is seconds since the UTC epoch. When you display it you choose a zone, so the same value reads differently in UTC and in your local time. The converter shows both side by side so you can pick the right one for logs versus user facing dates. For API signing and JWT use UTC.",
+            },
+            {
+                heading: "The 2038 limit and epoch synonyms",
+                body:
+                    "Signed 32-bit seconds overflow on 2038-01-19, which is why modern systems use 64 bits or milliseconds. The terms Unix timestamp, epoch time, and POSIX time all mean the same count, so a search for convert epoch to date is the same intent. Storing as 64-bit seconds or 13-digit milliseconds already solves the wrap.",
+            },
+        ],
+        faq: [
+            {
+                q: "How do I know if my timestamp is seconds or milliseconds?",
+                a: "Count the digits. 10 digits is seconds, 13 is milliseconds. If a timestamp converts to 1970 you treated milliseconds as seconds, multiply by 1000.",
+            },
+            {
+                q: "Can I convert a timestamp without uploading?",
+                a: "Yes. Paste it here and it converts entirely in your browser. The same math is new Date(timestamp * 1000) in JavaScript.",
+            },
+            {
+                q: "Why does the same timestamp show two different dates?",
+                a: "One is UTC and one is your local timezone. The timestamp itself has no zone, the display does. The tool shows both so you can choose.",
+            },
+            {
+                q: "What is the difference between Unix timestamp and epoch time?",
+                a: "Nothing. Unix timestamp, epoch time, and POSIX time all count seconds since 1970-01-01 00:00:00 UTC.",
+            },
+        ],
+        publishedIn: "v1.10",
+    },
 ];
 
 // ── Derived selectors ──────────────────────────────────────────────────
