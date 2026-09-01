@@ -355,7 +355,7 @@ export const tools: ToolManifest[] = [
     family: "json",
     status: "available",
     href: "/tools/json-validator",
-    keywords: ["json validator", "validate json", "json syntax checker", "json lint", "json parse error checker", "json syntax validator"],
+    keywords: ["json validator", "validate json", "json syntax checker", "json lint", "json parse error checker", "json syntax validator", "json verification", "json verify", "json checker online", "json verifier", "validate json online", "json linter", "check json validity", "json corrector", "correct json format", "json validator and fixer", "fix invalid json online", "json checker and fixer" ],
     addedIn: "v1.2",
   },
   {
@@ -366,7 +366,7 @@ export const tools: ToolManifest[] = [
     family: "json",
     status: "available",
     href: "/tools/json-schema-lite",
-    keywords: ["json schema validator", "validate json against schema", "json schema checker"],
+    keywords: ["json schema validator", "validate json against schema", "json schema checker", "json schema validation online", "validate json with schema online", "json schema validation python", "validate json schema python", "jsonschema python" ],
     addedIn: "v1.5",
   },
   // ── Compare ──────────────────────────────────────────────────────────
