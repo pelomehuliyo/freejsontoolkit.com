@@ -378,7 +378,7 @@ export const tools: ToolManifest[] = [
     family: "json",
     status: "available",
     href: "/tools/json-diff",
-    keywords: ["json diff", "compare json", "json compare tool", "json diff online", "compare two json files"],
+    keywords: ["json diff", "compare json", "json compare tool", "json diff online", "compare two json files", "json compare", "json compare online", "compare json objects online", "online compare json", "json comparator", "compare two json", "online json diff", "json diff tool", "json diff viewer", "json file compare", "compare json file", "json comparison tool" ],
     addedIn: "v1.2",
   },
   {
