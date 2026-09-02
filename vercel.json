@@ -65,6 +65,81 @@
       "source": "/learn/why-convert-json-to-csv",
       "destination": "/learn/how-to-convert-json-to-csv",
       "permanent": true
+    },
+    {
+      "source": "/learn/is-md5-secure",
+      "destination": "/learn/what-is-md5",
+      "permanent": true
+    },
+    {
+      "source": "/learn/can-md5-be-decrypted",
+      "destination": "/learn/what-is-md5",
+      "permanent": true
+    },
+    {
+      "source": "/learn/how-does-md5-work",
+      "destination": "/learn/what-is-md5",
+      "permanent": true
+    },
+    {
+      "source": "/learn/json-schema-ajv-vs-online-validator",
+      "destination": "/learn/what-is-json-schema-validation",
+      "permanent": true
+    },
+    {
+      "source": "/learn/json-schema-draft-7-vs-2020-12",
+      "destination": "/learn/what-is-json-schema-validation",
+      "permanent": true
+    },
+    {
+      "source": "/learn/what-is-json-validation",
+      "destination": "/learn/how-to-validate-json",
+      "permanent": true
+    },
+    {
+      "source": "/learn/json-schema-vs-json-validator",
+      "destination": "/learn/what-is-json-schema-validation",
+      "permanent": true
+    },
+    {
+      "source": "/learn/hmac-vs-sha-256",
+      "destination": "/learn/what-is-hmac",
+      "permanent": true
+    },
+    {
+      "source": "/learn/is-hmac-secure",
+      "destination": "/learn/what-is-hmac",
+      "permanent": true
+    },
+    {
+      "source": "/learn/how-to-convert-unix-timestamp-to-date",
+      "destination": "/learn/what-is-unix-timestamp",
+      "permanent": true
+    },
+    {
+      "source": "/learn/can-sha-512-be-decrypted",
+      "destination": "/learn/is-sha-512-secure",
+      "permanent": true
+    },
+    {
+      "source": "/learn/is-sha-256-secure",
+      "destination": "/learn/is-sha-512-secure",
+      "permanent": true
+    },
+    {
+      "source": "/learn/what-is-json-used-for",
+      "destination": "/learn/what-is-json-formatter",
+      "permanent": true
+    },
+    {
+      "source": "/learn/is-json-formatter-safe",
+      "destination": "/learn/what-is-json-formatter",
+      "permanent": true
+    },
+    {
+      "source": "/learn/is-bcrypt-secure",
+      "destination": "/learn/what-is-bcrypt",
+      "permanent": true
     }
   ]
 }

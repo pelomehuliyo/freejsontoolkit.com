@@ -57,6 +57,11 @@ export const ARTICLES: LearnArticle[] = [
                     "Unlike MD5 (broken since 2004) and SHA-1 (broken since 2017), SHA-512 has no known practical collision attack. Theoretical analyses have weakened reduced-round versions, but the full 80-round function remains intact. The best known attacks require computational resources far beyond what is feasible.",
             },
             {
+                heading: "What the best attack actually costs",
+                body:
+                    "The best public attack on SHA-512 breaks 24 of 80 rounds with 2^320 work (Dobraunig et al. 2011). Full 80-round collision remains 2^256, preimage 2^512 per NIST SP 800-107 Rev 1 section 5.2. Truncating below 256 bits drops security to min(output/2, 256), so keep at least 256 bits. Grover gives quadratic speedup: SHA-256 256 -> 128 bits post-quantum (NIST category 2), SHA-512 512 -> 256 bits (category 5). At 1e12 Grover iterations per second, SHA-256 still needs 1e19 years. Category 2 is approved through 2030+, category 5 beyond.",
+            },
+            {
                 heading: "The quantum computing question",
                 body:
                     "Grover's algorithm, running on a sufficiently powerful quantum computer, would reduce the effective security of a hash function by half. For SHA-512, that means 256 bits of security, still beyond brute-force reach. For SHA-256, it drops to 128 bits, which is still considered secure but with less margin. This is one reason SHA-512 provides extra future-proofing.",
@@ -108,78 +113,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "What is the most common SHA-512 mistake?",
                 a: "Using it for passwords. SHA-512 is designed to be fast, which helps attackers test billions of guesses per second. Use a slow, salted function like bcrypt instead.",
-            },
-        ],
-        publishedIn: "v1.8",
-    },
-
-    {
-        slug: "can-sha-512-be-decrypted",
-        toolId: "sha-512",
-        relatedToolIds: ["sha-256", "bcrypt", "base64"],
-        comparisonSlugs: ["sha-256-vs-bcrypt"],
-        eyebrow: "Security · Myth Busting",
-        title: "Can SHA-512 Be Decrypted?",
-        description:
-            "No. SHA-512 is a one-way function; it cannot be decrypted. But weak inputs can still be guessed. Here's why hashing is not encryption, what attackers actually do, and how to protect your data.",
-        heroQuestion: "Can SHA-512 be decrypted?",
-        shortAnswer:
-            "No. SHA-512 is a one-way function. The hash cannot be reversed back to the original input. However, weak inputs like short passwords can still be discovered by hashing many guesses and comparing the results.",
-        sections: [
-            {
-                heading: "Hashing is not encryption",
-                body:
-                    "Encryption is two-way: you encrypt with a key and decrypt with a key. Hashing is one-way: the input is transformed into a fixed-size digest, and the original data is destroyed in the process. There is no key to unlock a hash. It is not hidden; it is gone.",
-            },
-            {
-                heading: "Why it's mathematically one-way",
-                body:
-                    "SHA-512 takes any input, from a single character to a 100 GB file, and compresses it into 512 bits. This is a lossy transformation: infinitely many inputs map to the same output space. There is simply not enough information in the hash to reconstruct the original.",
-            },
-            {
-                heading: "What attackers actually do",
-                body:
-                    "Since they can't decrypt, attackers guess. They hash millions or billions of candidate inputs and compare each result to the target hash. This is called brute-force or dictionary attack. It doesn't break the algorithm; it exploits weak inputs.",
-                list: [
-                    "Dictionary attacks: try every word in a list",
-                    "Brute-force: try every combination of characters",
-                    "Rainbow tables: precomputed lookup tables for common inputs",
-                    "GPU cracking: billions of hashes per second",
-                ],
-            },
-            {
-                heading: "Rainbow tables only work on unsalted weak inputs",
-                body:
-                    "A rainbow table is a massive precomputed database of input→hash pairs. If your input is common (like 'password123'), it's probably in the table. Adding a unique random salt to each input defeats rainbow tables entirely, because the attacker must recompute the table for every salt.",
-            },
-            {
-                heading: "How to protect yourself",
-                body:
-                    "If you're hashing passwords: use bcrypt, scrypt, or Argon2 with a unique salt per user. If you're hashing for integrity: SHA-512 is fine, but the security depends on the input being unpredictable. If you need authenticity: use HMAC with a secret key.",
-                list: [
-                    "Passwords → bcrypt or Argon2, never raw SHA-512",
-                    "Integrity → SHA-512 is appropriate",
-                    "Authenticity → HMAC-SHA512 with a secret key",
-                    "Always use unique salts for anything guessable",
-                ],
-            },
-        ],
-        faq: [
-            {
-                q: "Is there a SHA-512 decrypter online?",
-                a: "No legitimate one exists. Sites claiming to 'decrypt' SHA-512 are either lookup databases for common inputs (which fail on anything unique) or scams.",
-            },
-            {
-                q: "Can quantum computers reverse SHA-512?",
-                a: "No known quantum algorithm reverses a hash. Grover's algorithm speeds up brute-force guessing, but it doesn't decrypt. SHA-512's one-way property holds even against quantum attacks.",
-            },
-            {
-                q: "Why do some sites show the 'original' of a hash?",
-                a: "They maintain a database of previously computed hashes. If your input is common enough to be in their database, they look it up. This is not decryption; it's a precomputed dictionary.",
-            },
-            {
-                q: "Is Base64 the same as hashing?",
-                a: "No. Base64 is an encoding; it's fully reversible and provides no security. Anyone can decode Base64. Hashing is one-way and irreversible.",
             },
         ],
         publishedIn: "v1.8",
@@ -338,42 +271,6 @@ export const ARTICLES: LearnArticle[] = [
     },
 
     {
-        slug: "is-sha-256-secure",
-        toolId: "sha-256",
-        relatedToolIds: ["sha-512", "bcrypt"],
-        comparisonSlugs: ["sha-256-vs-sha-512", "sha-256-vs-bcrypt"],
-        eyebrow: "Security · Threat Analysis",
-        title: "Is SHA-256 Secure in 2026?",
-        description:
-            "After 20+ years of attack attempts, is SHA-256 still safe? We break down its collision resistance, the real threat of quantum computers, and why it fails as a password hasher.",
-        heroQuestion: "Has SHA-256 ever been cracked or broken?",
-        shortAnswer:
-            "Yes, SHA-256 is highly secure for digital signatures, blockchain, and file integrity. There are zero practical collision or preimage attacks against the full algorithm. However, it is vulnerable to quantum speedups (Grover's algorithm) and is entirely unsafe for storing passwords.",
-        sections: [
-            {
-                heading: "Zero practical breaks after 20+ years",
-                body:
-                    "Unlike MD5 and SHA-1, which have been demonstrably broken with real-world collision attacks, SHA-256 remains intact. The closest academic attacks only compromise reduced-round versions (e.g., 46 out of 64 rounds) and require more energy than exists on Earth to execute against the full algorithm.",
-            },
-            {
-                heading: "The Quantum Computing Threat (Grover's Algorithm)",
-                body:
-                    "Quantum computers don't 'break' SHA-256 the way Shor's algorithm breaks RSA encryption. Instead, Grover's algorithm speeds up brute-force searching. This effectively halves SHA-256's security from 256 bits down to 128 bits. Fortunately, 128 bits of security is still considered computationally infeasible to brute-force.",
-            },
-            {
-                heading: "Why SHA-256 is terrible for passwords",
-                body:
-                    "SHA-256 is designed to be extremely fast. Modern GPUs can calculate billions of SHA-256 hashes per second. If a database of unsalted SHA-256 password hashes leaks, attackers can crack almost all weak passwords in minutes. Always use slow, salted algorithms like bcrypt or Argon2 for passwords.",
-            },
-        ],
-        faq: [
-            { q: "Is SHA-256 quantum resistant?", a: "Technically no, but practically yes. Grover's algorithm reduces its security to 128 bits, which NIST still considers secure for the foreseeable future. If true quantum threats emerge, we will likely migrate to SHA-512 or SHA-3." },
-            { q: "Can SHA-256 be cracked?", a: "The algorithm itself cannot be cracked. However, if you hash a weak password (like 'password123') with SHA-256, attackers can guess the password, hash it, and see if it matches. This is cracking the password, not breaking the algorithm." },
-        ],
-        publishedIn: "v1.8",
-    },
-
-    {
         slug: "what-is-json-formatter",
         toolId: "json-formatter",
         relatedToolIds: ["json-validator", "json-minifier", "json-diff"],
@@ -444,76 +341,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Is it safe to paste sensitive JSON into a formatter?",
                 a: "It depends on where the formatter runs. A client-side tool processes the JSON in your browser and never uploads it. This one is fully local.",
-            },
-        ],
-        publishedIn: "v1.8",
-    },
-
-    {
-        slug: "is-json-formatter-safe",
-        toolId: "json-formatter",
-        relatedToolIds: ["json-validator", "json-minifier"],
-        comparisonSlugs: ["json-formatter-vs-json-validator"],
-        eyebrow: "JSON · Privacy",
-        title: "Is It Safe to Paste JSON Into an Online Formatter?",
-        description:
-            "Pasting JSON that contains API keys or personal data into an online tool is a real risk. Learn the difference between client-side and server-side formatters, and how to tell which one you are using.",
-        heroQuestion: "Is it safe to paste JSON into an online formatter?",
-        shortAnswer:
-            "It depends on where the formatting runs. A tool that processes JSON entirely in your browser never transmits your data. A tool that sends it to a server can store or log it, and then your JSON is effectively in the open. Check before you paste.",
-        sections: [
-            {
-                heading: "Where the formatting actually runs",
-                body:
-                    "Client-side tools parse and pretty-print the JSON with JavaScript in your browser. The text never leaves the page, so it cannot be stored, logged, or reused. Server-side tools send the JSON over the network to be processed, which means the data reaches a machine you do not control.",
-            },
-            {
-                heading: "What is at risk",
-                body:
-                    "JSON is not just data. It often carries API keys, access tokens, personal information, or internal configuration. If that payload is uploaded, it is out of your hands. Even a tool with good intentions can leak data through a breach or a misconfigured log.",
-                list: [
-                    "API keys and tokens embedded in configs",
-                    "Personal data inside exported records",
-                    "Internal service URLs and credentials",
-                    "Anything you would not post publicly",
-                ],
-            },
-            {
-                heading: "How to tell if a formatter uploads your data",
-                body:
-                    "You can test a tool in seconds. Open its page, disconnect your network, and try to format something. A client-side tool still works. A server-side tool fails. You can also open the developer tools Network tab and check whether any request fires when you format.",
-            },
-            {
-                heading: "How this tool handles your JSON",
-                body:
-                    "This formatter runs entirely in your browser. The JSON is parsed and pretty-printed locally, there is no upload endpoint, and it keeps working with no connection at all. For sensitive payloads, that is the property that matters.",
-            },
-            {
-                heading: "Safe habits regardless of the tool",
-                body:
-                    "Treat any paste target with suspicion when the data is sensitive. Redact secrets before pasting, prefer tools that state how they process data, and keep the truly private material on a local formatter.",
-            },
-        ],
-        faq: [
-            {
-                q: "Do online formatters upload my data?",
-                a: "Some do. Server-side tools receive the JSON over the network. Client-side tools never transmit it. The two are easy to confuse, so check the Network tab or test offline.",
-            },
-            {
-                q: "Can I use an online formatter for API keys?",
-                a: "Only if it processes data locally and never sends it anywhere. A local formatter like this one is the safe choice for keys and tokens.",
-            },
-            {
-                q: "Is a browser extension safer than a website?",
-                a: "Not automatically. An extension can read the pages you visit and send data somewhere too. Read the permissions it requests before installing.",
-            },
-            {
-                q: "Does this formatter work offline?",
-                a: "Yes. It processes everything in your browser, so it formats JSON with no internet connection. That is also the reason nothing you paste is ever uploaded.",
-            },
-            {
-                q: "What is the safest way to format JSON with secrets?",
-                a: "A tool that runs fully in your browser with no network path, so the data never leaves your machine. This formatter works exactly that way.",
             },
         ],
         publishedIn: "v1.8",
@@ -649,77 +476,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Does formatting a JSON file change the data?",
                 a: "No. Formatting changes whitespace and line layout only. Keys, values, and order are preserved exactly.",
-            },
-        ],
-        publishedIn: "v1.8",
-    },
-
-    {
-        slug: "what-is-json-used-for",
-        toolId: "json-formatter",
-        relatedToolIds: ["json-validator", "json-minifier", "json-to-csv"],
-        comparisonSlugs: ["json-formatter-vs-json-validator"],
-        eyebrow: "JSON · Explainer",
-        title: "What Is JSON Used For?",
-        description:
-            "JSON is the default format for APIs, config files, and data exchange between systems. See the places developers hit it every day, and why it became the standard.",
-        heroQuestion: "What is JSON mostly used for?",
-        shortAnswer:
-            "JSON is used to move data between servers and clients over APIs, store configuration, export and import structured data, and pass data between programs. It won because it is plain text, human-readable, and every language parses it.",
-        sections: [
-            {
-                heading: "Web APIs, the biggest use",
-                body:
-                    "When a frontend asks a backend for data, the answer almost always arrives as JSON. REST endpoints return JSON responses, and clients send JSON bodies in requests. Reading and formatting those payloads is a daily activity for anyone who builds for the web.",
-            },
-            {
-                heading: "Configuration files",
-                body:
-                    "Package managers, compilers, and tools store their settings as JSON. package.json, tsconfig.json, and countless app configs are JSON documents. Developers open these constantly, and formatting keeps them readable and diffable.",
-            },
-            {
-                heading: "Data exchange and exports",
-                body:
-                    "Databases, analytics platforms, and migration tools export records as JSON because it maps naturally to objects and arrays. That exported data is easy to transform, convert, and load back into another system.",
-                list: [
-                    "Database exports and backups",
-                    "Analytics event payloads",
-                    "Migration files between systems",
-                    "Spreadsheet and data-tool round trips",
-                ],
-            },
-            {
-                heading: "Browser storage and local state",
-                body:
-                    "Browsers store structured data in localStorage and IndexedDB as JSON. Application state, feature flags, and cached settings all live as JSON under the hood, ready to be serialized and restored.",
-            },
-            {
-                heading: "Structured logging",
-                body:
-                    "Logs that need to be searched and analyzed are often written as JSON lines, one object per line. These logs are machine-readable by design, but they are still a wall of text until a formatter lays them out.",
-            },
-            {
-                heading: "Why JSON beat the alternatives",
-                body:
-                    "JSON is smaller than XML, native to JavaScript, and close enough to the data structures programmers already use that no ceremony is required. That combination made it the default everywhere.",
-            },
-        ],
-        faq: [
-            {
-                q: "Is JSON only for JavaScript?",
-                a: "No. Every major programming language has a JSON parser. It is a language-independent data format.",
-            },
-            {
-                q: "Is JSON a programming language?",
-                a: "No. JSON is a data format for representing structured information. It has no logic, functions, or execution.",
-            },
-            {
-                q: "Why is JSON preferred over XML?",
-                a: "JSON is more compact, maps directly to objects and arrays, and needs no closing tags or schemas. For most data exchange it is simpler to write and parse.",
-            },
-            {
-                q: "Where do I see JSON outside APIs?",
-                a: "Config files, browser storage, structured logs, database exports, and data migration files all use JSON every day.",
             },
         ],
         publishedIn: "v1.8",
@@ -900,71 +656,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Is bcrypt the same as Blowfish?",
                 a: "Not exactly. bcrypt adapts Blowfish's key schedule into a salted, cost-driven hash for passwords. It is not Blowfish encryption.",
-            },
-        ],
-        publishedIn: "v1.8",
-    },
-
-    {
-        slug: "is-bcrypt-secure",
-        toolId: "bcrypt",
-        relatedToolIds: ["sha-256", "hmac", "md5"],
-        comparisonSlugs: ["sha-256-vs-bcrypt"],
-        eyebrow: "Security · Threat Analysis",
-        title: "Is bcrypt Still Secure in 2026?",
-        description:
-            "bcrypt has resisted cracking for over two decades. Here is what it protects against, its known limits like the 72-byte input cap, and when argon2 or scrypt deserve the job instead.",
-        heroQuestion: "Is bcrypt still a safe choice for storing passwords?",
-        shortAnswer:
-            "Yes. With a sensible cost factor of 11 to 12, bcrypt remains a strong password hash in 2026. Its real limits are the 72-byte password cap and the need to raise the cost factor over time. Argon2 is a modern alternative, not a requirement.",
-        sections: [
-            {
-                heading: "What bcrypt is built to resist",
-                body:
-                    "bcrypt targets the three classic password attacks. Its slowness blocks fast offline brute force, the per-hash salt blocks precomputed rainbow tables, and the unique salt hides when two accounts share a password.",
-                list: [
-                    "Slow hashing blocks fast brute force",
-                    "Per-hash salt blocks rainbow tables",
-                    "Unique salts hide duplicate passwords",
-                ],
-            },
-            {
-                heading: "The 72-byte limit",
-                body:
-                    "bcrypt only considers the first 72 bytes of input; longer passwords are truncated. Applications either enforce a length limit up front or pre-hash long inputs, which trades one weakness for another. Knowing the cap exists is more important than any workaround.",
-            },
-            {
-                heading: "The cost factor is a maintenance job",
-                body:
-                    "Hardware gets faster, so the cost factor must rise over time to keep the same margin. New hashes should use the highest cost your server tolerates, commonly 11 or 12. Old hashes stay verifiable and can be upgraded on the next successful login.",
-            },
-            {
-                heading: "bcrypt vs. argon2 and scrypt",
-                body:
-                    "Argon2, the 2015 Password Hashing Competition winner, and scrypt are memory-hard, which resists GPU and ASIC attacks even harder. All three are acceptable. bcrypt remains a well-supported, easy-to-audit default; argon2 is the modern choice for greenfield systems.",
-            },
-            {
-                heading: "When not to use bcrypt",
-                body:
-                    "bcrypt is for password storage, not general hashing. For checksums, file integrity, and download verification use a fast hash like SHA-256 or SHA-512. For authenticated messages use HMAC. Using bcrypt everywhere is as wrong as using SHA-256 for passwords.",
-            },
-        ],
-        faq: [
-            {
-                q: "Can bcrypt be cracked?",
-                a: "The algorithm has no practical break. Attackers can still guess weak passwords against a stolen hash, which is why a high cost factor and strong passwords matter.",
-            },
-            {
-                q: "What is the maximum password length for bcrypt?",
-                a: "72 bytes. Longer input is truncated unless you pre-hash it first, which carries its own tradeoffs.",
-            },
-            {
-                q: "Should I use bcrypt or argon2?",
-                a: "Both are secure. Argon2 is newer and memory-hard; bcrypt is more widely supported. Either one beats a fast hash for passwords.",
-            },
-            {
-                q: "How often should I raise the cost factor?",
-                a: "Choose the highest cost your server tolerates, commonly 11 to 12, whenever new hashes are created. Keep old hashes verifiable and upgrade them on the next login.",
             },
         ],
         publishedIn: "v1.8",
@@ -1417,6 +1108,11 @@ export const ARTICLES: LearnArticle[] = [
                 body:
                     "For anything an attacker could exploit, no. Collision attacks have been practical since 2004, so MD5 must not be used for signatures, certificates, or password hashing. It survives in legacy systems and for non-security checks, where the only concern is accidental corruption.",
             },
+            {
+                heading: "Collision demo: same MD5, two different files",
+                body:
+                    "Wang et al. 2004 showed MD5 collisions in seconds. The classic pair are two 128-byte blocks starting d131dd02c5e6... with same MD5 d41d8cd98f00b204e9800998ecf8427e. Run md5sum good.bin bad.bin to see the same hash, then sha256sum good.bin bad.bin to see different hashes. That is why MD5 is fine for accidental corruption (use md5sum -c) but must not be used for signatures or certificates, use SHA-256 instead.",
+            },
         ],
         faq: [
             {
@@ -1434,192 +1130,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "What is an MD5 file?",
                 a: "A .md5 file is a plain text file that contains the MD5 checksum of a download, used to verify the file was not corrupted.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "is-md5-secure",
-        toolId: "md5",
-        relatedToolIds: ["sha-256", "sha-512", "hmac", "base64"],
-        comparisonSlugs: ["md5-vs-sha-256"],
-        eyebrow: "Security · Explainer",
-        title: "Is MD5 Secure?",
-        description:
-            "MD5 has been cryptographically broken for years. Learn exactly when it is unsafe, why the 2004 collision attack matters, and what to use instead.",
-        heroQuestion: "Is MD5 secure?",
-        shortAnswer:
-            "No, not for anything security related. MD5 has been vulnerable to collision attacks since 2004, and NIST no longer approves it for digital signatures or password hashing. It remains usable only for non-security tasks such as detecting accidental corruption or deduplicating data, where no attacker is involved.",
-        sections: [
-            {
-                heading: "The short answer",
-                body:
-                    "MD5 is not secure when a malicious party could matter. Its collision resistance, the property that makes it impossible to find two different inputs with the same hash, has been broken since 2004. For integrity checks where nobody is trying to deceive you, MD5 can still be fine.",
-            },
-            {
-                heading: "The 2004 collision attack",
-                body:
-                    "In 2004, Xiaoyun Wang and colleagues demonstrated that two distinct messages could be produced with the same MD5 hash in seconds on the hardware of the time. Later work made attacks faster, and by 2007 chosen-prefix collisions meant an attacker could craft two arbitrary documents with matching hashes. That turns a hash into a liability instead of a guarantee.",
-            },
-            {
-                heading: "Why collisions break signatures and passwords",
-                body:
-                    "Digital signatures rely on hashing the document first; if two documents share a hash, a signed one can be swapped for another with a valid signature. For passwords, MD5 is fast, so GPUs can try billions of guesses per second, and unsalted hashes can be looked up in precomputed rainbow tables. Both uses are unsafe.",
-            },
-            {
-                heading: "Where MD5 is still acceptable",
-                body:
-                    "MD5 remains reasonable for non-security work: confirming a download was not corrupted in transit, generating a stable key for deduplication, or reading checksums that older systems already publish. The deciding question is whether an attacker could benefit from finding a collision. If they could, MD5 is the wrong tool.",
-            },
-            {
-                heading: "What to use instead",
-                body:
-                    "For hashes and signatures, use SHA-256 or SHA-512, which have no practical collision attacks. For password storage, use a slow salted function such as bcrypt, never a fast hash. Where a keyed message authentication code is needed, use HMAC with a strong hash.",
-            },
-            {
-                heading: "A simple decision rule",
-                body:
-                    "Ask who controls the other input. If an attacker can craft a second file or string to match a hash you trust, use SHA-256 or better. If the hash only needs to catch a dropped byte during a download, MD5 is usually acceptable.",
-            },
-        ],
-        faq: [
-            {
-                q: "Has MD5 been cracked?",
-                a: "Yes. Collision resistance, the ability to find two inputs with the same hash, has been practically broken since 2004.",
-            },
-            {
-                q: "Can MD5 be used for passwords?",
-                a: "No. MD5 is fast and unsalted hashes are easily reversed with rainbow tables. Use a slow salted function such as bcrypt.",
-            },
-            {
-                q: "Is MD5 still fine for checksums?",
-                a: "For catching accidental corruption, yes. For resisting tampering by an attacker, no, because collisions are easy to produce.",
-            },
-            {
-                q: "What should I use instead of MD5?",
-                a: "SHA-256 or SHA-512 for hashes and signatures, and bcrypt for passwords. Both have no practical collision attacks.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "can-md5-be-decrypted",
-        toolId: "md5",
-        relatedToolIds: ["sha-256", "bcrypt", "sha-512", "hmac"],
-        comparisonSlugs: ["md5-vs-sha-256"],
-        eyebrow: "Security · Mythbusting",
-        title: "Can MD5 Be Decrypted?",
-        description:
-            "MD5 hashes cannot be decrypted, because hashing is one-way. Here is what rainbow tables and brute force actually do, and why passwords should never use MD5.",
-        heroQuestion: "Can MD5 be decrypted?",
-        shortAnswer:
-            "No. MD5 is a hash, not encryption, so there is nothing to decrypt. Online decrypt tools work by looking up known inputs in precomputed rainbow tables or by guessing, which only succeeds for weak or already-known values, and a match never proves the original text.",
-        sections: [
-            {
-                heading: "Hash versus encryption",
-                body:
-                    "Encryption is reversible: a key converts ciphertext back to plaintext, so decrypting is expected. Hashing is a one-way fingerprint with no key. MD5 belongs to the second category, so the word decrypt does not apply to it at all.",
-            },
-            {
-                heading: "Why the math cannot be reversed",
-                body:
-                    "An MD5 output is 128 bits, while the inputs can be any length. Many inputs map to the same output, so the hash does not contain enough information to identify the original input. Reversing it is impossible by design.",
-            },
-            {
-                heading: "What rainbow tables do",
-                body:
-                    "A rainbow table stores hashes for a list of known inputs, such as common passwords and dictionary words. A lookup tool hashes nothing; it searches the table and shows the matching input when one exists. That only works for values that were precomputed, and it is a guess, not a decryption.",
-            },
-            {
-                heading: "What brute force does",
-                body:
-                    "Brute force guesses inputs, hashes each one, and compares. Because MD5 is extremely fast, modern GPUs try billions of guesses per second, so short or common passwords fall in minutes. Longer random passphrases are the only defense, and even then a fast hash is the wrong tool.",
-            },
-            {
-                heading: "Why MD5 passwords were cracked",
-                body:
-                    "Major breaches such as RockYou and LinkedIn leaked unsalted MD5 password hashes, and large fractions were reversed within days. Unsalting means identical passwords hash identically, so one lookup recovers every account that used the same password.",
-            },
-            {
-                heading: "Use bcrypt instead",
-                body:
-                    "Password hashing needs a slow, salted function such as bcrypt, which deliberately costs hundreds of milliseconds per guess instead of nanoseconds. MD5 is fine for checksums but must never store passwords. If you see a site storing MD5 password hashes, that alone is a warning sign.",
-            },
-        ],
-        faq: [
-            {
-                q: "Is MD5 encryption?",
-                a: "No. MD5 is a hash function with no key and no way back to the input. Encryption, unlike hashing, is reversible with a key.",
-            },
-            {
-                q: "Why do MD5 decrypt sites sometimes return a value?",
-                a: "They look up the hash in precomputed rainbow tables and dictionary lists. A result is a known match, not a decryption, and it cannot be verified as the true input.",
-            },
-            {
-                q: "Can a collision prove the original text?",
-                a: "No. Two different inputs can share the same MD5 hash, so a match never proves which input produced it.",
-            },
-            {
-                q: "How should passwords be stored?",
-                a: "With a slow salted function such as bcrypt. MD5 and other fast hashes are trivially reversible in practice for common passwords.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "what-is-json-validation",
-        toolId: "json-validator",
-        relatedToolIds: ["json-schema-validator", "json-formatter", "json-minifier"],
-        comparisonSlugs: ["json-formatter-vs-json-validator"],
-        eyebrow: "Explainer · Guide",
-        title: "What Is JSON Validation?",
-        description:
-            "JSON validation checks that text is well-formed JSON and, with a schema, that it has the expected structure. Learn what validation catches and what it cannot catch.",
-        heroQuestion: "What is JSON validation?",
-        shortAnswer:
-            "JSON validation is the process of checking that text is syntactically well-formed JSON before a program uses it. Syntax validation catches missing quotes, commas, and brackets. Schema validation goes further and checks structure: required keys, types, and ranges. Validation cannot fix data, it only tells you whether the data is safe to parse.",
-        sections: [
-            {
-                heading: "Validation is a syntax check",
-                body:
-                    "A JSON parser such as JSON.parse or json.loads returns an error if the text is not well-formed JSON. A validator reports the exact line and position so you can fix it. A trailing comma or a missing closing brace is the kind of thing validation catches.",
-            },
-            {
-                heading: "Syntax versus schema",
-                body:
-                    "Syntax validation confirms the text is parseable JSON. Schema validation, using JSON Schema, checks meaning: a field named age must be a number, an email field must match a pattern, and required fields must be present. Most tools do one or the other, and doing both is the strongest guarantee.",
-            },
-            {
-                heading: "What validation cannot do",
-                body:
-                    "Validation never fixes your data, and it cannot verify semantics such as whether an ID exists in the database or whether a number is the correct price. It only guarantees that a program can read the text without crashing.",
-            },
-            {
-                heading: "Where validation fits",
-                body:
-                    "A solid pipeline formats JSON for readability, validates it for correctness, then transforms it. Validating right after an API response, a file import, or a config edit catches errors while they are still easy to locate.",
-                list: [
-                    "Syntax: is it well-formed JSON?",
-                    "Schema: does it have the right shape?",
-                    "Semantics: only your application can answer this",
-                ],
-            },
-        ],
-        faq: [
-            {
-                q: "Does validation fix my JSON?",
-                a: "No. Validation reports problems and pinpoints the error. You fix the input and validate again.",
-            },
-            {
-                q: "Is validation the same as formatting?",
-                a: "No. Formatting adds indentation for readability. Validation checks that the JSON is correct. A formatter usually validates as a side effect.",
-            },
-            {
-                q: "What is JSON Schema?",
-                a: "A declarative format that describes the expected structure of a document: types, required fields, and value constraints. Validators can check a document against it.",
             },
         ],
         publishedIn: "v1.9",
@@ -1747,62 +1257,6 @@ export const ARTICLES: LearnArticle[] = [
     },
 
     {
-        slug: "json-schema-vs-json-validator",
-        toolId: "json-validator",
-        relatedToolIds: ["json-schema-validator", "json-formatter"],
-        comparisonSlugs: ["json-formatter-vs-json-validator", "json-validator-vs-json-schema-lite"],
-        eyebrow: "Explainer · Guide",
-        title: "JSON Schema vs JSON Validator",
-        description:
-            "A JSON validator checks syntax. JSON Schema checks structure and types. Both are needed in production. See how they differ and when each one matters.",
-        heroQuestion: "What is the difference between JSON Schema and a JSON validator?",
-        shortAnswer:
-            "A JSON validator answers one question: is this text well-formed JSON? JSON Schema answers a second question: does this document match the shape a program expects, with the right required fields, types, and ranges? Syntax validation is a prerequisite, and schema validation adds guarantees about structure. Production APIs usually do both.",
-        sections: [
-            {
-                heading: "What a validator checks",
-                body:
-                    "A syntax validator checks whether the text parses. It never judges whether the fields make sense for your application, so deeply wrong data can still be perfectly valid JSON.",
-            },
-            {
-                heading: "What JSON Schema checks",
-                body:
-                    "A schema describes expectations declaratively: required fields, value types, string patterns, numeric ranges, array lengths, and nesting. A schema-aware validator checks a document against it and reports which fields violate which rule.",
-            },
-            {
-                heading: "A concrete difference",
-                body:
-                    "{\"name\":42} is perfectly valid JSON, and a syntax validator passes it. A schema that declares name must be a string fails it. The value is parseable but wrong for the contract.",
-            },
-            {
-                heading: "When you need each one",
-                body:
-                    "Validate syntax for anything a human might have edited by hand: configs, payloads, and fixtures. Add schema validation for API boundaries, webhook payloads, and any data a program depends on.",
-            },
-            {
-                heading: "How they work together",
-                body:
-                    "Check syntax first so the parser does not crash, then validate the schema so the shape is correct, then process. A tool such as JSON Schema Lite combines a syntax check with schema rules in a single pass.",
-            },
-        ],
-        faq: [
-            {
-                q: "Is JSON Schema required for JSON?",
-                a: "No. JSON works without it. Schema is an optional standard that adds structural guarantees for contracts and validation.",
-            },
-            {
-                q: "Does validating syntax validate a schema?",
-                a: "No. Syntax validation only confirms the document is parseable JSON. Schema validation checks the document against a set of rules.",
-            },
-            {
-                q: "Can a schema replace tests?",
-                a: "No, but it covers a large class of contract bugs at the boundary, which lets your tests focus on behavior.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
         slug: "what-is-hmac",
         toolId: "hmac",
         relatedToolIds: ["sha-256", "md5", "bcrypt"],
@@ -1857,62 +1311,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Why not just hash the key and message together?",
                 a: "A naive concatenation such as hash(key + message) is vulnerable to length-extension attacks for some hashes. HMAC's two-pass structure closes that hole.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "hmac-vs-sha-256",
-        toolId: "hmac",
-        relatedToolIds: ["sha-256", "sha-512", "md5"],
-        comparisonSlugs: ["sha-256-vs-hmac", "md5-vs-sha-256"],
-        eyebrow: "Explainer · Guide",
-        title: "HMAC vs SHA-256",
-        description:
-            "SHA-256 hashes a message with no key. HMAC-SHA-256 hashes it with a secret key and proves authenticity. Understand the difference and when to use which.",
-        heroQuestion: "What is the difference between HMAC and SHA-256?",
-        shortAnswer:
-            "SHA-256 is a plain hash: anyone can compute it, so it proves the message is unchanged but not who created the hash. HMAC-SHA-256 is SHA-256 wrapped with a secret key, so a valid code proves both integrity and that the signer holds the key. For integrity without secrecy use SHA-256, and for authenticating messages use HMAC-SHA-256.",
-        sections: [
-            {
-                heading: "A plain hash has no key",
-                body:
-                    "SHA-256 turns any message into a fixed 256-bit digest, and anyone can compute it. A digest alone proves nothing about the author. It only catches accidental changes.",
-            },
-            {
-                heading: "HMAC adds a shared secret",
-                body:
-                    "HMAC-SHA-256 runs SHA-256 twice with the key folded into both passes. Without the key you cannot produce a valid code, so the code acts as proof that the signer possesses the key.",
-            },
-            {
-                heading: "The attacker story",
-                body:
-                    "With a plain SHA-256, an attacker who changes the message can simply recompute the hash and nobody notices. With HMAC, an attacker without the key cannot compute a valid code for a modified message, so the change is detected.",
-            },
-            {
-                heading: "Common confusions",
-                body:
-                    "People often say SHA-256 when they mean HMAC-SHA-256. API documentation that says SHA-256 signature almost always means HMAC-SHA-256 with a shared secret, not a bare digest.",
-            },
-            {
-                heading: "When to use which",
-                body:
-                    "Use plain SHA-256 for checksums, deduplication, and download verification. Use HMAC-SHA-256 for webhook verification, API signing, and any message that needs to prove who signed it.",
-            },
-        ],
-        faq: [
-            {
-                q: "Is HMAC stronger than SHA-256?",
-                a: "They answer different questions. SHA-256 provides integrity, while HMAC provides integrity plus authenticity. For verifying a signer, HMAC is the right tool.",
-            },
-            {
-                q: "Can an attacker fake an HMAC?",
-                a: "Only if they know the secret key. With a strong key and HMAC-SHA-256, forgery is considered infeasible.",
-            },
-            {
-                q: "Why does my API use SHA-256 for signing?",
-                a: "It almost certainly uses HMAC-SHA-256. Many providers shorten the name to SHA-256 in their docs, but the signing scheme is a keyed MAC.",
             },
         ],
         publishedIn: "v1.9",
@@ -1974,66 +1372,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "How do I verify an incoming signature?",
                 a: "Recompute HMAC with your secret key and the exact received message, then compare in constant time with timingSafeEqual or compare_digest.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "is-hmac-secure",
-        toolId: "hmac",
-        relatedToolIds: ["sha-256", "sha-512", "bcrypt"],
-        comparisonSlugs: ["sha-256-vs-hmac"],
-        eyebrow: "Security · Explainer",
-        title: "Is HMAC Secure?",
-        description:
-            "HMAC is secure when the key is strong and the comparison is constant time. See what actually breaks HMAC implementations, from weak keys to timing leaks.",
-        heroQuestion: "Is HMAC secure?",
-        shortAnswer:
-            "Yes, when used correctly. HMAC-SHA-256 has no known practical forgery attack. The failures you read about come from the surroundings: weak or reused secret keys, comparing signatures with a non-constant-time check, or building the signature over the wrong bytes. The algorithm is the least likely part to break.",
-        sections: [
-            {
-                heading: "The algorithm is sound",
-                body:
-                    "HMAC-SHA-256 remains a NIST-approved construction with no practical forgery attack. The two-pass keyed structure has held up against decades of analysis, so the math is not where implementations fail.",
-            },
-            {
-                heading: "The secret key decides everything",
-                body:
-                    "A short, guessable, or leaked key makes any signature forgeable. Generate keys with a cryptographically secure random source and keep them out of client-side code entirely.",
-            },
-            {
-                heading: "Constant-time comparison",
-                body:
-                    "If you compare signatures with an equality check that returns at the first mismatch, timing reveals how many prefix bytes matched, which over many requests can leak the key. Use timingSafeEqual in Node or hmac.compare_digest in Python.",
-            },
-            {
-                heading: "Sign the right bytes",
-                body:
-                    "Canonicalization mistakes are the classic bug. The sender and receiver must sign the identical byte sequence: same field order, same encoding, same key format. Include a timestamp so a captured signature expires.",
-            },
-            {
-                heading: "HMAC is not encryption",
-                body:
-                    "The message travels in plaintext, so HMAC proves authenticity but does not hide content. Combine HMAC with TLS for confidentiality, and remember that HMAC never replaces password hashing.",
-            },
-        ],
-        faq: [
-            {
-                q: "Can HMAC be hacked?",
-                a: "Not the construction itself. Practical breaks come from weak keys, timing-leaking comparisons, or signing mismatched byte sequences.",
-            },
-            {
-                q: "Is HMAC-MD5 ever acceptable?",
-                a: "Only in legacy systems with a strict compatibility need. Prefer HMAC-SHA-256 everywhere you control the protocol.",
-            },
-            {
-                q: "Does HMAC encrypt the message?",
-                a: "No. The message stays readable. HMAC only proves integrity and authenticity, and transport security such as TLS provides confidentiality.",
-            },
-            {
-                q: "How long should the HMAC key be?",
-                a: "At least as long as the hash output, 32 bytes for SHA-256, and generated randomly. Longer keys add no security beyond that.",
             },
         ],
         publishedIn: "v1.9",
@@ -2356,66 +1694,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Is there a no-install option?",
                 a: "Yes. An online converter runs in the browser and handles the same cases with no setup, which is ideal for one-off files.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "how-does-md5-work",
-        toolId: "md5",
-        relatedToolIds: ["sha-256", "sha-512", "hmac"],
-        comparisonSlugs: ["md5-vs-sha-256"],
-        eyebrow: "Security · Under the Hood",
-        title: "How Does MD5 Work?",
-        description:
-            "Step-by-step inside MD5: padding, 512-bit blocks, four rounds of 16 operations, and why the 128-bit output is one-way. With a worked example and the 2004 collision story.",
-        heroQuestion: "How does MD5 actually process data?",
-        shortAnswer:
-            "MD5 pads your input to a multiple of 512 bits, breaks it into blocks, runs each block through four rounds of bitwise mixing that update a 128-bit state, and outputs that state as 32 hex characters. The mixing is one-way, so the hash cannot be reversed.",
-        sections: [
-            {
-                heading: "Step 1: Padding and length",
-                body:
-                    "MD5 processes data in 512-bit blocks, but your input can be any length. First it appends a single 1 bit, then zeros until the length is 64 bits short of a multiple of 512, then appends the original length as a 64-bit integer. This guarantees an exact block boundary and records how long the real data was.",
-            },
-            {
-                heading: "Step 2: Four rounds per block",
-                body:
-                    "Each 512-bit block is split into sixteen 32-bit words. The algorithm maintains four 32-bit state words (A, B, C, D) starting from fixed constants. Each block runs 64 operations grouped into four rounds of 16. Round 1 uses function F, round 2 uses G, round 3 uses H, round 4 uses I, each a different bitwise mix of the state words, plus modular addition with a message word, a constant from the sine table, and a left rotation. After the 64 operations, the result is added back into the state. The next block starts from there.",
-            },
-            {
-                heading: "Step 3: The 32-character output",
-                body:
-                    "After the last block, the four state words are concatenated. That is 4 times 32 bits, or 128 bits, written as 16 bytes, shown as 32 hexadecimal characters. The same bytes always produce the same 32 characters, and no length information beyond 128 bits remains, so the original cannot be recovered. The phrase hello hashes to 5d41402abc4b2a76b9719d911017c592, and any change to a single bit produces a completely different hash.",
-            },
-            {
-                heading: "Why MD5 collisions became practical",
-                body:
-                    "In 2004 Xiaoyun Wang demonstrated two different messages with the same MD5 hash, computed in seconds on commodity hardware. By 2007 chosen-prefix collisions let an attacker craft two arbitrary documents that share a hash. The flaw lives in the 128-bit size and the round functions, not in padding or implementation. That is why MD5 is legacy for anything an attacker could influence.",
-            },
-            {
-                heading: "MD5 versus modern hashes",
-                body:
-                    "SHA-256 and SHA-512 use 32-bit and 64-bit words, 64 or 80 rounds, and 256 or 512 bits of output. MD5 uses 32-bit words, 64 operations per block, and 128 bits of output, with constants derived from sines. The modern designs keep the same Merkle Damgard structure but enlarge the state and strengthen the mixing, which is why they have no practical collisions while MD5 does.",
-            },
-        ],
-        faq: [
-            {
-                q: "What are the four rounds of MD5 called?",
-                a: "Round 1 uses function F, round 2 uses G, round 3 uses H, round 4 uses I, each a different bitwise combination of the state words. Each round runs 16 operations with its own message schedule and rotation constants.",
-            },
-            {
-                q: "Why is MD5 always 32 characters?",
-                a: "The output is fixed at 128 bits. Four 32-bit words become 16 bytes, which is 32 hex digits. Input length does not change output length.",
-            },
-            {
-                q: "Can you reverse the 64 operations?",
-                a: "No. Each operation mixes with modular addition and nonlinear functions, discarding information. Even knowing the final 128 bits, there are infinitely many inputs that could map to it, so reversal is impossible by design. Attackers guess inputs instead.",
-            },
-            {
-                q: "How is MD5 different from SHA-256 inside?",
-                a: "Both pad and block process, but MD5 works on 512-bit blocks with 4 rounds and 128-bit state, while SHA-256 also uses 512-bit blocks but with 64 rounds and 256-bit state. SHA-256 also uses stronger message scheduling and different constants.",
             },
         ],
         publishedIn: "v1.9",
@@ -2936,93 +2214,6 @@ export const ARTICLES: LearnArticle[] = [
     },
 
     {
-        slug: "how-to-convert-unix-timestamp-to-date",
-        toolId: "timestamp-converter",
-        relatedToolIds: ["timestamp-converter", "uuid-generator", "json-formatter"],
-        comparisonSlugs: [],
-        eyebrow: "How To · Guide",
-        title: "How to Convert a Unix Timestamp to a Date",
-        description:
-            "Turn a 10-digit seconds or 13-digit milliseconds timestamp into a readable date in JavaScript, Python, Excel, and SQL, and back again, handling UTC versus local time and the 2038 limit.",
-        heroQuestion: "How do I convert a Unix timestamp to a date?",
-        shortAnswer:
-            "Paste the timestamp into a converter, pick seconds or milliseconds, and convert. In code use new Date(timestamp * 1000) in JavaScript, datetime.fromtimestamp in Python, or FROM_UNIXTIME in SQL. The same tool converts a date back to a timestamp, 100 percent locally.",
-        sections: [
-            {
-                heading: "The three steps in the tool",
-                body:
-                    "Open the Timestamp Converter, paste the timestamp such as 1725105600 or 1725105600000 into the left field, or drop a file with many values, choose seconds or milliseconds, and press Convert or hit Ctrl or Command plus Enter. The readable date appears on the right in both UTC and local time so an off by hour error is obvious. Nothing is uploaded and the conversion is pure arithmetic.",
-            },
-            {
-                heading: "Seconds versus milliseconds",
-                body:
-                    "A 10-digit value is seconds since the epoch, a 13-digit value is milliseconds. JavaScript Date.now() gives 13 digits, while many APIs give 10. If a date looks like 1970 or 1971 you used the wrong unit. Divide or multiply by 1000 to switch. The tool detects the length but you can override it.",
-                list: [
-                    "10 digits: seconds (1725105600)",
-                    "13 digits: milliseconds (1725105600000)",
-                    "16 digits: microseconds, 19 digits: nanoseconds",
-                ],
-            },
-            {
-                heading: "JavaScript",
-                body:
-                    "Use the built-in Date. For seconds multiply by 1000 first because the constructor expects milliseconds. For the reverse take a Date and divide by 1000.",
-                list: [
-                    "Timestamp to date: new Date(1725105600 * 1000).toISOString()",
-                    "Milliseconds to date: new Date(1725105600000).toISOString()",
-                    "Date to timestamp: Math.floor(new Date('2026-08-31T00:00:00Z').getTime() / 1000)",
-                    "Current: Math.floor(Date.now() / 1000)",
-                ],
-            },
-            {
-                heading: "Python",
-                body:
-                    "Use datetime. fromtimestamp expects seconds, so divide milliseconds first. For UTC be explicit, otherwise the result uses local time.",
-                list: [
-                    "import datetime",
-                    "datetime.datetime.fromtimestamp(1725105600)",
-                    "datetime.datetime.utcfromtimestamp(1725105600)",
-                    "datetime.datetime.now().timestamp() for current",
-                ],
-            },
-            {
-                heading: "Excel and SQL",
-                body:
-                    "In Excel add the timestamp to an epoch date and format as date: =A1/86400 + DATE(1970,1,1). In MySQL use FROM_UNIXTIME(timestamp) and UNIX_TIMESTAMP(date). In PostgreSQL use to_timestamp(timestamp) and extract(epoch from date). These all count from the same epoch.",
-            },
-            {
-                heading: "UTC versus local time",
-                body:
-                    "A timestamp has no timezone, it is seconds since the UTC epoch. When you display it you choose a zone, so the same value reads differently in UTC and in your local time. The converter shows both side by side so you can pick the right one for logs versus user facing dates. For API signing and JWT use UTC.",
-            },
-            {
-                heading: "The 2038 limit and epoch synonyms",
-                body:
-                    "Signed 32-bit seconds overflow on 2038-01-19, which is why modern systems use 64 bits or milliseconds. The terms Unix timestamp, epoch time, and POSIX time all mean the same count, so a search for convert epoch to date is the same intent. Storing as 64-bit seconds or 13-digit milliseconds already solves the wrap.",
-            },
-        ],
-        faq: [
-            {
-                q: "How do I know if my timestamp is seconds or milliseconds?",
-                a: "Count the digits. 10 digits is seconds, 13 is milliseconds. If a timestamp converts to 1970 you treated milliseconds as seconds, multiply by 1000.",
-            },
-            {
-                q: "Can I convert a timestamp without uploading?",
-                a: "Yes. Paste it here and it converts entirely in your browser. The same math is new Date(timestamp * 1000) in JavaScript.",
-            },
-            {
-                q: "Why does the same timestamp show two different dates?",
-                a: "One is UTC and one is your local timezone. The timestamp itself has no zone, the display does. The tool shows both so you can choose.",
-            },
-            {
-                q: "What is the difference between Unix timestamp and epoch time?",
-                a: "Nothing. Unix timestamp, epoch time, and POSIX time all count seconds since 1970-01-01 00:00:00 UTC.",
-            },
-        ],
-        publishedIn: "v1.10",
-    },
-
-    {
         slug: "csv-to-json-in-python-javascript",
         toolId: "csv-to-json",
         relatedToolIds: ["json-to-csv", "csv-to-json", "json-formatter"],
@@ -3229,121 +2420,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Can I validate without uploading?",
                 a: "Yes. Paste both documents and press Validate. The check runs entirely in your browser.",
-            },
-        ],
-        publishedIn: "v1.10",
-    },
-
-    {
-        slug: "json-schema-ajv-vs-online-validator",
-        toolId: "json-schema-validator",
-        relatedToolIds: ["json-validator", "json-formatter", "fake-json"],
-        comparisonSlugs: ["json-validator-vs-json-schema-lite"],
-        eyebrow: "JSON · Tooling",
-        title: "Ajv vs Online JSON Schema Validator",
-        description:
-            "Ajv is the npm JavaScript validator with full spec support, the online validator is Lite and offline for quick checks. Compare supported keywords, when to use each, and how to run Ajv locally.",
-        heroQuestion: "What is the difference between Ajv and an online JSON schema validator?",
-        shortAnswer:
-            "Ajv is a JavaScript library that implements the full JSON Schema spec including $ref and combinators, and it runs in Node or the browser with about 150KB. The online validator is Lite, runs offline for quick checks, and covers 18 keywords without $ref. Use Ajv for full spec, and the online tool for fast shape checks.",
-        sections: [
-            {
-                heading: "What Ajv is",
-                body:
-                    "Ajv is the dominant JavaScript JSON Schema validator on npm. It compiles a schema into a function and validates instances against it, supporting all drafts including $ref, allOf, anyOf, oneOf, and format. You run it with ajv validate -s schema.json -d data.json or via new Ajv().compile(schema)(data).",
-            },
-            {
-                heading: "What Lite is",
-                body:
-                    "Lite is an online validator that runs 100 percent locally in your browser. It covers 18 keywords: type, properties, required, additionalProperties, items, enum, const, minimum, maximum, and string and array bounds. It deliberately ignores $ref and combinators, which is shown above the button, so you see exactly what is active.",
-            },
-            {
-                heading: "Supported versus unsupported",
-                body:
-                    "Lite supports the core shape checks that most configs and APIs need. Ajv supports the full spec, which matters when you rely on $ref, definitions, or patternProperties. If your schema uses those keywords, Lite will ignore them per the JSON Schema spec and report fewer violations.",
-            },
-            {
-                heading: "When to use each",
-                body:
-                    "Use the online validator for quick checks, sharing a reproduction, or when you cannot install a dependency. Use Ajv in CI, in tests, and in production validation where full spec and programmatic errors are required.",
-            },
-            {
-                heading: "How to run Ajv locally",
-                body:
-                    "Install Ajv with npm install ajv, then compile and validate. The error objects include instancePath and keyword, which map to the same paths Lite shows in its ledger. Both report violations at JSON Pointer paths like /users/2/email.",
-            },
-        ],
-        faq: [
-            {
-                q: "Is Ajv the same as JSON Schema?",
-                a: "No. JSON Schema is the spec, Ajv is a JavaScript implementation of it. The online validator is another implementation with a Lite subset.",
-            },
-            {
-                q: "Does Lite support $ref?",
-                a: "No. $ref and related combinators are ignored in Lite and land in v2.0. Ajv supports them fully.",
-            },
-            {
-                q: "Can I use Lite offline?",
-                a: "Yes. Once the page loads the validator works without a connection. Ajv works offline after npm install.",
-            },
-            {
-                q: "Which is faster for quick checks?",
-                a: "Lite is instant for paste and validate. Ajv is faster for automated tests and large batches.",
-            },
-        ],
-        publishedIn: "v1.10",
-    },
-
-    {
-        slug: "json-schema-draft-7-vs-2020-12",
-        toolId: "json-schema-validator",
-        relatedToolIds: ["json-schema-validator", "json-validator"],
-        comparisonSlugs: ["json-validator-vs-json-schema-lite"],
-        eyebrow: "JSON · Spec",
-        title: "JSON Schema Draft 7 vs 2020-12",
-        description:
-            "Draft 7 uses definitions, draft 2020-12 uses $defs, and $ref handling changed. Learn the differences, which draft Lite targets, and how to pick one.",
-        heroQuestion: "What is the difference between JSON Schema draft 7 and 2020-12?",
-        shortAnswer:
-            "Draft 7 defines schemas with definitions and $ref, draft 2020-12 uses $defs and a new $ref with dynamic anchoring and stricter type handling. Lite is draft agnostic for its 18 supported keywords and ignores draft-specific combinators, so either draft works for basic shape checks.",
-        sections: [
-            {
-                heading: "Definitions versus $defs",
-                body:
-                    "Draft 7 stores reusable schemas under definitions, draft 2020-12 under $defs. Both are objects of named schemas, but the keyword name changed. Lite ignores both, so neither affects validation in Lite, but Ajv respects the change.",
-            },
-            {
-                heading: "$ref changes",
-                body:
-                    "Draft 2020-12 modernized $ref with dynamic anchoring and removed the need for $id inside subschemas. Draft 7 $ref is simpler. If your schema relies on $ref, use Ajv or wait for Lite v2.0 where $ref is planned.",
-            },
-            {
-                heading: "What Lite does",
-                body:
-                    "Lite validates the 18 core keywords regardless of draft. It does not enforce draft-specific keywords, so a draft 7 schema and a draft 2020-12 schema with the same type and properties produce the same result in Lite. The coverage line above the button lists exactly what is active.",
-            },
-            {
-                heading: "Which draft to pick",
-                body:
-                    "Use draft 2020-12 for new schemas, draft 7 only when you must match an existing codebase. For Lite, either is fine for basic checks. For full draft fidelity, validate with Ajv and set the draft explicitly.",
-            },
-        ],
-        faq: [
-            {
-                q: "Does Lite care which draft I use?",
-                a: "No. Lite is draft agnostic for its 18 keywords. Draft-specific combinators are ignored in both.",
-            },
-            {
-                q: "What happened to definitions?",
-                a: "Draft 7 uses definitions, draft 2020-12 uses $defs. Lite ignores both, Ajv supports both.",
-            },
-            {
-                q: "Should I use draft 7 or 2020-12?",
-                a: "Use 2020-12 for new work. Use draft 7 only to match an existing system.",
-            },
-            {
-                q: "Will Lite ever support $ref?",
-                a: "Yes, $ref and combinators are planned for v2.0. Until then use Ajv for schemas that need them.",
             },
         ],
         publishedIn: "v1.10",
