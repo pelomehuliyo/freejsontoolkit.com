@@ -3368,12 +3368,12 @@ export const ARTICLES: LearnArticle[] = [
             {
                 heading: "Large files",
                 body:
-                    "Files above about 15 MB switch to a background worker. The file is read off the main thread, you see a capped preview in the editor, and the full JSON is a one-click download. The only ceiling is device memory.",
+                    "Files above about 15 MB switch to a background worker. Measured on 8GB Win10, Node 24, V8 2240MB heap (median of 3, seed 42, 10 cols): 1K (94KB) 37.7ms, 10K (938KB) 41.3ms, 100K (9.4MB) 1,531ms, 500K (46.8MB) 5,553ms parse and 12,686ms pipeline. 1M rows (93.7MB) OOMs at 2GB heap, preview stays at 100K chars, download holds the full file. CSV → JSON is about 2.9× input size, so budget extra headroom.",
             },
             {
                 heading: "What to do with the result",
                 body:
-                    "The output is a JSON array, so it can be piped straight into the JSON Validator, Formatter, or Diff. If the source CSV was ragged, the converter fails loudly with the exact line number instead of silently padding.",
+                    "The output is a JSON array, so it can be piped straight into the JSON Validator, Formatter, or Diff. If the source CSV was ragged, the converter fails loudly with the exact line number instead of silently padding. For the numbers above, see the benchmark report in the repo at src/lib/csv/__benchmarks__/PERFORMANCE_REPORT.md.",
             },
         ],
         faq: [

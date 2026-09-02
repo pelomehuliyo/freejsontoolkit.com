@@ -61,17 +61,17 @@ const mechanics = [
 ];
 
 const limits = [
-  "The ceiling is your device's memory, not a quota we set",
-  "The editor shows a capped preview. The full file is always the download",
-  "CSV → JSON output runs ~2.9× the input size, so it's the tightest fit",
-  "CSV ⇄ TSV stays ~1× and handles the largest tables of the three",
-  "No accounts, no upload, no “processing on our servers”. There are no servers",
+  "Measured baseline on 8GB Win10, Node 24, V8 2240MB heap (median of 3, seed 42, 10 cols): 1K 37.7ms, 10K 41.3ms, 100K (9.4MB) 1,531ms, 500K (46.8MB) 5,553ms parse and 12,686ms pipeline",
+  "1M rows (93.7MB) OOM at 2GB heap — preview capped at 100K chars, download holds full file; close tab to reclaim memory",
+  "CSV → JSON output expands about 2.9× input size, so it hits the ceiling first; give it the most headroom",
+  "CSV ⇄ TSV stays about 1× and handles the largest tables of the three",
+  "Editor shows capped preview so rendering never locks the tab; full file is always the download. No accounts, no upload, no servers",
 ];
 
 const faqs = [
   {
     q: "How large a file can I actually convert?",
-    a: "There's no fixed cap. The limit is your device's available memory. Multi-megabyte tables convert comfortably on most machines; the CSV ⇄ TSV pair handles the largest files because its output is roughly the same size as the input.",
+    a: "No fixed cap, but the ceiling is measured: 100K rows (9.4MB) parses in 1,531ms, 500K rows (46.8MB) in 5,553ms and 12,686ms full pipeline on 8GB Win10 Node 24 (median of 3, seed 42). 1M rows (93.7MB) OOMs at 2GB heap — preview is capped at 100K chars. CSV ⇄ TSV handles the largest files at about 1× size; CSV → JSON is tightest at about 2.9×.",
   },
   {
     q: "Does the file get uploaded to check its size?",
