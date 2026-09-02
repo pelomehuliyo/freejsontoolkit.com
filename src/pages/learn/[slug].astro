@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Container from "../../components/Container.astro";
 import { ARTICLES, getArticle } from "../../lib/learn/articles";
 import { getTool } from "../../lib/tools/registry";
+import { AUTHOR, dateForPublishedIn } from "../../lib/seo/authors";
 
 export function getStaticPaths() {
   return ARTICLES.map((article) => ({
@@ -30,13 +31,26 @@ const faqSchema =
       }
     : null;
 
+const publishedDate = dateForPublishedIn(article.publishedIn);
+const modifiedDate = "2026-08-31";
+const personAuthor = {
+  "@type": "Person",
+  name: AUTHOR.name,
+  jobTitle: AUTHOR.jobTitle,
+  image: `${siteOrigin}${AUTHOR.image}`,
+  sameAs: AUTHOR.sameAs,
+  url: AUTHOR.url,
+};
 const articleSchema = {
   "@context": "https://schema.org",
   "@type": "TechArticle",
   headline: article.title,
   description: article.description,
-  author: { "@type": "Organization", name: "Free JSON Toolkit" },
-  publisher: { "@type": "Organization", name: "Free JSON Toolkit" },
+  author: personAuthor,
+  publisher: { "@type": "Organization", name: "Free JSON Toolkit", logo: { "@type": "ImageObject", url: `${siteOrigin}/web-app-manifest-192x192.png` } },
+  datePublished: publishedDate,
+  dateModified: modifiedDate,
+  mainEntityOfPage: `${siteOrigin}${canonicalPath}`,
 };
 ---
 
@@ -78,6 +92,15 @@ const articleSchema = {
         <span class="caption-mono section-eyebrow">{article.eyebrow}</span>
         <h1 class="display-md learn-article-title">{article.title}</h1>
         <p class="body-md learn-question">{article.heroQuestion}</p>
+        <div class="learn-byline caption-mono">
+          <span>By <a href="/about#author">{AUTHOR.name}</a> — {AUTHOR.jobTitle}</span>
+          <span class="byline-dot">·</span>
+          <span>Updated {modifiedDate}</span>
+          <span class="byline-dot">·</span>
+          <span>Published {publishedDate}</span>
+          <span class="byline-dot">·</span>
+          <a href={AUTHOR.sameAs[0]} target="_blank" rel="noopener">GitHub</a>
+        </div>
       </header>
 
       <!-- Short Answer Box -->
@@ -212,6 +235,26 @@ const articleSchema = {
   .learn-question {
     color: var(--color-body);
     font-style: italic;
+  }
+  .learn-byline {
+    margin-top: var(--spacing-sm);
+    color: var(--color-mute);
+    font-size: 11px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+  .learn-byline a {
+    color: var(--color-mute);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .learn-byline a:hover {
+    color: var(--color-accent);
+  }
+  .learn-byline .byline-dot {
+    opacity: 0.5;
   }
   .answer-box {
     border: 1px solid var(--color-accent);
