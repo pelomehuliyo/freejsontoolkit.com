@@ -71,16 +71,23 @@ const guarantees = [
           <div class="hp-hero-copy">
             <p class="hp-kicker caption-mono">
               <span class="hp-kicker-dot" aria-hidden="true"></span>
-              FREE JSON TOOLKIT · {counts.available} TOOLS · 100% LOCAL
+              {counts.available} FREE TOOLS · PASTE → FIX → COPY · ZERO BYTES UPLOADED
             </p>
             <h1 class="hp-h1 display-xl">
-              Format, validate, convert.<br />
-              <span class="hp-accent">Without uploading a byte.</span>
+              Paste broken JSON, get clean valid code in seconds.<br />
+              <span class="hp-accent">Nothing you paste ever leaves your browser.</span>
             </h1>
             <p class="hp-lede body-lg">
-              A growing suite of single‑purpose tools for JSON, CSV and more. Everything runs in
-              your browser, in a worker when it's heavy, with nothing sent anywhere.
+              Formatter, validator, JSON to CSV, Base64 and 24 more. Paste, convert, copy. No
+              signup, no upload, free forever.
             </p>
+            <div class="hp-trust-micro caption-mono" aria-label="Trust signals">
+              <a href="https://github.com/pelomehuliyo/freejsontoolkit.com" target="_blank" rel="noopener" class="hp-tm-link">Open source</a>
+              <span aria-hidden="true"> · </span>
+              <a href="/why-local#proof" class="hp-tm-link">Verify: DevTools → Network stays at 0</a>
+              <span aria-hidden="true"> · </span>
+              <span>Works offline after load</span>
+            </div>
 
             {
               /* the search bar IS the command palette — one intelligent search, no duplicate logic */
@@ -101,22 +108,23 @@ const guarantees = [
             </button>
 
             <div class="hp-quickstats" aria-label="Toolkit at a glance">
-              <span class="hp-qs"><strong>{counts.available}</strong> live</span>
-              <span class="hp-qs"
-                ><strong class="hp-accent">★</strong> <span id="hp-stat-fav">0</span> saved</span
-              >
-              <span class="hp-qs"><strong>↩</strong> <span id="hp-stat-rec">0</span> recent</span>
-              <span class="hp-qs"><strong>0&nbsp;B</strong> uploaded</span>
+              <span class="hp-qs"><strong>{counts.available}</strong> live tools</span>
+              <span class="hp-qs"><strong>★</strong> Open source on GitHub</span>
+              <span class="hp-qs"><strong>●</strong> Updated Sep 1, 2026</span>
+              <span class="hp-qs"><strong>0 B</strong> uploaded by design</span>
             </div>
 
             <div class="hp-cta">
-              <Button href="#hp-directory" variant="primary" size="lg" shape="square"
-                >Browse the toolkit</Button
+              <Button href="/tools/json-formatter" variant="primary" size="lg" shape="square"
+                >Try JSON Formatter now</Button
               >
-              <Button href="/why-local" variant="secondary" size="lg" shape="square"
-                >Why local?</Button
+              <Button href="#hp-directory" variant="secondary" size="lg" shape="square"
+                >Browse all tools</Button
               >
             </div>
+            <p class="caption-mono hp-cta-hint" style="margin-top:8px;color:var(--color-mute)">
+              One click demo, no upload needed. See before and after in 2 seconds.
+            </p>
           </div>
 
           {/* live console panel — the "alive" centerpiece */}
@@ -659,9 +667,33 @@ const guarantees = [
     }
     .hp-lede {
       color: var(--color-body);
-      margin: 0 0 var(--spacing-lg);
+      margin: 0 0 var(--spacing-md);
       max-width: 52ch;
       line-height: 1.6;
+    }
+    .hp-trust-micro {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-mute);
+      letter-spacing: 0.04em;
+      margin: 0 0 var(--spacing-md);
+    }
+    .hp-trust-micro a {
+      color: var(--color-mute);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .hp-trust-micro a:hover {
+      color: var(--color-ink);
+    }
+    .hp-cta-hint {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.02em;
     }
     /* ── LARGE-FILE CALLOUT ── */
     .hp-largefile {
