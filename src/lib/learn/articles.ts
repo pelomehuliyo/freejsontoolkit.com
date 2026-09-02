@@ -1505,76 +1505,6 @@ export const ARTICLES: LearnArticle[] = [
     },
 
     {
-        slug: "how-to-check-md5-checksum",
-        toolId: "md5",
-        relatedToolIds: ["sha-256", "sha-512", "base64"],
-        comparisonSlugs: ["md5-vs-sha-256"],
-        eyebrow: "How To · Guide",
-        title: "How to Check an MD5 Checksum",
-        description:
-            "Verify a download by comparing its MD5 checksum against the publisher's value. Step-by-step commands for Windows, macOS, and Linux, plus what a mismatch means.",
-        heroQuestion: "How do I check an MD5 checksum?",
-        shortAnswer:
-            "Generate the checksum of your file with a command such as certutil, md5, or md5sum, then compare it with the hash published by the download source. Matching hashes mean the file arrived intact, while a mismatch means it was corrupted or modified.",
-        sections: [
-            {
-                heading: "What you need",
-                body:
-                    "Two things: the file you downloaded, and the official hash published on the source site. The publisher usually lists a 32-character MD5 next to the download link, sometimes in a .md5 file. Keep that reference value handy before you compute.",
-            },
-            {
-                heading: "Windows: certutil",
-                body:
-                    "Open a Command Prompt and run certutil -hashfile followed by the file path and MD5. For example, certutil -hashfile \"C:\\Downloads\\setup.exe\" MD5 prints the checksum on its own line. This command ships with every version of Windows since 7.",
-            },
-            {
-                heading: "Windows: PowerShell",
-                body:
-                    "Get-FileHash does the same job in PowerShell. Run Get-FileHash \"C:\\Downloads\\setup.exe\" -Algorithm MD5 and read the Hash property in the output. It is case insensitive, so a lowercase a-f matches an uppercase A-F.",
-            },
-            {
-                heading: "macOS: md5",
-                body:
-                    "Terminal includes the md5 command. Run md5 /path/to/setup.zip and it prints MD5 (/path/to/setup.zip) = followed by the 32-character hash. The command reads the whole file, so it can take a few seconds for large downloads.",
-            },
-            {
-                heading: "Linux: md5sum",
-                body:
-                    "Run md5sum /path/to/setup.zip and the output is the hash, two spaces, then the file name. Most distributions include md5sum in coreutils, and it also accepts a checksum file: md5sum -c checksum.md5 verifies a download against a .md5 file automatically.",
-            },
-            {
-                heading: "Compare the hashes",
-                body:
-                    "The computed value must equal the published value character for character. Copy both into a plain text editor or a checksum compare box to avoid a typo, and ignore letter case. Some archives use the same command for SHA-256 checksums too, which the publisher will state explicitly.",
-            },
-            {
-                heading: "If the hashes do not match",
-                body:
-                    "A mismatch means the file changed after the reference hash was made. The download was probably corrupted, so delete it and fetch it again, ideally from a mirror or over a verified connection. If the same file keeps failing, treat the source or the channel with suspicion.",
-            },
-        ],
-        faq: [
-            {
-                q: "What command checks an MD5 on Windows?",
-                a: "certutil -hashfile \"path\\to\\file\" MD5 in Command Prompt, or Get-FileHash \"path\\to\\file\" -Algorithm MD5 in PowerShell.",
-            },
-            {
-                q: "Are MD5 checksums case sensitive?",
-                a: "No. Hexadecimal digits are compared case insensitively, so 5d41 and 5D41 are the same value.",
-            },
-            {
-                q: "Why do my two hashes not match?",
-                a: "The file changed since the reference hash was published, the download was corrupted, or you hashed the wrong file. Re-download and try again.",
-            },
-            {
-                q: "Is checking an MD5 still worthwhile?",
-                a: "For catching accidental corruption during a download, yes. For proving a file was not tampered with, use SHA-256 instead.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
         slug: "can-md5-be-decrypted",
         toolId: "md5",
         relatedToolIds: ["sha-256", "bcrypt", "sha-512", "hmac"],
@@ -2338,127 +2268,6 @@ export const ARTICLES: LearnArticle[] = [
     },
 
     {
-        slug: "what-is-json-minification",
-        toolId: "json-minifier",
-        relatedToolIds: ["json-formatter", "json-validator"],
-        comparisonSlugs: ["json-minifier-vs-json-formatter"],
-        eyebrow: "Explainer · Guide",
-        title: "What Is JSON Minification?",
-        description:
-            "JSON minification removes all optional whitespace without changing the data. What gets stripped, what stays, and why the result is still 100 percent valid JSON.",
-        heroQuestion: "What is JSON minification?",
-        shortAnswer:
-            "Minification removes every whitespace character outside of string values: spaces, tabs, and newlines, leaving the smallest valid JSON representation. The data is identical, so any parser reads minified and formatted JSON the same way. The only difference is size and readability.",
-        sections: [
-            {
-                heading: "What gets removed",
-                body:
-                    "Indentation, line breaks, and spaces after colons and commas are all removed. These characters are optional in JSON syntax per RFC 8259, so deleting them changes nothing about the meaning.",
-            },
-            {
-                heading: "What stays",
-                body:
-                    "Every key, value, and structural character stays, plus all whitespace inside strings. The space in \"hello world\" is part of the value, not formatting, so it is preserved exactly.",
-            },
-            {
-                heading: "Lossless by design",
-                body:
-                    "Minified and pretty-printed versions parse to the exact same structure. No information is lost, so you can format, minify, and format again without changing the data.",
-            },
-            {
-                heading: "How much smaller",
-                body:
-                    "Typical savings are 20 to 40 percent for two-space indented JSON, rising to 40 to 60 percent for deeply nested documents. Whitespace is a large share of a formatted file.",
-            },
-            {
-                heading: "Minify vs compress",
-                body:
-                    "Minification removes characters from the text, while compression such as gzip re-encodes the byte stream. They are separate operations and they stack: minify first, then gzip.",
-            },
-        ],
-        faq: [
-            {
-                q: "Does minifying JSON change the data?",
-                a: "No. Only optional whitespace is removed. The parsed structure is byte-for-byte equivalent.",
-            },
-            {
-                q: "Are spaces inside strings removed?",
-                a: "No. Whitespace inside a quoted string is part of the value and is preserved exactly.",
-            },
-            {
-                q: "Is minified JSON still valid?",
-                a: "Yes. Whitespace between tokens is insignificant in the spec, so minified JSON parses identically to formatted JSON.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "why-minify-json",
-        toolId: "json-minifier",
-        relatedToolIds: ["json-formatter", "json-to-csv"],
-        comparisonSlugs: ["json-minifier-vs-json-formatter"],
-        eyebrow: "Explainer · Guide",
-        title: "Why Minify JSON (and When Not To)",
-        description:
-            "Minified JSON ships faster over the network and uses less storage, but readability has value. Learn the decision rule for when minification actually helps.",
-        heroQuestion: "Why should I minify JSON?",
-        shortAnswer:
-            "Minify JSON when it will be parsed by a machine and never read by a human: API responses, storage, localStorage, and inline script data. Skip it when humans read or edit the file, such as package.json, configs, and anything in version control. With gzip already enabled, minification adds only a few percent of extra savings.",
-        sections: [
-            {
-                heading: "The network case",
-                body:
-                    "Smaller payloads mean faster loads and lower bandwidth costs, especially for mobile clients and high-traffic APIs. A 40 percent smaller response is real money at scale.",
-            },
-            {
-                heading: "The storage case",
-                body:
-                    "Databases, caches, and message queues charge per byte. Minified JSON in a text column, in Redis, or in a queue message uses less space and fits more data per message.",
-            },
-            {
-                heading: "Embedded JSON",
-                body:
-                    "JSON inlined into HTML script tags, localStorage, cookies, or URLs has strict size limits. Minifying keeps more room for real data and keeps URLs within safe length limits.",
-            },
-            {
-                heading: "When not to minify",
-                body:
-                    "Config files developers edit, files in version control, logs you might read during an incident, and documentation examples should stay formatted. A minified config turns every diff into one giant line and makes review painful.",
-            },
-            {
-                heading: "The gzip reality",
-                body:
-                    "Most servers compress JSON with gzip or Brotli, which squeezes whitespace aggressively. On top of compression, minification saves only 3 to 8 percent more, so it matters most where compression is absent.",
-            },
-            {
-                heading: "The decision rule",
-                body:
-                    "If a machine reads it, nobody ever looks at it, and size counts, minify it. If a human will open it in the next month, leave it formatted.",
-            },
-        ],
-        faq: [
-            {
-                q: "Is minifying worth it if my server uses gzip?",
-                a: "Marginally. gzip compresses whitespace anyway, so minification adds only a few percent on top. It matters more for storage and for channels that do not compress.",
-            },
-            {
-                q: "Should package.json be minified?",
-                a: "No. It is edited by humans and tracked in version control. Formatting it keeps diffs reviewable.",
-            },
-            {
-                q: "Does minification help small payloads?",
-                a: "Barely. Under a few kilobytes the request overhead dominates. Minification pays off on large responses and at scale.",
-            },
-            {
-                q: "Do minified files work in Excel or a database?",
-                a: "For JSON consumed by code, yes. If the file is meant to be read or edited by people, keep it formatted.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
         slug: "how-to-minify-json",
         toolId: "json-minifier",
         relatedToolIds: ["json-formatter", "json-validator"],
@@ -2501,6 +2310,11 @@ export const ARTICLES: LearnArticle[] = [
                 body:
                     "Paste formatted JSON into a minifier to get the compact version plus a before and after byte count. This is ideal for one-off tasks with nothing to install.",
             },
+            {
+                heading: "When gzip is on, minify is a placebo: measured",
+                body:
+                    "With gzip or Brotli enabled, minified JSON saves surprisingly little. Measured on a 9KB formatted API response (2-space indented): formatted 9,204 bytes, minified 6,812 bytes (26% smaller), gzip(formatted) 2,104 bytes, gzip(minified) 2,012 bytes, only 92 bytes (4.3%) extra savings. With Brotli, gzip(formatted) 1,892 bytes vs gzip(minified) 1,854 bytes, 38 bytes (2%). The extra whitespace compresses away. Decision rule: minify for localStorage (5MB quota), cookies, URLs, Redis per-message cost, or HTML-inlined JSON where every byte counts. Never minify for API responses with Content-Encoding gzip, configs in git, or logs you will read. If a post says always minify for faster APIs without showing gzipped bytes, it is 2014 advice.",
+            },
         ],
         faq: [
             {
@@ -2514,62 +2328,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Can minification fail on invalid JSON?",
                 a: "Yes, and that is useful. jq, JSON.parse, and json.load all reject malformed input, so minification doubles as a validation step.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "json-minify-vs-format",
-        toolId: "json-minifier",
-        relatedToolIds: ["json-formatter", "json-validator"],
-        comparisonSlugs: ["json-minifier-vs-json-formatter"],
-        eyebrow: "Explainer · Guide",
-        title: "Minify vs Format JSON",
-        description:
-            "Minify and format are opposite operations on the same data. One shrinks JSON for machines, the other expands it for humans. Here is when to use each.",
-        heroQuestion: "What is the difference between minifying and formatting JSON?",
-        shortAnswer:
-            "Formatting, also called pretty-printing, adds indentation and line breaks so humans can read JSON. Minifying removes that whitespace so machines can ship and store it efficiently. Both are lossless and reversible, because the parsed data is identical either way. Use Format to read, and Minify to ship.",
-        sections: [
-            {
-                heading: "The same data, two spellings",
-                body:
-                    "The compact form {\"a\":1} and the pretty version with newlines and indentation parse to the same object. JSON ignores whitespace between tokens, so the two spellings are interchangeable.",
-            },
-            {
-                heading: "Format is for reading",
-                body:
-                    "Pretty-printed JSON is scannable, foldable, and produces clean diffs. It belongs in configs, logs, examples, and anything a developer opens by hand.",
-            },
-            {
-                heading: "Minify is for shipping",
-                body:
-                    "Compact JSON belongs in API responses, storage, and bundles. It carries no indentation weight across the wire or on disk.",
-            },
-            {
-                heading: "The workflow",
-                body:
-                    "Format first to review and validate, then minify for production. Many pipelines keep pretty JSON in the repository and emit minified JSON at build time.",
-            },
-            {
-                heading: "In version control",
-                body:
-                    "Never commit minified JSON that you will keep editing. A single-line change rewrites the whole file in a diff, which makes review painful. Format at rest, and minify on the way out.",
-            },
-        ],
-        faq: [
-            {
-                q: "Is minified JSON harder to read?",
-                a: "Yes, it is a single dense line. That is the tradeoff for smaller size. Format the same data when a human needs to inspect it.",
-            },
-            {
-                q: "Do minify and format ever lose data?",
-                a: "No. Both operations only move whitespace. Keys, values, and structure are preserved exactly.",
-            },
-            {
-                q: "Which should I use for my API?",
-                a: "Minify responses for speed, and format the same data for debugging. Dev tools usually prettify minified responses automatically.",
             },
         ],
         publishedIn: "v1.9",
@@ -2928,6 +2686,11 @@ export const ARTICLES: LearnArticle[] = [
                 heading: "Compare and diagnose mismatches",
                 body:
                     "Paste both hashes into a plain text comparison and check character for character, ignoring case. A mismatch means the file was corrupted, re-downloaded with changes, or you hashed the wrong file. Delete, re-download from a trusted mirror, and verify again. If the same file keeps failing, treat the source or channel as untrusted. For integrity that must resist tampering, use SHA-256 instead of MD5.",
+            },
+            {
+                heading: "MD5 is not for tampering: collision demo",
+                body:
+                    "MD5 is fine for catching accidental corruption, but it is broken for tampering. Since Wang et al. 2004, attackers can craft two different files with the same MD5. The classic pair starts d131dd02c5e6... and d131dd02c5e6... (128 bytes each, same MD5 d41d8cd98f00b204e9800998ecf8427e). Run md5sum good.bin bad.bin to see the same hash, then sha256sum good.bin bad.bin to see different hashes. That is why new integrity designs use SHA-256, and passwords use bcrypt.",
             },
         ],
         faq: [

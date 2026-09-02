@@ -5,6 +5,26 @@
       "has": [{ "type": "host", "value": "freejsontoolkit.com" }],
       "destination": "https://www.freejsontoolkit.com/$1",
       "permanent": true
+    },
+    {
+      "source": "/learn/how-to-check-md5-checksum",
+      "destination": "/learn/how-to-get-md5-hash-of-file",
+      "permanent": true
+    },
+    {
+      "source": "/learn/what-is-json-minification",
+      "destination": "/learn/how-to-minify-json",
+      "permanent": true
+    },
+    {
+      "source": "/learn/why-minify-json",
+      "destination": "/learn/how-to-minify-json",
+      "permanent": true
+    },
+    {
+      "source": "/learn/json-minify-vs-format",
+      "destination": "/learn/how-to-minify-json",
+      "permanent": true
     }
   ]
 }
