@@ -18,7 +18,7 @@ const TOOL_PAGES = [...EDITOR_TOOLS, '/tools/uuid/'];
 test('homepage loads', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Format, validate, convert');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Paste broken JSON');
   await expect(page.locator('header.header')).toBeVisible();
 });
 

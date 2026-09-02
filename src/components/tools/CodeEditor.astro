@@ -47,8 +47,8 @@ const textareaId = `${id}-textarea`;
 const phLines = placeholder.split("\n");
 const ghostText = !readonly && phLines.length > 1 ? phLines.slice(1).join("\n") : placeholder;
 const emptyValue = readonly
-  ? "Run the tool — your result appears right here, processed fully offline."
-  : "Paste your data, drop a file above, or load the sample — it never leaves this tab.";
+  ? "Your result lands here. Copy or download, it stays in this tab."
+  : "Paste or drop a file, or click Try sample, then press the teal button.";
 ---
 
 <div class="editor-outer" data-editor-id={id}>
@@ -75,24 +75,19 @@ const emptyValue = readonly
         readonly ? (
           <p class="ee-prompt">
             <span class="ee-dot idle" aria-hidden="true" />
-            <span>no output yet</span>
+            <span>Waiting for you to run the tool</span>
           </p>
         ) : (
           <p class="ee-prompt">
-            <span class="ee-dollar" aria-hidden="true">
-              $
-            </span>
-            <span>awaiting input</span>
-            <span class="ee-caret" aria-hidden="true">
-              ▍
-            </span>
+            <span class="ee-dot idle" aria-hidden="true" />
+            <span>Ready to paste</span>
           </p>
         )
       }
       <p class="ee-value">{emptyValue}</p>
       <p class="ee-trust">
         <span class="ee-dot" aria-hidden="true"></span>
-        local sandbox · 0 bytes uploaded
+        Runs in this tab. Nothing is uploaded.
       </p>
       {ghostText ? <pre class="ee-ghost">{ghostText}</pre> : null}
     </div>
@@ -353,6 +348,7 @@ const emptyValue = readonly
     font-size: 11px;
     line-height: 1.5;
     color: var(--color-mute);
+    opacity: 0.6;
   }
   .ee-dot {
     display: inline-block;

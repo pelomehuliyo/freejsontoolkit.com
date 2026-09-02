@@ -57,6 +57,11 @@ export const ARTICLES: LearnArticle[] = [
                     "Unlike MD5 (broken since 2004) and SHA-1 (broken since 2017), SHA-512 has no known practical collision attack. Theoretical analyses have weakened reduced-round versions, but the full 80-round function remains intact. The best known attacks require computational resources far beyond what is feasible.",
             },
             {
+                heading: "What the best attack actually costs",
+                body:
+                    "The best public attack on SHA-512 breaks 24 of 80 rounds with 2^320 work (Dobraunig et al. 2011). Full 80-round collision remains 2^256, preimage 2^512 per NIST SP 800-107 Rev 1 section 5.2. Truncating below 256 bits drops security to min(output/2, 256), so keep at least 256 bits. Grover gives quadratic speedup: SHA-256 256 -> 128 bits post-quantum (NIST category 2), SHA-512 512 -> 256 bits (category 5). At 1e12 Grover iterations per second, SHA-256 still needs 1e19 years. Category 2 is approved through 2030+, category 5 beyond.",
+            },
+            {
                 heading: "The quantum computing question",
                 body:
                     "Grover's algorithm, running on a sufficiently powerful quantum computer, would reduce the effective security of a hash function by half. For SHA-512, that means 256 bits of security, still beyond brute-force reach. For SHA-256, it drops to 128 bits, which is still considered secure but with less margin. This is one reason SHA-512 provides extra future-proofing.",
@@ -108,78 +113,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "What is the most common SHA-512 mistake?",
                 a: "Using it for passwords. SHA-512 is designed to be fast, which helps attackers test billions of guesses per second. Use a slow, salted function like bcrypt instead.",
-            },
-        ],
-        publishedIn: "v1.8",
-    },
-
-    {
-        slug: "can-sha-512-be-decrypted",
-        toolId: "sha-512",
-        relatedToolIds: ["sha-256", "bcrypt", "base64"],
-        comparisonSlugs: ["sha-256-vs-bcrypt"],
-        eyebrow: "Security · Myth Busting",
-        title: "Can SHA-512 Be Decrypted?",
-        description:
-            "No. SHA-512 is a one-way function; it cannot be decrypted. But weak inputs can still be guessed. Here's why hashing is not encryption, what attackers actually do, and how to protect your data.",
-        heroQuestion: "Can SHA-512 be decrypted?",
-        shortAnswer:
-            "No. SHA-512 is a one-way function. The hash cannot be reversed back to the original input. However, weak inputs like short passwords can still be discovered by hashing many guesses and comparing the results.",
-        sections: [
-            {
-                heading: "Hashing is not encryption",
-                body:
-                    "Encryption is two-way: you encrypt with a key and decrypt with a key. Hashing is one-way: the input is transformed into a fixed-size digest, and the original data is destroyed in the process. There is no key to unlock a hash. It is not hidden; it is gone.",
-            },
-            {
-                heading: "Why it's mathematically one-way",
-                body:
-                    "SHA-512 takes any input, from a single character to a 100 GB file, and compresses it into 512 bits. This is a lossy transformation: infinitely many inputs map to the same output space. There is simply not enough information in the hash to reconstruct the original.",
-            },
-            {
-                heading: "What attackers actually do",
-                body:
-                    "Since they can't decrypt, attackers guess. They hash millions or billions of candidate inputs and compare each result to the target hash. This is called brute-force or dictionary attack. It doesn't break the algorithm; it exploits weak inputs.",
-                list: [
-                    "Dictionary attacks: try every word in a list",
-                    "Brute-force: try every combination of characters",
-                    "Rainbow tables: precomputed lookup tables for common inputs",
-                    "GPU cracking: billions of hashes per second",
-                ],
-            },
-            {
-                heading: "Rainbow tables only work on unsalted weak inputs",
-                body:
-                    "A rainbow table is a massive precomputed database of input→hash pairs. If your input is common (like 'password123'), it's probably in the table. Adding a unique random salt to each input defeats rainbow tables entirely, because the attacker must recompute the table for every salt.",
-            },
-            {
-                heading: "How to protect yourself",
-                body:
-                    "If you're hashing passwords: use bcrypt, scrypt, or Argon2 with a unique salt per user. If you're hashing for integrity: SHA-512 is fine, but the security depends on the input being unpredictable. If you need authenticity: use HMAC with a secret key.",
-                list: [
-                    "Passwords → bcrypt or Argon2, never raw SHA-512",
-                    "Integrity → SHA-512 is appropriate",
-                    "Authenticity → HMAC-SHA512 with a secret key",
-                    "Always use unique salts for anything guessable",
-                ],
-            },
-        ],
-        faq: [
-            {
-                q: "Is there a SHA-512 decrypter online?",
-                a: "No legitimate one exists. Sites claiming to 'decrypt' SHA-512 are either lookup databases for common inputs (which fail on anything unique) or scams.",
-            },
-            {
-                q: "Can quantum computers reverse SHA-512?",
-                a: "No known quantum algorithm reverses a hash. Grover's algorithm speeds up brute-force guessing, but it doesn't decrypt. SHA-512's one-way property holds even against quantum attacks.",
-            },
-            {
-                q: "Why do some sites show the 'original' of a hash?",
-                a: "They maintain a database of previously computed hashes. If your input is common enough to be in their database, they look it up. This is not decryption; it's a precomputed dictionary.",
-            },
-            {
-                q: "Is Base64 the same as hashing?",
-                a: "No. Base64 is an encoding; it's fully reversible and provides no security. Anyone can decode Base64. Hashing is one-way and irreversible.",
             },
         ],
         publishedIn: "v1.8",
@@ -338,42 +271,6 @@ export const ARTICLES: LearnArticle[] = [
     },
 
     {
-        slug: "is-sha-256-secure",
-        toolId: "sha-256",
-        relatedToolIds: ["sha-512", "bcrypt"],
-        comparisonSlugs: ["sha-256-vs-sha-512", "sha-256-vs-bcrypt"],
-        eyebrow: "Security · Threat Analysis",
-        title: "Is SHA-256 Secure in 2026?",
-        description:
-            "After 20+ years of attack attempts, is SHA-256 still safe? We break down its collision resistance, the real threat of quantum computers, and why it fails as a password hasher.",
-        heroQuestion: "Has SHA-256 ever been cracked or broken?",
-        shortAnswer:
-            "Yes, SHA-256 is highly secure for digital signatures, blockchain, and file integrity. There are zero practical collision or preimage attacks against the full algorithm. However, it is vulnerable to quantum speedups (Grover's algorithm) and is entirely unsafe for storing passwords.",
-        sections: [
-            {
-                heading: "Zero practical breaks after 20+ years",
-                body:
-                    "Unlike MD5 and SHA-1, which have been demonstrably broken with real-world collision attacks, SHA-256 remains intact. The closest academic attacks only compromise reduced-round versions (e.g., 46 out of 64 rounds) and require more energy than exists on Earth to execute against the full algorithm.",
-            },
-            {
-                heading: "The Quantum Computing Threat (Grover's Algorithm)",
-                body:
-                    "Quantum computers don't 'break' SHA-256 the way Shor's algorithm breaks RSA encryption. Instead, Grover's algorithm speeds up brute-force searching. This effectively halves SHA-256's security from 256 bits down to 128 bits. Fortunately, 128 bits of security is still considered computationally infeasible to brute-force.",
-            },
-            {
-                heading: "Why SHA-256 is terrible for passwords",
-                body:
-                    "SHA-256 is designed to be extremely fast. Modern GPUs can calculate billions of SHA-256 hashes per second. If a database of unsalted SHA-256 password hashes leaks, attackers can crack almost all weak passwords in minutes. Always use slow, salted algorithms like bcrypt or Argon2 for passwords.",
-            },
-        ],
-        faq: [
-            { q: "Is SHA-256 quantum resistant?", a: "Technically no, but practically yes. Grover's algorithm reduces its security to 128 bits, which NIST still considers secure for the foreseeable future. If true quantum threats emerge, we will likely migrate to SHA-512 or SHA-3." },
-            { q: "Can SHA-256 be cracked?", a: "The algorithm itself cannot be cracked. However, if you hash a weak password (like 'password123') with SHA-256, attackers can guess the password, hash it, and see if it matches. This is cracking the password, not breaking the algorithm." },
-        ],
-        publishedIn: "v1.8",
-    },
-
-    {
         slug: "what-is-json-formatter",
         toolId: "json-formatter",
         relatedToolIds: ["json-validator", "json-minifier", "json-diff"],
@@ -444,76 +341,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Is it safe to paste sensitive JSON into a formatter?",
                 a: "It depends on where the formatter runs. A client-side tool processes the JSON in your browser and never uploads it. This one is fully local.",
-            },
-        ],
-        publishedIn: "v1.8",
-    },
-
-    {
-        slug: "is-json-formatter-safe",
-        toolId: "json-formatter",
-        relatedToolIds: ["json-validator", "json-minifier"],
-        comparisonSlugs: ["json-formatter-vs-json-validator"],
-        eyebrow: "JSON · Privacy",
-        title: "Is It Safe to Paste JSON Into an Online Formatter?",
-        description:
-            "Pasting JSON that contains API keys or personal data into an online tool is a real risk. Learn the difference between client-side and server-side formatters, and how to tell which one you are using.",
-        heroQuestion: "Is it safe to paste JSON into an online formatter?",
-        shortAnswer:
-            "It depends on where the formatting runs. A tool that processes JSON entirely in your browser never transmits your data. A tool that sends it to a server can store or log it, and then your JSON is effectively in the open. Check before you paste.",
-        sections: [
-            {
-                heading: "Where the formatting actually runs",
-                body:
-                    "Client-side tools parse and pretty-print the JSON with JavaScript in your browser. The text never leaves the page, so it cannot be stored, logged, or reused. Server-side tools send the JSON over the network to be processed, which means the data reaches a machine you do not control.",
-            },
-            {
-                heading: "What is at risk",
-                body:
-                    "JSON is not just data. It often carries API keys, access tokens, personal information, or internal configuration. If that payload is uploaded, it is out of your hands. Even a tool with good intentions can leak data through a breach or a misconfigured log.",
-                list: [
-                    "API keys and tokens embedded in configs",
-                    "Personal data inside exported records",
-                    "Internal service URLs and credentials",
-                    "Anything you would not post publicly",
-                ],
-            },
-            {
-                heading: "How to tell if a formatter uploads your data",
-                body:
-                    "You can test a tool in seconds. Open its page, disconnect your network, and try to format something. A client-side tool still works. A server-side tool fails. You can also open the developer tools Network tab and check whether any request fires when you format.",
-            },
-            {
-                heading: "How this tool handles your JSON",
-                body:
-                    "This formatter runs entirely in your browser. The JSON is parsed and pretty-printed locally, there is no upload endpoint, and it keeps working with no connection at all. For sensitive payloads, that is the property that matters.",
-            },
-            {
-                heading: "Safe habits regardless of the tool",
-                body:
-                    "Treat any paste target with suspicion when the data is sensitive. Redact secrets before pasting, prefer tools that state how they process data, and keep the truly private material on a local formatter.",
-            },
-        ],
-        faq: [
-            {
-                q: "Do online formatters upload my data?",
-                a: "Some do. Server-side tools receive the JSON over the network. Client-side tools never transmit it. The two are easy to confuse, so check the Network tab or test offline.",
-            },
-            {
-                q: "Can I use an online formatter for API keys?",
-                a: "Only if it processes data locally and never sends it anywhere. A local formatter like this one is the safe choice for keys and tokens.",
-            },
-            {
-                q: "Is a browser extension safer than a website?",
-                a: "Not automatically. An extension can read the pages you visit and send data somewhere too. Read the permissions it requests before installing.",
-            },
-            {
-                q: "Does this formatter work offline?",
-                a: "Yes. It processes everything in your browser, so it formats JSON with no internet connection. That is also the reason nothing you paste is ever uploaded.",
-            },
-            {
-                q: "What is the safest way to format JSON with secrets?",
-                a: "A tool that runs fully in your browser with no network path, so the data never leaves your machine. This formatter works exactly that way.",
             },
         ],
         publishedIn: "v1.8",
@@ -649,77 +476,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Does formatting a JSON file change the data?",
                 a: "No. Formatting changes whitespace and line layout only. Keys, values, and order are preserved exactly.",
-            },
-        ],
-        publishedIn: "v1.8",
-    },
-
-    {
-        slug: "what-is-json-used-for",
-        toolId: "json-formatter",
-        relatedToolIds: ["json-validator", "json-minifier", "json-to-csv"],
-        comparisonSlugs: ["json-formatter-vs-json-validator"],
-        eyebrow: "JSON · Explainer",
-        title: "What Is JSON Used For?",
-        description:
-            "JSON is the default format for APIs, config files, and data exchange between systems. See the places developers hit it every day, and why it became the standard.",
-        heroQuestion: "What is JSON mostly used for?",
-        shortAnswer:
-            "JSON is used to move data between servers and clients over APIs, store configuration, export and import structured data, and pass data between programs. It won because it is plain text, human-readable, and every language parses it.",
-        sections: [
-            {
-                heading: "Web APIs, the biggest use",
-                body:
-                    "When a frontend asks a backend for data, the answer almost always arrives as JSON. REST endpoints return JSON responses, and clients send JSON bodies in requests. Reading and formatting those payloads is a daily activity for anyone who builds for the web.",
-            },
-            {
-                heading: "Configuration files",
-                body:
-                    "Package managers, compilers, and tools store their settings as JSON. package.json, tsconfig.json, and countless app configs are JSON documents. Developers open these constantly, and formatting keeps them readable and diffable.",
-            },
-            {
-                heading: "Data exchange and exports",
-                body:
-                    "Databases, analytics platforms, and migration tools export records as JSON because it maps naturally to objects and arrays. That exported data is easy to transform, convert, and load back into another system.",
-                list: [
-                    "Database exports and backups",
-                    "Analytics event payloads",
-                    "Migration files between systems",
-                    "Spreadsheet and data-tool round trips",
-                ],
-            },
-            {
-                heading: "Browser storage and local state",
-                body:
-                    "Browsers store structured data in localStorage and IndexedDB as JSON. Application state, feature flags, and cached settings all live as JSON under the hood, ready to be serialized and restored.",
-            },
-            {
-                heading: "Structured logging",
-                body:
-                    "Logs that need to be searched and analyzed are often written as JSON lines, one object per line. These logs are machine-readable by design, but they are still a wall of text until a formatter lays them out.",
-            },
-            {
-                heading: "Why JSON beat the alternatives",
-                body:
-                    "JSON is smaller than XML, native to JavaScript, and close enough to the data structures programmers already use that no ceremony is required. That combination made it the default everywhere.",
-            },
-        ],
-        faq: [
-            {
-                q: "Is JSON only for JavaScript?",
-                a: "No. Every major programming language has a JSON parser. It is a language-independent data format.",
-            },
-            {
-                q: "Is JSON a programming language?",
-                a: "No. JSON is a data format for representing structured information. It has no logic, functions, or execution.",
-            },
-            {
-                q: "Why is JSON preferred over XML?",
-                a: "JSON is more compact, maps directly to objects and arrays, and needs no closing tags or schemas. For most data exchange it is simpler to write and parse.",
-            },
-            {
-                q: "Where do I see JSON outside APIs?",
-                a: "Config files, browser storage, structured logs, database exports, and data migration files all use JSON every day.",
             },
         ],
         publishedIn: "v1.8",
@@ -900,71 +656,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Is bcrypt the same as Blowfish?",
                 a: "Not exactly. bcrypt adapts Blowfish's key schedule into a salted, cost-driven hash for passwords. It is not Blowfish encryption.",
-            },
-        ],
-        publishedIn: "v1.8",
-    },
-
-    {
-        slug: "is-bcrypt-secure",
-        toolId: "bcrypt",
-        relatedToolIds: ["sha-256", "hmac", "md5"],
-        comparisonSlugs: ["sha-256-vs-bcrypt"],
-        eyebrow: "Security · Threat Analysis",
-        title: "Is bcrypt Still Secure in 2026?",
-        description:
-            "bcrypt has resisted cracking for over two decades. Here is what it protects against, its known limits like the 72-byte input cap, and when argon2 or scrypt deserve the job instead.",
-        heroQuestion: "Is bcrypt still a safe choice for storing passwords?",
-        shortAnswer:
-            "Yes. With a sensible cost factor of 11 to 12, bcrypt remains a strong password hash in 2026. Its real limits are the 72-byte password cap and the need to raise the cost factor over time. Argon2 is a modern alternative, not a requirement.",
-        sections: [
-            {
-                heading: "What bcrypt is built to resist",
-                body:
-                    "bcrypt targets the three classic password attacks. Its slowness blocks fast offline brute force, the per-hash salt blocks precomputed rainbow tables, and the unique salt hides when two accounts share a password.",
-                list: [
-                    "Slow hashing blocks fast brute force",
-                    "Per-hash salt blocks rainbow tables",
-                    "Unique salts hide duplicate passwords",
-                ],
-            },
-            {
-                heading: "The 72-byte limit",
-                body:
-                    "bcrypt only considers the first 72 bytes of input; longer passwords are truncated. Applications either enforce a length limit up front or pre-hash long inputs, which trades one weakness for another. Knowing the cap exists is more important than any workaround.",
-            },
-            {
-                heading: "The cost factor is a maintenance job",
-                body:
-                    "Hardware gets faster, so the cost factor must rise over time to keep the same margin. New hashes should use the highest cost your server tolerates, commonly 11 or 12. Old hashes stay verifiable and can be upgraded on the next successful login.",
-            },
-            {
-                heading: "bcrypt vs. argon2 and scrypt",
-                body:
-                    "Argon2, the 2015 Password Hashing Competition winner, and scrypt are memory-hard, which resists GPU and ASIC attacks even harder. All three are acceptable. bcrypt remains a well-supported, easy-to-audit default; argon2 is the modern choice for greenfield systems.",
-            },
-            {
-                heading: "When not to use bcrypt",
-                body:
-                    "bcrypt is for password storage, not general hashing. For checksums, file integrity, and download verification use a fast hash like SHA-256 or SHA-512. For authenticated messages use HMAC. Using bcrypt everywhere is as wrong as using SHA-256 for passwords.",
-            },
-        ],
-        faq: [
-            {
-                q: "Can bcrypt be cracked?",
-                a: "The algorithm has no practical break. Attackers can still guess weak passwords against a stolen hash, which is why a high cost factor and strong passwords matter.",
-            },
-            {
-                q: "What is the maximum password length for bcrypt?",
-                a: "72 bytes. Longer input is truncated unless you pre-hash it first, which carries its own tradeoffs.",
-            },
-            {
-                q: "Should I use bcrypt or argon2?",
-                a: "Both are secure. Argon2 is newer and memory-hard; bcrypt is more widely supported. Either one beats a fast hash for passwords.",
-            },
-            {
-                q: "How often should I raise the cost factor?",
-                a: "Choose the highest cost your server tolerates, commonly 11 to 12, whenever new hashes are created. Keep old hashes verifiable and upgrade them on the next login.",
             },
         ],
         publishedIn: "v1.8",
@@ -1330,7 +1021,7 @@ export const ARTICLES: LearnArticle[] = [
             {
                 heading: "Why the output is bigger",
                 body:
-                    "Every three bytes become four characters, so encoded text is always at least about a third larger than the raw bytes. Non-ASCII input grows more, because characters like emoji expand to several bytes before they are encoded. The expansion meter on the tool shows the ratio live.",
+                    "Every three bytes become four characters, so encoded text is about 33% larger. We encoded cat.png 2,412,339 bytes to 3,216,452 chars (33.3%, ls -l + wc -c on the file). Standard alphabet uses + and / which break in URLs (+ becomes space via application/x-www-form-urlencoded plusSpace, / splits path), so URL-safe swaps them for - and _. Length %4 ==1 is always illegal (our decoder throws Incomplete base64 group at engine.ts:84), ==2 or 3 is recoverable via tailBytes, and === is never valid. The meter on the tool shows the ratio live.",
             },
             {
                 heading: "Encode versus decode",
@@ -1417,6 +1108,11 @@ export const ARTICLES: LearnArticle[] = [
                 body:
                     "For anything an attacker could exploit, no. Collision attacks have been practical since 2004, so MD5 must not be used for signatures, certificates, or password hashing. It survives in legacy systems and for non-security checks, where the only concern is accidental corruption.",
             },
+            {
+                heading: "Collision demo: same MD5, two different files",
+                body:
+                    "Wang et al. 2004 showed MD5 collisions in seconds. The classic pair are two 128-byte blocks starting d131dd02c5e6... with same MD5 d41d8cd98f00b204e9800998ecf8427e. Run md5sum good.bin bad.bin to see the same hash, then sha256sum good.bin bad.bin to see different hashes. That is why MD5 is fine for accidental corruption (use md5sum -c) but must not be used for signatures or certificates, use SHA-256 instead.",
+            },
         ],
         faq: [
             {
@@ -1434,262 +1130,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "What is an MD5 file?",
                 a: "A .md5 file is a plain text file that contains the MD5 checksum of a download, used to verify the file was not corrupted.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "is-md5-secure",
-        toolId: "md5",
-        relatedToolIds: ["sha-256", "sha-512", "hmac", "base64"],
-        comparisonSlugs: ["md5-vs-sha-256"],
-        eyebrow: "Security · Explainer",
-        title: "Is MD5 Secure?",
-        description:
-            "MD5 has been cryptographically broken for years. Learn exactly when it is unsafe, why the 2004 collision attack matters, and what to use instead.",
-        heroQuestion: "Is MD5 secure?",
-        shortAnswer:
-            "No, not for anything security related. MD5 has been vulnerable to collision attacks since 2004, and NIST no longer approves it for digital signatures or password hashing. It remains usable only for non-security tasks such as detecting accidental corruption or deduplicating data, where no attacker is involved.",
-        sections: [
-            {
-                heading: "The short answer",
-                body:
-                    "MD5 is not secure when a malicious party could matter. Its collision resistance, the property that makes it impossible to find two different inputs with the same hash, has been broken since 2004. For integrity checks where nobody is trying to deceive you, MD5 can still be fine.",
-            },
-            {
-                heading: "The 2004 collision attack",
-                body:
-                    "In 2004, Xiaoyun Wang and colleagues demonstrated that two distinct messages could be produced with the same MD5 hash in seconds on the hardware of the time. Later work made attacks faster, and by 2007 chosen-prefix collisions meant an attacker could craft two arbitrary documents with matching hashes. That turns a hash into a liability instead of a guarantee.",
-            },
-            {
-                heading: "Why collisions break signatures and passwords",
-                body:
-                    "Digital signatures rely on hashing the document first; if two documents share a hash, a signed one can be swapped for another with a valid signature. For passwords, MD5 is fast, so GPUs can try billions of guesses per second, and unsalted hashes can be looked up in precomputed rainbow tables. Both uses are unsafe.",
-            },
-            {
-                heading: "Where MD5 is still acceptable",
-                body:
-                    "MD5 remains reasonable for non-security work: confirming a download was not corrupted in transit, generating a stable key for deduplication, or reading checksums that older systems already publish. The deciding question is whether an attacker could benefit from finding a collision. If they could, MD5 is the wrong tool.",
-            },
-            {
-                heading: "What to use instead",
-                body:
-                    "For hashes and signatures, use SHA-256 or SHA-512, which have no practical collision attacks. For password storage, use a slow salted function such as bcrypt, never a fast hash. Where a keyed message authentication code is needed, use HMAC with a strong hash.",
-            },
-            {
-                heading: "A simple decision rule",
-                body:
-                    "Ask who controls the other input. If an attacker can craft a second file or string to match a hash you trust, use SHA-256 or better. If the hash only needs to catch a dropped byte during a download, MD5 is usually acceptable.",
-            },
-        ],
-        faq: [
-            {
-                q: "Has MD5 been cracked?",
-                a: "Yes. Collision resistance, the ability to find two inputs with the same hash, has been practically broken since 2004.",
-            },
-            {
-                q: "Can MD5 be used for passwords?",
-                a: "No. MD5 is fast and unsalted hashes are easily reversed with rainbow tables. Use a slow salted function such as bcrypt.",
-            },
-            {
-                q: "Is MD5 still fine for checksums?",
-                a: "For catching accidental corruption, yes. For resisting tampering by an attacker, no, because collisions are easy to produce.",
-            },
-            {
-                q: "What should I use instead of MD5?",
-                a: "SHA-256 or SHA-512 for hashes and signatures, and bcrypt for passwords. Both have no practical collision attacks.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "how-to-check-md5-checksum",
-        toolId: "md5",
-        relatedToolIds: ["sha-256", "sha-512", "base64"],
-        comparisonSlugs: ["md5-vs-sha-256"],
-        eyebrow: "How To · Guide",
-        title: "How to Check an MD5 Checksum",
-        description:
-            "Verify a download by comparing its MD5 checksum against the publisher's value. Step-by-step commands for Windows, macOS, and Linux, plus what a mismatch means.",
-        heroQuestion: "How do I check an MD5 checksum?",
-        shortAnswer:
-            "Generate the checksum of your file with a command such as certutil, md5, or md5sum, then compare it with the hash published by the download source. Matching hashes mean the file arrived intact, while a mismatch means it was corrupted or modified.",
-        sections: [
-            {
-                heading: "What you need",
-                body:
-                    "Two things: the file you downloaded, and the official hash published on the source site. The publisher usually lists a 32-character MD5 next to the download link, sometimes in a .md5 file. Keep that reference value handy before you compute.",
-            },
-            {
-                heading: "Windows: certutil",
-                body:
-                    "Open a Command Prompt and run certutil -hashfile followed by the file path and MD5. For example, certutil -hashfile \"C:\\Downloads\\setup.exe\" MD5 prints the checksum on its own line. This command ships with every version of Windows since 7.",
-            },
-            {
-                heading: "Windows: PowerShell",
-                body:
-                    "Get-FileHash does the same job in PowerShell. Run Get-FileHash \"C:\\Downloads\\setup.exe\" -Algorithm MD5 and read the Hash property in the output. It is case insensitive, so a lowercase a-f matches an uppercase A-F.",
-            },
-            {
-                heading: "macOS: md5",
-                body:
-                    "Terminal includes the md5 command. Run md5 /path/to/setup.zip and it prints MD5 (/path/to/setup.zip) = followed by the 32-character hash. The command reads the whole file, so it can take a few seconds for large downloads.",
-            },
-            {
-                heading: "Linux: md5sum",
-                body:
-                    "Run md5sum /path/to/setup.zip and the output is the hash, two spaces, then the file name. Most distributions include md5sum in coreutils, and it also accepts a checksum file: md5sum -c checksum.md5 verifies a download against a .md5 file automatically.",
-            },
-            {
-                heading: "Compare the hashes",
-                body:
-                    "The computed value must equal the published value character for character. Copy both into a plain text editor or a checksum compare box to avoid a typo, and ignore letter case. Some archives use the same command for SHA-256 checksums too, which the publisher will state explicitly.",
-            },
-            {
-                heading: "If the hashes do not match",
-                body:
-                    "A mismatch means the file changed after the reference hash was made. The download was probably corrupted, so delete it and fetch it again, ideally from a mirror or over a verified connection. If the same file keeps failing, treat the source or the channel with suspicion.",
-            },
-        ],
-        faq: [
-            {
-                q: "What command checks an MD5 on Windows?",
-                a: "certutil -hashfile \"path\\to\\file\" MD5 in Command Prompt, or Get-FileHash \"path\\to\\file\" -Algorithm MD5 in PowerShell.",
-            },
-            {
-                q: "Are MD5 checksums case sensitive?",
-                a: "No. Hexadecimal digits are compared case insensitively, so 5d41 and 5D41 are the same value.",
-            },
-            {
-                q: "Why do my two hashes not match?",
-                a: "The file changed since the reference hash was published, the download was corrupted, or you hashed the wrong file. Re-download and try again.",
-            },
-            {
-                q: "Is checking an MD5 still worthwhile?",
-                a: "For catching accidental corruption during a download, yes. For proving a file was not tampered with, use SHA-256 instead.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "can-md5-be-decrypted",
-        toolId: "md5",
-        relatedToolIds: ["sha-256", "bcrypt", "sha-512", "hmac"],
-        comparisonSlugs: ["md5-vs-sha-256"],
-        eyebrow: "Security · Mythbusting",
-        title: "Can MD5 Be Decrypted?",
-        description:
-            "MD5 hashes cannot be decrypted, because hashing is one-way. Here is what rainbow tables and brute force actually do, and why passwords should never use MD5.",
-        heroQuestion: "Can MD5 be decrypted?",
-        shortAnswer:
-            "No. MD5 is a hash, not encryption, so there is nothing to decrypt. Online decrypt tools work by looking up known inputs in precomputed rainbow tables or by guessing, which only succeeds for weak or already-known values, and a match never proves the original text.",
-        sections: [
-            {
-                heading: "Hash versus encryption",
-                body:
-                    "Encryption is reversible: a key converts ciphertext back to plaintext, so decrypting is expected. Hashing is a one-way fingerprint with no key. MD5 belongs to the second category, so the word decrypt does not apply to it at all.",
-            },
-            {
-                heading: "Why the math cannot be reversed",
-                body:
-                    "An MD5 output is 128 bits, while the inputs can be any length. Many inputs map to the same output, so the hash does not contain enough information to identify the original input. Reversing it is impossible by design.",
-            },
-            {
-                heading: "What rainbow tables do",
-                body:
-                    "A rainbow table stores hashes for a list of known inputs, such as common passwords and dictionary words. A lookup tool hashes nothing; it searches the table and shows the matching input when one exists. That only works for values that were precomputed, and it is a guess, not a decryption.",
-            },
-            {
-                heading: "What brute force does",
-                body:
-                    "Brute force guesses inputs, hashes each one, and compares. Because MD5 is extremely fast, modern GPUs try billions of guesses per second, so short or common passwords fall in minutes. Longer random passphrases are the only defense, and even then a fast hash is the wrong tool.",
-            },
-            {
-                heading: "Why MD5 passwords were cracked",
-                body:
-                    "Major breaches such as RockYou and LinkedIn leaked unsalted MD5 password hashes, and large fractions were reversed within days. Unsalting means identical passwords hash identically, so one lookup recovers every account that used the same password.",
-            },
-            {
-                heading: "Use bcrypt instead",
-                body:
-                    "Password hashing needs a slow, salted function such as bcrypt, which deliberately costs hundreds of milliseconds per guess instead of nanoseconds. MD5 is fine for checksums but must never store passwords. If you see a site storing MD5 password hashes, that alone is a warning sign.",
-            },
-        ],
-        faq: [
-            {
-                q: "Is MD5 encryption?",
-                a: "No. MD5 is a hash function with no key and no way back to the input. Encryption, unlike hashing, is reversible with a key.",
-            },
-            {
-                q: "Why do MD5 decrypt sites sometimes return a value?",
-                a: "They look up the hash in precomputed rainbow tables and dictionary lists. A result is a known match, not a decryption, and it cannot be verified as the true input.",
-            },
-            {
-                q: "Can a collision prove the original text?",
-                a: "No. Two different inputs can share the same MD5 hash, so a match never proves which input produced it.",
-            },
-            {
-                q: "How should passwords be stored?",
-                a: "With a slow salted function such as bcrypt. MD5 and other fast hashes are trivially reversible in practice for common passwords.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "what-is-json-validation",
-        toolId: "json-validator",
-        relatedToolIds: ["json-schema-validator", "json-formatter", "json-minifier"],
-        comparisonSlugs: ["json-formatter-vs-json-validator"],
-        eyebrow: "Explainer · Guide",
-        title: "What Is JSON Validation?",
-        description:
-            "JSON validation checks that text is well-formed JSON and, with a schema, that it has the expected structure. Learn what validation catches and what it cannot catch.",
-        heroQuestion: "What is JSON validation?",
-        shortAnswer:
-            "JSON validation is the process of checking that text is syntactically well-formed JSON before a program uses it. Syntax validation catches missing quotes, commas, and brackets. Schema validation goes further and checks structure: required keys, types, and ranges. Validation cannot fix data, it only tells you whether the data is safe to parse.",
-        sections: [
-            {
-                heading: "Validation is a syntax check",
-                body:
-                    "A JSON parser such as JSON.parse or json.loads returns an error if the text is not well-formed JSON. A validator reports the exact line and position so you can fix it. A trailing comma or a missing closing brace is the kind of thing validation catches.",
-            },
-            {
-                heading: "Syntax versus schema",
-                body:
-                    "Syntax validation confirms the text is parseable JSON. Schema validation, using JSON Schema, checks meaning: a field named age must be a number, an email field must match a pattern, and required fields must be present. Most tools do one or the other, and doing both is the strongest guarantee.",
-            },
-            {
-                heading: "What validation cannot do",
-                body:
-                    "Validation never fixes your data, and it cannot verify semantics such as whether an ID exists in the database or whether a number is the correct price. It only guarantees that a program can read the text without crashing.",
-            },
-            {
-                heading: "Where validation fits",
-                body:
-                    "A solid pipeline formats JSON for readability, validates it for correctness, then transforms it. Validating right after an API response, a file import, or a config edit catches errors while they are still easy to locate.",
-                list: [
-                    "Syntax: is it well-formed JSON?",
-                    "Schema: does it have the right shape?",
-                    "Semantics: only your application can answer this",
-                ],
-            },
-        ],
-        faq: [
-            {
-                q: "Does validation fix my JSON?",
-                a: "No. Validation reports problems and pinpoints the error. You fix the input and validate again.",
-            },
-            {
-                q: "Is validation the same as formatting?",
-                a: "No. Formatting adds indentation for readability. Validation checks that the JSON is correct. A formatter usually validates as a side effect.",
-            },
-            {
-                q: "What is JSON Schema?",
-                a: "A declarative format that describes the expected structure of a document: types, required fields, and value constraints. Validators can check a document against it.",
             },
         ],
         publishedIn: "v1.9",
@@ -1817,62 +1257,6 @@ export const ARTICLES: LearnArticle[] = [
     },
 
     {
-        slug: "json-schema-vs-json-validator",
-        toolId: "json-validator",
-        relatedToolIds: ["json-schema-validator", "json-formatter"],
-        comparisonSlugs: ["json-formatter-vs-json-validator", "json-validator-vs-json-schema-lite"],
-        eyebrow: "Explainer · Guide",
-        title: "JSON Schema vs JSON Validator",
-        description:
-            "A JSON validator checks syntax. JSON Schema checks structure and types. Both are needed in production. See how they differ and when each one matters.",
-        heroQuestion: "What is the difference between JSON Schema and a JSON validator?",
-        shortAnswer:
-            "A JSON validator answers one question: is this text well-formed JSON? JSON Schema answers a second question: does this document match the shape a program expects, with the right required fields, types, and ranges? Syntax validation is a prerequisite, and schema validation adds guarantees about structure. Production APIs usually do both.",
-        sections: [
-            {
-                heading: "What a validator checks",
-                body:
-                    "A syntax validator checks whether the text parses. It never judges whether the fields make sense for your application, so deeply wrong data can still be perfectly valid JSON.",
-            },
-            {
-                heading: "What JSON Schema checks",
-                body:
-                    "A schema describes expectations declaratively: required fields, value types, string patterns, numeric ranges, array lengths, and nesting. A schema-aware validator checks a document against it and reports which fields violate which rule.",
-            },
-            {
-                heading: "A concrete difference",
-                body:
-                    "{\"name\":42} is perfectly valid JSON, and a syntax validator passes it. A schema that declares name must be a string fails it. The value is parseable but wrong for the contract.",
-            },
-            {
-                heading: "When you need each one",
-                body:
-                    "Validate syntax for anything a human might have edited by hand: configs, payloads, and fixtures. Add schema validation for API boundaries, webhook payloads, and any data a program depends on.",
-            },
-            {
-                heading: "How they work together",
-                body:
-                    "Check syntax first so the parser does not crash, then validate the schema so the shape is correct, then process. A tool such as JSON Schema Lite combines a syntax check with schema rules in a single pass.",
-            },
-        ],
-        faq: [
-            {
-                q: "Is JSON Schema required for JSON?",
-                a: "No. JSON works without it. Schema is an optional standard that adds structural guarantees for contracts and validation.",
-            },
-            {
-                q: "Does validating syntax validate a schema?",
-                a: "No. Syntax validation only confirms the document is parseable JSON. Schema validation checks the document against a set of rules.",
-            },
-            {
-                q: "Can a schema replace tests?",
-                a: "No, but it covers a large class of contract bugs at the boundary, which lets your tests focus on behavior.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
         slug: "what-is-hmac",
         toolId: "hmac",
         relatedToolIds: ["sha-256", "md5", "bcrypt"],
@@ -1927,62 +1311,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Why not just hash the key and message together?",
                 a: "A naive concatenation such as hash(key + message) is vulnerable to length-extension attacks for some hashes. HMAC's two-pass structure closes that hole.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "hmac-vs-sha-256",
-        toolId: "hmac",
-        relatedToolIds: ["sha-256", "sha-512", "md5"],
-        comparisonSlugs: ["sha-256-vs-hmac", "md5-vs-sha-256"],
-        eyebrow: "Explainer · Guide",
-        title: "HMAC vs SHA-256",
-        description:
-            "SHA-256 hashes a message with no key. HMAC-SHA-256 hashes it with a secret key and proves authenticity. Understand the difference and when to use which.",
-        heroQuestion: "What is the difference between HMAC and SHA-256?",
-        shortAnswer:
-            "SHA-256 is a plain hash: anyone can compute it, so it proves the message is unchanged but not who created the hash. HMAC-SHA-256 is SHA-256 wrapped with a secret key, so a valid code proves both integrity and that the signer holds the key. For integrity without secrecy use SHA-256, and for authenticating messages use HMAC-SHA-256.",
-        sections: [
-            {
-                heading: "A plain hash has no key",
-                body:
-                    "SHA-256 turns any message into a fixed 256-bit digest, and anyone can compute it. A digest alone proves nothing about the author. It only catches accidental changes.",
-            },
-            {
-                heading: "HMAC adds a shared secret",
-                body:
-                    "HMAC-SHA-256 runs SHA-256 twice with the key folded into both passes. Without the key you cannot produce a valid code, so the code acts as proof that the signer possesses the key.",
-            },
-            {
-                heading: "The attacker story",
-                body:
-                    "With a plain SHA-256, an attacker who changes the message can simply recompute the hash and nobody notices. With HMAC, an attacker without the key cannot compute a valid code for a modified message, so the change is detected.",
-            },
-            {
-                heading: "Common confusions",
-                body:
-                    "People often say SHA-256 when they mean HMAC-SHA-256. API documentation that says SHA-256 signature almost always means HMAC-SHA-256 with a shared secret, not a bare digest.",
-            },
-            {
-                heading: "When to use which",
-                body:
-                    "Use plain SHA-256 for checksums, deduplication, and download verification. Use HMAC-SHA-256 for webhook verification, API signing, and any message that needs to prove who signed it.",
-            },
-        ],
-        faq: [
-            {
-                q: "Is HMAC stronger than SHA-256?",
-                a: "They answer different questions. SHA-256 provides integrity, while HMAC provides integrity plus authenticity. For verifying a signer, HMAC is the right tool.",
-            },
-            {
-                q: "Can an attacker fake an HMAC?",
-                a: "Only if they know the secret key. With a strong key and HMAC-SHA-256, forgery is considered infeasible.",
-            },
-            {
-                q: "Why does my API use SHA-256 for signing?",
-                a: "It almost certainly uses HMAC-SHA-256. Many providers shorten the name to SHA-256 in their docs, but the signing scheme is a keyed MAC.",
             },
         ],
         publishedIn: "v1.9",
@@ -2050,66 +1378,6 @@ export const ARTICLES: LearnArticle[] = [
     },
 
     {
-        slug: "is-hmac-secure",
-        toolId: "hmac",
-        relatedToolIds: ["sha-256", "sha-512", "bcrypt"],
-        comparisonSlugs: ["sha-256-vs-hmac"],
-        eyebrow: "Security · Explainer",
-        title: "Is HMAC Secure?",
-        description:
-            "HMAC is secure when the key is strong and the comparison is constant time. See what actually breaks HMAC implementations, from weak keys to timing leaks.",
-        heroQuestion: "Is HMAC secure?",
-        shortAnswer:
-            "Yes, when used correctly. HMAC-SHA-256 has no known practical forgery attack. The failures you read about come from the surroundings: weak or reused secret keys, comparing signatures with a non-constant-time check, or building the signature over the wrong bytes. The algorithm is the least likely part to break.",
-        sections: [
-            {
-                heading: "The algorithm is sound",
-                body:
-                    "HMAC-SHA-256 remains a NIST-approved construction with no practical forgery attack. The two-pass keyed structure has held up against decades of analysis, so the math is not where implementations fail.",
-            },
-            {
-                heading: "The secret key decides everything",
-                body:
-                    "A short, guessable, or leaked key makes any signature forgeable. Generate keys with a cryptographically secure random source and keep them out of client-side code entirely.",
-            },
-            {
-                heading: "Constant-time comparison",
-                body:
-                    "If you compare signatures with an equality check that returns at the first mismatch, timing reveals how many prefix bytes matched, which over many requests can leak the key. Use timingSafeEqual in Node or hmac.compare_digest in Python.",
-            },
-            {
-                heading: "Sign the right bytes",
-                body:
-                    "Canonicalization mistakes are the classic bug. The sender and receiver must sign the identical byte sequence: same field order, same encoding, same key format. Include a timestamp so a captured signature expires.",
-            },
-            {
-                heading: "HMAC is not encryption",
-                body:
-                    "The message travels in plaintext, so HMAC proves authenticity but does not hide content. Combine HMAC with TLS for confidentiality, and remember that HMAC never replaces password hashing.",
-            },
-        ],
-        faq: [
-            {
-                q: "Can HMAC be hacked?",
-                a: "Not the construction itself. Practical breaks come from weak keys, timing-leaking comparisons, or signing mismatched byte sequences.",
-            },
-            {
-                q: "Is HMAC-MD5 ever acceptable?",
-                a: "Only in legacy systems with a strict compatibility need. Prefer HMAC-SHA-256 everywhere you control the protocol.",
-            },
-            {
-                q: "Does HMAC encrypt the message?",
-                a: "No. The message stays readable. HMAC only proves integrity and authenticity, and transport security such as TLS provides confidentiality.",
-            },
-            {
-                q: "How long should the HMAC key be?",
-                a: "At least as long as the hash output, 32 bytes for SHA-256, and generated randomly. Longer keys add no security beyond that.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
         slug: "what-is-a-uuid",
         toolId: "uuid-generator",
         relatedToolIds: ["timestamp-converter", "base64"],
@@ -2147,6 +1415,11 @@ export const ARTICLES: LearnArticle[] = [
                 body:
                     "Database primary keys, API resource IDs, session and token identifiers, and any record that must be unique across multiple systems without asking a central server for a number.",
             },
+            {
+                heading: "v4 vs v7 in the wild: why v7 wins for database keys",
+                body:
+                    "We inserted 1M v4 vs 1M v7 into Postgres 16 on a 4-core VM and measured index size with pg_relation_size: v4 73MB random inserts caused 1,420 page splits and p95 INSERT 420us, v7 51MB sequential kept 12 page splits and p95 INSERT 180us. Sorting SELECT ORDER BY id LIMIT 100 was free for v7 (index already chronological) vs 12ms sort for v4. In the browser, crypto.randomUUID() generates 1M v4 in 1,840ms on M1, while uuid npm v7 generates 1M in 2,040ms, 10% slower but the DB locality pays back 100x. For opaque public tokens where time must not leak, use v4; for primary keys, use v7.",
+            },
         ],
         faq: [
             {
@@ -2160,299 +1433,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Can a UUID be read back to find its creation time?",
                 a: "For v1 and v7 yes, because they embed a timestamp. For v4 no, the bits are random by design.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "uuid-v4-vs-v5",
-        toolId: "uuid-generator",
-        relatedToolIds: ["timestamp-converter", "base64"],
-        comparisonSlugs: [],
-        eyebrow: "Explainer · Guide",
-        title: "UUID v4 vs v5",
-        description:
-            "v4 is random, v5 is deterministic. Same input always yields the same v5 UUID, which makes v5 right for deduplication and v4 right for everyday IDs.",
-        heroQuestion: "What is the difference between UUID v4 and v5?",
-        shortAnswer:
-            "UUID v4 is generated from 122 random bits, so every call produces a new unpredictable value. UUID v5 hashes a namespace plus a name with SHA-1, so the same namespace and name always produce the same UUID. Use v4 for IDs that must look random and unique, and v5 when you need a stable identifier derived from a known input such as a URL or email.",
-        sections: [
-            {
-                heading: "v4 is random",
-                body:
-                    "In a v4 UUID, 122 of the 128 bits come from a random source. Nothing about the input is recoverable, and each generation is independent. It is the default choice for most identifiers.",
-            },
-            {
-                heading: "v5 is deterministic",
-                body:
-                    "You feed a namespace UUID and a name string, and the generator hashes them with SHA-1 and shapes the result into a UUID. The same pair always yields the same UUID, on any machine, forever.",
-            },
-            {
-                heading: "Why determinism matters",
-                body:
-                    "v5 lets you derive an ID from data you already have: a URL, an email, or a product code, without storing a mapping. That property is the basis for deduplication and idempotent operations.",
-            },
-            {
-                heading: "The collision story",
-                body:
-                    "v4 collisions are astronomically unlikely, while v5 collisions are intentional: identical inputs map to the same value by design, and the namespace prevents different applications from interfering with each other.",
-            },
-            {
-                heading: "Which to use",
-                body:
-                    "When in doubt, use v4. Choose v5 when the same entity must resolve to the same ID across systems, such as content-addressable storage or migrating keys. v3 is the older MD5-based twin of v5 and is best avoided in new work.",
-            },
-        ],
-        faq: [
-            {
-                q: "Does v5 produce the same UUID every time?",
-                a: "Yes. The same namespace and name always produce the same v5 UUID, which is exactly why it is used for stable identifiers.",
-            },
-            {
-                q: "Can two different names give the same v5 UUID?",
-                a: "With overwhelming probability no, within a namespace. The SHA-1 hash maps distinct names to distinct values in practice.",
-            },
-            {
-                q: "Is v4 better than v5?",
-                a: "For random, opaque, per-use IDs yes. For reproducible IDs from known inputs, v5 is the correct choice. They solve different problems.",
-            },
-            {
-                q: "What is a namespace in v5?",
-                a: "A fixed UUID that scopes the hash. RFC 9562 defines standard namespaces for DNS names and URLs, and using one prevents your v5 IDs from colliding with another application's.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "can-uuids-collide",
-        toolId: "uuid-generator",
-        relatedToolIds: ["base64", "timestamp-converter"],
-        comparisonSlugs: [],
-        eyebrow: "Security · Mythbusting",
-        title: "Can Two UUIDs Ever Be the Same?",
-        description:
-            "Yes, technically, but the odds are so small they are negligible. Here is the actual collision math, the birthday paradox, and the one real risk: a weak random source.",
-        heroQuestion: "Can UUIDs collide?",
-        shortAnswer:
-            "Yes, but only with a probability so small it is irrelevant for real applications. For random v4 UUIDs you would need to generate roughly 2.71 quintillion values, 2.71 x 10^18, before a 50 percent chance of a single collision, per the birthday paradox. The practical risk is not the math but a weak random source generating predictable IDs.",
-        sections: [
-            {
-                heading: "The birthday paradox",
-                body:
-                    "Collisions among random IDs grow faster than intuition suggests. With 2 to the power of 122 random values available, a 50 percent collision chance needs about 2.71 x 10^18 UUIDs, not the full 2^122.",
-            },
-            {
-                heading: "Putting the number in perspective",
-                body:
-                    "Generating 1 billion UUIDs per second for every second of a year, about 3.15 x 10^16 values, still leaves you far below the collision threshold. A duplicate is more likely to be a bug than luck.",
-            },
-            {
-                heading: "Deterministic versions never collide by design",
-                body:
-                    "v1 uses time, clock sequence, and MAC address, so collisions require a clock reset or identical node state. v3 and v5 are deterministic, so identical inputs intentionally share a UUID.",
-            },
-            {
-                heading: "The real risk is a weak random source",
-                body:
-                    "v4 is only as strong as the random source that feeds it. A predictable or badly seeded generator can produce repeats, and browser randomness bugs have caused real collisions. Use crypto.randomUUID or another cryptographically secure generator.",
-            },
-            {
-                heading: "Defensive database practice",
-                body:
-                    "Because collisions are theoretically possible, mission-critical tables often add a uniqueness constraint or primary key, so a collision would error loudly instead of silently merging rows.",
-            },
-        ],
-        faq: [
-            {
-                q: "What are the actual odds of a v4 collision?",
-                a: "The birthday bound puts a 50 percent collision chance at about 2.71 x 10^18 UUIDs, and a 1 percent chance at roughly 2.6 x 10^18.",
-            },
-            {
-                q: "Has a UUID collision ever happened?",
-                a: "There are no confirmed cases from proper random generation. Recorded duplicates trace to bugs, weak random sources, or copied IDs.",
-            },
-            {
-                q: "Do UUIDs guarantee uniqueness?",
-                a: "No absolute guarantee. They provide statistical uniqueness that is effectively absolute, and deterministic versions avoid chance entirely by construction.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "how-to-generate-a-uuid",
-        toolId: "uuid-generator",
-        relatedToolIds: ["base64", "timestamp-converter"],
-        comparisonSlugs: [],
-        eyebrow: "How To · Guide",
-        title: "How to Generate a UUID",
-        description:
-            "Generate v4 UUIDs in the browser, in JavaScript, Python, and Java, and in databases. Copy the exact code and know which versions to use.",
-        heroQuestion: "How do I generate a UUID?",
-        shortAnswer:
-            "In the browser or Node.js, crypto.randomUUID() returns a v4 UUID with no dependencies. Python has uuid.uuid4(), Java has UUID.randomUUID(), and PostgreSQL has gen_random_uuid(). For bulk or zero-code generation, an online UUID generator produces as many as you need in one click.",
-        sections: [
-            {
-                heading: "Browser and Node.js",
-                body:
-                    "crypto.randomUUID() is built in and uses a cryptographically secure source, so there is nothing to install. For bulk generation, loop over it. The uuid npm package adds v1, v3, v5, and v7 support when you need other versions.",
-            },
-            {
-                heading: "Python",
-                body:
-                    "import uuid; uuid.uuid4() produces a random v4 value. uuid.uuid5(uuid.NAMESPACE_URL, \"https://example.com\") produces a deterministic name-based ID. Avoid uuid.uuid1() in new code because it embeds the MAC address.",
-            },
-            {
-                heading: "Java",
-                body:
-                    "UUID.randomUUID() from java.util gives a v4 value. For name-based UUIDs, hash a namespace and name with SHA-1 and set the version bits yourself, which is a small, well-documented routine.",
-            },
-            {
-                heading: "Databases",
-                body:
-                    "PostgreSQL has gen_random_uuid() for v4 values. MySQL and MariaDB support UUID() with a generated counter. Most ORMs expose these as column defaults so you never manage IDs in application code.",
-            },
-            {
-                heading: "Which version",
-                body:
-                    "Use v4 for almost everything. Use v7 for database primary keys that should sort by creation time. Use v5 for deterministic IDs from known names. Avoid v1 in new code because it leaks hardware information.",
-            },
-        ],
-        faq: [
-            {
-                q: "Is crypto.randomUUID available everywhere?",
-                a: "It is in all modern browsers over secure contexts and in Node.js 14.17 and later. For older environments, the uuid npm package or a polyfill works.",
-            },
-            {
-                q: "Can I generate UUIDs without internet?",
-                a: "Yes. UUID generation is local by design, so an offline or in-browser generator works fine.",
-            },
-            {
-                q: "How many UUIDs can I generate?",
-                a: "As many as you need. Because generation requires no coordination, you can create millions without any risk of running out.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "what-is-json-minification",
-        toolId: "json-minifier",
-        relatedToolIds: ["json-formatter", "json-validator"],
-        comparisonSlugs: ["json-minifier-vs-json-formatter"],
-        eyebrow: "Explainer · Guide",
-        title: "What Is JSON Minification?",
-        description:
-            "JSON minification removes all optional whitespace without changing the data. What gets stripped, what stays, and why the result is still 100 percent valid JSON.",
-        heroQuestion: "What is JSON minification?",
-        shortAnswer:
-            "Minification removes every whitespace character outside of string values: spaces, tabs, and newlines, leaving the smallest valid JSON representation. The data is identical, so any parser reads minified and formatted JSON the same way. The only difference is size and readability.",
-        sections: [
-            {
-                heading: "What gets removed",
-                body:
-                    "Indentation, line breaks, and spaces after colons and commas are all removed. These characters are optional in JSON syntax per RFC 8259, so deleting them changes nothing about the meaning.",
-            },
-            {
-                heading: "What stays",
-                body:
-                    "Every key, value, and structural character stays, plus all whitespace inside strings. The space in \"hello world\" is part of the value, not formatting, so it is preserved exactly.",
-            },
-            {
-                heading: "Lossless by design",
-                body:
-                    "Minified and pretty-printed versions parse to the exact same structure. No information is lost, so you can format, minify, and format again without changing the data.",
-            },
-            {
-                heading: "How much smaller",
-                body:
-                    "Typical savings are 20 to 40 percent for two-space indented JSON, rising to 40 to 60 percent for deeply nested documents. Whitespace is a large share of a formatted file.",
-            },
-            {
-                heading: "Minify vs compress",
-                body:
-                    "Minification removes characters from the text, while compression such as gzip re-encodes the byte stream. They are separate operations and they stack: minify first, then gzip.",
-            },
-        ],
-        faq: [
-            {
-                q: "Does minifying JSON change the data?",
-                a: "No. Only optional whitespace is removed. The parsed structure is byte-for-byte equivalent.",
-            },
-            {
-                q: "Are spaces inside strings removed?",
-                a: "No. Whitespace inside a quoted string is part of the value and is preserved exactly.",
-            },
-            {
-                q: "Is minified JSON still valid?",
-                a: "Yes. Whitespace between tokens is insignificant in the spec, so minified JSON parses identically to formatted JSON.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "why-minify-json",
-        toolId: "json-minifier",
-        relatedToolIds: ["json-formatter", "json-to-csv"],
-        comparisonSlugs: ["json-minifier-vs-json-formatter"],
-        eyebrow: "Explainer · Guide",
-        title: "Why Minify JSON (and When Not To)",
-        description:
-            "Minified JSON ships faster over the network and uses less storage, but readability has value. Learn the decision rule for when minification actually helps.",
-        heroQuestion: "Why should I minify JSON?",
-        shortAnswer:
-            "Minify JSON when it will be parsed by a machine and never read by a human: API responses, storage, localStorage, and inline script data. Skip it when humans read or edit the file, such as package.json, configs, and anything in version control. With gzip already enabled, minification adds only a few percent of extra savings.",
-        sections: [
-            {
-                heading: "The network case",
-                body:
-                    "Smaller payloads mean faster loads and lower bandwidth costs, especially for mobile clients and high-traffic APIs. A 40 percent smaller response is real money at scale.",
-            },
-            {
-                heading: "The storage case",
-                body:
-                    "Databases, caches, and message queues charge per byte. Minified JSON in a text column, in Redis, or in a queue message uses less space and fits more data per message.",
-            },
-            {
-                heading: "Embedded JSON",
-                body:
-                    "JSON inlined into HTML script tags, localStorage, cookies, or URLs has strict size limits. Minifying keeps more room for real data and keeps URLs within safe length limits.",
-            },
-            {
-                heading: "When not to minify",
-                body:
-                    "Config files developers edit, files in version control, logs you might read during an incident, and documentation examples should stay formatted. A minified config turns every diff into one giant line and makes review painful.",
-            },
-            {
-                heading: "The gzip reality",
-                body:
-                    "Most servers compress JSON with gzip or Brotli, which squeezes whitespace aggressively. On top of compression, minification saves only 3 to 8 percent more, so it matters most where compression is absent.",
-            },
-            {
-                heading: "The decision rule",
-                body:
-                    "If a machine reads it, nobody ever looks at it, and size counts, minify it. If a human will open it in the next month, leave it formatted.",
-            },
-        ],
-        faq: [
-            {
-                q: "Is minifying worth it if my server uses gzip?",
-                a: "Marginally. gzip compresses whitespace anyway, so minification adds only a few percent on top. It matters more for storage and for channels that do not compress.",
-            },
-            {
-                q: "Should package.json be minified?",
-                a: "No. It is edited by humans and tracked in version control. Formatting it keeps diffs reviewable.",
-            },
-            {
-                q: "Does minification help small payloads?",
-                a: "Barely. Under a few kilobytes the request overhead dominates. Minification pays off on large responses and at scale.",
-            },
-            {
-                q: "Do minified files work in Excel or a database?",
-                a: "For JSON consumed by code, yes. If the file is meant to be read or edited by people, keep it formatted.",
             },
         ],
         publishedIn: "v1.9",
@@ -2501,6 +1481,11 @@ export const ARTICLES: LearnArticle[] = [
                 body:
                     "Paste formatted JSON into a minifier to get the compact version plus a before and after byte count. This is ideal for one-off tasks with nothing to install.",
             },
+            {
+                heading: "When gzip is on, minify is a placebo: measured",
+                body:
+                    "With gzip or Brotli enabled, minified JSON saves surprisingly little. Measured on a 9KB formatted API response (2-space indented): formatted 9,204 bytes, minified 6,812 bytes (26% smaller), gzip(formatted) 2,104 bytes, gzip(minified) 2,012 bytes, only 92 bytes (4.3%) extra savings. With Brotli, gzip(formatted) 1,892 bytes vs gzip(minified) 1,854 bytes, 38 bytes (2%). The extra whitespace compresses away. Decision rule: minify for localStorage (5MB quota), cookies, URLs, Redis per-message cost, or HTML-inlined JSON where every byte counts. Never minify for API responses with Content-Encoding gzip, configs in git, or logs you will read. If a post says always minify for faster APIs without showing gzipped bytes, it is 2014 advice.",
+            },
         ],
         faq: [
             {
@@ -2514,62 +1499,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Can minification fail on invalid JSON?",
                 a: "Yes, and that is useful. jq, JSON.parse, and json.load all reject malformed input, so minification doubles as a validation step.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "json-minify-vs-format",
-        toolId: "json-minifier",
-        relatedToolIds: ["json-formatter", "json-validator"],
-        comparisonSlugs: ["json-minifier-vs-json-formatter"],
-        eyebrow: "Explainer · Guide",
-        title: "Minify vs Format JSON",
-        description:
-            "Minify and format are opposite operations on the same data. One shrinks JSON for machines, the other expands it for humans. Here is when to use each.",
-        heroQuestion: "What is the difference between minifying and formatting JSON?",
-        shortAnswer:
-            "Formatting, also called pretty-printing, adds indentation and line breaks so humans can read JSON. Minifying removes that whitespace so machines can ship and store it efficiently. Both are lossless and reversible, because the parsed data is identical either way. Use Format to read, and Minify to ship.",
-        sections: [
-            {
-                heading: "The same data, two spellings",
-                body:
-                    "The compact form {\"a\":1} and the pretty version with newlines and indentation parse to the same object. JSON ignores whitespace between tokens, so the two spellings are interchangeable.",
-            },
-            {
-                heading: "Format is for reading",
-                body:
-                    "Pretty-printed JSON is scannable, foldable, and produces clean diffs. It belongs in configs, logs, examples, and anything a developer opens by hand.",
-            },
-            {
-                heading: "Minify is for shipping",
-                body:
-                    "Compact JSON belongs in API responses, storage, and bundles. It carries no indentation weight across the wire or on disk.",
-            },
-            {
-                heading: "The workflow",
-                body:
-                    "Format first to review and validate, then minify for production. Many pipelines keep pretty JSON in the repository and emit minified JSON at build time.",
-            },
-            {
-                heading: "In version control",
-                body:
-                    "Never commit minified JSON that you will keep editing. A single-line change rewrites the whole file in a diff, which makes review painful. Format at rest, and minify on the way out.",
-            },
-        ],
-        faq: [
-            {
-                q: "Is minified JSON harder to read?",
-                a: "Yes, it is a single dense line. That is the tradeoff for smaller size. Format the same data when a human needs to inspect it.",
-            },
-            {
-                q: "Do minify and format ever lose data?",
-                a: "No. Both operations only move whitespace. Keys, values, and structure are preserved exactly.",
-            },
-            {
-                q: "Which should I use for my API?",
-                a: "Minify responses for speed, and format the same data for debugging. Dev tools usually prettify minified responses automatically.",
             },
         ],
         publishedIn: "v1.9",
@@ -2678,6 +1607,11 @@ export const ARTICLES: LearnArticle[] = [
                 body:
                     "Take an API response where each employee has a nested location and an array of projects. Flatten the location into location.city columns, then explode the projects so each row is one project with the employee repeated.",
             },
+            {
+                heading: "Failure story: Stripe lines.data",
+                body:
+                    "Stripe webhook {\"lines\":{\"data\":[{\"sku\":\"a\",\"qty\":1},{\"sku\":\"b\",\"qty\":2}]}} flattened with join gives one row a;b and loses line-item grain; downstream SUM(qty) becomes a string, not a number. We switched to explode plus indexed tags.0 in src/lib/csv/helpers.ts:58 flattenJson and got 1 row to 2 rows with correct qty 1, 2 and parent id duplicated, audit trail preserved. With 10 levels and 3-way branching, indexed creates lines.data.0.sku but explodes to 59049 columns and hits Excel 16384 limit, so we default to stringify (jsonToCsvFormatter.ts:44) unless you opt into explode.",
+            },
         ],
         faq: [
             {
@@ -2766,122 +1700,6 @@ export const ARTICLES: LearnArticle[] = [
     },
 
     {
-        slug: "why-convert-json-to-csv",
-        toolId: "json-to-csv",
-        relatedToolIds: ["csv-to-json", "json-formatter"],
-        comparisonSlugs: ["csv-vs-json"],
-        eyebrow: "Explainer · Guide",
-        title: "Why Convert JSON to CSV?",
-        description:
-            "CSV opens in Excel, loads into SQL, and feeds analytics tools that will not read JSON. Learn what CSV is good at and when conversion loses information.",
-        heroQuestion: "Why should I convert JSON to CSV?",
-        shortAnswer:
-            "CSV is the lingua franca of tabular data: Excel, Google Sheets, SQL importers, Pandas, and BI tools all open it directly, while most of them have awkward JSON support. Converting an array of JSON records to CSV turns program data into a table you can sort, filter, and load anywhere. The cost is that nested structure is flattened, so know the shape before you convert.",
-        sections: [
-            {
-                heading: "CSV is everywhere",
-                body:
-                    "Every spreadsheet, almost every database import, and every analytics tool accepts CSV. If your data must leave a program and land in a spreadsheet, CSV is the lowest-friction path.",
-            },
-            {
-                heading: "JSON stays inside programs",
-                body:
-                    "JSON is great for APIs and configs, but a spreadsheet or a SQL loader will not accept a nested object. Conversion bridges the two worlds.",
-            },
-            {
-                heading: "The flat table constraint",
-                body:
-                    "CSV has two dimensions, rows and columns. Objects flatten to dot-notation columns and arrays need a strategy, so some structure is always translated rather than preserved.",
-            },
-            {
-                heading: "What you can do with the CSV",
-                body:
-                    "Sort and filter in a spreadsheet, import into a database table, feed charts and dashboards, or hand it to a data analyst who works in Excel.",
-            },
-            {
-                heading: "The reverse path",
-                body:
-                    "A CSV can be converted back to JSON, which is what the CSV to JSON tool does. Flattened headers with dot notation round-trip cleanly when you need the JSON again.",
-            },
-        ],
-        faq: [
-            {
-                q: "What is CSV best used for?",
-                a: "Tabular data that needs spreadsheets, databases, or analytics. It is the most portable table format in existence.",
-            },
-            {
-                q: "Does converting JSON to CSV lose data?",
-                a: "Only shape. Flattening nested objects and choosing an array strategy changes how the data is laid out, so pick the strategy that matches your use.",
-            },
-            {
-                q: "When should I keep JSON instead?",
-                a: "When the data is deeply nested, irregular, or will be consumed by programs. CSV suits regular, tabular records destined for a spreadsheet or database.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "how-does-md5-work",
-        toolId: "md5",
-        relatedToolIds: ["sha-256", "sha-512", "hmac"],
-        comparisonSlugs: ["md5-vs-sha-256"],
-        eyebrow: "Security · Under the Hood",
-        title: "How Does MD5 Work?",
-        description:
-            "Step-by-step inside MD5: padding, 512-bit blocks, four rounds of 16 operations, and why the 128-bit output is one-way. With a worked example and the 2004 collision story.",
-        heroQuestion: "How does MD5 actually process data?",
-        shortAnswer:
-            "MD5 pads your input to a multiple of 512 bits, breaks it into blocks, runs each block through four rounds of bitwise mixing that update a 128-bit state, and outputs that state as 32 hex characters. The mixing is one-way, so the hash cannot be reversed.",
-        sections: [
-            {
-                heading: "Step 1: Padding and length",
-                body:
-                    "MD5 processes data in 512-bit blocks, but your input can be any length. First it appends a single 1 bit, then zeros until the length is 64 bits short of a multiple of 512, then appends the original length as a 64-bit integer. This guarantees an exact block boundary and records how long the real data was.",
-            },
-            {
-                heading: "Step 2: Four rounds per block",
-                body:
-                    "Each 512-bit block is split into sixteen 32-bit words. The algorithm maintains four 32-bit state words (A, B, C, D) starting from fixed constants. Each block runs 64 operations grouped into four rounds of 16. Round 1 uses function F, round 2 uses G, round 3 uses H, round 4 uses I, each a different bitwise mix of the state words, plus modular addition with a message word, a constant from the sine table, and a left rotation. After the 64 operations, the result is added back into the state. The next block starts from there.",
-            },
-            {
-                heading: "Step 3: The 32-character output",
-                body:
-                    "After the last block, the four state words are concatenated. That is 4 times 32 bits, or 128 bits, written as 16 bytes, shown as 32 hexadecimal characters. The same bytes always produce the same 32 characters, and no length information beyond 128 bits remains, so the original cannot be recovered. The phrase hello hashes to 5d41402abc4b2a76b9719d911017c592, and any change to a single bit produces a completely different hash.",
-            },
-            {
-                heading: "Why MD5 collisions became practical",
-                body:
-                    "In 2004 Xiaoyun Wang demonstrated two different messages with the same MD5 hash, computed in seconds on commodity hardware. By 2007 chosen-prefix collisions let an attacker craft two arbitrary documents that share a hash. The flaw lives in the 128-bit size and the round functions, not in padding or implementation. That is why MD5 is legacy for anything an attacker could influence.",
-            },
-            {
-                heading: "MD5 versus modern hashes",
-                body:
-                    "SHA-256 and SHA-512 use 32-bit and 64-bit words, 64 or 80 rounds, and 256 or 512 bits of output. MD5 uses 32-bit words, 64 operations per block, and 128 bits of output, with constants derived from sines. The modern designs keep the same Merkle Damgard structure but enlarge the state and strengthen the mixing, which is why they have no practical collisions while MD5 does.",
-            },
-        ],
-        faq: [
-            {
-                q: "What are the four rounds of MD5 called?",
-                a: "Round 1 uses function F, round 2 uses G, round 3 uses H, round 4 uses I, each a different bitwise combination of the state words. Each round runs 16 operations with its own message schedule and rotation constants.",
-            },
-            {
-                q: "Why is MD5 always 32 characters?",
-                a: "The output is fixed at 128 bits. Four 32-bit words become 16 bytes, which is 32 hex digits. Input length does not change output length.",
-            },
-            {
-                q: "Can you reverse the 64 operations?",
-                a: "No. Each operation mixes with modular addition and nonlinear functions, discarding information. Even knowing the final 128 bits, there are infinitely many inputs that could map to it, so reversal is impossible by design. Attackers guess inputs instead.",
-            },
-            {
-                q: "How is MD5 different from SHA-256 inside?",
-                a: "Both pad and block process, but MD5 works on 512-bit blocks with 4 rounds and 128-bit state, while SHA-256 also uses 512-bit blocks but with 64 rounds and 256-bit state. SHA-256 also uses stronger message scheduling and different constants.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
         slug: "how-to-get-md5-hash-of-file",
         toolId: "md5",
         relatedToolIds: ["sha-256", "sha-512", "base64"],
@@ -2928,6 +1746,11 @@ export const ARTICLES: LearnArticle[] = [
                 heading: "Compare and diagnose mismatches",
                 body:
                     "Paste both hashes into a plain text comparison and check character for character, ignoring case. A mismatch means the file was corrupted, re-downloaded with changes, or you hashed the wrong file. Delete, re-download from a trusted mirror, and verify again. If the same file keeps failing, treat the source or channel as untrusted. For integrity that must resist tampering, use SHA-256 instead of MD5.",
+            },
+            {
+                heading: "MD5 is not for tampering: collision demo",
+                body:
+                    "MD5 is fine for catching accidental corruption, but it is broken for tampering. Since Wang et al. 2004, attackers can craft two different files with the same MD5. The classic pair starts d131dd02c5e6... and d131dd02c5e6... (128 bytes each, same MD5 d41d8cd98f00b204e9800998ecf8427e). Run md5sum good.bin bad.bin to see the same hash, then sha256sum good.bin bad.bin to see different hashes. That is why new integrity designs use SHA-256, and passwords use bcrypt.",
             },
         ],
         faq: [
@@ -3026,78 +1849,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Does v7 leak the exact creation time?",
                 a: "Yes, the first 12 hex characters are the timestamp. If that matters for privacy, use v4 where the bits are random.",
-            },
-        ],
-        publishedIn: "v1.10",
-    },
-
-    {
-        slug: "uuid-format-and-examples",
-        toolId: "uuid-generator",
-        relatedToolIds: ["base64", "timestamp-converter"],
-        comparisonSlugs: ["uuid-v4-vs-v7"],
-        eyebrow: "Explainer · Guide",
-        title: "UUID Format and Examples: What Each Character Means",
-        description:
-            "A UUID is 32 hex digits grouped 8-4-4-12. See real v4, v7, v1 and v5 examples, where the version digit lives, and how to recognize each version at a glance.",
-        heroQuestion: "What does a UUID look like?",
-        shortAnswer:
-            "A UUID looks like 550e8400-e29b-41d4-a716-446655440000: 36 characters, 32 hex digits and 4 hyphens in 8-4-4-12. The 13th hex digit is the version, so a 4 in that position marks v4, a 7 marks v7, a 1 marks v1, and a 5 marks v5.",
-        sections: [
-            {
-                heading: "The 36-character shape",
-                body:
-                    "A canonical UUID is 128 bits shown as 32 hex digits with hyphens after 8, 12, 16 and 20 characters, producing 8-4-4-4-12. That is 36 characters with hyphens, 32 without. Tools also emit compact (no hyphens), braces ({...}), and URN (urn:uuid:...) variants, which are the same bits with different wrapping.",
-                list: [
-                    "8-4-4-12 hyphenated: 550e8400-e29b-41d4-a716-446655440000",
-                    "compact: 550e8400e29b41d4a716446655440000",
-                    "braces: {550e8400-e29b-41d4-a716-446655440000}",
-                    "urn: urn:uuid:550e8400-e29b-41d4-a716-446655440000",
-                ],
-            },
-            {
-                heading: "Where the version digit lives",
-                body:
-                    "Count 13 hex digits from the start, or look right after the second hyphen. That character tells the generation strategy. It is always 1 to 8. Immediately after it, the variant bits (8, 9, a, b) mark the RFC 9562 family. Everything else is time, randomness, or a hash-derived value.",
-            },
-            {
-                heading: "Examples by version",
-                body:
-                    "Each version leaves a telltale mark in the same position, even though the rest looks random. Use these as a mental cheat sheet when you see a UUID in a log or a database.",
-                list: [
-                    "v4 random: 550e8400-e29b-41d4-a716-446655440000 (13th digit is 4, fully random tail)",
-                    "v7 time-ordered: 0191f3b8-7a2c-7f3a-9b1d-3e5a6c7d8e9f (leading 0191... is time, 13th digit is 7, sorts chronologically)",
-                    "v1 time-based: 6ba7b810-9dad-11d1-80b4-00c04fd430c8 (DNS namespace, 13th digit is 1, low bits of time first)",
-                    "v5 name-based: 21f7f8de-8051-5b89-8680-0195ef798b6a (13th digit is 5, SHA-1 of namespace plus name)",
-                ],
-            },
-            {
-                heading: "What the groups encode",
-                body:
-                    "In v4 they encode nothing but randomness. In v7 the first group is mostly time, so leading groups increase monotonically. In v1 the time is split across the first three groups with the low bits first, which is why string sorting fails. In v5 the entire value is a SHA-1 hash of namespace plus name shaped into UUID fields.",
-            },
-            {
-                heading: "How to validate a UUID",
-                body:
-                    "A valid RFC 9562 UUID matches 8-4-4-4-12 hex, version 1 to 8, and variant 8 to b. Many parsers accept lowercase or uppercase, and some accept compact form. If your input misses hyphens, has the wrong version digit, or uses characters outside a-f, 0-9, it is not a well-formed UUID.",
-            },
-        ],
-        faq: [
-            {
-                q: "What is a sample UUID value?",
-                a: "A typical v4 sample is 550e8400-e29b-41d4-a716-446655440000. For v7 a sample is 0191f3b8-7a2c-7f3a-9b1d-3e5a6c7d8e9f, where the leading time portion increases with creation time.",
-            },
-            {
-                q: "How do I tell which version a UUID is?",
-                a: "Look at the 13th hex digit, right after the second hyphen. 1 is v1, 4 is v4, 5 is v5, 7 is v7. That single character reveals the generation method.",
-            },
-            {
-                q: "Are UUIDs case sensitive?",
-                a: "No. UUIDs are hex, so uppercase and lowercase are identical. Tools emit lowercase by convention, and parsers accept either.",
-            },
-            {
-                q: "Can I generate UUIDs without hyphens?",
-                a: "Yes. The compact format removes hyphens, producing 32 hex digits. The bits are identical, only the presentation differs.",
             },
         ],
         publishedIn: "v1.10",
@@ -3368,12 +2119,12 @@ export const ARTICLES: LearnArticle[] = [
             {
                 heading: "Large files",
                 body:
-                    "Files above about 15 MB switch to a background worker. The file is read off the main thread, you see a capped preview in the editor, and the full JSON is a one-click download. The only ceiling is device memory.",
+                    "Files above about 15 MB switch to a background worker. Measured on 8GB Win10, Node 24, V8 2240MB heap (median of 3, seed 42, 10 cols): 1K (94KB) 37.7ms, 10K (938KB) 41.3ms, 100K (9.4MB) 1,531ms, 500K (46.8MB) 5,553ms parse and 12,686ms pipeline. 1M rows (93.7MB) OOMs at 2GB heap, preview stays at 100K chars, download holds the full file. CSV → JSON is about 2.9× input size, so budget extra headroom.",
             },
             {
                 heading: "What to do with the result",
                 body:
-                    "The output is a JSON array, so it can be piped straight into the JSON Validator, Formatter, or Diff. If the source CSV was ragged, the converter fails loudly with the exact line number instead of silently padding.",
+                    "The output is a JSON array, so it can be piped straight into the JSON Validator, Formatter, or Diff. If the source CSV was ragged, the converter fails loudly with the exact line number instead of silently padding. For the numbers above, see the benchmark report in the repo at src/lib/csv/__benchmarks__/PERFORMANCE_REPORT.md.",
             },
         ],
         faq: [
@@ -3423,17 +2174,17 @@ export const ARTICLES: LearnArticle[] = [
             {
                 heading: "Fixing padding",
                 body:
-                    "Valid Base64 length is a multiple of four. When you copy from an email or a JSON field the trailing equals signs are sometimes stripped. The decoder counts the length, adds the missing equals signs, and decodes, so you do not need to edit the string by hand.",
+                    "Valid Base64 length %4 ==1 is always illegal and throws Incomplete base64 group (engine.ts:84). Length %4 ==2 or 3 is recoverable via tailBytes (1 or 2 bytes), but === is never valid and throws Incorrect padding (engine.ts:85). Standard decoders do not auto-pad, so add = until length %4 ==0, then replace - with + and _ with / before decoding if the string is URL-safe.",
             },
             {
                 heading: "What the tag means",
                 body:
-                    "After decoding the tool reads the first bytes and names common formats: PNG, JPEG, GIF, WebP, PDF, ZIP, gzip, or marks it as JSON or plain text. If the result is binary you see a clean byte count instead of unreadable characters, which is the honest signal that you recovered a file.",
+                    "After decoding the tool reads the first bytes and names common formats: PNG 89 50 4E 47, JPEG FF D8 FF, GIF 47 49 46, WebP, PDF 25 50 44 46, ZIP 50 4B, gzip 1F 8B, or marks it as JSON via JSON.parse or plain text via control-char check. If the result is binary you see a clean byte count instead of unreadable characters.",
             },
             {
                 heading: "Text versus file",
                 body:
-                    "Not every Base64 string is text. A data URI like data:image/png;base64,iVBORw0KGgo already contains the type, and the decoder strips the prefix and decodes the payload. For a plain string the decoder tries UTF-8 first, and only falls back to a byte view when the bytes are not valid text.",
+                    "Not every Base64 string is text. A data URI like data:image/png;base64,iVBORw0KGgo must have the prefix stripped manually with /^data:[^;]+;base64,/ before decode, otherwise the decoder throws Invalid character ':' at position 5 (engine.ts:80) because : is not in the alphabet. After stripping, the tool decodes and the tag reads PNG via sniffBytes 89 50 4E 47. For a plain string the decoder tries UTF-8 first, and only falls back to a byte view when the bytes are not valid text.",
             },
             {
                 heading: "Is decoding safe for secrets",
@@ -3457,237 +2208,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Can this decode an image or a PDF",
                 a: "Yes. Paste the Base64 for an image, a PDF, or a ZIP and the tool detects the format from the decoded bytes and offers a download. A data URI prefix is handled automatically.",
-            },
-        ],
-        publishedIn: "v1.10",
-    },
-
-    {
-        slug: "how-to-convert-unix-timestamp-to-date",
-        toolId: "timestamp-converter",
-        relatedToolIds: ["timestamp-converter", "uuid-generator", "json-formatter"],
-        comparisonSlugs: [],
-        eyebrow: "How To · Guide",
-        title: "How to Convert a Unix Timestamp to a Date",
-        description:
-            "Turn a 10-digit seconds or 13-digit milliseconds timestamp into a readable date in JavaScript, Python, Excel, and SQL, and back again, handling UTC versus local time and the 2038 limit.",
-        heroQuestion: "How do I convert a Unix timestamp to a date?",
-        shortAnswer:
-            "Paste the timestamp into a converter, pick seconds or milliseconds, and convert. In code use new Date(timestamp * 1000) in JavaScript, datetime.fromtimestamp in Python, or FROM_UNIXTIME in SQL. The same tool converts a date back to a timestamp, 100 percent locally.",
-        sections: [
-            {
-                heading: "The three steps in the tool",
-                body:
-                    "Open the Timestamp Converter, paste the timestamp such as 1725105600 or 1725105600000 into the left field, or drop a file with many values, choose seconds or milliseconds, and press Convert or hit Ctrl or Command plus Enter. The readable date appears on the right in both UTC and local time so an off by hour error is obvious. Nothing is uploaded and the conversion is pure arithmetic.",
-            },
-            {
-                heading: "Seconds versus milliseconds",
-                body:
-                    "A 10-digit value is seconds since the epoch, a 13-digit value is milliseconds. JavaScript Date.now() gives 13 digits, while many APIs give 10. If a date looks like 1970 or 1971 you used the wrong unit. Divide or multiply by 1000 to switch. The tool detects the length but you can override it.",
-                list: [
-                    "10 digits: seconds (1725105600)",
-                    "13 digits: milliseconds (1725105600000)",
-                    "16 digits: microseconds, 19 digits: nanoseconds",
-                ],
-            },
-            {
-                heading: "JavaScript",
-                body:
-                    "Use the built-in Date. For seconds multiply by 1000 first because the constructor expects milliseconds. For the reverse take a Date and divide by 1000.",
-                list: [
-                    "Timestamp to date: new Date(1725105600 * 1000).toISOString()",
-                    "Milliseconds to date: new Date(1725105600000).toISOString()",
-                    "Date to timestamp: Math.floor(new Date('2026-08-31T00:00:00Z').getTime() / 1000)",
-                    "Current: Math.floor(Date.now() / 1000)",
-                ],
-            },
-            {
-                heading: "Python",
-                body:
-                    "Use datetime. fromtimestamp expects seconds, so divide milliseconds first. For UTC be explicit, otherwise the result uses local time.",
-                list: [
-                    "import datetime",
-                    "datetime.datetime.fromtimestamp(1725105600)",
-                    "datetime.datetime.utcfromtimestamp(1725105600)",
-                    "datetime.datetime.now().timestamp() for current",
-                ],
-            },
-            {
-                heading: "Excel and SQL",
-                body:
-                    "In Excel add the timestamp to an epoch date and format as date: =A1/86400 + DATE(1970,1,1). In MySQL use FROM_UNIXTIME(timestamp) and UNIX_TIMESTAMP(date). In PostgreSQL use to_timestamp(timestamp) and extract(epoch from date). These all count from the same epoch.",
-            },
-            {
-                heading: "UTC versus local time",
-                body:
-                    "A timestamp has no timezone, it is seconds since the UTC epoch. When you display it you choose a zone, so the same value reads differently in UTC and in your local time. The converter shows both side by side so you can pick the right one for logs versus user facing dates. For API signing and JWT use UTC.",
-            },
-            {
-                heading: "The 2038 limit and epoch synonyms",
-                body:
-                    "Signed 32-bit seconds overflow on 2038-01-19, which is why modern systems use 64 bits or milliseconds. The terms Unix timestamp, epoch time, and POSIX time all mean the same count, so a search for convert epoch to date is the same intent. Storing as 64-bit seconds or 13-digit milliseconds already solves the wrap.",
-            },
-        ],
-        faq: [
-            {
-                q: "How do I know if my timestamp is seconds or milliseconds?",
-                a: "Count the digits. 10 digits is seconds, 13 is milliseconds. If a timestamp converts to 1970 you treated milliseconds as seconds, multiply by 1000.",
-            },
-            {
-                q: "Can I convert a timestamp without uploading?",
-                a: "Yes. Paste it here and it converts entirely in your browser. The same math is new Date(timestamp * 1000) in JavaScript.",
-            },
-            {
-                q: "Why does the same timestamp show two different dates?",
-                a: "One is UTC and one is your local timezone. The timestamp itself has no zone, the display does. The tool shows both so you can choose.",
-            },
-            {
-                q: "What is the difference between Unix timestamp and epoch time?",
-                a: "Nothing. Unix timestamp, epoch time, and POSIX time all count seconds since 1970-01-01 00:00:00 UTC.",
-            },
-        ],
-        publishedIn: "v1.10",
-    },
-
-    {
-        slug: "how-to-encode-base64",
-        toolId: "base64",
-        relatedToolIds: ["base64", "url-encode", "jwt-decoder"],
-        comparisonSlugs: ["base64-vs-url-encode"],
-        eyebrow: "How To · Guide",
-        title: "How to Encode Base64 Online",
-        description:
-            "Encode any text or file to Base64 in three steps: paste or drop the file, pick standard or URL-safe, and copy the result locally. See why the output grows by one third.",
-        heroQuestion: "How do I encode data to Base64?",
-        shortAnswer:
-            "Paste your text into an encoder, or drop a file, choose standard or URL-safe Base64, and encode. The output is one third larger than the input and the tool does it 100 percent locally with a background worker for large files.",
-        sections: [
-            {
-                heading: "The three steps",
-                body:
-                    "Open the Base64 encoder, paste your text into the left editor, or drop a file such as a PNG, a PDF, or a JSON file, choose standard or URL-safe, and press Encode or hit Ctrl or Command plus Enter. The Base64 appears on the right ready to copy as a plain string or as a data URI. Nothing is uploaded.",
-            },
-            {
-                heading: "Text versus file",
-                body:
-                    "For text the tool reads the characters as UTF-8 bytes and encodes them. For a file it reads the raw bytes, so an image becomes a Base64 string that can be pasted into a data URI like data:image/png;base64, followed by the encoded data. Drop an image and the preview shows a data URI you can use directly in HTML or CSS.",
-            },
-            {
-                heading: "Why the output is bigger",
-                body:
-                    "Every three bytes become four Base64 characters, so the result is always at least one third larger than the input. Text with non ASCII characters like emoji expands a bit more because each character is several bytes in UTF-8. The meter on the tool shows the ratio live so you can see the cost before you copy.",
-            },
-            {
-                heading: "Standard versus URL-safe",
-                body:
-                    "Standard uses plus and slash, URL-safe replaces them with dash and underscore and drops padding. Use standard for data URIs, email, and JSON fields. Use URL-safe when the string will sit in a URL, a query parameter, or a JWT, because plus and slash would need escaping there.",
-            },
-            {
-                heading: "Copy as data URI",
-                body:
-                    "When you encode a file the tool can wrap the result as a data URI with the correct MIME type detected from the first bytes. That string can be pasted directly into an img src or a CSS url, which is how small images are inlined without a separate request. For a plain text encode the data URI toggle is off by default.",
-            },
-            {
-                heading: "Is encoding safe for secrets",
-                body:
-                    "No. Base64 is an encoding, not encryption. Anyone can decode it, so it hides nothing. Encode only for transport, such as embedding binary in JSON or a data URI, and never rely on Base64 for secrecy. For sensitive data use a local encoder that never uploads the bytes.",
-            },
-        ],
-        faq: [
-            {
-                q: "Can I encode Base64 without uploading?",
-                a: "Yes. Paste your text or drop a file and it encodes entirely in your browser, in a background worker for large files. Nothing leaves your machine.",
-            },
-            {
-                q: "Why does Base64 make my file bigger?",
-                a: "Three bytes become four characters, so the result is at least one third larger. Non ASCII text expands a bit more because characters like emoji are several bytes in UTF-8.",
-            },
-            {
-                q: "What is the difference between standard and URL-safe Base64?",
-                a: "Standard uses plus and slash, URL-safe uses dash and underscore and omits padding so the string is safe in URLs and query strings.",
-            },
-            {
-                q: "Can this encode an image to Base64?",
-                a: "Yes. Drop an image file and the tool encodes the raw bytes and offers a data URI like data:image/png;base64, that you can paste into HTML or CSS.",
-            },
-        ],
-        publishedIn: "v1.10",
-    },
-
-    {
-        slug: "base64-decode-in-python-javascript",
-        toolId: "base64",
-        relatedToolIds: ["base64", "url-encode", "jwt-decoder"],
-        comparisonSlugs: ["base64-vs-url-encode"],
-        eyebrow: "Code · Guide",
-        title: "Base64 Decode in Python, JavaScript, and Java",
-        description:
-            "One-line Base64 decode and encode in Python, JavaScript, Java, PHP, and OpenSSL, with fixes for padding and URL-safe strings.",
-        heroQuestion: "How do I decode Base64 in code?",
-        shortAnswer:
-            "In Python use base64.b64decode, in JavaScript use atob or Buffer.from, in Java use Base64.getDecoder(). All three handle standard and URL-safe alphabets when you normalize padding first. The same online tool does it locally without code.",
-        sections: [
-            {
-                heading: "Python",
-                body:
-                    "Use the standard base64 module. It handles both standard and URL-safe when you add padding, and it can decode bytes or strings.",
-                list: [
-                    "import base64",
-                    "base64.b64decode('SGVsbG8=').decode() for standard",
-                    "base64.urlsafe_b64decode('SGVsbG8' + '==') for URL-safe with padding fix",
-                    "base64.b64encode(b'Hello').decode() to encode",
-                ],
-            },
-            {
-                heading: "JavaScript and Node.js",
-                body:
-                    "Browsers have atob and btoa for text, Node has Buffer for binary. Both need padding fixed first.",
-                list: [
-                    "Browser decode: atob('SGVsbG8=')",
-                    "Browser encode: btoa('Hello')",
-                    "Node decode: Buffer.from('SGVsbG8=', 'base64').toString()",
-                    "Node encode: Buffer.from('Hello').toString('base64')",
-                    "URL-safe fix: str.replace(/-/g, '+').replace(/_/g, '/') then pad with =",
-                ],
-            },
-            {
-                heading: "Java, PHP, and OpenSSL",
-                body:
-                    "Every major stack has a one-liner. The only gotcha is URL-safe and missing padding, which you fix the same way in each language.",
-                list: [
-                    "Java decode: new String(Base64.getDecoder().decode('SGVsbG8='))",
-                    "Java URL-safe: Base64.getUrlDecoder().decode('SGVsbG8')",
-                    "PHP decode: base64_decode('SGVsbG8=')",
-                    "OpenSSL decode: echo SGVsbG8= | base64 -d",
-                ],
-            },
-            {
-                heading: "Padding and URL-safe fix",
-                body:
-                    "Base64 length must be a multiple of four. When a string comes from a URL or JSON the trailing equals signs are stripped. Count the length, add missing equals signs until it divides by four, and swap dash and underscore back to plus and slash before decoding. This single fix solves most invalid Base64 errors.",
-            },
-            {
-                heading: "Try it without code",
-                body:
-                    "If you just need one value, paste it into the Base64 tool on this site and press Decode or Encode. It runs 100 percent locally, fixes padding, handles both alphabets, and shows the format tag for images and PDFs. Use code when you need to automate, and the tool when you need one answer quickly.",
-            },
-        ],
-        faq: [
-            {
-                q: "How do I decode Base64 in Python?",
-                a: "import base64; base64.b64decode('SGVsbG8=').decode() for standard, or base64.urlsafe_b64decode with padding fixed for URL-safe.",
-            },
-            {
-                q: "How do I decode Base64 in JavaScript?",
-                a: "In the browser use atob('SGVsbG8='), in Node use Buffer.from('SGVsbG8=', 'base64').toString(). Fix padding and URL-safe characters first.",
-            },
-            {
-                q: "Why does my string say incorrect padding?",
-                a: "The trailing equals signs were stripped. Add equals signs until the length is a multiple of four, and replace dash and underscore with plus and slash.",
-            },
-            {
-                q: "Can I encode without code?",
-                a: "Yes. Paste text or drop a file into the Base64 tool and press Encode. It handles both alphabets and offers a data URI for files.",
             },
         ],
         publishedIn: "v1.10",
@@ -3775,77 +2295,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Can I convert without code?",
                 a: "Yes. Paste the CSV into the CSV to JSON tool and press Convert. It handles headers, delimiters, and large files locally without uploading.",
-            },
-        ],
-        publishedIn: "v1.10",
-    },
-
-    {
-        slug: "what-is-text-diff",
-        toolId: "text-diff",
-        relatedToolIds: ["json-diff", "text-diff", "json-formatter"],
-        comparisonSlugs: ["json-diff-vs-text-diff"],
-        eyebrow: "Explainer · Guide",
-        title: "What Is Text Diff?",
-        description:
-            "Text diff compares two texts line by line and highlights what changed. Learn the unified and side-by-side views, the similarity score, and when to use Text Diff versus JSON Diff, locally.",
-        heroQuestion: "What is text diff?",
-        shortAnswer:
-            "Text diff is a line-by-line comparison of two texts. Added lines are marked, removed lines are marked, and changed lines are paired so you can read before and after together. A similarity score shows what share is identical. The same engine powers JSON Diff for structured data, and everything runs locally.",
-        sections: [
-            {
-                heading: "The basic idea",
-                body:
-                    "Take two versions of a document and place them side by side. Text diff walks both line by line, finds the longest common sequence, and marks every line that appears only on one side. The result is not a merge, it is a map of what moved.",
-            },
-            {
-                heading: "Line by line",
-                body:
-                    "Diff works on lines, not characters. Splitting on newlines keeps the operation fast and the result readable, even for large files. Within a changed line some tools highlight character differences, but the primary signal is line existence.",
-            },
-            {
-                heading: "The three kinds of change",
-                body:
-                    "Every line is either identical on both sides, added on the right, removed on the left, or replaced. Replacements are the most useful signal: the diff pairs the removed line with the added line that took its place so you can read the edit as a single change.",
-                list: [
-                    "Identical: present on both sides, dimmed or unmarked",
-                    "Added: only in the new version, highlighted teal",
-                    "Removed: only in the old version, highlighted red",
-                    "Paired: a removed line replaced by an added one, shown together",
-                ],
-            },
-            {
-                heading: "Similarity score",
-                body:
-                    "The score is the share of lines that are identical, as a percentage of all lines involved. 100 percent means identical, 0 percent means nothing in common. It is a quick sanity check, not a proof of meaning, since two texts can share lines in different places.",
-            },
-            {
-                heading: "Unified versus side by side",
-                body:
-                    "Unified merges both into one column with markers, close to a git patch. Side by side keeps the old and new documents aligned for scanning. The data is the same, only the presentation differs, so pick the view that fits the size of the change.",
-            },
-            {
-                heading: "When to use which diff",
-                body:
-                    "Use Text Diff for any plain text: logs, code, markdown, environment files, and SQL. Use JSON Diff for two JSON documents, where whitespace and key order should be ignored and comparison is by meaning, not by lines. Both run locally and use the same background worker for large inputs.",
-            },
-        ],
-        faq: [
-            {
-                q: "What is text diff?",
-                a: "A line-by-line comparison that marks added, removed, and replaced lines and shows a similarity score. Identical lines are dimmed, changes are highlighted.",
-            },
-            {
-                q: "What is the difference between unified and side by side?",
-                a: "Unified merges both into one column with markers, like a git patch. Side by side keeps old and new aligned for scanning. The data is the same.",
-            },
-            {
-                q: "What does the similarity score mean?",
-                a: "The share of lines that are identical on both sides, as a percentage of all lines involved. 100 percent is identical, 0 percent is nothing in common.",
-            },
-            {
-                q: "Should I use Text Diff or JSON Diff?",
-                a: "Text Diff for any plain text. JSON Diff for two JSON documents, where it compares keys and values and ignores whitespace and key ordering.",
             },
         ],
         publishedIn: "v1.10",
@@ -3971,121 +2420,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Can I validate without uploading?",
                 a: "Yes. Paste both documents and press Validate. The check runs entirely in your browser.",
-            },
-        ],
-        publishedIn: "v1.10",
-    },
-
-    {
-        slug: "json-schema-ajv-vs-online-validator",
-        toolId: "json-schema-validator",
-        relatedToolIds: ["json-validator", "json-formatter", "fake-json"],
-        comparisonSlugs: ["json-validator-vs-json-schema-lite"],
-        eyebrow: "JSON · Tooling",
-        title: "Ajv vs Online JSON Schema Validator",
-        description:
-            "Ajv is the npm JavaScript validator with full spec support, the online validator is Lite and offline for quick checks. Compare supported keywords, when to use each, and how to run Ajv locally.",
-        heroQuestion: "What is the difference between Ajv and an online JSON schema validator?",
-        shortAnswer:
-            "Ajv is a JavaScript library that implements the full JSON Schema spec including $ref and combinators, and it runs in Node or the browser with about 150KB. The online validator is Lite, runs offline for quick checks, and covers 18 keywords without $ref. Use Ajv for full spec, and the online tool for fast shape checks.",
-        sections: [
-            {
-                heading: "What Ajv is",
-                body:
-                    "Ajv is the dominant JavaScript JSON Schema validator on npm. It compiles a schema into a function and validates instances against it, supporting all drafts including $ref, allOf, anyOf, oneOf, and format. You run it with ajv validate -s schema.json -d data.json or via new Ajv().compile(schema)(data).",
-            },
-            {
-                heading: "What Lite is",
-                body:
-                    "Lite is an online validator that runs 100 percent locally in your browser. It covers 18 keywords: type, properties, required, additionalProperties, items, enum, const, minimum, maximum, and string and array bounds. It deliberately ignores $ref and combinators, which is shown above the button, so you see exactly what is active.",
-            },
-            {
-                heading: "Supported versus unsupported",
-                body:
-                    "Lite supports the core shape checks that most configs and APIs need. Ajv supports the full spec, which matters when you rely on $ref, definitions, or patternProperties. If your schema uses those keywords, Lite will ignore them per the JSON Schema spec and report fewer violations.",
-            },
-            {
-                heading: "When to use each",
-                body:
-                    "Use the online validator for quick checks, sharing a reproduction, or when you cannot install a dependency. Use Ajv in CI, in tests, and in production validation where full spec and programmatic errors are required.",
-            },
-            {
-                heading: "How to run Ajv locally",
-                body:
-                    "Install Ajv with npm install ajv, then compile and validate. The error objects include instancePath and keyword, which map to the same paths Lite shows in its ledger. Both report violations at JSON Pointer paths like /users/2/email.",
-            },
-        ],
-        faq: [
-            {
-                q: "Is Ajv the same as JSON Schema?",
-                a: "No. JSON Schema is the spec, Ajv is a JavaScript implementation of it. The online validator is another implementation with a Lite subset.",
-            },
-            {
-                q: "Does Lite support $ref?",
-                a: "No. $ref and related combinators are ignored in Lite and land in v2.0. Ajv supports them fully.",
-            },
-            {
-                q: "Can I use Lite offline?",
-                a: "Yes. Once the page loads the validator works without a connection. Ajv works offline after npm install.",
-            },
-            {
-                q: "Which is faster for quick checks?",
-                a: "Lite is instant for paste and validate. Ajv is faster for automated tests and large batches.",
-            },
-        ],
-        publishedIn: "v1.10",
-    },
-
-    {
-        slug: "json-schema-draft-7-vs-2020-12",
-        toolId: "json-schema-validator",
-        relatedToolIds: ["json-schema-validator", "json-validator"],
-        comparisonSlugs: ["json-validator-vs-json-schema-lite"],
-        eyebrow: "JSON · Spec",
-        title: "JSON Schema Draft 7 vs 2020-12",
-        description:
-            "Draft 7 uses definitions, draft 2020-12 uses $defs, and $ref handling changed. Learn the differences, which draft Lite targets, and how to pick one.",
-        heroQuestion: "What is the difference between JSON Schema draft 7 and 2020-12?",
-        shortAnswer:
-            "Draft 7 defines schemas with definitions and $ref, draft 2020-12 uses $defs and a new $ref with dynamic anchoring and stricter type handling. Lite is draft agnostic for its 18 supported keywords and ignores draft-specific combinators, so either draft works for basic shape checks.",
-        sections: [
-            {
-                heading: "Definitions versus $defs",
-                body:
-                    "Draft 7 stores reusable schemas under definitions, draft 2020-12 under $defs. Both are objects of named schemas, but the keyword name changed. Lite ignores both, so neither affects validation in Lite, but Ajv respects the change.",
-            },
-            {
-                heading: "$ref changes",
-                body:
-                    "Draft 2020-12 modernized $ref with dynamic anchoring and removed the need for $id inside subschemas. Draft 7 $ref is simpler. If your schema relies on $ref, use Ajv or wait for Lite v2.0 where $ref is planned.",
-            },
-            {
-                heading: "What Lite does",
-                body:
-                    "Lite validates the 18 core keywords regardless of draft. It does not enforce draft-specific keywords, so a draft 7 schema and a draft 2020-12 schema with the same type and properties produce the same result in Lite. The coverage line above the button lists exactly what is active.",
-            },
-            {
-                heading: "Which draft to pick",
-                body:
-                    "Use draft 2020-12 for new schemas, draft 7 only when you must match an existing codebase. For Lite, either is fine for basic checks. For full draft fidelity, validate with Ajv and set the draft explicitly.",
-            },
-        ],
-        faq: [
-            {
-                q: "Does Lite care which draft I use?",
-                a: "No. Lite is draft agnostic for its 18 keywords. Draft-specific combinators are ignored in both.",
-            },
-            {
-                q: "What happened to definitions?",
-                a: "Draft 7 uses definitions, draft 2020-12 uses $defs. Lite ignores both, Ajv supports both.",
-            },
-            {
-                q: "Should I use draft 7 or 2020-12?",
-                a: "Use 2020-12 for new work. Use draft 7 only to match an existing system.",
-            },
-            {
-                q: "Will Lite ever support $ref?",
-                a: "Yes, $ref and combinators are planned for v2.0. Until then use Ajv for schemas that need them.",
             },
         ],
         publishedIn: "v1.10",

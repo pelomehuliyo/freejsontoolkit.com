@@ -256,7 +256,7 @@ export const tools: ToolManifest[] = [
     family: "json",
     status: "available",
     href: "/tools/yaml-to-json",
-    keywords: ["yaml to json", "convert yaml to json"],
+    keywords: ["yaml to json", "convert yaml to json", "yaml to json converter", "json yaml converter", "yaml to json online", "yaml to json converter online", "online yaml to json converter", "yaml to json python" ],
     addedIn: "v1.4",
   },
   {
@@ -267,7 +267,7 @@ export const tools: ToolManifest[] = [
     family: "json",
     status: "available",
     href: "/tools/json-to-yaml",
-    keywords: ["json to yaml", "convert json to yaml"],
+    keywords: ["json to yaml", "convert json to yaml", "json to yaml converter", "json yaml converter", "json to yaml online", "json to yaml converter online", "online json to yaml converter", "convert json to yaml online", "swagger json to yaml", "openapi json to yaml", "python json to yaml" ],
     addedIn: "v1.4",
   },
   {

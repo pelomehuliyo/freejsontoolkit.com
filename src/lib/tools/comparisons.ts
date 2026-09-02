@@ -45,7 +45,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       "Both tools parse JSON with the same engine, but they answer different questions. " +
       "The Formatter takes JSON you already trust and makes it readable; the Validator takes " +
       "JSON you don't trust and tells you exactly where it breaks. They're two halves of one " +
-      "workflow, not rivals. Everything runs 100% in your browser.",
+      "workflow, not rivals.",
     useA: {
       heading: "Use the Formatter when",
       points: [
@@ -80,7 +80,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Sort keys", a: "Yes (optional)", b: "—" },
       { label: "Duplicate-key warnings", a: "—", b: "Yes" },
       { label: "Structure tally", a: "—", b: "Yes: objects, arrays, depth…" },
-      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+      { label: "Where it runs", a: "Browser, no upload", b: "Browser, no upload" },
     ],
     verdict:
       "Format to read it, validate to trust it. In practice you reach for both: validate first " +
@@ -135,7 +135,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       },
       { label: "Sort keys", a: "Yes (optional)", b: "Yes (optional)" },
       { label: "Best for", a: "APIs, URLs, bundles, storage", b: "Editing, reviewing, committing" },
-      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+      { label: "Where it runs", a: "Browser, no upload", b: "Browser, no upload" },
     ],
     verdict:
       "Same engine, opposite directions. Minify to ship it, format to read it. Your data is never " +
@@ -192,7 +192,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       },
       { label: "Sort keys", a: "—", b: "Yes (optional)" },
       { label: "Typical question", a: "What changed?", b: "How should this look?" },
-      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+      { label: "Where it runs", a: "Browser, no upload", b: "Browser, no upload" },
     ],
     verdict:
       "Reach for the Formatter when you have one document and want to read it; reach for the Diff when " +
@@ -284,7 +284,7 @@ export const COMPARISONS: Record<string, Comparison> = {
     intro:
       "Two sides of the same conversion. JSON → XML takes a JSON object and builds an XML document from it; " +
       "XML → JSON does the reverse, parsing an XML document into a JSON object. Together they let you move " +
-      "data between the two most common structured formats on the web. Both run 100% locally.",
+      "data between the two most common structured formats on the web.",
     useA: {
       heading: "Use JSON → XML when",
       points: [
@@ -311,7 +311,7 @@ export const COMPARISONS: Record<string, Comparison> = {
         a: "Yes (arrays maintain order)",
         b: "Yes (child order preserved)",
       },
-      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+      { label: "Where it runs", a: "Browser, no upload", b: "Browser, no upload" },
     ],
     verdict:
       "Use JSON → XML when you're generating data for a legacy system; use XML → JSON when you're receiving data from one. They're perfect mirrors, and you'll often use them together in a pipeline.",
@@ -351,7 +351,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Needs a schema?", a: "No, one input", b: "Yes, JSON + schema" },
       { label: "Catches syntax errors", a: "Yes, exact line + column", b: "No, assumes valid JSON" },
       { label: "Catches missing / wrong-typed fields", a: "No", b: "Yes" },
-      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+      { label: "Where it runs", a: "Browser, no upload", b: "Browser, no upload" },
     ],
     verdict:
       "Validate syntax first, then validate shape. The Validator tells you the JSON parses; Schema Lite " +
@@ -397,7 +397,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Whitespace / key-order changes", a: "Ignored, data only", b: "Shown (unless toggled off)" },
       { label: "Works on non-JSON", a: "No, JSON only", b: "Yes, anything textual" },
       { label: "Typical input", a: "Configs, payloads, API responses", b: "Logs, code, markdown, env, SQL" },
-      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+      { label: "Where it runs", a: "Browser, no upload", b: "Browser, no upload" },
     ],
     verdict:
       "If both sides are JSON and you care about the data, use JSON Diff. It won't shout about re-indenting " +
@@ -421,7 +421,7 @@ export const COMPARISONS: Record<string, Comparison> = {
     intro:
       "Two sides of the same conversion. TOML → JSON parses a TOML config into a JSON object; JSON → TOML " +
       "does the reverse, serializing JSON into clean TOML. Together they let you move data between the " +
-      "human-friendly config format and the API-native one. Both run 100% locally.",
+      "human-friendly config format and the API-native one.",
     useA: {
       heading: "Use TOML → JSON when",
       points: [
@@ -444,7 +444,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Output", a: "JSON", b: "TOML" },
       { label: "Handles nested tables?", a: "Yes", b: "Yes" },
       { label: "Preserves types?", a: "Yes, dates, numbers, booleans", b: "Yes, within TOML's types" },
-      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+      { label: "Where it runs", a: "Browser, no upload", b: "Browser, no upload" },
     ],
     verdict:
       "Use TOML → JSON when you're consuming a config; use JSON → TOML when you're producing one. They're " +
@@ -468,7 +468,7 @@ export const COMPARISONS: Record<string, Comparison> = {
     intro:
       "Two sides of the same conversion. YAML → JSON parses a YAML document into JSON; JSON → YAML does the " +
       "reverse, serializing JSON into readable YAML. Since YAML is a superset of JSON, the two formats are " +
-      "close cousins, and these tools move you between them, both running 100% locally.",
+      "close cousins, and these tools move you between them, running locally.",
     useA: {
       heading: "Use YAML → JSON when",
       points: [
@@ -491,7 +491,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Output", a: "JSON", b: "YAML" },
       { label: "Handles nesting & lists?", a: "Yes", b: "Yes" },
       { label: "Comments", a: "Dropped (JSON can't hold them)", b: "Not generated" },
-      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+      { label: "Where it runs", a: "Browser, no upload", b: "Browser, no upload" },
     ],
     verdict:
       "Use YAML → JSON when you're consuming a config; use JSON → YAML when you're writing one. They're " +
@@ -539,7 +539,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Output delimiter", a: "Tab", b: "Comma" },
       { label: "Header row preserved?", a: "Yes", b: "Yes" },
       { label: "Quoted fields handled?", a: "Yes, RFC 4180 parsing", b: "Yes, RFC 4180 output" },
-      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+      { label: "Where it runs", a: "Browser, no upload", b: "Browser, no upload" },
     ],
     verdict:
       "They're the same operation pointed in opposite directions. Use whichever matches the direction you're " +
@@ -583,7 +583,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Output", a: "Base64 alphabet (A–Z, a–z, 0–9, +, /)", b: "Percent-escaped (%20, %26…)" },
       { label: "Reversible?", a: "Yes, lossless decode", b: "Yes, lossless decode" },
       { label: "Handles binary?", a: "Yes, that's the point", b: "Byte-level, but meant for text" },
-      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+      { label: "Where it runs", a: "Browser, no upload", b: "Browser, no upload" },
     ],
     verdict:
       "If the data is going *into* a URL, URL-encode it. If the data needs to *be* text (a binary blob in a " +
@@ -603,7 +603,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       "SHA-256 and SHA-512 are the two workhorses of the SHA-2 family. They share the same design " +
       "philosophy and both are cryptographically secure, but they produce digests of different sizes and " +
       "run on different word widths. Neither is 'better' in the abstract. Which one fits depends on the " +
-      "protocol you're matching and the platform you're on. Both tools run 100% in your browser.",
+      "protocol you're matching and the platform you're on.",
     useA: {
       heading: "Use SHA-256 when",
       points: [
@@ -630,7 +630,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Word width", a: "32-bit words", b: "64-bit words" },
       { label: "Fastest on", a: "32-bit platforms", b: "64-bit platforms" },
       { label: "Security level", a: "Collision-safe in practice", b: "Collision-safe with more headroom" },
-      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+      { label: "Where it runs", a: "Browser, no upload", b: "Browser, no upload" },
     ],
     verdict:
       "Choose SHA-256 when you need to match an existing standard. It's the default everywhere from TLS to " +
@@ -653,7 +653,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       "checksum. The same input always gives the same digest, which makes it perfect for integrity. " +
       "bcrypt is a slow, salted password hash. Every run gives a different result, which makes it " +
       "right for storing secrets. Pick by job: fingerprints and file verification want SHA-256; anything " +
-      "meant to resist offline guessing wants bcrypt. Both tools run 100% in your browser.",
+      "meant to resist offline guessing wants bcrypt.",
     useA: {
       heading: "Use SHA-256 when",
       points: [
@@ -679,7 +679,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Output", a: "64 hex chars", b: "60-char string ($2b$10$…)" },
       { label: "Speed", a: "Fast by design", b: "Deliberately slow (2^cost rounds)" },
       { label: "Best for", a: "Files, payloads, fingerprints", b: "Passwords, secrets, tokens" },
-      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+      { label: "Where it runs", a: "Browser, no upload", b: "Browser, no upload" },
     ],
     verdict:
       "Reach for SHA-256 when you need a fast, repeatable checksum: verifying files, payloads, or that " +
@@ -702,7 +702,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       "is an unkeyed checksum. Anyone can compute it, so it detects accidental corruption but says " +
       "nothing about who made the data. HMAC is the same hash family wrapped in a secret key. Only " +
       "parties who share the key can produce or verify it, so it proves authenticity as well as " +
-      "integrity. Both tools run 100% in your browser.",
+      "integrity.",
     useA: {
       heading: "Use SHA-256 when",
       points: [
@@ -727,7 +727,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Proves", a: "Integrity (not tampered)", b: "Integrity + authenticity (from the key holder)" },
       { label: "Who can verify", a: "Anyone", b: "Anyone with the key" },
       { label: "Output (SHA-256)", a: "64 hex chars", b: "64 hex chars" },
-      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+      { label: "Where it runs", a: "Browser, no upload", b: "Browser, no upload" },
     ],
     verdict:
       "Use SHA-256 when there's no secret and you just need to detect corruption: file checksums, " +
@@ -776,7 +776,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Released", a: "1992", b: "2001" },
       { label: "Collision resistance", a: "Broken (practical attacks)", b: "Strong" },
       { label: "Status", a: "Legacy", b: "Current best practice" },
-      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+      { label: "Where it runs", a: "Browser, no upload", b: "Browser, no upload" },
     ],
     verdict:
       "Reach for SHA-256 by default. It's stronger, current, and just as easy to compute. Reserve " +
@@ -799,7 +799,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       "operational tiers. MD5 is a 128-bit legacy checksum broken since 2004, kept alive only for " +
       "compatibility and non-security deduplication. SHA-512 is a 512-bit member of the SHA-2 family, " +
       "built for collision resistance on 64-bit hardware with a much larger output. If a hash protects " +
-      "anything that could be tampered with, SHA-512 is the safe default. Both tools run 100% in your browser.",
+      "anything that could be tampered with, SHA-512 is the safe default.",
     useA: {
       heading: "Use MD5 when",
       points: [
@@ -827,7 +827,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Collision resistance", a: "Broken (practical attacks)", b: "Strong" },
       { label: "Speed bias", a: "Fast, but irrelevant", b: "Fast on 64-bit, still safe" },
       { label: "Status", a: "Legacy", b: "Current best practice" },
-      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+      { label: "Where it runs", a: "Browser, no upload", b: "Browser, no upload" },
     ],
     verdict:
       "Choose SHA-512 for anything that must survive tampering, and reserve MD5 for legacy reads. " +
@@ -876,7 +876,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Speed", a: "Fast by design", b: "Deliberately slow (2^cost rounds)" },
       { label: "Collision resistance", a: "Broken", b: "Not applicable, brute force is the threat" },
       { label: "Best for", a: "Legacy fingerprints", b: "Passwords and secrets" },
-      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+      { label: "Where it runs", a: "Browser, no upload", b: "Browser, no upload" },
     ],
     verdict:
       "If an attacker guessing the input could matter, MD5 is the wrong tool. Use bcrypt for any secret " +
@@ -904,7 +904,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       "122 bits of cryptographic randomness: opaque, unpredictable, and private. v7 puts a 48-bit Unix " +
       "millisecond timestamp first, then fills the rest with randomness, so IDs sort chronologically. " +
       "Random where ordering must stay hidden, time-ordered where insertion order and locality matter. " +
-      "Both generate 100% in your browser.",
+      "Both generate locally in your browser.",
     useA: {
       heading: "Use v4 when",
       points: [
@@ -931,7 +931,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Spec", a: "RFC 9562 v4", b: "RFC 9562 v7 (2024)" },
       { label: "Collision risk", a: "Negligible, pure random", b: "Negligible, time plus random" },
       { label: "Leaks MAC?", a: "No", b: "No" },
-      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+      { label: "Where it runs", a: "Browser, no upload", b: "Browser, no upload" },
     ],
     verdict:
       "Pick v7 for database keys and any ID where order matters. Its timestamp prefix makes inserts " +
@@ -958,7 +958,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       "v1 and v4 look identical on the surface, both are 36-character strings, but they generate those " +
       "bits very differently. v1 embeds a timestamp, clock sequence, and MAC-derived node, so time is in " +
       "the bits but not in sort order. v4 is pure randomness, opaque and private. One leaks hardware " +
-      "identity and arrival order, the other hides it. Both generate 100% in your browser.",
+      "identity and arrival order, the other hides it. Both generate locally in your browser.",
     useA: {
       heading: "Use v1 when",
       points: [
@@ -985,7 +985,7 @@ export const COMPARISONS: Record<string, Comparison> = {
       { label: "Modern replacement", a: "v7 for sortable time", b: "Still the default random choice" },
       { label: "Collision source", a: "Clock or node reuse", b: "Random chance only (negligible)" },
       { label: "Spec", a: "RFC 9562 v1 legacy", b: "RFC 9562 v4 current" },
-      { label: "Runs 100% locally", a: "Yes", b: "Yes" },
+      { label: "Where it runs", a: "Browser, no upload", b: "Browser, no upload" },
     ],
     verdict:
       "For new work, v4 is the conservative random choice and v7 is the sortable time-based choice. " +
