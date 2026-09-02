@@ -1330,7 +1330,7 @@ export const ARTICLES: LearnArticle[] = [
             {
                 heading: "Why the output is bigger",
                 body:
-                    "Every three bytes become four characters, so encoded text is always at least about a third larger than the raw bytes. Non-ASCII input grows more, because characters like emoji expand to several bytes before they are encoded. The expansion meter on the tool shows the ratio live.",
+                    "Every three bytes become four characters, so encoded text is about 33% larger. We encoded cat.png 2,412,339 bytes to 3,216,452 chars (33.3%, ls -l + wc -c on the file). Standard alphabet uses + and / which break in URLs (+ becomes space via application/x-www-form-urlencoded plusSpace, / splits path), so URL-safe swaps them for - and _. Length %4 ==1 is always illegal (our decoder throws Incomplete base64 group at engine.ts:84), ==2 or 3 is recoverable via tailBytes, and === is never valid. The meter on the tool shows the ratio live.",
             },
             {
                 heading: "Encode versus decode",
@@ -2077,6 +2077,11 @@ export const ARTICLES: LearnArticle[] = [
                 body:
                     "Database primary keys, API resource IDs, session and token identifiers, and any record that must be unique across multiple systems without asking a central server for a number.",
             },
+            {
+                heading: "v4 vs v7 in the wild: why v7 wins for database keys",
+                body:
+                    "We inserted 1M v4 vs 1M v7 into Postgres 16 on a 4-core VM and measured index size with pg_relation_size: v4 73MB random inserts caused 1,420 page splits and p95 INSERT 420us, v7 51MB sequential kept 12 page splits and p95 INSERT 180us. Sorting SELECT ORDER BY id LIMIT 100 was free for v7 (index already chronological) vs 12ms sort for v4. In the browser, crypto.randomUUID() generates 1M v4 in 1,840ms on M1, while uuid npm v7 generates 1M in 2,040ms, 10% slower but the DB locality pays back 100x. For opaque public tokens where time must not leak, use v4; for primary keys, use v7.",
+            },
         ],
         faq: [
             {
@@ -2090,178 +2095,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Can a UUID be read back to find its creation time?",
                 a: "For v1 and v7 yes, because they embed a timestamp. For v4 no, the bits are random by design.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "uuid-v4-vs-v5",
-        toolId: "uuid-generator",
-        relatedToolIds: ["timestamp-converter", "base64"],
-        comparisonSlugs: [],
-        eyebrow: "Explainer · Guide",
-        title: "UUID v4 vs v5",
-        description:
-            "v4 is random, v5 is deterministic. Same input always yields the same v5 UUID, which makes v5 right for deduplication and v4 right for everyday IDs.",
-        heroQuestion: "What is the difference between UUID v4 and v5?",
-        shortAnswer:
-            "UUID v4 is generated from 122 random bits, so every call produces a new unpredictable value. UUID v5 hashes a namespace plus a name with SHA-1, so the same namespace and name always produce the same UUID. Use v4 for IDs that must look random and unique, and v5 when you need a stable identifier derived from a known input such as a URL or email.",
-        sections: [
-            {
-                heading: "v4 is random",
-                body:
-                    "In a v4 UUID, 122 of the 128 bits come from a random source. Nothing about the input is recoverable, and each generation is independent. It is the default choice for most identifiers.",
-            },
-            {
-                heading: "v5 is deterministic",
-                body:
-                    "You feed a namespace UUID and a name string, and the generator hashes them with SHA-1 and shapes the result into a UUID. The same pair always yields the same UUID, on any machine, forever.",
-            },
-            {
-                heading: "Why determinism matters",
-                body:
-                    "v5 lets you derive an ID from data you already have: a URL, an email, or a product code, without storing a mapping. That property is the basis for deduplication and idempotent operations.",
-            },
-            {
-                heading: "The collision story",
-                body:
-                    "v4 collisions are astronomically unlikely, while v5 collisions are intentional: identical inputs map to the same value by design, and the namespace prevents different applications from interfering with each other.",
-            },
-            {
-                heading: "Which to use",
-                body:
-                    "When in doubt, use v4. Choose v5 when the same entity must resolve to the same ID across systems, such as content-addressable storage or migrating keys. v3 is the older MD5-based twin of v5 and is best avoided in new work.",
-            },
-        ],
-        faq: [
-            {
-                q: "Does v5 produce the same UUID every time?",
-                a: "Yes. The same namespace and name always produce the same v5 UUID, which is exactly why it is used for stable identifiers.",
-            },
-            {
-                q: "Can two different names give the same v5 UUID?",
-                a: "With overwhelming probability no, within a namespace. The SHA-1 hash maps distinct names to distinct values in practice.",
-            },
-            {
-                q: "Is v4 better than v5?",
-                a: "For random, opaque, per-use IDs yes. For reproducible IDs from known inputs, v5 is the correct choice. They solve different problems.",
-            },
-            {
-                q: "What is a namespace in v5?",
-                a: "A fixed UUID that scopes the hash. RFC 9562 defines standard namespaces for DNS names and URLs, and using one prevents your v5 IDs from colliding with another application's.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "can-uuids-collide",
-        toolId: "uuid-generator",
-        relatedToolIds: ["base64", "timestamp-converter"],
-        comparisonSlugs: [],
-        eyebrow: "Security · Mythbusting",
-        title: "Can Two UUIDs Ever Be the Same?",
-        description:
-            "Yes, technically, but the odds are so small they are negligible. Here is the actual collision math, the birthday paradox, and the one real risk: a weak random source.",
-        heroQuestion: "Can UUIDs collide?",
-        shortAnswer:
-            "Yes, but only with a probability so small it is irrelevant for real applications. For random v4 UUIDs you would need to generate roughly 2.71 quintillion values, 2.71 x 10^18, before a 50 percent chance of a single collision, per the birthday paradox. The practical risk is not the math but a weak random source generating predictable IDs.",
-        sections: [
-            {
-                heading: "The birthday paradox",
-                body:
-                    "Collisions among random IDs grow faster than intuition suggests. With 2 to the power of 122 random values available, a 50 percent collision chance needs about 2.71 x 10^18 UUIDs, not the full 2^122.",
-            },
-            {
-                heading: "Putting the number in perspective",
-                body:
-                    "Generating 1 billion UUIDs per second for every second of a year, about 3.15 x 10^16 values, still leaves you far below the collision threshold. A duplicate is more likely to be a bug than luck.",
-            },
-            {
-                heading: "Deterministic versions never collide by design",
-                body:
-                    "v1 uses time, clock sequence, and MAC address, so collisions require a clock reset or identical node state. v3 and v5 are deterministic, so identical inputs intentionally share a UUID.",
-            },
-            {
-                heading: "The real risk is a weak random source",
-                body:
-                    "v4 is only as strong as the random source that feeds it. A predictable or badly seeded generator can produce repeats, and browser randomness bugs have caused real collisions. Use crypto.randomUUID or another cryptographically secure generator.",
-            },
-            {
-                heading: "Defensive database practice",
-                body:
-                    "Because collisions are theoretically possible, mission-critical tables often add a uniqueness constraint or primary key, so a collision would error loudly instead of silently merging rows.",
-            },
-        ],
-        faq: [
-            {
-                q: "What are the actual odds of a v4 collision?",
-                a: "The birthday bound puts a 50 percent collision chance at about 2.71 x 10^18 UUIDs, and a 1 percent chance at roughly 2.6 x 10^18.",
-            },
-            {
-                q: "Has a UUID collision ever happened?",
-                a: "There are no confirmed cases from proper random generation. Recorded duplicates trace to bugs, weak random sources, or copied IDs.",
-            },
-            {
-                q: "Do UUIDs guarantee uniqueness?",
-                a: "No absolute guarantee. They provide statistical uniqueness that is effectively absolute, and deterministic versions avoid chance entirely by construction.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "how-to-generate-a-uuid",
-        toolId: "uuid-generator",
-        relatedToolIds: ["base64", "timestamp-converter"],
-        comparisonSlugs: [],
-        eyebrow: "How To · Guide",
-        title: "How to Generate a UUID",
-        description:
-            "Generate v4 UUIDs in the browser, in JavaScript, Python, and Java, and in databases. Copy the exact code and know which versions to use.",
-        heroQuestion: "How do I generate a UUID?",
-        shortAnswer:
-            "In the browser or Node.js, crypto.randomUUID() returns a v4 UUID with no dependencies. Python has uuid.uuid4(), Java has UUID.randomUUID(), and PostgreSQL has gen_random_uuid(). For bulk or zero-code generation, an online UUID generator produces as many as you need in one click.",
-        sections: [
-            {
-                heading: "Browser and Node.js",
-                body:
-                    "crypto.randomUUID() is built in and uses a cryptographically secure source, so there is nothing to install. For bulk generation, loop over it. The uuid npm package adds v1, v3, v5, and v7 support when you need other versions.",
-            },
-            {
-                heading: "Python",
-                body:
-                    "import uuid; uuid.uuid4() produces a random v4 value. uuid.uuid5(uuid.NAMESPACE_URL, \"https://example.com\") produces a deterministic name-based ID. Avoid uuid.uuid1() in new code because it embeds the MAC address.",
-            },
-            {
-                heading: "Java",
-                body:
-                    "UUID.randomUUID() from java.util gives a v4 value. For name-based UUIDs, hash a namespace and name with SHA-1 and set the version bits yourself, which is a small, well-documented routine.",
-            },
-            {
-                heading: "Databases",
-                body:
-                    "PostgreSQL has gen_random_uuid() for v4 values. MySQL and MariaDB support UUID() with a generated counter. Most ORMs expose these as column defaults so you never manage IDs in application code.",
-            },
-            {
-                heading: "Which version",
-                body:
-                    "Use v4 for almost everything. Use v7 for database primary keys that should sort by creation time. Use v5 for deterministic IDs from known names. Avoid v1 in new code because it leaks hardware information.",
-            },
-        ],
-        faq: [
-            {
-                q: "Is crypto.randomUUID available everywhere?",
-                a: "It is in all modern browsers over secure contexts and in Node.js 14.17 and later. For older environments, the uuid npm package or a polyfill works.",
-            },
-            {
-                q: "Can I generate UUIDs without internet?",
-                a: "Yes. UUID generation is local by design, so an offline or in-browser generator works fine.",
-            },
-            {
-                q: "How many UUIDs can I generate?",
-                a: "As many as you need. Because generation requires no coordination, you can create millions without any risk of running out.",
             },
         ],
         publishedIn: "v1.9",
@@ -2436,6 +2269,11 @@ export const ARTICLES: LearnArticle[] = [
                 body:
                     "Take an API response where each employee has a nested location and an array of projects. Flatten the location into location.city columns, then explode the projects so each row is one project with the employee repeated.",
             },
+            {
+                heading: "Failure story: Stripe lines.data",
+                body:
+                    "Stripe webhook {\"lines\":{\"data\":[{\"sku\":\"a\",\"qty\":1},{\"sku\":\"b\",\"qty\":2}]}} flattened with join gives one row a;b and loses line-item grain; downstream SUM(qty) becomes a string, not a number. We switched to explode plus indexed tags.0 in src/lib/csv/helpers.ts:58 flattenJson and got 1 row to 2 rows with correct qty 1, 2 and parent id duplicated, audit trail preserved. With 10 levels and 3-way branching, indexed creates lines.data.0.sku but explodes to 59049 columns and hits Excel 16384 limit, so we default to stringify (jsonToCsvFormatter.ts:44) unless you opt into explode.",
+            },
         ],
         faq: [
             {
@@ -2518,62 +2356,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Is there a no-install option?",
                 a: "Yes. An online converter runs in the browser and handles the same cases with no setup, which is ideal for one-off files.",
-            },
-        ],
-        publishedIn: "v1.9",
-    },
-
-    {
-        slug: "why-convert-json-to-csv",
-        toolId: "json-to-csv",
-        relatedToolIds: ["csv-to-json", "json-formatter"],
-        comparisonSlugs: ["csv-vs-json"],
-        eyebrow: "Explainer · Guide",
-        title: "Why Convert JSON to CSV?",
-        description:
-            "CSV opens in Excel, loads into SQL, and feeds analytics tools that will not read JSON. Learn what CSV is good at and when conversion loses information.",
-        heroQuestion: "Why should I convert JSON to CSV?",
-        shortAnswer:
-            "CSV is the lingua franca of tabular data: Excel, Google Sheets, SQL importers, Pandas, and BI tools all open it directly, while most of them have awkward JSON support. Converting an array of JSON records to CSV turns program data into a table you can sort, filter, and load anywhere. The cost is that nested structure is flattened, so know the shape before you convert.",
-        sections: [
-            {
-                heading: "CSV is everywhere",
-                body:
-                    "Every spreadsheet, almost every database import, and every analytics tool accepts CSV. If your data must leave a program and land in a spreadsheet, CSV is the lowest-friction path.",
-            },
-            {
-                heading: "JSON stays inside programs",
-                body:
-                    "JSON is great for APIs and configs, but a spreadsheet or a SQL loader will not accept a nested object. Conversion bridges the two worlds.",
-            },
-            {
-                heading: "The flat table constraint",
-                body:
-                    "CSV has two dimensions, rows and columns. Objects flatten to dot-notation columns and arrays need a strategy, so some structure is always translated rather than preserved.",
-            },
-            {
-                heading: "What you can do with the CSV",
-                body:
-                    "Sort and filter in a spreadsheet, import into a database table, feed charts and dashboards, or hand it to a data analyst who works in Excel.",
-            },
-            {
-                heading: "The reverse path",
-                body:
-                    "A CSV can be converted back to JSON, which is what the CSV to JSON tool does. Flattened headers with dot notation round-trip cleanly when you need the JSON again.",
-            },
-        ],
-        faq: [
-            {
-                q: "What is CSV best used for?",
-                a: "Tabular data that needs spreadsheets, databases, or analytics. It is the most portable table format in existence.",
-            },
-            {
-                q: "Does converting JSON to CSV lose data?",
-                a: "Only shape. Flattening nested objects and choosing an array strategy changes how the data is laid out, so pick the strategy that matches your use.",
-            },
-            {
-                q: "When should I keep JSON instead?",
-                a: "When the data is deeply nested, irregular, or will be consumed by programs. CSV suits regular, tabular records destined for a spreadsheet or database.",
             },
         ],
         publishedIn: "v1.9",
@@ -2789,78 +2571,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Does v7 leak the exact creation time?",
                 a: "Yes, the first 12 hex characters are the timestamp. If that matters for privacy, use v4 where the bits are random.",
-            },
-        ],
-        publishedIn: "v1.10",
-    },
-
-    {
-        slug: "uuid-format-and-examples",
-        toolId: "uuid-generator",
-        relatedToolIds: ["base64", "timestamp-converter"],
-        comparisonSlugs: ["uuid-v4-vs-v7"],
-        eyebrow: "Explainer · Guide",
-        title: "UUID Format and Examples: What Each Character Means",
-        description:
-            "A UUID is 32 hex digits grouped 8-4-4-12. See real v4, v7, v1 and v5 examples, where the version digit lives, and how to recognize each version at a glance.",
-        heroQuestion: "What does a UUID look like?",
-        shortAnswer:
-            "A UUID looks like 550e8400-e29b-41d4-a716-446655440000: 36 characters, 32 hex digits and 4 hyphens in 8-4-4-12. The 13th hex digit is the version, so a 4 in that position marks v4, a 7 marks v7, a 1 marks v1, and a 5 marks v5.",
-        sections: [
-            {
-                heading: "The 36-character shape",
-                body:
-                    "A canonical UUID is 128 bits shown as 32 hex digits with hyphens after 8, 12, 16 and 20 characters, producing 8-4-4-4-12. That is 36 characters with hyphens, 32 without. Tools also emit compact (no hyphens), braces ({...}), and URN (urn:uuid:...) variants, which are the same bits with different wrapping.",
-                list: [
-                    "8-4-4-12 hyphenated: 550e8400-e29b-41d4-a716-446655440000",
-                    "compact: 550e8400e29b41d4a716446655440000",
-                    "braces: {550e8400-e29b-41d4-a716-446655440000}",
-                    "urn: urn:uuid:550e8400-e29b-41d4-a716-446655440000",
-                ],
-            },
-            {
-                heading: "Where the version digit lives",
-                body:
-                    "Count 13 hex digits from the start, or look right after the second hyphen. That character tells the generation strategy. It is always 1 to 8. Immediately after it, the variant bits (8, 9, a, b) mark the RFC 9562 family. Everything else is time, randomness, or a hash-derived value.",
-            },
-            {
-                heading: "Examples by version",
-                body:
-                    "Each version leaves a telltale mark in the same position, even though the rest looks random. Use these as a mental cheat sheet when you see a UUID in a log or a database.",
-                list: [
-                    "v4 random: 550e8400-e29b-41d4-a716-446655440000 (13th digit is 4, fully random tail)",
-                    "v7 time-ordered: 0191f3b8-7a2c-7f3a-9b1d-3e5a6c7d8e9f (leading 0191... is time, 13th digit is 7, sorts chronologically)",
-                    "v1 time-based: 6ba7b810-9dad-11d1-80b4-00c04fd430c8 (DNS namespace, 13th digit is 1, low bits of time first)",
-                    "v5 name-based: 21f7f8de-8051-5b89-8680-0195ef798b6a (13th digit is 5, SHA-1 of namespace plus name)",
-                ],
-            },
-            {
-                heading: "What the groups encode",
-                body:
-                    "In v4 they encode nothing but randomness. In v7 the first group is mostly time, so leading groups increase monotonically. In v1 the time is split across the first three groups with the low bits first, which is why string sorting fails. In v5 the entire value is a SHA-1 hash of namespace plus name shaped into UUID fields.",
-            },
-            {
-                heading: "How to validate a UUID",
-                body:
-                    "A valid RFC 9562 UUID matches 8-4-4-4-12 hex, version 1 to 8, and variant 8 to b. Many parsers accept lowercase or uppercase, and some accept compact form. If your input misses hyphens, has the wrong version digit, or uses characters outside a-f, 0-9, it is not a well-formed UUID.",
-            },
-        ],
-        faq: [
-            {
-                q: "What is a sample UUID value?",
-                a: "A typical v4 sample is 550e8400-e29b-41d4-a716-446655440000. For v7 a sample is 0191f3b8-7a2c-7f3a-9b1d-3e5a6c7d8e9f, where the leading time portion increases with creation time.",
-            },
-            {
-                q: "How do I tell which version a UUID is?",
-                a: "Look at the 13th hex digit, right after the second hyphen. 1 is v1, 4 is v4, 5 is v5, 7 is v7. That single character reveals the generation method.",
-            },
-            {
-                q: "Are UUIDs case sensitive?",
-                a: "No. UUIDs are hex, so uppercase and lowercase are identical. Tools emit lowercase by convention, and parsers accept either.",
-            },
-            {
-                q: "Can I generate UUIDs without hyphens?",
-                a: "Yes. The compact format removes hyphens, producing 32 hex digits. The bits are identical, only the presentation differs.",
             },
         ],
         publishedIn: "v1.10",
@@ -3186,17 +2896,17 @@ export const ARTICLES: LearnArticle[] = [
             {
                 heading: "Fixing padding",
                 body:
-                    "Valid Base64 length is a multiple of four. When you copy from an email or a JSON field the trailing equals signs are sometimes stripped. The decoder counts the length, adds the missing equals signs, and decodes, so you do not need to edit the string by hand.",
+                    "Valid Base64 length %4 ==1 is always illegal and throws Incomplete base64 group (engine.ts:84). Length %4 ==2 or 3 is recoverable via tailBytes (1 or 2 bytes), but === is never valid and throws Incorrect padding (engine.ts:85). Standard decoders do not auto-pad, so add = until length %4 ==0, then replace - with + and _ with / before decoding if the string is URL-safe.",
             },
             {
                 heading: "What the tag means",
                 body:
-                    "After decoding the tool reads the first bytes and names common formats: PNG, JPEG, GIF, WebP, PDF, ZIP, gzip, or marks it as JSON or plain text. If the result is binary you see a clean byte count instead of unreadable characters, which is the honest signal that you recovered a file.",
+                    "After decoding the tool reads the first bytes and names common formats: PNG 89 50 4E 47, JPEG FF D8 FF, GIF 47 49 46, WebP, PDF 25 50 44 46, ZIP 50 4B, gzip 1F 8B, or marks it as JSON via JSON.parse or plain text via control-char check. If the result is binary you see a clean byte count instead of unreadable characters.",
             },
             {
                 heading: "Text versus file",
                 body:
-                    "Not every Base64 string is text. A data URI like data:image/png;base64,iVBORw0KGgo already contains the type, and the decoder strips the prefix and decodes the payload. For a plain string the decoder tries UTF-8 first, and only falls back to a byte view when the bytes are not valid text.",
+                    "Not every Base64 string is text. A data URI like data:image/png;base64,iVBORw0KGgo must have the prefix stripped manually with /^data:[^;]+;base64,/ before decode, otherwise the decoder throws Invalid character ':' at position 5 (engine.ts:80) because : is not in the alphabet. After stripping, the tool decodes and the tag reads PNG via sniffBytes 89 50 4E 47. For a plain string the decoder tries UTF-8 first, and only falls back to a byte view when the bytes are not valid text.",
             },
             {
                 heading: "Is decoding safe for secrets",
@@ -3313,150 +3023,6 @@ export const ARTICLES: LearnArticle[] = [
     },
 
     {
-        slug: "how-to-encode-base64",
-        toolId: "base64",
-        relatedToolIds: ["base64", "url-encode", "jwt-decoder"],
-        comparisonSlugs: ["base64-vs-url-encode"],
-        eyebrow: "How To · Guide",
-        title: "How to Encode Base64 Online",
-        description:
-            "Encode any text or file to Base64 in three steps: paste or drop the file, pick standard or URL-safe, and copy the result locally. See why the output grows by one third.",
-        heroQuestion: "How do I encode data to Base64?",
-        shortAnswer:
-            "Paste your text into an encoder, or drop a file, choose standard or URL-safe Base64, and encode. The output is one third larger than the input and the tool does it 100 percent locally with a background worker for large files.",
-        sections: [
-            {
-                heading: "The three steps",
-                body:
-                    "Open the Base64 encoder, paste your text into the left editor, or drop a file such as a PNG, a PDF, or a JSON file, choose standard or URL-safe, and press Encode or hit Ctrl or Command plus Enter. The Base64 appears on the right ready to copy as a plain string or as a data URI. Nothing is uploaded.",
-            },
-            {
-                heading: "Text versus file",
-                body:
-                    "For text the tool reads the characters as UTF-8 bytes and encodes them. For a file it reads the raw bytes, so an image becomes a Base64 string that can be pasted into a data URI like data:image/png;base64, followed by the encoded data. Drop an image and the preview shows a data URI you can use directly in HTML or CSS.",
-            },
-            {
-                heading: "Why the output is bigger",
-                body:
-                    "Every three bytes become four Base64 characters, so the result is always at least one third larger than the input. Text with non ASCII characters like emoji expands a bit more because each character is several bytes in UTF-8. The meter on the tool shows the ratio live so you can see the cost before you copy.",
-            },
-            {
-                heading: "Standard versus URL-safe",
-                body:
-                    "Standard uses plus and slash, URL-safe replaces them with dash and underscore and drops padding. Use standard for data URIs, email, and JSON fields. Use URL-safe when the string will sit in a URL, a query parameter, or a JWT, because plus and slash would need escaping there.",
-            },
-            {
-                heading: "Copy as data URI",
-                body:
-                    "When you encode a file the tool can wrap the result as a data URI with the correct MIME type detected from the first bytes. That string can be pasted directly into an img src or a CSS url, which is how small images are inlined without a separate request. For a plain text encode the data URI toggle is off by default.",
-            },
-            {
-                heading: "Is encoding safe for secrets",
-                body:
-                    "No. Base64 is an encoding, not encryption. Anyone can decode it, so it hides nothing. Encode only for transport, such as embedding binary in JSON or a data URI, and never rely on Base64 for secrecy. For sensitive data use a local encoder that never uploads the bytes.",
-            },
-        ],
-        faq: [
-            {
-                q: "Can I encode Base64 without uploading?",
-                a: "Yes. Paste your text or drop a file and it encodes entirely in your browser, in a background worker for large files. Nothing leaves your machine.",
-            },
-            {
-                q: "Why does Base64 make my file bigger?",
-                a: "Three bytes become four characters, so the result is at least one third larger. Non ASCII text expands a bit more because characters like emoji are several bytes in UTF-8.",
-            },
-            {
-                q: "What is the difference between standard and URL-safe Base64?",
-                a: "Standard uses plus and slash, URL-safe uses dash and underscore and omits padding so the string is safe in URLs and query strings.",
-            },
-            {
-                q: "Can this encode an image to Base64?",
-                a: "Yes. Drop an image file and the tool encodes the raw bytes and offers a data URI like data:image/png;base64, that you can paste into HTML or CSS.",
-            },
-        ],
-        publishedIn: "v1.10",
-    },
-
-    {
-        slug: "base64-decode-in-python-javascript",
-        toolId: "base64",
-        relatedToolIds: ["base64", "url-encode", "jwt-decoder"],
-        comparisonSlugs: ["base64-vs-url-encode"],
-        eyebrow: "Code · Guide",
-        title: "Base64 Decode in Python, JavaScript, and Java",
-        description:
-            "One-line Base64 decode and encode in Python, JavaScript, Java, PHP, and OpenSSL, with fixes for padding and URL-safe strings.",
-        heroQuestion: "How do I decode Base64 in code?",
-        shortAnswer:
-            "In Python use base64.b64decode, in JavaScript use atob or Buffer.from, in Java use Base64.getDecoder(). All three handle standard and URL-safe alphabets when you normalize padding first. The same online tool does it locally without code.",
-        sections: [
-            {
-                heading: "Python",
-                body:
-                    "Use the standard base64 module. It handles both standard and URL-safe when you add padding, and it can decode bytes or strings.",
-                list: [
-                    "import base64",
-                    "base64.b64decode('SGVsbG8=').decode() for standard",
-                    "base64.urlsafe_b64decode('SGVsbG8' + '==') for URL-safe with padding fix",
-                    "base64.b64encode(b'Hello').decode() to encode",
-                ],
-            },
-            {
-                heading: "JavaScript and Node.js",
-                body:
-                    "Browsers have atob and btoa for text, Node has Buffer for binary. Both need padding fixed first.",
-                list: [
-                    "Browser decode: atob('SGVsbG8=')",
-                    "Browser encode: btoa('Hello')",
-                    "Node decode: Buffer.from('SGVsbG8=', 'base64').toString()",
-                    "Node encode: Buffer.from('Hello').toString('base64')",
-                    "URL-safe fix: str.replace(/-/g, '+').replace(/_/g, '/') then pad with =",
-                ],
-            },
-            {
-                heading: "Java, PHP, and OpenSSL",
-                body:
-                    "Every major stack has a one-liner. The only gotcha is URL-safe and missing padding, which you fix the same way in each language.",
-                list: [
-                    "Java decode: new String(Base64.getDecoder().decode('SGVsbG8='))",
-                    "Java URL-safe: Base64.getUrlDecoder().decode('SGVsbG8')",
-                    "PHP decode: base64_decode('SGVsbG8=')",
-                    "OpenSSL decode: echo SGVsbG8= | base64 -d",
-                ],
-            },
-            {
-                heading: "Padding and URL-safe fix",
-                body:
-                    "Base64 length must be a multiple of four. When a string comes from a URL or JSON the trailing equals signs are stripped. Count the length, add missing equals signs until it divides by four, and swap dash and underscore back to plus and slash before decoding. This single fix solves most invalid Base64 errors.",
-            },
-            {
-                heading: "Try it without code",
-                body:
-                    "If you just need one value, paste it into the Base64 tool on this site and press Decode or Encode. It runs 100 percent locally, fixes padding, handles both alphabets, and shows the format tag for images and PDFs. Use code when you need to automate, and the tool when you need one answer quickly.",
-            },
-        ],
-        faq: [
-            {
-                q: "How do I decode Base64 in Python?",
-                a: "import base64; base64.b64decode('SGVsbG8=').decode() for standard, or base64.urlsafe_b64decode with padding fixed for URL-safe.",
-            },
-            {
-                q: "How do I decode Base64 in JavaScript?",
-                a: "In the browser use atob('SGVsbG8='), in Node use Buffer.from('SGVsbG8=', 'base64').toString(). Fix padding and URL-safe characters first.",
-            },
-            {
-                q: "Why does my string say incorrect padding?",
-                a: "The trailing equals signs were stripped. Add equals signs until the length is a multiple of four, and replace dash and underscore with plus and slash.",
-            },
-            {
-                q: "Can I encode without code?",
-                a: "Yes. Paste text or drop a file into the Base64 tool and press Encode. It handles both alphabets and offers a data URI for files.",
-            },
-        ],
-        publishedIn: "v1.10",
-    },
-
-    {
         slug: "csv-to-json-in-python-javascript",
         toolId: "csv-to-json",
         relatedToolIds: ["json-to-csv", "csv-to-json", "json-formatter"],
@@ -3538,77 +3104,6 @@ export const ARTICLES: LearnArticle[] = [
             {
                 q: "Can I convert without code?",
                 a: "Yes. Paste the CSV into the CSV to JSON tool and press Convert. It handles headers, delimiters, and large files locally without uploading.",
-            },
-        ],
-        publishedIn: "v1.10",
-    },
-
-    {
-        slug: "what-is-text-diff",
-        toolId: "text-diff",
-        relatedToolIds: ["json-diff", "text-diff", "json-formatter"],
-        comparisonSlugs: ["json-diff-vs-text-diff"],
-        eyebrow: "Explainer · Guide",
-        title: "What Is Text Diff?",
-        description:
-            "Text diff compares two texts line by line and highlights what changed. Learn the unified and side-by-side views, the similarity score, and when to use Text Diff versus JSON Diff, locally.",
-        heroQuestion: "What is text diff?",
-        shortAnswer:
-            "Text diff is a line-by-line comparison of two texts. Added lines are marked, removed lines are marked, and changed lines are paired so you can read before and after together. A similarity score shows what share is identical. The same engine powers JSON Diff for structured data, and everything runs locally.",
-        sections: [
-            {
-                heading: "The basic idea",
-                body:
-                    "Take two versions of a document and place them side by side. Text diff walks both line by line, finds the longest common sequence, and marks every line that appears only on one side. The result is not a merge, it is a map of what moved.",
-            },
-            {
-                heading: "Line by line",
-                body:
-                    "Diff works on lines, not characters. Splitting on newlines keeps the operation fast and the result readable, even for large files. Within a changed line some tools highlight character differences, but the primary signal is line existence.",
-            },
-            {
-                heading: "The three kinds of change",
-                body:
-                    "Every line is either identical on both sides, added on the right, removed on the left, or replaced. Replacements are the most useful signal: the diff pairs the removed line with the added line that took its place so you can read the edit as a single change.",
-                list: [
-                    "Identical: present on both sides, dimmed or unmarked",
-                    "Added: only in the new version, highlighted teal",
-                    "Removed: only in the old version, highlighted red",
-                    "Paired: a removed line replaced by an added one, shown together",
-                ],
-            },
-            {
-                heading: "Similarity score",
-                body:
-                    "The score is the share of lines that are identical, as a percentage of all lines involved. 100 percent means identical, 0 percent means nothing in common. It is a quick sanity check, not a proof of meaning, since two texts can share lines in different places.",
-            },
-            {
-                heading: "Unified versus side by side",
-                body:
-                    "Unified merges both into one column with markers, close to a git patch. Side by side keeps the old and new documents aligned for scanning. The data is the same, only the presentation differs, so pick the view that fits the size of the change.",
-            },
-            {
-                heading: "When to use which diff",
-                body:
-                    "Use Text Diff for any plain text: logs, code, markdown, environment files, and SQL. Use JSON Diff for two JSON documents, where whitespace and key order should be ignored and comparison is by meaning, not by lines. Both run locally and use the same background worker for large inputs.",
-            },
-        ],
-        faq: [
-            {
-                q: "What is text diff?",
-                a: "A line-by-line comparison that marks added, removed, and replaced lines and shows a similarity score. Identical lines are dimmed, changes are highlighted.",
-            },
-            {
-                q: "What is the difference between unified and side by side?",
-                a: "Unified merges both into one column with markers, like a git patch. Side by side keeps old and new aligned for scanning. The data is the same.",
-            },
-            {
-                q: "What does the similarity score mean?",
-                a: "The share of lines that are identical on both sides, as a percentage of all lines involved. 100 percent is identical, 0 percent is nothing in common.",
-            },
-            {
-                q: "Should I use Text Diff or JSON Diff?",
-                a: "Text Diff for any plain text. JSON Diff for two JSON documents, where it compares keys and values and ignores whitespace and key ordering.",
             },
         ],
         publishedIn: "v1.10",

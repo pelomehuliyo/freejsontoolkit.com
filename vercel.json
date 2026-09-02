@@ -25,6 +25,46 @@
       "source": "/learn/json-minify-vs-format",
       "destination": "/learn/how-to-minify-json",
       "permanent": true
+    },
+    {
+      "source": "/learn/uuid-v4-vs-v5",
+      "destination": "/learn/what-is-a-uuid",
+      "permanent": true
+    },
+    {
+      "source": "/learn/can-uuids-collide",
+      "destination": "/learn/what-is-a-uuid",
+      "permanent": true
+    },
+    {
+      "source": "/learn/how-to-generate-a-uuid",
+      "destination": "/learn/what-is-a-uuid",
+      "permanent": true
+    },
+    {
+      "source": "/learn/uuid-format-and-examples",
+      "destination": "/learn/what-is-a-uuid",
+      "permanent": true
+    },
+    {
+      "source": "/learn/how-to-encode-base64",
+      "destination": "/learn/how-to-decode-base64",
+      "permanent": true
+    },
+    {
+      "source": "/learn/base64-decode-in-python-javascript",
+      "destination": "/learn/how-to-decode-base64",
+      "permanent": true
+    },
+    {
+      "source": "/learn/what-is-text-diff",
+      "destination": "/learn/how-to-compare-two-text-files",
+      "permanent": true
+    },
+    {
+      "source": "/learn/why-convert-json-to-csv",
+      "destination": "/learn/how-to-convert-json-to-csv",
+      "permanent": true
     }
   ]
 }
