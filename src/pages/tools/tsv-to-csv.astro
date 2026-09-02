@@ -1,4 +1,4 @@
----
+﻿---
 import ToolShell from "../../components/tools/ToolShell.astro";
 import ToolHeader from "../../components/tools/ToolHeader.astro";
 import ToolWorkspace from "../../components/tools/ToolWorkspace.astro";
@@ -66,7 +66,7 @@ Ada	Engineer	London`}
           <span class="status-indicator"><span class="dot idle" id="status-dot"></span></span>
           <span class="status-phase" id="convert-phase" aria-hidden="true"></span>
           <span class="sr-only" id="convert-status-announce" aria-live="polite"></span>
-          <span id="convert-status-text">Local sandbox active</span>
+          <span id="convert-status-text">Ready, paste to start</span>
         </div>
       </Card>
     </div>
@@ -310,7 +310,7 @@ Ada	Engineer	London`}
         statusText.textContent = "";
       } else {
         phaseEl.textContent = "";
-        statusText.textContent = "Local sandbox active";
+        statusText.textContent = "Ready, paste to start";
       }
     }
     if (convertBtn) {
